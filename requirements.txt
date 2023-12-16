@@ -1,0 +1,7 @@
+requests
+bs4 
+lxml
+tqdm
+rich
+random-user-agent
+ffmpeg-python
