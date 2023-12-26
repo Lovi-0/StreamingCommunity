@@ -5,6 +5,7 @@ import re, os, sys, glob, time, requests, shutil, ffmpeg, subprocess
 from functools import partial
 from multiprocessing.dummy import Pool
 from tqdm.rich import tqdm
+import moviepy.editor as mp
 
 # Class import
 #from Stream.util.console import console
@@ -289,3 +290,11 @@ def dw_vvt_sub(url, headers, folder_id) -> (None):
 
     else:
         console.log("[red]Cant find info of subtitle [SKIP]")
+
+def join_audio_to_video(audio_path, video_path, out_path):
+
+    audio = mp.AudioFileClip(audio_path)
+    video1 = mp.VideoFileClip(video_path)
+    final = video1.set_audio(audio)
+
+    final.write_videofile(out_path)
