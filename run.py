@@ -3,6 +3,7 @@
 # Class import
 import Stream.api.page as Page
 from Stream.util.message import msg_start
+from Stream.upload.update import main_update
 from Stream.util.console import console, msg, console_print
 from Stream.api.film import main_dw_film as download_film
 from Stream.api.tv import main_dw_tv as download_tv
@@ -12,6 +13,7 @@ site_version = Page.get_version(domain)
 
 def main():
     msg_start()
+    main_update()
 
     film_search = msg.ask("[blue]Insert film to search: ").strip()
     db_title = Page.search(film_search, domain)
