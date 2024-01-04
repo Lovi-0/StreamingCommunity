@@ -205,7 +205,13 @@ def dw_m3u8(m3u8_link, m3u8_content, m3u8_headers="", decrypt_key="", merged_mp4
     pool.join()
 
     if is_encryped:
-        for ts_fname in tqdm(glob.glob("temp_ts/*.ts"), desc="[yellow]Decoding"):
+        path = ""
+        if is_platform_linux():
+            path = "temp_ts/*.ts"
+        else:
+            path = "temp_ts\*.ts"
+
+        for ts_fname in tqdm(glob.glob(path), desc="[yellow]Decoding"):
             video_decoder.decode_aes_128(ts_fname)
 
         # Start to merge all *.ts files
