@@ -86,7 +86,7 @@ def save_in_part(folder_ts, merged_mp4, file_extension = ".ts"):
             for i in range(start, end):
                 f.write(f"file {ordered_ts_names[i]} \n")
 
-        ffmpeg.input(f"{part}_concat.txt", format='concat', safe=0).output(f"{part}.mp4", c='copy', loglevel="quiet").run(capture_stdout=True, capture_stderr=True)
+        ffmpeg.input(f"{part}_concat.txt", format='concat', safe=0).output(f"{part}.mp4", c='copy', loglevel="quiet").run()
 
 
     # Save first part
