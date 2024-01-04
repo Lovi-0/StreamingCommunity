@@ -6,6 +6,7 @@ from functools import partial
 from multiprocessing.dummy import Pool
 from tqdm.rich import tqdm
 import moviepy.editor as mp
+from Stream.util.platform import *
 
 # Class import
 #from Stream.util.console import console
@@ -33,7 +34,10 @@ class Video_Decoder(object):
         self.iv = x_key["IV"].lstrip("0x") if "IV" in x_key.keys() else ""
 
     def decode_aes_128(self, video_fname: str):
-        frame_name = video_fname.split("\\")[-1].split("-")[0] + ".ts"
+        if is_platform_linux():
+            frame_name = video_fname.split("/")[-1].split("-")[0] + ".ts"
+        else:
+            frame_name = video_fname.split("\\")[-1].split("-")[0] + ".ts"
         res_cmd = subprocess.run(["openssl","aes-128-cbc","-d","-in", video_fname,"-out", "ou_ts/"+frame_name,"-nosalt","-iv", self.iv,"-K", self.uri ], capture_output=True)
 
         res_cmd_str = res_cmd.stderr.decode("utf-8")
@@ -56,6 +60,7 @@ def save_in_part(folder_ts, merged_mp4, file_extension = ".ts"):
     # Get list of ts file in order
     os.chdir(folder_ts)
 
+
     # Order all ts file
     try: ordered_ts_names = sorted(glob.glob(f"*{file_extension}"), key=lambda x:float(re.findall("(\d+)", x.split("_")[1])[0]))
     except: 
@@ -76,12 +81,17 @@ def save_in_part(folder_ts, merged_mp4, file_extension = ".ts"):
         #console.log(f"[blue]Process part [green][[red]{part}[green]]")
         list_mp4_part.append(f"{part}.mp4")
 
+
         with open(f"{part}_concat.txt", "w") as f:
             for i in range(start, end):
                 f.write(f"file {ordered_ts_names[i]} \n")
-                
-        ffmpeg.input(f"{part}_concat.txt", format='concat', safe=0).output(f"{part}.mp4", c='copy', loglevel="quiet").run()
-        
+        # try:        
+        #     ffmpeg.input(f"{part}_concat.txt", format='concat', safe=0).output(f"{part}.mp4", c='copy', loglevel="quiet").run(capture_stdout=True, capture_stderr=True)
+        # except ffmpeg.Error as e:
+        #     print('stderr:', e.stderr.decode('utf8'))
+        ffmpeg.input(f"{part}_concat.txt", format='concat', safe=0).output(f"{part}.mp4", c='copy', loglevel="quiet").run(capture_stdout=True, capture_stderr=True)
+
+
     # Save first part
     save_part_ts(start, end, part)
 
@@ -107,6 +117,11 @@ def save_in_part(folder_ts, merged_mp4, file_extension = ".ts"):
             f.write(f"file {mp4_fname}\n")
             
     ffmpeg.input("part_list.txt", format='concat', safe=0).output(merged_mp4, c='copy', loglevel="quiet").run()
+
+    # try:
+    #     ffmpeg.input("part_list.txt", format='concat', safe=0).output(merged_mp4, c='copy', loglevel="quiet").run(capture_stdout=True, capture_stderr=True)
+    # except ffmpeg.Error as e:
+    #     print('stderr:', e.stderr.decode('utf8'))
     
 def download_ts_file(ts_url: str, store_dir: str, headers):
 
@@ -198,7 +213,7 @@ def dw_m3u8(m3u8_link, m3u8_content, m3u8_headers="", decrypt_key="", merged_mp4
     pool.join()
 
     if is_encryped:
-        for ts_fname in tqdm(glob.glob("temp_ts\*.ts"), desc="[yellow]Decoding"):
+        for ts_fname in tqdm(glob.glob("temp_ts/*.ts"), desc="[yellow]Decoding"):
             video_decoder.decode_aes_128(ts_fname)
 
         # Start to merge all *.ts files
@@ -211,10 +226,18 @@ def dw_m3u8(m3u8_link, m3u8_content, m3u8_headers="", decrypt_key="", merged_mp4
     os.chdir("..")
     console.log("[green]Clean")
 
-    if is_encryped: 
-        shutil.move("ou_ts\\"+merged_mp4 , main_out_folder+"\\")
-    else: 
-        shutil.move("temp_ts\\"+merged_mp4 , main_out_folder+"\\")
+
+    if is_platform_linux():
+        if is_encryped: 
+            shutil.move("ou_ts/"+merged_mp4 , main_out_folder+"/")
+        else: 
+            shutil.move("temp_ts/"+merged_mp4 , main_out_folder+"/")
+
+    else:
+        if is_encryped: 
+            shutil.move("ou_ts\\"+merged_mp4 , main_out_folder+"\\")
+        else: 
+            shutil.move("temp_ts\\"+merged_mp4 , main_out_folder+"\\")
 
     shutil.rmtree("ou_ts", ignore_errors=True)
     shutil.rmtree("temp_ts", ignore_errors=True)
