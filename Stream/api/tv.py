@@ -66,7 +66,7 @@ def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, e
 
 def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title):
 
-    response = requests.get('https://vixcloud.co/playlist/175967', params={'token': json_win_param['token'], 'expires': json_win_param["expires"] }, headers={
+    response = requests.get(f'https://vixcloud.co/playlist/{json_win_video['id']}', params={'token': json_win_param['token'], 'expires': json_win_param["expires"] }, headers={
         'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param["token720p"]}&title={tv_name.replace("-", "+")}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title.replace(" ", "+")}&nextEpisode=1'
     })
 
