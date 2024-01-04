@@ -2,8 +2,8 @@
 
 # Class import
 from Stream.util.headers import get_headers
-from Stream.util.console import console
 from Stream.util.m3u8 import dw_m3u8
+from Stream.util.util import convert_utf8_name
 
 # General import
 import requests, sys, re, json
@@ -43,9 +43,12 @@ def get_m3u8_key(json_win_video, json_win_param, title_name):
 
 def main_dw_film(id_film, title_name, domain):
 
+    lower_title_name = str(title_name).lower()
+    title_name = convert_utf8_name(lower_title_name)   # ERROR LATIN 1 IN REQ WITH ò à ù ...
+
     embed_content = get_iframe(id_film, domain)
     json_win_video, json_win_param = parse_content(embed_content)
     m3u8_url = get_m3u8_url(json_win_video, json_win_param)
     m3u8_key = get_m3u8_key(json_win_video, json_win_param, title_name)
     
-    dw_m3u8(m3u8_url, requests.get(m3u8_url, headers={"User-agent": get_headers()}).text, "", m3u8_key, str(title_name).replace("+", " ").replace(",", "") + ".mp4")
+    dw_m3u8(m3u8_url, requests.get(m3u8_url, headers={"User-agent": get_headers()}).text, "", m3u8_key, lower_title_name.replace("+", " ").replace(",", "") + ".mp4")

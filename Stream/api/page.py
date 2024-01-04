@@ -21,7 +21,6 @@ def get_version(domain):
         return json.loads(info_data_page)['version']
     
     except:
-
         console.log("[red]UPDATE DOMANIN")
         sys.exit(0)
     
