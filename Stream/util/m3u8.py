@@ -85,10 +85,7 @@ def save_in_part(folder_ts, merged_mp4, file_extension = ".ts"):
         with open(f"{part}_concat.txt", "w") as f:
             for i in range(start, end):
                 f.write(f"file {ordered_ts_names[i]} \n")
-        # try:        
-        #     ffmpeg.input(f"{part}_concat.txt", format='concat', safe=0).output(f"{part}.mp4", c='copy', loglevel="quiet").run(capture_stdout=True, capture_stderr=True)
-        # except ffmpeg.Error as e:
-        #     print('stderr:', e.stderr.decode('utf8'))
+
         ffmpeg.input(f"{part}_concat.txt", format='concat', safe=0).output(f"{part}.mp4", c='copy', loglevel="quiet").run(capture_stdout=True, capture_stderr=True)
 
 
@@ -117,11 +114,6 @@ def save_in_part(folder_ts, merged_mp4, file_extension = ".ts"):
             f.write(f"file {mp4_fname}\n")
             
     ffmpeg.input("part_list.txt", format='concat', safe=0).output(merged_mp4, c='copy', loglevel="quiet").run()
-
-    # try:
-    #     ffmpeg.input("part_list.txt", format='concat', safe=0).output(merged_mp4, c='copy', loglevel="quiet").run(capture_stdout=True, capture_stderr=True)
-    # except ffmpeg.Error as e:
-    #     print('stderr:', e.stderr.decode('utf8'))
     
 def download_ts_file(ts_url: str, store_dir: str, headers):
 
