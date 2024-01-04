@@ -13,7 +13,7 @@ Script to download film from streaming community without selenium, select movie 
 ## Requirement
 * python [3.9](https://www.python.org/downloads/release/python-390/)
 * ffmpeg [win](https://www.gyan.dev/ffmpeg/builds/)
-* opensll [win](https://slproweb.com/products/Win32OpenSSL.html)
+* open ssl [win](https://slproweb.com/products/Win32OpenSSL.html)
 
 ## Installation library
 ```bash
