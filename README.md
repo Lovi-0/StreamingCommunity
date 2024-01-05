@@ -30,7 +30,7 @@ python run.py
 - Add audio if missing.
 
 ## Tutorial
-[yt]https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing
+https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing
 
 ## Authors
 - [@Ghost6446](https://www.github.com/Ghost6446)
