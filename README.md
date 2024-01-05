@@ -13,7 +13,6 @@ Script to download film from streaming community without selenium, select movie 
 ## Requirement
 * python [3.9](https://www.python.org/downloads/release/python-390/)
 * ffmpeg [win](https://www.gyan.dev/ffmpeg/builds/)
-* open ssl [win](https://slproweb.com/products/Win32OpenSSL.html)
 
 ## Installation library
 ```bash
@@ -27,7 +26,8 @@ python run.py
 
 ## Features
 - Search for movies.
-- Search and download TV series episodes.
+- Search and download TV series episode.
+- Add audio if missing.
 
 ## Authors
 

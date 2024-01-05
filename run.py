@@ -21,7 +21,7 @@ def main():
     main_update()
     console.print(f"[blue]Find system [white]=> [red]{sys.platform} \n")
     
-    film_search = msg.ask("[blue]Insert word to search in all site: ").strip()
+    film_search = msg.ask("\n[blue]Insert word to search in all site: ").strip()
     db_title = Page.search(film_search, domain)
 
     for i in range(len(db_title)):
@@ -29,12 +29,14 @@ def main():
     index_select = int(msg.ask("\n[blue]Index to download: "))
 
     if db_title[index_select]['type'] == "movie":
-        console.log(f"[green]Movie select: {db_title[index_select]['name']}")
+        console.print(f"[green]\nMovie select: {db_title[index_select]['name']}")
         download_film(db_title[index_select]['id'], db_title[index_select]['name'].replace(" ", "+"), domain)
 
     else:
-        console.log(f"[green]Tv select: {db_title[index_select]['name']}")
+        console.print(f"[green]\nTv select: {db_title[index_select]['name']}")
         download_tv(db_title[index_select]['id'], db_title[index_select]['name'].replace(" ", "+"), site_version, domain)
+
+    console.print("\n[red]Done")
 
 if __name__ == '__main__':
     main()

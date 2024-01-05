@@ -1,190 +1,136 @@
-# 4.08.2023 -> 14.09.2023 -> 17.09.2023 -> 3.12.2023
+# 5.01.24
 
 # Import
-import re, os, sys, glob, time, requests, shutil, ffmpeg, subprocess
-from functools import partial
-from multiprocessing.dummy import Pool
+import requests, re,  os, ffmpeg, shutil
 from tqdm.rich import tqdm
+from concurrent.futures import ThreadPoolExecutor
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 import moviepy.editor as mp
 
 # Class import
 from Stream.util.console import console
-
-# Disable warning
-import warnings
-from tqdm import TqdmExperimentalWarning
-warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
-
+from Stream.util.headers import get_headers
 
 # Variable
-main_out_folder = "videos"
-os.makedirs(main_out_folder, exist_ok=True)
-path_out_without_key = "temp_ts"
-path_out_with_key = "out_ts"
+os.makedirs("videos", exist_ok=True)
 
 
-# [ decoder ]
-def decode_aes_128(path_video_frame, decript_key, x_key):
-    frame_name = path_video_frame.split("\\")[-1].split("-")[0] + ".ts"
-    iv = x_key["IV"].lstrip("0x") if "IV" in x_key.keys() else ""
+# [ main class ]
+class M3U8Downloader:
 
-    out = subprocess.run([
-        "openssl",
-        "aes-128-cbc", "-d",
-        "-in", path_video_frame,
-        "-out", os.path.join(path_out_with_key, frame_name),
-        "-nosalt","-iv", iv,
-        "-K", decript_key 
-    ], capture_output=True)
+    def __init__(self, m3u8_url, key=None, output_filename="output.mp4"):
+        self.m3u8_url = m3u8_url
+        self.key = key
+        self.output_filename = output_filename
+        
+        self.segments = []
+        self.iv = None
+        self.key = bytes.fromhex(key)
 
-def decode_ext_x_key(key_str: str):
-    key_str = key_str.replace('"', '').lstrip("#EXT-X-KEY:")
-    v_list = re.findall(r"[^,=]+", key_str)
-    key_map = {v_list[i]: v_list[i+1] for i in range(0, len(v_list), 2)}
-    return key_map
+        self.temp_folder = "tmp"
+        os.makedirs(self.temp_folder, exist_ok=True)
 
+    def decode_ext_x_key(self, key_str):
+        key_str = key_str.replace('"', '').lstrip("#EXT-X-KEY:")
+        v_list = re.findall(r"[^,=]+", key_str)
+        key_map = {v_list[i]: v_list[i+1] for i in range(0, len(v_list), 2)}
 
-# [ util ] 
-def save_in_part(folder_ts, merged_mp4, file_extension = ".ts"):
+        return key_map # URI | METHOD | IV
 
-    # Get list of ts file in order
-    os.chdir(folder_ts)
+    def parse_key(self, raw_iv):
+        self.iv = bytes.fromhex(raw_iv.replace("0x", ""))
 
-    # Order all ts file
-    try: ordered_ts_names = sorted(glob.glob(f"*{file_extension}"), key=lambda x:float(re.findall("(\d+)", x.split("_")[1])[0]))
-    except: 
-        try: ordered_ts_names = sorted(glob.glob(f"*{file_extension}"), key=lambda x:float(re.findall("(\d+)", x.split("-")[1])[0]))
-        except: ordered_ts_names = sorted(glob.glob(f"*{file_extension}"))
+    def parse_m3u8(self, m3u8_content):
+        m3u8_base_url = self.m3u8_url.rstrip(self.m3u8_url.split("/")[-1])
+        lines = m3u8_content.split('\n')
 
-    open("concat.txt", "wb")
-    open("part_list.txt", "wb")
+        for i in range(len(lines)):
+            line = str(lines[i])
 
-    # Variable for download
-    list_mp4_part = []
-    part = 0
-    start = 0
-    end = 200
+            if line.startswith("#EXT-X-KEY:"):
+                x_key_dict = self.decode_ext_x_key(line)
+                self.parse_key(x_key_dict['IV'])
 
-    # Create mp4 from start ts to end
-    def save_part_ts(start, end, part):
-        list_mp4_part.append(f"{part}.mp4")
+            if line.startswith("#EXTINF"):
+                ts_url = lines[i+1]
 
-        with open(f"{part}_concat.txt", "w") as f:
-            for i in range(start, end):
-                f.write(f"file {ordered_ts_names[i]} \n")
+                if not ts_url.startswith("http"):
+                    ts_url = m3u8_base_url + ts_url
+                self.segments.append(ts_url)
 
-        ffmpeg.input(f"{part}_concat.txt", format='concat', safe=0).output(f"{part}.mp4", c='copy', loglevel="quiet").run()
+        console.print(f"[cyan]Find: {len(self.segments)} ts file to download")
 
+    def download_m3u8(self):
+        response = requests.get(self.m3u8_url, headers={'user-agent': get_headers()})
 
-    # Save first part
-    save_part_ts(start, end, part)
+        if response.ok:
+            m3u8_content = response.text
+            self.parse_m3u8(m3u8_content)
 
-    # Save all other part
-    for _ in range(start, end):
+    def decrypt_ts(self, encrypted_data):
+        cipher = Cipher(algorithms.AES(self.key), modes.CBC(self.iv), backend=default_backend())
+        decryptor = cipher.decryptor()
+        decrypted_data = decryptor.update(encrypted_data) + decryptor.finalize()
 
-        # Increment progress ts file
-        start+= 200
-        end += 200
-        part+=1
-
-        # Check if end or not
-        if(end < len(ordered_ts_names)): 
-            save_part_ts(start, end, part)
-        else:
-            save_part_ts(start, len(ordered_ts_names), part)
-            break
-
-    # Merge all part
-    console.log(f"[purple]Merge all: {file_extension} file")
-    with open("part_list.txt", 'w') as f:
-        for mp4_fname in list_mp4_part:
-            f.write(f"file {mp4_fname}\n")
-            
-    ffmpeg.input("part_list.txt", format='concat', safe=0).output(merged_mp4, c='copy', loglevel="quiet").run()
+        return decrypted_data
     
-def download_ts_file(ts_url: str, store_dir: str, headers):
+    def decrypt_and_save(self, args):
+        ts_url, index = args
+        ts_filename = os.path.join(self.temp_folder, f"{index}.ts")
 
-    # Get ts name and folder
-    ts_name = ts_url.split('/')[-1].split("?")[0]
-    ts_dir = os.path.join(store_dir, ts_name)
+        if not os.path.exists(ts_filename):
+            ts_response = requests.get(ts_url, headers={'user-agent': get_headers()}).content
 
-    if(not os.path.isfile(ts_dir)):
-        ts_res = requests.get(ts_url, headers=headers)
+            if self.key and self.iv:
+                decrypted_data = self.decrypt_ts(ts_response)
+                with open(ts_filename, "wb") as ts_file:
+                    ts_file.write(decrypted_data)
 
-        if(ts_res.status_code == 200):
-            with open(ts_dir, 'wb+') as f:
-                f.write(ts_res.content)
-        else:
-            print(f"Failed to download streaming file: {ts_name}.") 
+            else:
+                with open(ts_filename, "wb") as ts_file:
+                    ts_file.write(ts_response)
 
-        time.sleep(0.5)
+    def download_and_save_ts(self):
+        with ThreadPoolExecutor(max_workers=30) as executor:
 
+            list(tqdm(executor.map(self.decrypt_and_save, zip(self.segments, range(len(self.segments)))),
+                total=len(self.segments), unit="bytes", unit_scale=True, unit_divisor=1024, desc="[yellow]Download"))
+            
+    def join_ts_files(self):
 
-# [ donwload ]
-def dw_m3u8(m3u8_link, m3u8_content, m3u8_headers="", decrypt_key="", merged_mp4="test.mp4"):
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        file_list_path = os.path.join(current_dir, 'file_list.txt')
 
-    # Reading the m3u8 file
-    m3u8_base_url = m3u8_link.rstrip(m3u8_link.split("/")[-1])
-    m3u8 = m3u8_content.split('\n')
+        ts_files = [f for f in os.listdir(self.temp_folder) if f.endswith(".ts")]
+        ts_files.sort()
 
-    ts_url_list = []
-    ts_names = []
-    x_key_dict = dict()
+        with open(file_list_path, 'w') as f:
+            for ts_file in ts_files:
+                relative_path = os.path.relpath(os.path.join(self.temp_folder, ts_file), current_dir)
+                f.write(f"file '{relative_path}'\n")
 
-    is_encryped = False
-    os.makedirs(path_out_without_key, exist_ok=True)
-    os.makedirs(path_out_with_key, exist_ok=True)
-
-    # Parsing the content in m3u8 with creation of url_list with url of ts file
-    for i in range(len(m3u8)):
-        if "AES-128" in str(m3u8[i]):
-            is_encryped = True
-
-        if m3u8[i].startswith("#EXT-X-KEY:"):
-            x_key_dict = decode_ext_x_key(m3u8[i])
-
-        if m3u8[i].startswith("#EXTINF"):
-            ts_url = m3u8[i+1]
-            ts_names.append(ts_url.split('/')[-1])
-
-            if not ts_url.startswith("http"):
-                ts_url = m3u8_base_url + ts_url
-
-            ts_url_list.append(ts_url)
-    console.log(f"[blue]Find [white]=> [red]{len(ts_url_list)}[blue] ts file to download")
-
-    if is_encryped and decrypt_key == "": 
-        console.log(f"[red]M3U8 Is encryped")
-        sys.exit(0)
+        console.print("[cyan]Start join all file")
+        try:
+            (
+                ffmpeg.input(file_list_path, format='concat', safe=0).output(self.output_filename, c="copy", loglevel="quiet").run()
+            )
+            console.print(f"[cyan]Clean ...")
+        except ffmpeg.Error as e:
+            print(f"Errore durante il salvataggio del file MP4: {e}")
+        finally:
+            os.remove(file_list_path)
+            shutil.rmtree("tmp", ignore_errors=True)
 
 
-    #  Using multithreading to download all ts file
-    pool = Pool(15)
-    gen = pool.imap(partial(download_ts_file, store_dir=path_out_without_key, headers=m3u8_headers), ts_url_list)
-    for _ in tqdm(gen, total=len(ts_url_list), unit="bytes", unit_scale=True, unit_divisor=1024, desc="[yellow]Download m3u8"):
-        pass
-    pool.close()
-    pool.join()
+# [ function ]
+def dw_m3u8(url, key=None, output_filename="output.mp4"):
 
-    # Merge all ts 
-    if is_encryped:
-        for ts_fname in tqdm(glob.glob(f"{path_out_without_key}/*.ts"), desc="[yellow]Decoding m3u8"):
-            decode_aes_128(ts_fname, decrypt_key, x_key_dict)
-        save_in_part(path_out_with_key, merged_mp4)
-    else:
-        save_in_part(path_out_without_key, merged_mp4)
+    downloader = M3U8Downloader(url, key, output_filename)
 
-    # Clean temp file
-    os.chdir("..")
-    console.log("[green]Clean")
-
-    # Move mp4 file to main folder
-    if is_encryped: shutil.move(path_out_with_key+"/"+merged_mp4 , main_out_folder+"/")
-    else: shutil.move(path_out_without_key+"/"+merged_mp4 , main_out_folder+"/")
-
-    # Remove folder out_ts and temp_ts
-    shutil.rmtree(path_out_with_key, ignore_errors=True)
-    shutil.rmtree(path_out_without_key, ignore_errors=True)
+    downloader.download_m3u8()
+    downloader.download_and_save_ts()
+    downloader.join_ts_files()
 
 def join_audio_to_video(audio_path, video_path, out_path):
 
@@ -197,4 +143,3 @@ def join_audio_to_video(audio_path, video_path, out_path):
 
     # Join all
     final.write_videofile(out_path)
-

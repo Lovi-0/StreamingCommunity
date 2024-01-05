@@ -6,7 +6,7 @@ from Stream.util.m3u8 import dw_m3u8
 from Stream.util.util import convert_utf8_name
 
 # General import
-import requests, sys, re, json
+import requests, os, re, json
 from bs4 import BeautifulSoup
 
 # [func]
@@ -51,4 +51,5 @@ def main_dw_film(id_film, title_name, domain):
     m3u8_url = get_m3u8_url(json_win_video, json_win_param)
     m3u8_key = get_m3u8_key(json_win_video, json_win_param, title_name)
     
-    dw_m3u8(m3u8_url, requests.get(m3u8_url, headers={"User-agent": get_headers()}).text, "", m3u8_key, lower_title_name.replace("+", " ").replace(",", "") + ".mp4")
+    path_film = os.path.join("videos", lower_title_name.replace("+", " ").replace(",", "") + ".mp4")
+    dw_m3u8(m3u8_url, m3u8_key, path_film)

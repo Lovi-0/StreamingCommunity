@@ -101,14 +101,15 @@ def main_dw_tv(tv_id, tv_name, version, domain):
     base_path_mp4 = os.path.join("videos", mp4_format)
     base_audio_path = os.path.join("videos", mp4_format + "_audio.mp4")
 
-    dw_m3u8(m3u8_url, requests.get(m3u8_url, headers={"User-agent": get_headers()}).text, "", m3u8_key, mp4_format)
+    dw_m3u8(m3u8_url, m3u8_key, base_path_mp4)
 
     if not check_audio_presence(base_path_mp4):
-        console.log("[red]Audio is not present, start download (Use all CPU)")
+        
+        console.print("[red]Audio is not present, start download (Use all CPU)")
         m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'])
-        dw_m3u8(m3u8_url_audio, requests.get(m3u8_url_audio, headers={"User-agent": get_headers()}).text, "", m3u8_key, "audio.mp4")
 
-        temp_audio_path = os.path.join("videos", "audio.mp4")
-        join_audio_to_video(temp_audio_path, base_path_mp4, base_audio_path)
-        os.remove(temp_audio_path)
+        dw_m3u8(m3u8_url_audio, m3u8_key, base_audio_path)
+
+        join_audio_to_video(base_audio_path, base_path_mp4, base_audio_path)
+        os.remove(base_audio_path)
         os.remove(base_path_mp4)
