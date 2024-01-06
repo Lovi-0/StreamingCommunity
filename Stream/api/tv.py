@@ -4,7 +4,7 @@
 from Stream.util.headers import get_headers
 from Stream.util.console import console, msg
 from Stream.util.m3u8 import dw_m3u8, join_audio_to_video
-from Stream.util.util import convert_utf8_name, check_audio_presence
+from Stream.util.util import convert_utf8_name
 
 # General import
 import requests, os, re, json
@@ -96,20 +96,13 @@ def main_dw_tv(tv_id, tv_name, version, domain):
     m3u8_url = get_m3u8_url(json_win_video, json_win_param)
     m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'])
 
-    mp4_name = lower_tv_name.replace("+", "_") + "_"+str(season_select)+"__"+str(index_ep_select+1)
+    mp4_name = f"{lower_tv_name.replace('+', '_')}_{str(season_select)}_{str(index_ep_select+1)}"
     mp4_format = mp4_name + ".mp4"
-    base_path_mp4 = os.path.join("videos", mp4_format)
-    base_audio_path = os.path.join("videos", mp4_format + "_audio.mp4")
+    mp4_path = os.path.join("videos", mp4_format)
 
-    dw_m3u8(m3u8_url, m3u8_key, base_path_mp4)
+    m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'])
 
-    if not check_audio_presence(base_path_mp4):
-        
-        console.print("[red]Audio is not present, start download (Use all CPU)")
-        m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'])
+    if m3u8_url_audio != None:
+        console.print("[red]=> Use m3u8 audio")
 
-        dw_m3u8(m3u8_url_audio, m3u8_key, base_audio_path)
-
-        join_audio_to_video(base_audio_path, base_path_mp4, base_audio_path)
-        os.remove(base_audio_path)
-        os.remove(base_path_mp4)
+    dw_m3u8(m3u8_url, m3u8_url_audio, m3u8_key, mp4_path)

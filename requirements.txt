@@ -5,5 +5,4 @@ tqdm
 rich
 random-user-agent
 ffmpeg-python
-moviepy
 cryptography
