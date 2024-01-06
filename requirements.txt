@@ -6,3 +6,4 @@ rich
 random-user-agent
 ffmpeg-python
 cryptography
+moviepy
