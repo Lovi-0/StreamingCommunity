@@ -1,7 +1,7 @@
 # 5.01.24
 
 # Import
-import requests, re,  os, ffmpeg, shutil
+import requests, re,  os, ffmpeg, shutil, time
 from tqdm.rich import tqdm
 from concurrent.futures import ThreadPoolExecutor
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -29,7 +29,7 @@ class M3U8Downloader:
         self.segments = []
         self.segments_audio = []
         self.iv = None
-        self.key = bytes.fromhex(key)
+        if key != None: self.key = bytes.fromhex(key)
 
         self.temp_folder = "tmp"
         os.makedirs(self.temp_folder, exist_ok=True)
@@ -102,13 +102,8 @@ class M3U8Downloader:
         video_ts_url = self.segments[index]
         video_ts_filename = os.path.join(self.temp_folder, f"{index}_v.ts")
 
-        if self.download_audio: 
-            audio_ts_url = self.segments_audio[index]
-            audio_ts_filename = os.path.join(self.temp_folder, f"{index}_a.ts")
-            video_audio_ts_filename = os.path.join(self.temp_folder, f"{index}_v_a.ts")
-
         # Download video or audio ts file 
-        if not os.path.exists(video_ts_url):
+        if not os.path.exists(video_ts_filename):   # Only for media that not use audio
             ts_response = requests.get(video_ts_url, headers={'user-agent': get_headers()}).content
 
             if self.key and self.iv:
@@ -121,22 +116,27 @@ class M3U8Downloader:
                     ts_file.write(ts_response)
 
         # Donwload only audio ts file
-        if self.download_audio:
-            ts_response = requests.get(audio_ts_url, headers={'user-agent': get_headers()}).content
+        if self.download_audio: 
+            audio_ts_url = self.segments_audio[index]
+            audio_ts_filename = os.path.join(self.temp_folder, f"{index}_a.ts")
+            video_audio_ts_filename = os.path.join(self.temp_folder, f"{index}_v_a.ts")
 
-            if self.key and self.iv:
-                decrypted_data = self.decrypt_ts(ts_response)
-                with open(audio_ts_filename, "wb") as ts_file:
-                    ts_file.write(decrypted_data)
+            if not os.path.exists(video_audio_ts_filename):  # Only for media use audio
+                ts_response = requests.get(audio_ts_url, headers={'user-agent': get_headers()}).content
 
-            else:
-                with open(audio_ts_filename, "wb") as ts_file:
-                    ts_file.write(ts_response)
-            
-            # Join ts video and audio
-            merge_ts_files(video_ts_filename, audio_ts_filename, video_audio_ts_filename)
-            os.remove(video_ts_filename)
-            os.remove(audio_ts_filename)
+                if self.key and self.iv:
+                    decrypted_data = self.decrypt_ts(ts_response)
+                    with open(audio_ts_filename, "wb") as ts_file:
+                        ts_file.write(decrypted_data)
+
+                else:
+                    with open(audio_ts_filename, "wb") as ts_file:
+                        ts_file.write(ts_response)
+                
+                # Join ts video and audio
+                merge_ts_files(video_ts_filename, audio_ts_filename, video_audio_ts_filename)
+                os.remove(video_ts_filename)
+                os.remove(audio_ts_filename)
         
     def download_and_save_ts(self):
         with ThreadPoolExecutor(max_workers=30) as executor:
@@ -147,8 +147,12 @@ class M3U8Downloader:
         current_dir = os.path.dirname(os.path.realpath(__file__))
         file_list_path = os.path.join(current_dir, 'file_list.txt')
 
+        # Make sort by number
         ts_files = [f for f in os.listdir(self.temp_folder) if f.endswith(".ts")]
-        ts_files.sort()
+        def extract_number(file_name):
+            return int(''.join(filter(str.isdigit, file_name)))
+        
+        ts_files.sort(key=extract_number)
 
         with open(file_list_path, 'w') as f:
             for ts_file in ts_files:
@@ -164,6 +168,7 @@ class M3U8Downloader:
         except ffmpeg.Error as e:
             print(f"Errore durante il salvataggio del file MP4: {e}")
         finally:
+            time.sleep(2)
             os.remove(file_list_path)
             shutil.rmtree("tmp", ignore_errors=True)
 
