@@ -1,12 +1,12 @@
 # 10.12.23
 
 # Class import
-import Stream.api.page as Page
-from Stream.util.message import msg_start
-from Stream.upload.update import main_update
-from Stream.util.console import console, msg
-from Stream.api.film import main_dw_film as download_film
-from Stream.api.tv import main_dw_tv as download_tv
+import Src.Api.page as Page
+from Src.Api.film import main_dw_film as download_film
+from Src.Api.tv import main_dw_tv as download_tv
+from Src.Util.Helper.message import msg_start
+from Src.Util.Helper.console import console, msg
+from Src.Upload.update import main_update
 
 # General import
 import sys

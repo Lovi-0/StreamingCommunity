@@ -1,7 +1,7 @@
 # 13.09.2023
 
 # General import
-from Stream.util.console import console
+from Src.Util.Helper.console import console
 import os, requests, time
 
 # Variable
