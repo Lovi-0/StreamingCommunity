@@ -1,5 +1,5 @@
 <p align="center">
-	<img src="Stream/assets/min_logo.png" style="max-width: 55%;" alt="video working" />
+	<img src="Src/Assets/min_logo.png" style="max-width: 55%;" alt="video working" />
 </p>
 
 ## Streaming community downloader
@@ -7,7 +7,7 @@
 Script to download film from streaming community without selenium, select movie or series and download single ep.
 
 <p align="center">
-	<img src="Stream/assets/run.gif" style="max-width: 55%;" alt="video working" />
+	<img src="Src/Assets/run.gif" style="max-width: 55%;" alt="video working" />
 </p>
 
 ## Requirement
