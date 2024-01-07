@@ -76,7 +76,26 @@ def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep
         if "audio" in str(row) and "ita" in str(row):
             return row.split(",")[-1].split('"')[-2]
 
- 
+
+def actually_dw(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name):
+    embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
+    json_win_video, json_win_param = parse_content(embed_content)
+    m3u8_url = get_m3u8_url(json_win_video, json_win_param)
+    m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'])
+    
+    mp4_name = f"{lower_tv_name.replace('+', '_')}_{str(season_select)}_{str(index_ep_select+1)}"
+    mp4_format = mp4_name + ".mp4"
+    mp4_path = os.path.join("videos", mp4_format)
+    
+    m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'])
+    
+    if m3u8_url_audio != None:
+        console.print("[red]=> Use m3u8 audio")
+    
+    dw_m3u8(m3u8_url, m3u8_url_audio, m3u8_key, mp4_path)
+    
+
+
 def main_dw_tv(tv_id, tv_name, version, domain):
 
     token = get_token(tv_id, domain)
@@ -89,20 +108,13 @@ def main_dw_tv(tv_id, tv_name, version, domain):
     eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
     for ep in eps:
         console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
-    index_ep_select = int(msg.ask("\n[green]Insert ep number: ")) - 1
-    
-    embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
-    json_win_video, json_win_param = parse_content(embed_content)
-    m3u8_url = get_m3u8_url(json_win_video, json_win_param)
-    m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'])
+    index_ep_select = msg.ask("\n[green]Insert ep number (use * for all episodes): ")
 
-    mp4_name = f"{lower_tv_name.replace('+', '_')}_{str(season_select)}_{str(index_ep_select+1)}"
-    mp4_format = mp4_name + ".mp4"
-    mp4_path = os.path.join("videos", mp4_format)
-
-    m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'])
-
-    if m3u8_url_audio != None:
-        console.print("[red]=> Use m3u8 audio")
-
-    dw_m3u8(m3u8_url, m3u8_url_audio, m3u8_key, mp4_path)
+    if(index_ep_select == '*'):
+        for ep in eps:
+            index_ep_select = int(ep['n']) - 1
+            actually_dw(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name)
+        return
+            
+    index_ep_select = int(index_ep_select) - 1
+    actually_dw(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name)
