@@ -7,7 +7,7 @@ from Src.Util.Helper.console import console, msg
 from Src.Util.m3u8 import dw_m3u8
 
 # General import
-import requests, os, re, json
+import requests, os, re, json, sys
 from bs4 import BeautifulSoup
 
 # [func]
@@ -17,31 +17,43 @@ def get_token(id_tv, domain):
     return session.cookies['XSRF-TOKEN']
 
 def get_info_tv(id_film, title_name, site_version, domain):
-    r = requests.get(f"https://streamingcommunity.{domain}/titles/{id_film}-{title_name}", headers={
+    req = requests.get(f"https://streamingcommunity.{domain}/titles/{id_film}-{title_name}", headers={
         'X-Inertia': 'true', 
         'X-Inertia-Version': site_version,
         'User-Agent': get_headers()
     })
 
-    return r.json()['props']['title']['seasons_count']
+    if req.ok():
+        return req.json()['props']['title']['seasons_count']
+    else:
+        console.log(f"[red]Error: {req.status_code}")
+        sys.exit(0)
 
 def get_info_season(tv_id, tv_name, domain, version, token, n_stagione):
-    r = requests.get(f'https://streamingcommunity.{domain}/titles/{tv_id}-{tv_name}/stagione-{n_stagione}', headers={
+    req = requests.get(f'https://streamingcommunity.{domain}/titles/{tv_id}-{tv_name}/stagione-{n_stagione}', headers={
         'authority': f'streamingcommunity.{domain}', 'referer': f'https://streamingcommunity.broker/titles/{tv_id}-{tv_name}',
         'user-agent': get_headers(), 'x-inertia': 'true', 'x-inertia-version': version, 'x-xsrf-token': token,
     })
 
-    return [{'id': ep['id'], 'n': ep['number'], 'name': ep['name']} for ep in r.json()['props']['loadedSeason']['episodes']]
+    if req.ok:
+        return [{'id': ep['id'], 'n': ep['number'], 'name': ep['name']} for ep in req.json()['props']['loadedSeason']['episodes']]
+    else:
+        console.log(f"[red]Error: {req.status_code}")
+        sys.exit(0)
 
 def get_iframe(tv_id, ep_id, domain, token):
-    r = requests.get(f'https://streamingcommunity.{domain}/iframe/{tv_id}', params={'episode_id': ep_id, 'next_episode': '1'}, cookies={'XSRF-TOKEN': token}, headers={
+    req = requests.get(f'https://streamingcommunity.{domain}/iframe/{tv_id}', params={'episode_id': ep_id, 'next_episode': '1'}, cookies={'XSRF-TOKEN': token}, headers={
         'referer': f'https://streamingcommunity.{domain}/watch/{tv_id}?e={ep_id}',
         'user-agent': get_headers()
     })
 
-    url_embed = BeautifulSoup(r.text, "lxml").find("iframe").get("src")
-    req_embed = requests.get(url_embed, headers = {"User-agent": get_headers()}).text
-    return BeautifulSoup(req_embed, "lxml").find("body").find("script").text
+    if req.ok:
+        url_embed = BeautifulSoup(req.text, "lxml").find("iframe").get("src")
+        req_embed = requests.get(url_embed, headers = {"User-agent": get_headers()}).text
+        return BeautifulSoup(req_embed, "lxml").find("body").find("script").text
+    else:
+        console.log(f"[red]Error: {req.status_code}")
+        sys.exit(0)
 
 def parse_content(embed_content):
 
@@ -59,22 +71,30 @@ def get_m3u8_url(json_win_video, json_win_param):
     return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition=720p&token={json_win_param['token720p']}&expires={json_win_param['expires']}"
 
 def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title):
-    req_key = requests.get('https://vixcloud.co/storage/enc.key', headers={
+    req = requests.get('https://vixcloud.co/storage/enc.key', headers={
         'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param["token720p"]}&title={tv_name.replace("-", "+")}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title.replace(" ", "+")}&nextEpisode=1',
-    }).content
+    })
 
-    return "".join(["{:02x}".format(c) for c in req_key])
+    if req.ok:
+        return "".join(["{:02x}".format(c) for c in req.content])
+    else:
+        console.log(f"[red]Error: {req.status_code}")
+        sys.exit(0)
 
 def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title):
 
-    response = requests.get(f'https://vixcloud.co/playlist/{json_win_video["id"]}', params={'token': json_win_param['token'], 'expires': json_win_param["expires"] }, headers={
+    req = requests.get(f'https://vixcloud.co/playlist/{json_win_video["id"]}', params={'token': json_win_param['token'], 'expires': json_win_param["expires"] }, headers={
         'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param["token720p"]}&title={tv_name.replace("-", "+")}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title.replace(" ", "+")}&nextEpisode=1'
     })
 
-    m3u8_cont = response.text.split()
-    for row in m3u8_cont:
-        if "audio" in str(row) and "ita" in str(row):
-            return row.split(",")[-1].split('"')[-2]
+    if req.ok:
+        m3u8_cont = req.text.split()
+        for row in m3u8_cont:
+            if "audio" in str(row) and "ita" in str(row):
+                return row.split(",")[-1].split('"')[-2]
+    else:
+        console.log(f"[red]Error: {req.status_code}")
+        sys.exit(0)
 
  
 def main_dw_tv(tv_id, tv_name, version, domain):

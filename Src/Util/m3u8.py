@@ -92,11 +92,9 @@ class M3U8Downloader:
         if response.ok:
             m3u8_content = response.text
             self.parse_m3u8(m3u8_content)
-
         else:
             console.log("[red]Wrong m3u8 url")
             sys.exit(0)
-
 
         if self.m3u8_audio != None:
 
@@ -206,15 +204,3 @@ def dw_m3u8(url, audio_url=None, key=None, output_filename="output.mp4"):
     downloader.download_m3u8()
     downloader.download_and_save_ts()
     downloader.join_ts_files()
-
-def join_audio_to_video(audio_path, video_path, out_path):
-
-    # Get audio and video
-    audio = mp.AudioFileClip(audio_path)
-    video1 = mp.VideoFileClip(video_path)
-
-    # Add audio
-    final = video1.set_audio(audio)
-
-    # Join all
-    final.write_videofile(out_path)
