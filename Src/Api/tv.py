@@ -8,6 +8,7 @@ from Src.Util.m3u8 import dw_m3u8
 
 # General import
 import requests, os, re, json, sys
+from enum import Enum
 from bs4 import BeautifulSoup
 
 # [func]
@@ -23,7 +24,7 @@ def get_info_tv(id_film, title_name, site_version, domain):
         'User-Agent': get_headers()
     })
 
-    if req.ok():
+    if req.ok:
         return req.json()['props']['title']['seasons_count']
     else:
         console.log(f"[red]Error: {req.status_code}")
@@ -116,7 +117,11 @@ def actually_dw(tv_id, eps, index_ep_select, domain, token, tv_name, season_sele
     
 
 
-def main_dw_tv(tv_id, tv_name, version, domain):
+class TvDownloadBehaviour(Enum):
+    DOWNLOAD_EPISODE = 0
+    DOWNLOAD_SEASON = 1
+
+def main_dw_tv(tv_id, tv_name, version, domain, tv_download_behaviour):
 
     token = get_token(tv_id, domain)
 
@@ -125,16 +130,18 @@ def main_dw_tv(tv_id, tv_name, version, domain):
     console.print(f"[blue]Season find: [red]{get_info_tv(tv_id, tv_name, version, domain)}")
     season_select = msg.ask("\n[green]Insert season number: ")
 
-    eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
-    for ep in eps:
-        console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
-    index_ep_select = msg.ask("\n[green]Insert ep number (use * for all episodes): ")
 
-    if(index_ep_select == '*'):
+    console.print(tv_download_behaviour)
+
+    eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
+
+    if (tv_download_behaviour == TvDownloadBehaviour.DOWNLOAD_SEASON.value):
         for ep in eps:
+            console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
             index_ep_select = int(ep['n']) - 1
             actually_dw(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name)
-        return
-            
-    index_ep_select = int(index_ep_select) - 1
-    actually_dw(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name)
+    else:
+        for ep in eps:
+            console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
+        index_ep_select = int(msg.ask("\n[green]Insert ep number: ")) - 1
+        actually_dw(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name)
