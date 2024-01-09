@@ -28,9 +28,13 @@ def get_version(domain):
 def search(title_search, domain):
 
     title_search = str(title_search).replace(" ", "+")
-    r = requests.get(
+    req = requests.get(
         url = f"https://streamingcommunity.{domain}/api/search?q={title_search}",
         headers = {"User-agent": get_headers()}
     )
 
-    return [{'name': title['name'], 'type': title['type'], 'id': title['id']} for title in r.json()['data']]
+    if req.ok:
+        return [{'name': title['name'], 'type': title['type'], 'id': title['id']} for title in req.json()['data']]
+    else:
+        console.log(f"[red]Error: {req.status_code}")
+        sys.exit(0)

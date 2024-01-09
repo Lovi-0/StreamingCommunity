@@ -3,21 +3,26 @@
 # Class import
 from Src.Util.Helper.headers import get_headers
 from Src.Util.Helper.util import convert_utf8_name
+from Src.Util.Helper.console import console
 from Src.Util.m3u8 import dw_m3u8
 
 # General import
-import requests, os, re, json
+import requests, os, re, json, sys
 from bs4 import BeautifulSoup
 
 # [func]
 def get_iframe(id_title, domain):
-    req_iframe = requests.get(url = f"https://streamingcommunity.{domain}/iframe/{id_title}", headers = {
+    req = requests.get(url = f"https://streamingcommunity.{domain}/iframe/{id_title}", headers = {
         "User-agent": get_headers()
     })
 
-    url_embed = BeautifulSoup(req_iframe.text, "lxml").find("iframe").get("src")
-    req_embed = requests.get(url_embed, headers = {"User-agent": get_headers()}).text
-    return BeautifulSoup(req_embed, "lxml").find("body").find("script").text
+    if req.ok:
+        url_embed = BeautifulSoup(req.text, "lxml").find("iframe").get("src")
+        req_embed = requests.get(url_embed, headers = {"User-agent": get_headers()}).text
+        return BeautifulSoup(req_embed, "lxml").find("body").find("script").text
+    else:
+        console.log(f"[red]Error: {req.status_code}")
+        sys.exit(0)
     
 def parse_content(embed_content):
 
@@ -35,12 +40,16 @@ def get_m3u8_url(json_win_video, json_win_param):
     return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition=720p&token={json_win_param['token720p']}&expires={json_win_param['expires']}"
 
 def get_m3u8_key(json_win_video, json_win_param, title_name):
-    req_key = requests.get('https://vixcloud.co/storage/enc.key', headers={
+    req = requests.get('https://vixcloud.co/storage/enc.key', headers={
         'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param["token720p"]}&title={title_name.replace(" ", "+")}&referer=1&expires={json_win_param["expires"]}',
-    }).content
+    })
 
-    return "".join(["{:02x}".format(c) for c in req_key])
-
+    if req.ok:
+        return "".join(["{:02x}".format(c) for c in req.content])
+    else:
+        console.log(f"[red]Error: {req.status_code}")
+        sys.exit(0)
+        
 def main_dw_film(id_film, title_name, domain):
 
     lower_title_name = str(title_name).lower()
