@@ -34,8 +34,7 @@ def main():
 
     else:
         console.print(f"[green]\nTv select: {db_title[index_select]['name']}")
-        tv_download_behaviour = int(msg.ask(f"\n[blue]Do you want to download specific episodes or an entire season? (0-> Specific | 1 -> Entire season): ", choices=['0', '1']))
-        download_tv(db_title[index_select]['id'], db_title[index_select]['name'].replace(" ", "+"), site_version, domain, tv_download_behaviour)
+        download_tv(db_title[index_select]['id'], db_title[index_select]['name'].replace(" ", "+"), site_version, domain)
 
     console.print("\n[red]Done")
 
