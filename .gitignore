@@ -1,0 +1,10 @@
+bin
+lib
+lib64
+*__pycache__
+pyvenv.cfg
+
+# Project specific
+videos/
+tmp/
+Src/Util/file_list.txt
