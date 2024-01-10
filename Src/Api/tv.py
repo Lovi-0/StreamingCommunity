@@ -23,7 +23,7 @@ def get_info_tv(id_film, title_name, site_version, domain):
         'User-Agent': get_headers()
     })
 
-    if req.ok():
+    if req.ok:
         return req.json()['props']['title']['seasons_count']
     else:
         console.log(f"[red]Error: {req.status_code}")
@@ -67,12 +67,13 @@ def parse_content(embed_content):
     json_win_param = json_win_param.replace(",}", "}").replace("'", '"')
     return json.loads(json_win_video), json.loads(json_win_param)
 
-def get_m3u8_url(json_win_video, json_win_param):
-    return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition=720p&token={json_win_param['token720p']}&expires={json_win_param['expires']}"
+def get_m3u8_url(json_win_video, json_win_param, render_quality):
+    token_render = f"token{render_quality}"
+    return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition={render_quality}&token={json_win_param[token_render]}&expires={json_win_param['expires']}"
 
-def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title):
+def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
     req = requests.get('https://vixcloud.co/storage/enc.key', headers={
-        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param["token720p"]}&title={tv_name.replace("-", "+")}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title.replace(" ", "+")}&nextEpisode=1',
+        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={tv_name.replace("-", "+")}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title.replace(" ", "+")}&nextEpisode=1',
     })
 
     if req.ok:
@@ -81,10 +82,9 @@ def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, e
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
 
-def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title):
-
+def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
     req = requests.get(f'https://vixcloud.co/playlist/{json_win_video["id"]}', params={'token': json_win_param['token'], 'expires': json_win_param["expires"] }, headers={
-        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param["token720p"]}&title={tv_name.replace("-", "+")}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title.replace(" ", "+")}&nextEpisode=1'
+        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={tv_name.replace("-", "+")}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title.replace(" ", "+")}&nextEpisode=1'
     })
 
     if req.ok:
@@ -96,7 +96,35 @@ def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
 
- 
+
+def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name):
+
+    console.print(f"[green]Download ep: [blue]{eps[index_ep_select]['n']} [green]=> [purple]{eps[index_ep_select]['name']}")
+    embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
+    json_win_video, json_win_param = parse_content(embed_content)
+
+    # Select first availability video quality
+    if json_win_param['token1080p'] != "": render_quality = "1080p"
+    elif json_win_param['token720p'] != "": render_quality = "720p"
+    elif json_win_param['token480p'] != "": render_quality = "480p"
+    else: render_quality = "360p"
+    token_render = f"token{render_quality}"
+    console.print(f"[blue]Quality select => [red]{render_quality}")
+
+    m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
+    m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
+
+    mp4_name = f"{lower_tv_name.replace('+', '_')}_S{str(season_select)}E{str(index_ep_select+1)}"
+    mp4_format = mp4_name + ".mp4"
+    mp4_path = os.path.join("videos", mp4_format)
+
+    m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
+
+    if m3u8_url_audio != None:
+        console.print("[red]=> Use m3u8 audio")
+
+    dw_m3u8(m3u8_url, m3u8_url_audio, m3u8_key, mp4_path)
+    
 def main_dw_tv(tv_id, tv_name, version, domain):
 
     token = get_token(tv_id, domain)
@@ -107,22 +135,16 @@ def main_dw_tv(tv_id, tv_name, version, domain):
     season_select = msg.ask("\n[green]Insert season number: ")
 
     eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
+
     for ep in eps:
         console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
-    index_ep_select = int(msg.ask("\n[green]Insert ep number: ")) - 1
-    
-    embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
-    json_win_video, json_win_param = parse_content(embed_content)
-    m3u8_url = get_m3u8_url(json_win_video, json_win_param)
-    m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'])
+    index_ep_select = str(msg.ask("\n[green]Insert ep [red]number [green]or [red](*) [green]to download all ep: "))
 
-    mp4_name = f"{lower_tv_name.replace('+', '_')}_{str(season_select)}_{str(index_ep_select+1)}"
-    mp4_format = mp4_name + ".mp4"
-    mp4_path = os.path.join("videos", mp4_format)
+    if index_ep_select != "*":
+        index_ep_select = int(index_ep_select) - 1
+        dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name)
 
-    m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'])
-
-    if m3u8_url_audio != None:
-        console.print("[red]=> Use m3u8 audio")
-
-    dw_m3u8(m3u8_url, m3u8_url_audio, m3u8_key, mp4_path)
+    else:
+        for ep in eps:
+            dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, season_select, lower_tv_name)
+            print("\n")

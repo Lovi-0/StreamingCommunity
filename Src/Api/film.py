@@ -36,12 +36,13 @@ def parse_content(embed_content):
     json_win_param = json_win_param.replace(",}", "}").replace("'", '"')
     return json.loads(json_win_video), json.loads(json_win_param)
 
-def get_m3u8_url(json_win_video, json_win_param):
-    return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition=720p&token={json_win_param['token720p']}&expires={json_win_param['expires']}"
+def get_m3u8_url(json_win_video, json_win_param, render_quality):
+    token_render = f"token{render_quality}"
+    return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition={render_quality}&token={json_win_param[token_render]}&expires={json_win_param['expires']}"
 
-def get_m3u8_key(json_win_video, json_win_param, title_name):
+def get_m3u8_key(json_win_video, json_win_param, title_name, token_render):
     req = requests.get('https://vixcloud.co/storage/enc.key', headers={
-        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param["token720p"]}&title={title_name.replace(" ", "+")}&referer=1&expires={json_win_param["expires"]}',
+        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={title_name.replace(" ", "+")}&referer=1&expires={json_win_param["expires"]}',
     })
 
     if req.ok:
@@ -57,8 +58,17 @@ def main_dw_film(id_film, title_name, domain):
 
     embed_content = get_iframe(id_film, domain)
     json_win_video, json_win_param = parse_content(embed_content)
-    m3u8_url = get_m3u8_url(json_win_video, json_win_param)
-    m3u8_key = get_m3u8_key(json_win_video, json_win_param, title_name)
+
+    # Select first availability video quaklity
+    if json_win_param['token1080p'] != "": render_quality = "1080p"
+    elif json_win_param['token720p'] != "": render_quality = "720p"
+    elif json_win_param['token480p'] != "": render_quality = "480p"
+    else: render_quality = "360p"
+    token_render = f"token{render_quality}"
+    console.print(f"[blue]Quality select => [red]{render_quality}")
+
+    m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
+    m3u8_key = get_m3u8_key(json_win_video, json_win_param, title_name, token_render)
     
     path_film = os.path.join("videos", lower_title_name.replace("+", " ").replace(",", "") + ".mp4")
     dw_m3u8(m3u8_url, None, m3u8_key, path_film)
