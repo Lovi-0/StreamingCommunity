@@ -59,7 +59,7 @@ def main_dw_film(id_film, title_name, domain):
     embed_content = get_iframe(id_film, domain)
     json_win_video, json_win_param = parse_content(embed_content)
 
-    # Select first availability video quaklity
+    # Select first availability video quality
     if json_win_param['token1080p'] != "": render_quality = "1080p"
     elif json_win_param['token720p'] != "": render_quality = "720p"
     elif json_win_param['token480p'] != "": render_quality = "480p"

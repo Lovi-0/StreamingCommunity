@@ -103,7 +103,7 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
     json_win_video, json_win_param = parse_content(embed_content)
 
-    # Select first availability video quality
+    # Select first availability video quality for single ep
     if json_win_param['token1080p'] != "": render_quality = "1080p"
     elif json_win_param['token720p'] != "": render_quality = "720p"
     elif json_win_param['token480p'] != "": render_quality = "480p"
