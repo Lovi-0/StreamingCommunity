@@ -18,7 +18,9 @@ site_version = Page.get_version(domain)
 def main():
 
     msg_start()
-    main_update()
+    try: main_update()
+    except: console.print("[blue]Req github [white]=> [red]Failed")
+
     console.print(f"[blue]Find system [white]=> [red]{sys.platform} \n")
     
     film_search = msg.ask("\n[blue]Insert word to search in all site: ").strip()

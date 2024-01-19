@@ -121,7 +121,7 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
 
     if m3u8_url_audio != None:
-        console.print("[red]=> Use m3u8 audio")
+        console.print("[blue]Use m3u8 audio => [red]True")
 
     dw_m3u8(m3u8_url, m3u8_url_audio, m3u8_key, mp4_path)
     

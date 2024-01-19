@@ -1,17 +1,23 @@
 # 5.01.24 -> 7.01.24
 
 # Import
-import requests, re,  os, ffmpeg, shutil, time, sys
+import requests, re,  os, ffmpeg, shutil, time, sys, warnings
 from tqdm.rich import tqdm
 from concurrent.futures import ThreadPoolExecutor
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-import moviepy.editor as mp
+
 
 # Class import
 from Src.Util.Helper.console import console
 from Src.Util.Helper.headers import get_headers
 from Src.Util.Helper.util import there_is_audio, merge_ts_files
+
+
+# Disable warning
+from tqdm import TqdmExperimentalWarning
+warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module="cryptography")
 
 
 # Variable
@@ -26,6 +32,9 @@ class M3U8Downloader:
         self.m3u8_audio = m3u8_audio
         self.key = key
         self.output_filename = output_filename
+        if output_filename == None:
+            console.log(f"Cant pass None as output file name") 
+            sys.exit(0)
         
         self.segments = []
         self.segments_audio = []
@@ -35,6 +44,8 @@ class M3U8Downloader:
         self.temp_folder = "tmp"
         os.makedirs(self.temp_folder, exist_ok=True)
         self.download_audio = False
+        self.max_retry = 3
+        self.failed_segments = []
 
     def decode_ext_x_key(self, key_str):
         key_str = key_str.replace('"', '').lstrip("#EXT-X-KEY:")
@@ -119,6 +130,21 @@ class M3U8Downloader:
 
         return decrypted_data
     
+    def make_req_single_ts_file(self, ts_url, retry=0):
+
+        if retry == self.max_retry:
+            console.log(f"[red]Failed download: {ts_url}")
+            self.segments.remove(ts_url)
+            return None
+
+        req = requests.get(ts_url, headers={'user-agent': get_headers()}, timeout=10, allow_redirects=True)
+
+        if req.status_code == 200:
+            return req.content
+        else:
+            retry += 1
+            return self.make_req_single_ts_file(ts_url, retry)
+
     def decrypt_and_save(self, index):
         
         video_ts_url = self.segments[index]
@@ -126,44 +152,57 @@ class M3U8Downloader:
 
         # Download video or audio ts file 
         if not os.path.exists(video_ts_filename):   # Only for media that not use audio
-            ts_response = requests.get(video_ts_url, headers={'user-agent': get_headers()}).content
+            ts_response = self.make_req_single_ts_file(video_ts_url)
 
-            if self.key and self.iv:
-                decrypted_data = self.decrypt_ts(ts_response)
-                with open(video_ts_filename, "wb") as ts_file:
-                    ts_file.write(decrypted_data)
+            if ts_response != None:
+                if self.key and self.iv:
+                    decrypted_data = self.decrypt_ts(ts_response)
+                    with open(video_ts_filename, "wb") as ts_file:
+                        ts_file.write(decrypted_data)
 
-            else:
-                with open(video_ts_filename, "wb") as ts_file:
-                    ts_file.write(ts_response)
+                else:
+                    with open(video_ts_filename, "wb") as ts_file:
+                        ts_file.write(ts_response)
 
-        # Donwload only audio ts file
+        # Donwload only audio ts file and merge with video
         if self.download_audio: 
             audio_ts_url = self.segments_audio[index]
             audio_ts_filename = os.path.join(self.temp_folder, f"{index}_a.ts")
             video_audio_ts_filename = os.path.join(self.temp_folder, f"{index}_v_a.ts")
 
             if not os.path.exists(video_audio_ts_filename):  # Only for media use audio
-                ts_response = requests.get(audio_ts_url, headers={'user-agent': get_headers()}).content
+                ts_response = self.make_req_single_ts_file(audio_ts_url)
 
-                if self.key and self.iv:
-                    decrypted_data = self.decrypt_ts(ts_response)
-                    with open(audio_ts_filename, "wb") as ts_file:
-                        ts_file.write(decrypted_data)
+                if ts_response != None:
+                    if self.key and self.iv:
+                        decrypted_data = self.decrypt_ts(ts_response)
 
-                else:
-                    with open(audio_ts_filename, "wb") as ts_file:
-                        ts_file.write(ts_response)
-                
-                # Join ts video and audio
-                merge_ts_files(video_ts_filename, audio_ts_filename, video_audio_ts_filename)
-                os.remove(video_ts_filename)
-                os.remove(audio_ts_filename)
-        
+                        with open(audio_ts_filename, "wb") as ts_file:
+                            ts_file.write(decrypted_data)
+
+                    else:
+                        with open(audio_ts_filename, "wb") as ts_file:
+                            ts_file.write(ts_response)
+                    
+                    # Join ts video and audio
+                    res_merge = merge_ts_files(video_ts_filename, audio_ts_filename, video_audio_ts_filename)
+
+                    if res_merge:
+                        os.remove(video_ts_filename)
+                        os.remove(audio_ts_filename)
+
+                    # If merge fail, so we have only video and audio, take only video
+                    else:
+                        self.failed_segments.append(index)
+                        os.remove(audio_ts_filename)
+                         
     def download_and_save_ts(self):
         with ThreadPoolExecutor(max_workers=30) as executor:
             list(tqdm(executor.map(self.decrypt_and_save, range(len(self.segments)) ), total=len(self.segments), unit="bytes", unit_scale=True, unit_divisor=1024, desc="[yellow]Download"))
-            
+        
+        if len(self.failed_segments) > 0:
+            console.log(f"[red]Segment ts: {self.failed_segments}, cant use audio")
+
     def join_ts_files(self):
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
