@@ -7,6 +7,17 @@ from Src.Util.Helper.console import console
 # General import
 import requests, sys
 
+def domain_version():
+
+    req = requests.get("https://raw.githubusercontent.com/Ghost6446/Streaming_comunity_data/main/data.json")
+
+    if req.ok and requests.get(f"https://streamingcommunity.{req.json()['domain']}/").ok:
+        return req.json()['domain'], req.json()['version']
+
+    else:
+        console.log(f"[red]Error: {req.status_code}, new domain available")
+        sys.exit(0)
+
 def search(title_search, domain):
 
     title_search = str(title_search).replace(" ", "+")

@@ -55,6 +55,17 @@ def get_iframe(tv_id, ep_id, domain, token):
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
 
+def select_quality(json_win_param):
+
+    if json_win_param['token1080p']:
+        return "1080p"
+    elif json_win_param['token720p']:
+        return "720p"
+    elif json_win_param['token480p']:
+        return "480p"
+    else:
+        return "360p"
+    
 def parse_content(embed_content):
 
     # Parse parameter from req embed content
@@ -65,7 +76,7 @@ def parse_content(embed_content):
     json_win_video = "{"+win_video.split("{")[1].split("}")[0]+"}"
     json_win_param = "{"+win_param.split("{")[1].split("}")[0].replace("\n", "").replace(" ", "") + "}"
     json_win_param = json_win_param.replace(",}", "}").replace("'", '"')
-    return json.loads(json_win_video), json.loads(json_win_param)
+    return json.loads(json_win_video), json.loads(json_win_param), select_quality(json.loads(json_win_param))
 
 def get_m3u8_url(json_win_video, json_win_param, render_quality):
     token_render = f"token{render_quality}"
@@ -97,17 +108,13 @@ def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep
         sys.exit(0)
 
 
+# [func \ main]
 def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name):
 
     console.print(f"[green]Download ep: [blue]{eps[index_ep_select]['n']} [green]=> [purple]{eps[index_ep_select]['name']}")
     embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
-    json_win_video, json_win_param = parse_content(embed_content)
+    json_win_video, json_win_param, render_quality = parse_content(embed_content)
 
-    # Select first availability video quality for single ep
-    if json_win_param['token1080p'] != "": render_quality = "1080p"
-    elif json_win_param['token720p'] != "": render_quality = "720p"
-    elif json_win_param['token480p'] != "": render_quality = "480p"
-    else: render_quality = "360p"
     token_render = f"token{render_quality}"
     console.print(f"[blue]Quality select => [red]{render_quality}")
 
@@ -123,6 +130,7 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     if m3u8_url_audio != None:
         console.print("[blue]Use m3u8 audio => [red]True")
 
+    print("\n")
     dw_m3u8(m3u8_url, m3u8_url_audio, m3u8_key, mp4_path)
     
 def main_dw_tv(tv_id, tv_name, version, domain):
@@ -131,20 +139,29 @@ def main_dw_tv(tv_id, tv_name, version, domain):
 
     lower_tv_name = str(tv_name).lower()
     tv_name = convert_utf8_name(lower_tv_name)   # ERROR LATIN 1 IN REQ WITH ò à ù ...
-    console.print(f"[blue]Season find: [red]{get_info_tv(tv_id, tv_name, version, domain)}")
-    season_select = msg.ask("\n[green]Insert season number: ")
 
-    eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
+    num_season_find = get_info_tv(tv_id, tv_name, version, domain)
+    console.print(f"[blue]Season find: [red]{num_season_find}")
+    season_select = int(msg.ask("\n[green]Insert season number: "))
 
-    for ep in eps:
-        console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
-    index_ep_select = str(msg.ask("\n[green]Insert ep [red]number [green]or [red](*) [green]to download all ep: "))
+    if 1 <= season_select <= num_season_find:
+        eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
 
-    if index_ep_select != "*":
-        index_ep_select = int(index_ep_select) - 1
-        dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name)
+        for ep in eps:
+            console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
+        index_ep_select = str(msg.ask("\n[green]Insert ep [red]number [green]or [red](*) [green]to download all ep: "))
+
+        if index_ep_select != "*":
+            if 1 <= int(index_ep_select) <= len(eps):
+                index_ep_select = int(index_ep_select) - 1
+                dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name)
+            else:
+                console.print("[red]Wrong index for ep")
+
+        else:
+            for ep in eps:
+                dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, season_select, lower_tv_name)
+                print("\n")
 
     else:
-        for ep in eps:
-            dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, season_select, lower_tv_name)
-            print("\n")
+        console.print("[red]Wrong index for season")

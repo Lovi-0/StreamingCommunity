@@ -32,9 +32,6 @@ class M3U8Downloader:
         self.m3u8_audio = m3u8_audio
         self.key = key
         self.output_filename = output_filename
-        if output_filename == None:
-            console.log(f"Cant pass None as output file name") 
-            sys.exit(0)
         
         self.segments = []
         self.segments_audio = []
@@ -118,9 +115,9 @@ class M3U8Downloader:
 
             if not there_is_audio(path_test_ts_file):
                 self.download_audio = True
-                console.log("[cyan]=> Make req to get video and audio file")
+                #console.log("[yellow]=> Make req to get video and audio file")
 
-            console.log("[cyan]=> Download audio")
+            #console.log("[yellow]=> Download audio")
             os.remove(path_test_ts_file)
 
     def decrypt_ts(self, encrypted_data):

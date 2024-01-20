@@ -9,13 +9,12 @@ from Src.Util.Helper.console import console, msg
 from Src.Upload.update import main_update
 
 # General import
-import sys, requests
+import sys
 
 
 # Variable
-json_data = requests.get("https://raw.githubusercontent.com/Ghost6446/Streaming_comunity_data/main/data.json").json()
-domain = json_data['domain']
-site_version = json_data['version']
+domain, site_version = Page.domain_version()
+
 
 def main():
 
@@ -32,13 +31,17 @@ def main():
         console.print(f"[yellow]{i} [white]-> [green]{db_title[i]['name']} [white]- [cyan]{db_title[i]['type']}")
     index_select = int(msg.ask("\n[blue]Index to download: "))
 
-    if db_title[index_select]['type'] == "movie":
-        console.print(f"[green]\nMovie select: {db_title[index_select]['name']}")
-        download_film(db_title[index_select]['id'], db_title[index_select]['name'].replace(" ", "+"), domain)
+    if 0 <= index_select <= len(db_title)-1:
+        if db_title[index_select]['type'] == "movie":
+            console.print(f"[green]\nMovie select: {db_title[index_select]['name']}")
+            download_film(db_title[index_select]['id'], db_title[index_select]['name'].replace(" ", "+"), domain)
+
+        else:
+            console.print(f"[green]\nTv select: {db_title[index_select]['name']}")
+            download_tv(db_title[index_select]['id'], db_title[index_select]['name'].replace(" ", "+"), site_version, domain)
 
     else:
-        console.print(f"[green]\nTv select: {db_title[index_select]['name']}")
-        download_tv(db_title[index_select]['id'], db_title[index_select]['name'].replace(" ", "+"), site_version, domain)
+        console.print("[red]Wrong index for selection")
 
     console.print("\n[red]Done")
 

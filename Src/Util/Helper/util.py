@@ -20,5 +20,4 @@ def merge_ts_files(video_path, audio_path, output_path):
         subprocess.run(ffmpeg_command, check=True, stderr=subprocess.PIPE)
         return True
     except subprocess.CalledProcessError as e:
-        #print(f"Failed convert: {video_path} \ {audio_path} to {output_path}")
         return False
