@@ -5,25 +5,7 @@ from Src.Util.Helper.headers import get_headers
 from Src.Util.Helper.console import console
 
 # General import
-import requests, json, sys
-from bs4 import BeautifulSoup
-
-def get_version(domain):
-
-    try:
-        r = requests.get(f'https://streamingcommunity.{domain}/', headers={
-            'Authority': f'streamingcommunity.{domain}',
-            'User-Agent': get_headers(),
-        })
-        soup = BeautifulSoup(r.text, "lxml")
-        info_data_page = soup.find("div", {'id': 'app'}).attrs["data-page"]
-
-        return json.loads(info_data_page)['version']
-    
-    except:
-        console.log("[red]UPDATE DOMANIN")
-        sys.exit(0)
-    
+import requests, sys
 
 def search(title_search, domain):
 

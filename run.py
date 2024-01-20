@@ -9,11 +9,13 @@ from Src.Util.Helper.console import console, msg
 from Src.Upload.update import main_update
 
 # General import
-import sys
+import sys, requests
+
 
 # Variable
-domain = "cz"
-site_version = Page.get_version(domain)
+json_data = requests.get("https://raw.githubusercontent.com/Ghost6446/Streaming_comunity_data/main/data.json").json()
+domain = json_data['domain']
+site_version = json_data['version']
 
 def main():
 
