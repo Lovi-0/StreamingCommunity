@@ -1,10 +1,7 @@
 # 4.01.2023
 
 # Import
-import ffmpeg, subprocess, re
-
-def convert_utf8_name(name):
-    return str(name).encode('utf-8').decode('latin-1')
+import ffmpeg, subprocess
 
 def there_is_audio(ts_file_path):
     probe = ffmpeg.probe(ts_file_path)

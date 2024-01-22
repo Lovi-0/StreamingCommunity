@@ -2,7 +2,6 @@
 
 # Class import
 from Src.Util.Helper.headers import get_headers
-from Src.Util.Helper.util import convert_utf8_name
 from Src.Util.Helper.console import console, msg
 from Src.Util.m3u8 import dw_m3u8
 
@@ -17,6 +16,7 @@ def get_token(id_tv, domain):
     return session.cookies['XSRF-TOKEN']
 
 def get_info_tv(id_film, title_name, site_version, domain):
+
     req = requests.get(f"https://streamingcommunity.{domain}/titles/{id_film}-{title_name}", headers={
         'X-Inertia': 'true', 
         'X-Inertia-Version': site_version,
@@ -109,7 +109,7 @@ def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep
 
 
 # [func \ main]
-def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name):
+def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select):
 
     console.print(f"[green]Download ep: [blue]{eps[index_ep_select]['n']} [green]=> [purple]{eps[index_ep_select]['name']}")
     embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
@@ -121,7 +121,7 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
     m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
 
-    mp4_name = f"{lower_tv_name.replace('+', '_')}_S{str(season_select)}E{str(index_ep_select+1)}"
+    mp4_name = f"{tv_name.replace('+', '_')}_S{str(season_select)}E{str(index_ep_select+1)}"
     mp4_format = mp4_name + ".mp4"
     mp4_path = os.path.join("videos", mp4_format)
 
@@ -137,9 +137,6 @@ def main_dw_tv(tv_id, tv_name, version, domain):
 
     token = get_token(tv_id, domain)
 
-    lower_tv_name = str(tv_name).lower()
-    tv_name = convert_utf8_name(lower_tv_name)   # ERROR LATIN 1 IN REQ WITH ò à ù ...
-
     num_season_find = get_info_tv(tv_id, tv_name, version, domain)
     console.print(f"[blue]Season find: [red]{num_season_find}")
     season_select = int(msg.ask("\n[green]Insert season number: "))
@@ -154,13 +151,13 @@ def main_dw_tv(tv_id, tv_name, version, domain):
         if index_ep_select != "*":
             if 1 <= int(index_ep_select) <= len(eps):
                 index_ep_select = int(index_ep_select) - 1
-                dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select, lower_tv_name)
+                dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select)
             else:
                 console.print("[red]Wrong index for ep")
 
         else:
             for ep in eps:
-                dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, season_select, lower_tv_name)
+                dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, season_select)
                 print("\n")
 
     else:

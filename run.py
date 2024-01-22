@@ -11,10 +11,8 @@ from Src.Upload.update import main_update
 # General import
 import sys
 
-
 # Variable
 domain, site_version = Page.domain_version()
-
 
 def main():
 
@@ -34,11 +32,11 @@ def main():
     if 0 <= index_select <= len(db_title)-1:
         if db_title[index_select]['type'] == "movie":
             console.print(f"[green]\nMovie select: {db_title[index_select]['name']}")
-            download_film(db_title[index_select]['id'], db_title[index_select]['name'].replace(" ", "+"), domain)
+            download_film(db_title[index_select]['id'], db_title[index_select]['slug'], domain)
 
         else:
             console.print(f"[green]\nTv select: {db_title[index_select]['name']}")
-            download_tv(db_title[index_select]['id'], db_title[index_select]['name'].replace(" ", "+"), site_version, domain)
+            download_tv(db_title[index_select]['id'], db_title[index_select]['slug'], site_version, domain)
 
     else:
         console.print("[red]Wrong index for selection")
