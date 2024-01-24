@@ -11,7 +11,7 @@ from cryptography.hazmat.backends import default_backend
 # Class import
 from Src.Util.Helper.console import console
 from Src.Util.Helper.headers import get_headers
-from Src.Util.Helper.util import there_is_audio, merge_ts_files
+from Src.Util.FFmpeg.util import there_is_audio, merge_ts_files
 
 
 # Disable warning

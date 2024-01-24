@@ -7,6 +7,8 @@ from Src.Api.tv import main_dw_tv as download_tv
 from Src.Util.Helper.message import msg_start
 from Src.Util.Helper.console import console, msg
 from Src.Upload.update import main_update
+from Src.Util.FFmpeg.installer import check_ffmpeg
+from Src.Util.Helper.os import remove_folder
 
 # General import
 import sys
@@ -16,11 +18,17 @@ domain, site_version = Page.domain_version()
 
 def main():
 
+    remove_folder("tmp")
     msg_start()
-    try: main_update()
-    except: console.print("[blue]Req github [white]=> [red]Failed")
 
-    console.print(f"[blue]Find system [white]=> [red]{sys.platform} \n")
+    try: 
+        main_update()
+    except: 
+        console.print("[blue]Req github [white]=> [red]Failed")
+
+    console.print(f"[blue]Find system [white]=> [red]{sys.platform}")
+    check_ffmpeg()
+    print("\n")
     
     film_search = msg.ask("\n[blue]Insert word to search in all site: ").strip()
     db_title = Page.search(film_search, domain)

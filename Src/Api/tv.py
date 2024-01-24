@@ -3,7 +3,7 @@
 # Class import
 from Src.Util.Helper.headers import get_headers
 from Src.Util.Helper.console import console, msg
-from Src.Util.m3u8 import dw_m3u8
+from Src.Util.FFmpeg.m3u8 import dw_m3u8
 
 # General import
 import requests, os, re, json, sys
@@ -84,7 +84,7 @@ def get_m3u8_url(json_win_video, json_win_param, render_quality):
 
 def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
     req = requests.get('https://vixcloud.co/storage/enc.key', headers={
-        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={tv_name.replace("-", "+")}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title.replace(" ", "+")}&nextEpisode=1',
+        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={tv_name}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title}&nextEpisode=1',
     })
 
     if req.ok:
@@ -95,7 +95,7 @@ def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, e
 
 def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
     req = requests.get(f'https://vixcloud.co/playlist/{json_win_video["id"]}', params={'token': json_win_param['token'], 'expires': json_win_param["expires"] }, headers={
-        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={tv_name.replace("-", "+")}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title.replace(" ", "+")}&nextEpisode=1'
+        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={tv_name}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title}&nextEpisode=1'
     })
 
     if req.ok:
