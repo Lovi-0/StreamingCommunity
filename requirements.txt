@@ -5,5 +5,5 @@ tqdm
 rich
 random-user-agent
 ffmpeg-python
-cryptography
+cryptography==3.4.8 # Problem with new version
 moviepy

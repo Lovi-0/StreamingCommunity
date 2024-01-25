@@ -13,38 +13,45 @@ from Src.Util.Helper.os import remove_folder
 # General import
 import sys
 
-# Variable
-domain, site_version = Page.domain_version()
 
-def main():
-
+def initialize():
+    
     remove_folder("tmp")
     msg_start()
 
-    try: 
+    try:
         main_update()
-    except: 
-        console.print("[blue]Req github [white]=> [red]Failed")
+    except Exception as e:
+        console.print(f"[blue]Req github [white]=> [red]Failed: {e}")
 
     console.print(f"[blue]Find system [white]=> [red]{sys.platform}")
     check_ffmpeg()
     print("\n")
-    
+
+def display_search_results(db_title):
+    for i, title in enumerate(db_title):
+        console.print(f"[yellow]{i} [white]-> [green]{title['name']} [white]- [cyan]{title['type']}")
+
+def main():
+
+    initialize()
+    domain, site_version = Page.domain_version()
+
     film_search = msg.ask("\n[blue]Insert word to search in all site: ").strip()
     db_title = Page.search(film_search, domain)
+    display_search_results(db_title)
 
-    for i in range(len(db_title)):
-        console.print(f"[yellow]{i} [white]-> [green]{db_title[i]['name']} [white]- [cyan]{db_title[i]['type']}")
     index_select = int(msg.ask("\n[blue]Index to download: "))
 
-    if 0 <= index_select <= len(db_title)-1:
-        if db_title[index_select]['type'] == "movie":
-            console.print(f"[green]\nMovie select: {db_title[index_select]['name']}")
-            download_film(db_title[index_select]['id'], db_title[index_select]['slug'], domain)
+    if 0 <= index_select <= len(db_title) - 1:
+        selected_title = db_title[index_select]
 
+        if selected_title['type'] == "movie":
+            console.print(f"[green]\nMovie select: {selected_title['name']}")
+            download_film(selected_title['id'], selected_title['slug'], domain)
         else:
-            console.print(f"[green]\nTv select: {db_title[index_select]['name']}")
-            download_tv(db_title[index_select]['id'], db_title[index_select]['slug'], site_version, domain)
+            console.print(f"[green]\nTv select: {selected_title['name']}")
+            download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
 
     else:
         console.print("[red]Wrong index for selection")

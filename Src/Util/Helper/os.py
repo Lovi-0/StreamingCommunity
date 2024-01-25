@@ -9,5 +9,3 @@ def remove_folder(folder_path):
             shutil.rmtree(folder_path)
         except OSError as e:
             print(f"Error removing folder '{folder_path}': {e}")
-    else:
-        print(f"Folder '{folder_path}' does not exist.")

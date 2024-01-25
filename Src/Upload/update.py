@@ -34,7 +34,7 @@ def main_update():
     if get_install_version() != last_version: 
         console.print(f"[red]=> A new version is available: [green]{json['zipball_url']}")
         console.print(f"[red]=> Versione: [yellow]{json['name']}")
-
+        
     else: 
         console.print(f"[red]=> Everything up to date")
         console.print(f"[red]=> Last version: [yellow]{json['name']}")
