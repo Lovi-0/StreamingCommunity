@@ -1,3 +1,5 @@
+
+# Folder
 bin
 lib
 lib64
@@ -7,3 +9,4 @@ pyvenv.cfg
 # Project specific
 videos/
 tmp/
+debug.log

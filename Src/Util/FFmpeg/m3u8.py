@@ -1,17 +1,18 @@
 # 5.01.24 -> 7.01.24
 
+
+# Class import
+from Src.Util.Helper.console import console, config_logger
+from Src.Util.Helper.headers import get_headers
+from Src.Util.FFmpeg.util import there_is_audio, merge_ts_files
+
+
 # Import
-import requests, re,  os, ffmpeg, shutil, time, sys, warnings
+import requests, re,  os, ffmpeg, time, sys, warnings, logging, shutil
 from tqdm.rich import tqdm
 from concurrent.futures import ThreadPoolExecutor
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-
-
-# Class import
-from Src.Util.Helper.console import console
-from Src.Util.Helper.headers import get_headers
-from Src.Util.FFmpeg.util import there_is_audio, merge_ts_files
 
 
 # Disable warning
@@ -22,6 +23,8 @@ warnings.filterwarnings("ignore", category=UserWarning, module="cryptography")
 
 # Variable
 os.makedirs("videos", exist_ok=True)
+DOWNLOAD_WORKERS = 30
+USE_MULTI_THREAD = True
 
 
 # [ main class ]
@@ -43,6 +46,11 @@ class M3U8Downloader:
         self.download_audio = False
         self.max_retry = 3
         self.failed_segments = []
+
+        # Debug
+        logging.debug(m3u8_url)
+        logging.debug(m3u8_audio)
+        logging.debug(self.key)
 
     def decode_ext_x_key(self, key_str):
         key_str = key_str.replace('"', '').lstrip("#EXT-X-KEY:")
@@ -79,7 +87,7 @@ class M3U8Downloader:
                 if self.m3u8_audio != None: 
                     self.segments_audio.append(m3u8_audio_line[i+1])
 
-        console.log(f"[cyan]Find: {len(self.segments)} ts file to download")
+        console.log(f"[cyan]Find: {len(self.segments)} ts video file to download")
 
         # Check video ts segment
         if len(self.segments) == 0:
@@ -108,6 +116,7 @@ class M3U8Downloader:
 
             # Check there is audio in first ts file
             path_test_ts_file = os.path.join(self.temp_folder, "ts_test.ts")
+
             if self.key and self.iv:
                 open(path_test_ts_file, "wb").write(self.decrypt_ts(requests.get(self.segments[0]).content))
             else:
@@ -115,9 +124,7 @@ class M3U8Downloader:
 
             if not there_is_audio(path_test_ts_file):
                 self.download_audio = True
-                #console.log("[yellow]=> Make req to get video and audio file")
 
-            #console.log("[yellow]=> Download audio")
             os.remove(path_test_ts_file)
 
     def decrypt_ts(self, encrypted_data):
@@ -132,9 +139,10 @@ class M3U8Downloader:
         if retry == self.max_retry:
             console.log(f"[red]Failed download: {ts_url}")
             self.segments.remove(ts_url)
+            logging.error(f"Failed: {ts_url}")
             return None
 
-        req = requests.get(ts_url, headers={'user-agent': get_headers()}, timeout=10, allow_redirects=True)
+        req = requests.get(ts_url, headers={'user-agent': get_headers()}, timeout=5, allow_redirects=True)
 
         if req.status_code == 200:
             return req.content
@@ -146,6 +154,7 @@ class M3U8Downloader:
         
         video_ts_url = self.segments[index]
         video_ts_filename = os.path.join(self.temp_folder, f"{index}_v.ts")
+        logging.debug(f"Download video ts file: {video_ts_url}")
 
         # Download video or audio ts file 
         if not os.path.exists(video_ts_filename):   # Only for media that not use audio
@@ -160,10 +169,15 @@ class M3U8Downloader:
                 else:
                     with open(video_ts_filename, "wb") as ts_file:
                         ts_file.write(ts_response)
+            
+            else:
+                logging.debug(f"Cant save video ts: {video_ts_url}")
 
         # Donwload only audio ts file and merge with video
         if self.download_audio: 
             audio_ts_url = self.segments_audio[index]
+            logging.debug(f"Download audio ts file: {audio_ts_url}")
+
             audio_ts_filename = os.path.join(self.temp_folder, f"{index}_a.ts")
             video_audio_ts_filename = os.path.join(self.temp_folder, f"{index}_v_a.ts")
 
@@ -192,13 +206,29 @@ class M3U8Downloader:
                     else:
                         self.failed_segments.append(index)
                         os.remove(audio_ts_filename)
+
+                else:
+                    logging.debug(f"Cant save audio ts: {audio_ts_url}")
                          
     def download_and_save_ts(self):
-        with ThreadPoolExecutor(max_workers=30) as executor:
-            list(tqdm(executor.map(self.decrypt_and_save, range(len(self.segments)) ), total=len(self.segments), unit="bytes", unit_scale=True, unit_divisor=1024, desc="[yellow]Download"))
-        
-        if len(self.failed_segments) > 0:
-            console.log(f"[red]Segment ts: {self.failed_segments}, cant use audio")
+
+        try:
+                
+            if USE_MULTI_THREAD:
+                with ThreadPoolExecutor(max_workers=DOWNLOAD_WORKERS) as executor:
+                    list(tqdm(executor.map(self.decrypt_and_save, range(len(self.segments)) ), total=len(self.segments), unit="bytes", unit_scale=True, unit_divisor=1024, desc="[yellow]Download"))
+            else:
+                for index in range(len(self.segments)):
+                    console.log(f"[yellow]Download: [red]{index}")
+                    self.decrypt_and_save(index)
+                
+
+            if len(self.failed_segments) > 0:
+                console.log(f"[red]Segment ts: {self.failed_segments}, cant use audio")
+
+        except KeyboardInterrupt:
+            console.log("[yellow]Interruption detected. Exiting program.")
+            sys.exit(0)
 
     def join_ts_files(self):
 
@@ -222,12 +252,12 @@ class M3U8Downloader:
             (
                 ffmpeg.input(file_list_path, format='concat', safe=0).output(self.output_filename, c='copy', loglevel='quiet').run()
             )
-            console.log(f"[cyan]Clean ...")
         except ffmpeg.Error as e:
             console.log(f"[red]Error saving MP4: {e.stdout}")
             sys.exit(0)
-        
-        time.sleep(2)
+            
+        time.sleep(1)
+        console.log(f"[cyan]Clean ...")
         os.remove(file_list_path)
         shutil.rmtree("tmp", ignore_errors=True)
 

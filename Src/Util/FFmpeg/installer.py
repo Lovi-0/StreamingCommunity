@@ -38,9 +38,9 @@ def check_ffmpeg():
     try:
         subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         console.print("[blue]FFmpeg [white]=> [red]Add to system path")
-    except subprocess.CalledProcessError:
-        console.print("[cyan]FFmpeg is not in the PATH. Downloading and adding to the PATH...[/cyan]")
+    except:
         try:
+            console.print("[cyan]FFmpeg is not in the PATH. Downloading and adding to the PATH...[/cyan]")
             download_ffmpeg()
             sys.exit(0) # Exit
         except:
