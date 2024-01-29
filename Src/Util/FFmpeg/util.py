@@ -15,7 +15,12 @@ def merge_ts_files(video_path, audio_path, output_path):
     input_audio = ffmpeg.input(audio_path)
     logging.debug(f"Merge video ts: {input_video}, with audio ts: {input_audio}, to: {output_path}")
 
-    ffmpeg_command = ffmpeg.output(input_video, input_audio, output_path, format='mpegts', acodec='copy', vcodec='copy', loglevel='quiet').compile()
+    ffmpeg_command = ffmpeg.output(input_video, input_audio, output_path, 
+        format='mpegts', 
+        acodec='copy', 
+        vcodec='copy', 
+        loglevel='quiet',
+        ).compile()
 
     try:
         subprocess.run(ffmpeg_command, check=True, stderr=subprocess.PIPE)

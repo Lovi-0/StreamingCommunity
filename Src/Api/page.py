@@ -5,14 +5,19 @@ from Src.Util.Helper.headers import get_headers
 from Src.Util.Helper.console import console
 
 # General import
-import requests, sys
+import requests, sys, json
+from bs4 import BeautifulSoup
 
 def domain_version():
 
     req_repo = requests.get("https://raw.githubusercontent.com/Ghost6446/Streaming_comunity_data/main/data.json", headers={'user-agent': get_headers()})
 
     if req_repo.ok:
-        return req_repo.json()['domain'], req_repo.json()['version']
+        site_req = requests.get(f"https://streamingcommunity.{req_repo.json()['domain']}/").text
+        soup = BeautifulSoup(site_req, "lxml")
+        version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
+
+        return version, req_repo.json()['version']
     
     else:
         console.log(f"[red]Error: {req_repo.status_code}")

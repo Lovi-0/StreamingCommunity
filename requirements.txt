@@ -6,4 +6,3 @@ rich
 random-user-agent
 ffmpeg-python
 cryptography==3.4.8 # Problem with new version
-moviepy

@@ -18,7 +18,13 @@ def get_iframe(id_title, domain):
     if req.ok:
         url_embed = BeautifulSoup(req.text, "lxml").find("iframe").get("src")
         req_embed = requests.get(url_embed, headers = {"User-agent": get_headers()}).text
-        return BeautifulSoup(req_embed, "lxml").find("body").find("script").text
+
+        try:
+            return BeautifulSoup(req_embed, "lxml").find("body").find("script").text
+        except:
+            console.log("[red]Cant play this video, (video not available)")
+            sys.exit(0)
+
     else:
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
