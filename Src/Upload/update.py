@@ -19,6 +19,7 @@ def get_install_version():
     return about['__version__']
 
 def main_update():
+    console.print("[green]Checking github version ...")
 
     json = requests.get(f"https://api.github.com/repos/{repo_user}/{repo_name}/releases").json()[0]
     stargazers_count = requests.get(f"https://api.github.com/repos/{repo_user}/{repo_name}").json()['stargazers_count']

@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 
 def domain_version():
 
+    console.print("[green]Get rules ...")
     req_repo = requests.get("https://raw.githubusercontent.com/Ghost6446/Streaming_comunity_data/main/data.json", headers={'user-agent': get_headers()})
 
     if req_repo.ok:
@@ -17,7 +18,7 @@ def domain_version():
         soup = BeautifulSoup(site_req, "lxml")
         version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
 
-        return version, req_repo.json()['version']
+        return req_repo.json()['domain'], version
     
     else:
         console.log(f"[red]Error: {req_repo.status_code}")

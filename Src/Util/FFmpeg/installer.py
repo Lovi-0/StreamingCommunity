@@ -35,6 +35,8 @@ def download_ffmpeg():
 
 def check_ffmpeg():
 
+    console.print("[green]Checking ffmpeg ...")
+
     try:
         subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         console.print("[blue]FFmpeg [white]=> [red]Add to system path")

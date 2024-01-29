@@ -41,20 +41,23 @@ def main():
     db_title = Page.search(film_search, domain)
     display_search_results(db_title)
 
-    index_select = int(msg.ask("\n[blue]Index to download: "))
+    if len(db_title) != 0:
+        index_select = int(msg.ask("\n[blue]Index to download: "))
 
-    if 0 <= index_select <= len(db_title) - 1:
-        selected_title = db_title[index_select]
+        if 0 <= index_select <= len(db_title) - 1:
+            selected_title = db_title[index_select]
 
-        if selected_title['type'] == "movie":
-            console.print(f"[green]\nMovie select: {selected_title['name']}")
-            download_film(selected_title['id'], selected_title['slug'], domain)
+            if selected_title['type'] == "movie":
+                console.print(f"[green]\nMovie select: {selected_title['name']}")
+                download_film(selected_title['id'], selected_title['slug'], domain)
+            else:
+                console.print(f"[green]\nTv select: {selected_title['name']}")
+                download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
+
         else:
-            console.print(f"[green]\nTv select: {selected_title['name']}")
-            download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
-
+            console.print("[red]Wrong index for selection")
     else:
-        console.print("[red]Wrong index for selection")
+        console.print("[red]Cant find a single element")
 
     console.print("\n[red]Done")
 
