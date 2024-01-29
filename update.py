@@ -95,7 +95,7 @@ def main_upload():
     repository_name = 'StreamingCommunity_api'
 
     # Remove all old file
-    keep_specific_items(".", "video", "upload.py")
+    keep_specific_items(".", "videos", "upload.py")
 
     download_and_extract_latest_commit(repository_owner, repository_name)
 
