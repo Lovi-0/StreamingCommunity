@@ -11,10 +11,10 @@ from bs4 import BeautifulSoup
 def domain_version():
 
     console.print("[green]Get rules ...")
-    req_repo = requests.get("https://raw.githubusercontent.com/Ghost6446/Streaming_comunity_data/main/data.json", headers={'user-agent': get_headers()})
+    req_repo = requests.get("https://raw.githubusercontent.com/Ghost6446/Streaming_comunity_data/main/data.json")
 
     if req_repo.ok:
-        site_req = requests.get(f"https://streamingcommunity.{req_repo.json()['domain']}/").text
+        site_req = requests.get(f"https://streamingcommunity.{req_repo.json()['domain']}/", headers={'user-agent': get_headers()}).text
         soup = BeautifulSoup(site_req, "lxml")
         version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
 
