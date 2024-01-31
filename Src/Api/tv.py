@@ -130,7 +130,6 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     if m3u8_url_audio != None:
         console.print("[blue]Use m3u8 audio => [red]True")
 
-    print("\n")
     dw_m3u8(m3u8_url, m3u8_url_audio, m3u8_key, mp4_path)
     
 def main_dw_tv(tv_id, tv_name, version, domain):

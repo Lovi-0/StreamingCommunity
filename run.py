@@ -1,4 +1,4 @@
-# 10.12.23
+# 10.12.23 -> 31.01.24
 
 # Class import
 import Src.Api.page as Page
@@ -24,7 +24,6 @@ def initialize():
     except Exception as e:
         console.print(f"[blue]Req github [white]=> [red]Failed: {e}")
 
-    console.print(f"[blue]Find system [white]=> [red]{sys.platform}")
     check_ffmpeg()
     print("\n")
 

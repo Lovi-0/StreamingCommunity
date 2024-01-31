@@ -103,5 +103,4 @@ def main_dw_film(id_film, title_name, domain):
     if m3u8_url_audio != None:
         console.print("[blue]Use m3u8 audio => [red]True")
     
-    print("\n")
     dw_m3u8(m3u8_url, m3u8_url_audio, m3u8_key, mp4_path)
