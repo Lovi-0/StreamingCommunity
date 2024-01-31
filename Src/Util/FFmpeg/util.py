@@ -1,31 +1,28 @@
-# 4.01.2023
+# 31.01.24
 
 # Class import
-from Src.Util.Helper.console import console, config_logger
+from Src.Util.Helper.console import console
 
-# General import
-import ffmpeg, subprocess, logging
+# Import
+import ffmpeg 
 
-def there_is_audio(ts_file_path):
-    probe = ffmpeg.probe(ts_file_path)
-    return any(stream['codec_type'] == 'audio' for stream in probe['streams'])
-
-def merge_ts_files(video_path, audio_path, output_path):
-    input_video = ffmpeg.input(video_path)
-    input_audio = ffmpeg.input(audio_path)
-    logging.debug(f"Merge video ts: {input_video}, with audio ts: {input_audio}, to: {output_path}")
-
-    ffmpeg_command = ffmpeg.output(input_video, input_audio, output_path, 
-        format='mpegts', 
-        acodec='copy', 
-        vcodec='copy', 
-        loglevel='quiet',
-        ).compile()
-
+def get_video_duration(file_path):
     try:
-        subprocess.run(ffmpeg_command, check=True, stderr=subprocess.PIPE)
-        logging.debug(f"Saving: {output_path}")
-        return True
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Can save: {output_path}")
-        return False
+        probe = ffmpeg.probe(file_path)
+        duration = float(probe['format']['duration'])
+        return duration
+    except ffmpeg.Error as e:
+        print(f"Error: {e.stderr}")
+        return None
+
+def format_duration(seconds):
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return int(hours), int(minutes), int(seconds)
+
+def print_duration_table(file_path):
+    video_duration = get_video_duration(file_path)
+
+    if video_duration is not None:
+        hours, minutes, seconds = format_duration(video_duration)
+        console.log(f"[cyan]Info [green]'{file_path}': [purple]{int(hours)}[red]h [purple]{int(minutes)}[red]m [purple]{int(seconds)}[red]s")

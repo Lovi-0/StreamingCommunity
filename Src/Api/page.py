@@ -17,6 +17,7 @@ def domain_version():
         site_req = requests.get(f"https://streamingcommunity.{req_repo.json()['domain']}/", headers={'user-agent': get_headers()}).text
         soup = BeautifulSoup(site_req, "lxml")
         version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
+        console.print(f"[blue]Rules [white]=> [red].{req_repo.json()['domain']}")
 
         return req_repo.json()['domain'], version
     
