@@ -10,10 +10,7 @@ from Src.Upload.update import main_update
 from Src.Util.FFmpeg.installer import check_ffmpeg
 from Src.Util.Helper.os import remove_folder
 
-# General import
-import sys
-
-
+# [ main ]
 def initialize():
     
     remove_folder("tmp")

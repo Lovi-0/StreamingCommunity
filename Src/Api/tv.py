@@ -145,15 +145,26 @@ def main_dw_tv(tv_id, tv_name, version, domain):
 
         for ep in eps:
             console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
-        index_ep_select = str(msg.ask("\n[green]Insert ep [red]number [green]or [red](*) [green]to download all ep: "))
+        index_ep_select = str(msg.ask("\n[green]Insert ep [red]number [yellow]or [red](*) [green]to download all ep [yellow]or [red][1-2] [green]for a range of ep: "))
 
-        if index_ep_select != "*":
+        # Download range []
+        if "[" in index_ep_select:
+            start, end = map(int, index_ep_select[1:-1].split('-'))
+            result = list(range(start, end + 1))
+
+            for n_randge_ep in result:
+                index_ep_select = int(n_randge_ep)
+                dw_single_ep(tv_id, eps, n_randge_ep-1, domain, token, tv_name, season_select)
+
+        # Download single ep
+        elif index_ep_select != "*":
             if 1 <= int(index_ep_select) <= len(eps):
                 index_ep_select = int(index_ep_select) - 1
                 dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select)
             else:
                 console.print("[red]Wrong index for ep")
 
+        # Download all
         else:
             for ep in eps:
                 dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, season_select)

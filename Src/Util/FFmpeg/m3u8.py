@@ -178,24 +178,13 @@ class M3U8Downloader:
             self.join_audio()
 
     def join_audio(self):
-        command = [
-            "ffmpeg",
-            "-y",
-            "-i", self.video_path,
-            "-i", self.audio_path,
-            "-c", "copy",
-            "-map", "0:v:0",
-            "-map", "1:a:0",
-            "-shortest",
-            "-strict", "experimental",
-            self.video_path + ".mp4"
-        ]
-
+        output_path = self.video_path + ".mp4"
         try:
-            out = subprocess.run(command, check=True, stderr=subprocess.PIPE)
-            console.print("\n[green]Merge completed successfully.")
-        except subprocess.CalledProcessError as e:
-            print("ffmpeg output:", e.stderr.decode())
+            video_stream = ffmpeg.input(self.video_path)
+            audio_stream = ffmpeg.input(self.audio_path)
+            ffmpeg.output(video_stream, audio_stream, output_path, vcodec="copy", acodec="copy").global_args('-map', '0:v:0', '-map', '1:a:0', '-shortest', '-strict', 'experimental').run(overwrite_output=True)
+        except ffmpeg.Error as e:
+            print("ffmpeg error:", e.stderr)
 
         os.remove(self.video_path)
         os.remove(self.audio_path)
