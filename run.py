@@ -1,5 +1,21 @@
 # 10.12.23 -> 31.01.24
 
+# From https://raccoon.ninja/en/dev/using-python-to-check-if-the-application-is-running-as-an-administrator/
+import ctypes, os, sys
+
+def isAdmin():
+    try:
+        is_admin = (os.getuid() == 0)
+    except AttributeError:
+        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+    return is_admin
+
+if not isAdmin():
+    print("You need to be admin to proceed!")
+    sys.exit()  
+else:
+    print("You're admin! Let's start!")
+
 # Class import
 import Src.Api.page as Page
 from Src.Api.film import main_dw_film as download_film
