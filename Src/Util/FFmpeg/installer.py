@@ -6,6 +6,14 @@ from Src.Util.Helper.console import console
 # Import
 import subprocess, os, requests, zipfile, sys
 
+import ctypes, os, sys
+
+def isAdmin():
+    try:
+        is_admin = (os.getuid() == 0)
+    except AttributeError:
+        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+    return is_admin
 
 def download_ffmpeg():
 
@@ -43,6 +51,11 @@ def check_ffmpeg():
     except:
         try:
             console.print("[cyan]FFmpeg is not in the PATH. Downloading and adding to the PATH...[/cyan]")
+
+            if not isAdmin():
+                console.log("[red]You need to be admin to proceed!")
+                sys.exit(0)  
+
             download_ffmpeg()
             sys.exit(0) # Exit
         except:
