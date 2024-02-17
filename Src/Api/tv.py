@@ -85,6 +85,10 @@ def parse_content(embed_content):
     json_win_param = json_win_param.replace(",}", "}").replace("'", '"')
     return json.loads(json_win_video), json.loads(json_win_param), select_quality(json.loads(json_win_param))
 
+def get_playlist(json_win_video, json_win_param, render_quality):
+    token_render = f"token{render_quality}"
+    return f"https://vixcloud.co/playlist/{json_win_video['id']}?token={json_win_param['token']}&{token_render}={json_win_param[token_render]}&expires={json_win_param['expires']}"
+
 def get_m3u8_url(json_win_video, json_win_param, render_quality):
     token_render = f"token{render_quality}"
     return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition={render_quality}&token={json_win_param[token_render]}&expires={json_win_param['expires']}"
@@ -126,6 +130,7 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     token_render = f"token{render_quality}"
     console.print(f"[blue]Quality select => [red]{render_quality}")
 
+    m3u8_playlist = get_playlist(json_win_video, json_win_param, render_quality)
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
     m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
 
@@ -138,7 +143,7 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     if m3u8_url_audio != None:
         console.print("[blue]Use m3u8 audio => [red]True")
 
-    download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_url, key=m3u8_key, output_filename=mp4_path)
+    download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_playlist, key=m3u8_key, output_filename=mp4_path)
     
 def main_dw_tv(tv_id, tv_name, version, domain):
 
