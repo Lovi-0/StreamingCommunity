@@ -13,7 +13,7 @@ This repository provide a simple script designed to facilitate the downloading o
 ## Requirement
 Make sure you have the following prerequisites installed on your system:
 
-* python [3.9](https://www.python.org/downloads/release/python-390/)
+* python > [3.11](https://www.python.org/downloads/)
 * ffmpeg [win](https://www.gyan.dev/ffmpeg/builds/)
 
 ## Installation library
@@ -35,8 +35,13 @@ python update.py
 ```
 
 ## Features
-- Download single film.
-- Download specific episodes or entire series with command (*).
+- Download Single Film: Easily download individual movies with a simple command.
+
+- Download Specific Episodes or Entire Series: Seamlessly retrieve specific episodes or entire series using intuitive commands. Specify a range of episodes with square brackets notation, e.g., [5-7], or download all episodes with an asterisk (*).
+
+- Download Subtitles: Automatically fetch subtitles if available for downloaded content. (Note: To disable this feature, navigate to ".\Src\Lib\FFmpeg\my_m3u8" and change 'DOWNLOAD_SUB' to False in the configuration file.)
+
+- Sync Audio and Video: Ensure perfect synchronization between audio and video during the download process for an enhanced viewing experience.
 
 ## Tutorial
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
