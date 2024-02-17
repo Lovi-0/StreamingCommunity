@@ -1,13 +1,14 @@
 # 3.12.23 -> 10.12.23
 
 # Class import
-from Src.Util.Helper.headers import get_headers
-from Src.Util.Helper.console import console, msg
-from Src.Util.FFmpeg.m3u8 import dw_m3u8
+from Src.Util.headers import get_headers
+from Src.Util.console import console, msg
+from Src.Lib.FFmpeg.my_m3u8 import download_m3u8
 
 # General import
 import requests, os, re, json, sys
 from bs4 import BeautifulSoup
+
 
 # [func]
 def get_token(id_tv, domain):
@@ -46,6 +47,12 @@ def get_iframe(tv_id, ep_id, domain, token):
         'referer': f'https://streamingcommunity.{domain}/watch/{tv_id}?e={ep_id}',
         'user-agent': get_headers()
     })
+
+    # Change user agent m3u8
+    custom_headers_req = {
+        'referer': f'https://streamingcommunity.{domain}/watch/{tv_id}?e={ep_id}',
+        'user-agent': get_headers()
+    }
 
     if req.ok:
         url_embed = BeautifulSoup(req.text, "lxml").find("iframe").get("src")
@@ -93,7 +100,7 @@ def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, e
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
 
-def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
+def get_m3u8_playlist(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
     req = requests.get(f'https://vixcloud.co/playlist/{json_win_video["id"]}', params={'token': json_win_param['token'], 'expires': json_win_param["expires"] }, headers={
         'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={tv_name}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title}&nextEpisode=1'
     })
@@ -102,7 +109,7 @@ def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep
         m3u8_cont = req.text.split()
         for row in m3u8_cont:
             if "audio" in str(row) and "ita" in str(row):
-                return row.split(",")[-1].split('"')[-2]
+                return row.split(",")[-1].split('"')[-2], req.text
     else:
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
@@ -125,12 +132,12 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     mp4_format = mp4_name + ".mp4"
     mp4_path = os.path.join("videos", mp4_format)
 
-    m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
+    m3u8_url_audio, m3u8_playlist_content = get_m3u8_playlist(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
 
     if m3u8_url_audio != None:
         console.print("[blue]Use m3u8 audio => [red]True")
 
-    dw_m3u8(m3u8_url, m3u8_url_audio, m3u8_key, mp4_path)
+    download_m3u8(m3u8_playlist=m3u8_playlist_content, m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_url, key=m3u8_key, output_filename=mp4_path)
     
 def main_dw_tv(tv_id, tv_name, version, domain):
 

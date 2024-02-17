@@ -1,7 +1,7 @@
 # 3.12.23
 
 # Import
-from Src.Util.Helper.console import console
+from Src.Util.console import console
 
 def msg_start():
 

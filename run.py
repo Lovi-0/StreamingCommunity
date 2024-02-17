@@ -1,18 +1,25 @@
 # 10.12.23 -> 31.01.24
 
-# Class import
+# Class
 import Src.Api.page as Page
 from Src.Api.film import main_dw_film as download_film
 from Src.Api.tv import main_dw_tv as download_tv
-from Src.Util.Helper.message import msg_start
-from Src.Util.Helper.console import console, msg
+from Src.Util.message import msg_start
+from Src.Util.console import console, msg
+from Src.Util.os import remove_folder
 from Src.Upload.update import main_update
-from Src.Util.FFmpeg.installer import check_ffmpeg
-from Src.Util.Helper.os import remove_folder
+from Src.Lib.FFmpeg.installer import check_ffmpeg
+
+# Import
+import sys
 
 # [ main ]
 def initialize():
-    
+
+    if sys.version_info < (3, 11):
+        console.log("Install python version > 3.11")
+        sys.exit(0)
+
     remove_folder("tmp")
     msg_start()
 
@@ -24,10 +31,6 @@ def initialize():
     check_ffmpeg()
     print("\n")
 
-def display_search_results(db_title):
-    for i, title in enumerate(db_title):
-        console.print(f"[yellow]{i} [white]-> [green]{title['name']} [white]- [cyan]{title['type']}")
-
 def main():
 
     initialize()
@@ -35,7 +38,7 @@ def main():
 
     film_search = msg.ask("\n[blue]Insert word to search in all site: ").strip()
     db_title = Page.search(film_search, domain)
-    display_search_results(db_title)
+    Page.display_search_results(db_title)
 
     if len(db_title) != 0:
         index_select = int(msg.ask("\n[blue]Index to download: "))
@@ -55,7 +58,7 @@ def main():
     else:
         console.print("[red]Cant find a single element")
 
-    console.print("\n[red]Done")
+    console.print("[red]Done")
 
 if __name__ == '__main__':
     main()

@@ -1,7 +1,7 @@
 # 13.09.2023
 
 # Class import
-from Src.Util.Helper.console import console
+from Src.Util.console import console
 
 # General import
 import os, requests, time
