@@ -448,9 +448,9 @@ def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_s
 
         # Parse directly m3u8 content pass if present
         if "#EXTM3U" not in m3u8_subtitle: 
-            parse_class_m3u8.parse_data(df_make_req(m3u8_subtitle))
+            parse_class_m3u8_sub.parse_data(df_make_req(m3u8_subtitle))
         else: 
-            parse_class_m3u8.parse_data(m3u8_subtitle)
+            parse_class_m3u8_sub.parse_data(m3u8_subtitle)
 
         # Download subtitle if present ( normaly in m3u8 playlist )
         if DONWLOAD_SUB: 
