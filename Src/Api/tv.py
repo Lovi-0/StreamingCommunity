@@ -195,7 +195,7 @@ def main_dw_tv(tv_id, tv_name, version, domain):
         else:
             console.print("[red]Wrong index for season")
     else:
-        for n_season in range(1, num_season_find):
+        for n_season in range(1, num_season_find+1):
             eps = get_info_season(tv_id, tv_name, domain, version, token, n_season)
             for ep in eps:
                 dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, n_season)
