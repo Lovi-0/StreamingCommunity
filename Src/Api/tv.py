@@ -152,7 +152,15 @@ def main_dw_tv(tv_id, tv_name, version, domain):
     num_season_find = get_info_tv(tv_id, tv_name, version, domain)
     console.print(f"[blue]Season find: [red]{num_season_find}")
     season_select = str(msg.ask("\n[green]Insert season number: "))
-    if season_select != "*":
+    if "[" in season_select:
+        start, end = map(int, season_select[1:-1].split('-'))
+        result = list(range(start, end + 1))
+        for n_season in result:
+            eps = get_info_season(tv_id, tv_name, domain, version, token, n_season)
+            for ep in eps:
+                dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, n_season)
+                print("\n")
+    elif season_select != "*":
         season_select = int(season_select)
         if 1 <= season_select <= num_season_find:
             eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
@@ -186,14 +194,6 @@ def main_dw_tv(tv_id, tv_name, version, domain):
 
         else:
             console.print("[red]Wrong index for season")
-    elif "[" in season_select:
-        start, end = map(int, season_select[1:-1].split('-'))
-        result = list(range(start, end + 1))
-        for n_season in result:
-            eps = get_info_season(tv_id, tv_name, domain, version, token, n_season)
-            for ep in eps:
-                dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, n_season)
-                print("\n")
     else:
         for n_season in range(1, num_season_find):
             eps = get_info_season(tv_id, tv_name, domain, version, token, n_season)
