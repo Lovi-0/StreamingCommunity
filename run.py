@@ -41,20 +41,49 @@ def main():
     Page.display_search_results(db_title)
 
     if len(db_title) != 0:
-        index_select = int(msg.ask("\n[blue]Index to download: "))
+        console.print(f"\n[blue]Total result: {len(db_title)}")
+        console.print(
+            "\n[green]Insert index [red]number [yellow]or [red][1-2] [green]for a range of movies/tv [yellow]or [red][1,3,5] [green]to select discontinued movie/tv"
+        )
+        console.print("\n[red]In case of tv show you will have to choose season and episode to download")
+        index_select = str(msg.ask("\n[blue]Index to download: "))
+        if index_select.isnumeric():
+            index_select = int(index_select)
+            if 0 <= index_select <= len(db_title) - 1:
+                selected_title = db_title[index_select]
 
-        if 0 <= index_select <= len(db_title) - 1:
-            selected_title = db_title[index_select]
-
-            if selected_title['type'] == "movie":
-                console.print(f"[green]\nMovie select: {selected_title['name']}")
-                download_film(selected_title['id'], selected_title['slug'], domain)
+                if selected_title['type'] == "movie":
+                    console.print(f"[green]\nMovie select: {selected_title['name']}")
+                    download_film(selected_title['id'], selected_title['slug'], domain)
+                else:
+                    console.print(f"[green]\nTv select: {selected_title['name']}")
+                    download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
             else:
-                console.print(f"[green]\nTv select: {selected_title['name']}")
-                download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
-
-        else:
-            console.print("[red]Wrong index for selection")
+                console.print("[red]Wrong index for selection")
+        elif "[" in index_select:
+            if "-" in index_select:
+                start, end = map(int, index_select[1:-1].split('-'))
+                result = list(range(start, end + 1))
+                for n in result:
+                    selected_title = db_title[n]
+                    if selected_title['type'] == "movie":
+                        console.print(f"[green]\nMovie select: {selected_title['name']}")
+                        download_film(selected_title['id'], selected_title['slug'], domain)
+                    else:
+                        console.print(f"[green]\nTv select: {selected_title['name']}")
+                        download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
+            elif "," in index_select:
+                result = list(map(int, index_select[1:-1].split(',')))
+                for n in result:
+                    selected_title = db_title[n]
+                    if selected_title['type'] == "movie":
+                        console.print(f"[green]\nMovie select: {selected_title['name']}")
+                        download_film(selected_title['id'], selected_title['slug'], domain)
+                    else:
+                        console.print(f"[green]\nTv select: {selected_title['name']}")
+                        download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
+            else:
+                console.print("[red]Wrong index for selection")
     else:
         console.print("[red]Cant find a single element")
 

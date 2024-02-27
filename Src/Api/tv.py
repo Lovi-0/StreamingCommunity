@@ -134,9 +134,9 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
     m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
 
-    mp4_name = f"{tv_name.replace('+', '_')}_S{str(season_select)}E{str(index_ep_select+1)}"
-    mp4_format = mp4_name + ".mp4"
-    mp4_path = os.path.join("videos", mp4_format)
+    mp4_name = f"{tv_name.replace('+', '_')}_S{str(season_select).zfill(2)}E{str(index_ep_select+1).zfill(2)}"
+    mp4_format = f"{mp4_name}.mp4"
+    mp4_path = os.path.join("videos",tv_name, mp4_format)
 
     m3u8_url_audio = get_m3u8_playlist(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
 
@@ -150,38 +150,55 @@ def main_dw_tv(tv_id, tv_name, version, domain):
     token = get_token(tv_id, domain)
 
     num_season_find = get_info_tv(tv_id, tv_name, version, domain)
-    console.print(f"[blue]Season find: [red]{num_season_find}")
-    season_select = int(msg.ask("\n[green]Insert season number: "))
-
-    if 1 <= season_select <= num_season_find:
-        eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
-
-        for ep in eps:
-            console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
-        index_ep_select = str(msg.ask("\n[green]Insert ep [red]number [yellow]or [red](*) [green]to download all ep [yellow]or [red][1-2] [green]for a range of ep: "))
-
-        # Download range []
-        if "[" in index_ep_select:
-            start, end = map(int, index_ep_select[1:-1].split('-'))
-            result = list(range(start, end + 1))
-
-            for n_randge_ep in result:
-                index_ep_select = int(n_randge_ep)
-                dw_single_ep(tv_id, eps, n_randge_ep-1, domain, token, tv_name, season_select)
-
-        # Download single ep
-        elif index_ep_select != "*":
-            if 1 <= int(index_ep_select) <= len(eps):
-                index_ep_select = int(index_ep_select) - 1
-                dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select)
-            else:
-                console.print("[red]Wrong index for ep")
-
-        # Download all
-        else:
+    console.print("\n[green]Insert season [red]number [yellow]or [red](*) [green]to download all seasons [yellow]or [red][1-2] [green]for a range of season")
+    console.print(f"\n[blue]Season find: [red]{num_season_find}")
+    season_select = str(msg.ask("\n[green]Insert season number: "))
+    if "[" in season_select:
+        start, end = map(int, season_select[1:-1].split('-'))
+        result = list(range(start, end + 1))
+        for n_season in result:
+            eps = get_info_season(tv_id, tv_name, domain, version, token, n_season)
             for ep in eps:
-                dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, season_select)
+                dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, n_season)
                 print("\n")
+    elif season_select != "*":
+        season_select = int(season_select)
+        if 1 <= season_select <= num_season_find:
+            eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
 
+            for ep in eps:
+                console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
+            index_ep_select = str(msg.ask("\n[green]Insert ep [red]number [yellow]or [red](*) [green]to download all ep [yellow]or [red][1-2] [green]for a range of ep: "))
+
+            # Download range []
+            if "[" in index_ep_select:
+                start, end = map(int, index_ep_select[1:-1].split('-'))
+                result = list(range(start, end + 1))
+
+                for n_randge_ep in result:
+                    index_ep_select = int(n_randge_ep)
+                    dw_single_ep(tv_id, eps, n_randge_ep-1, domain, token, tv_name, season_select)
+
+            # Download single ep
+            elif index_ep_select != "*":
+                if 1 <= int(index_ep_select) <= len(eps):
+                    index_ep_select = int(index_ep_select) - 1
+                    dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select)
+                else:
+                    console.print("[red]Wrong index for ep")
+
+            # Download all
+            else:
+                for ep in eps:
+                    dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, season_select)
+                    print("\n")
+
+        else:
+            console.print("[red]Wrong index for season")
     else:
-        console.print("[red]Wrong index for season")
+        for n_season in range(1, num_season_find+1):
+            eps = get_info_season(tv_id, tv_name, domain, version, token, n_season)
+            for ep in eps:
+                dw_single_ep(tv_id, eps, int(ep['n'])-1, domain, token, tv_name, n_season)
+                print("\n")
+            
