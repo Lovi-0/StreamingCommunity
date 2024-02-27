@@ -134,9 +134,9 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
     m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
 
-    mp4_name = f"{tv_name.replace('+', '_')}_S{str(season_select)}E{str(index_ep_select+1)}"
+    mp4_name = f"{tv_name.replace('+', '_')}_S{str(season_select).zfill(2)}E{str(index_ep_select+1).zfill(2)}"
     mp4_format = f"{mp4_name}.mp4"
-    mp4_path = os.path.join("videos", mp4_format)
+    mp4_path = os.path.join("videos",tv_name, mp4_format)
 
     m3u8_url_audio = get_m3u8_playlist(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
 
