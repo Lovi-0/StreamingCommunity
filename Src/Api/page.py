@@ -9,30 +9,34 @@ import requests, sys, json
 from bs4 import BeautifulSoup
 
 def domain_version():
-
     console.print("[green]Get rules ...")
-    req_repo = requests.get("https://raw.githubusercontent.com/Ghost6446/Streaming_comunity_data/main/data.json", headers={'user-agent': get_headers()}, timeout=5)
-    domain = req_repo.json()['domain']
+    req_repo = None
+    try:
+        with open('data.json', 'r') as file:
+            req_repo = json.load(file)
+    except FileNotFoundError:
+        req_repo = {"domain": ""}
+    domain = req_repo['domain']
 
-    if req_repo.ok:
+    while True:
+        if not domain:
+            domain = input("Insert domain (streamingcommunity.?): ")
+            req_repo['domain'] = domain
+            with open('data.json', 'w') as file:
+                json.dump(req_repo, file)
         console.print(f"[blue]Test domain [white]=> [red]{domain}")
         site_url = f"https://streamingcommunity.{domain}"
-        site_request = requests.get(site_url, headers={'user-agent': get_headers()})
-
         try:
+            site_request = requests.get(site_url, headers={'user-agent': get_headers()})
             soup = BeautifulSoup(site_request.text, "lxml")
             version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
             console.print(f"[blue]Rules [white]=> [red].{domain}")
-
             return domain, version
         
-        except:
-            console.log("[red]Cant get version, problem with domain")
-            sys.exit(0)
-    
-    else:
-        console.log(f"[red]Error: {req_repo.status_code}")
-        sys.exit(0)
+        except Exception as e:
+            console.log("[red]Cant get version, problem with domain. Try again.")
+            domain = None
+            continue
 
 def search(title_search, domain):
 
