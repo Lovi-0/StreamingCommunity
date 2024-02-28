@@ -193,7 +193,12 @@ class M3U8_Segments:
         """Single req to a ts file to get content"""
 
         url_number = self.segments.index(ts_url)
-        is_valid = ( str(url_number) in failed_segments )
+
+        is_valid = True
+        for failde_seg in failed_segments:
+            if str(failde_seg) in ts_url:
+                is_valid = False
+                break
 
         if is_valid:
 
@@ -307,8 +312,8 @@ class M3U8_Segments:
 
         with open(file_list_path, 'w') as f:
             for ts_file in ts_files:
-                absolute_path = os.path.abspath(os.path.join(self.temp_folder, ts_file), current_dir)
-                f.write(f"file '{absolute_path}'\n")
+                relative_path = os.path.relpath(os.path.join(self.temp_folder, ts_file), current_dir)
+                f.write(f"file '{relative_path}'\n")
 
         console.log("[cyan]Start join all file")
         try:
