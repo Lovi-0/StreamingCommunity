@@ -11,7 +11,9 @@ from bs4 import BeautifulSoup
 
 # [func]
 def get_iframe(id_title, domain):
-    req = requests.get(url = f"https://streamingcommunity.{domain}/iframe/{id_title}", headers = {
+    domain_req = requests.get("https://api.telegra.ph/getPage/Link-Aggiornato-StreamingCommunity-01-17")
+    domain = domain_req.json()['result']['description']
+    req = requests.get(url = f"{domain}/iframe/{id_title}", headers = {
         "User-agent": get_headers()
     })
 
