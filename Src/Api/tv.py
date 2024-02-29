@@ -13,12 +13,14 @@ from bs4 import BeautifulSoup
 # [func]
 def get_token(id_tv, domain):
     session = requests.Session()
-    session.get(f"https://streamingcommunity.{domain}/watch/{id_tv}")
+    domain_req = requests.get("https://api.telegra.ph/getPage/Link-Aggiornato-StreamingCommunity-01-17")
+    domain = domain_req.json()['result']['description']
+    session.get(f"{domain}/watch/{id_tv}")
     return session.cookies['XSRF-TOKEN']
 
 def get_info_tv(id_film, title_name, site_version, domain):
 
-    req = requests.get(f"https://streamingcommunity.{domain}/titles/{id_film}-{title_name}", headers={
+    req = requests.get(f"{domain}/titles/{id_film}-{title_name}", headers={
         'X-Inertia': 'true', 
         'X-Inertia-Version': site_version,
         'User-Agent': get_headers()
@@ -31,7 +33,7 @@ def get_info_tv(id_film, title_name, site_version, domain):
         sys.exit(0)
 
 def get_info_season(tv_id, tv_name, domain, version, token, n_stagione):
-    req = requests.get(f'https://streamingcommunity.{domain}/titles/{tv_id}-{tv_name}/stagione-{n_stagione}', headers={
+    req = requests.get(f'{domain}/titles/{tv_id}-{tv_name}/stagione-{n_stagione}', headers={
         'authority': f'streamingcommunity.{domain}', 'referer': f'https://streamingcommunity.broker/titles/{tv_id}-{tv_name}',
         'user-agent': get_headers(), 'x-inertia': 'true', 'x-inertia-version': version, 'x-xsrf-token': token,
     })
@@ -43,14 +45,14 @@ def get_info_season(tv_id, tv_name, domain, version, token, n_stagione):
         sys.exit(0)
 
 def get_iframe(tv_id, ep_id, domain, token):
-    req = requests.get(f'https://streamingcommunity.{domain}/iframe/{tv_id}', params={'episode_id': ep_id, 'next_episode': '1'}, cookies={'XSRF-TOKEN': token}, headers={
+    req = requests.get(f'{domain}/iframe/{tv_id}', params={'episode_id': ep_id, 'next_episode': '1'}, cookies={'XSRF-TOKEN': token}, headers={
         'referer': f'https://streamingcommunity.{domain}/watch/{tv_id}?e={ep_id}',
         'user-agent': get_headers()
     })
 
     # Change user agent m3u8
     custom_headers_req = {
-        'referer': f'https://streamingcommunity.{domain}/watch/{tv_id}?e={ep_id}',
+        'referer': f'{domain}/watch/{tv_id}?e={ep_id}',
         'user-agent': get_headers()
     }
 
