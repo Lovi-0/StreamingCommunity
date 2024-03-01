@@ -21,5 +21,3 @@ def remove_file(file_path):
             print(f"Error removing file '{file_path}': {e}")
     else:
         print(f"File '{file_path}' does not exist.")
-
-    time.sleep(1)
