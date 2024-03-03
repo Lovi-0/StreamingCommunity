@@ -185,6 +185,11 @@ class M3U8_Segments:
         if response.ok:
             self.parse_data(response.text)
             #console.log(f"[red]Ts segments find [white]=> [yellow]{len(self.segments)}")
+
+            if len(self.segments) == 0:
+                console.log("[red]Cant find segments to donwload, retry")
+                sys.exit(0)
+
         else:
             console.log(f"[red]Wrong m3u8, error: {response.status_code}")
             sys.exit(0)
@@ -310,6 +315,11 @@ class M3U8_Segments:
             return int(''.join(filter(str.isdigit, file_name)))
         ts_files.sort(key=extract_number)
 
+        if len(ts_files) == 0:
+            console.log("[red]Cant find segments to join, retry")
+            sys.exit(0)
+
+
         with open(file_list_path, 'w') as f:
             for ts_file in ts_files:
                 relative_path = os.path.relpath(os.path.join(self.temp_folder, ts_file), current_dir)
@@ -317,7 +327,7 @@ class M3U8_Segments:
 
         console.log("[cyan]Start join all file")
         try:
-            ffmpeg.input(file_list_path, format='concat', safe=0).output(output_filename, c='copy', loglevel='quiet').run()
+            ffmpeg.input(file_list_path, format='concat', safe=0).output(output_filename, c='copy', loglevel='error').run()
         except ffmpeg.Error as e:
             console.log(f"[red]Error saving MP4: {e.stdout}")
             sys.exit(0)
@@ -368,7 +378,7 @@ class M3U8_Downloader:
                     self.video_path + ".mp4",
                     vcodec="copy",
                     acodec="copy",
-                    loglevel='quiet'
+                    loglevel='error'
                 )
                 .global_args('-map', '0:v:0', '-map', '1:a:0', '-shortest', '-strict', 'experimental')
                 .run()
