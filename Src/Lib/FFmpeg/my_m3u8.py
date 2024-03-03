@@ -459,7 +459,9 @@ def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_s
 
     # Download m3u8 index, with segments
     # os.makedirs("videos", exist_ok=True)
-    path = os.path.expanduser(output_filename)
-    os.makedirs("\\".join(path[:-1]), exist_ok=True)
-    if log: console.log(f"[green]Dowload m3u8 from index [white]=> [purple]{m3u8_index}")
+    path = os.path.dirname(output_filename)
+    os.makedirs(path, exist_ok=True)
+
+    if log: 
+        console.log(f"[green]Dowload m3u8 from index [white]=> [purple]{m3u8_index}")
     M3U8_Downloader(m3u8_index, m3u8_audio, key=key, output_filename=output_filename).start()
