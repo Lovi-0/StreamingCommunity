@@ -6,7 +6,7 @@ from Src.Util.console import console, msg
 from Src.Lib.FFmpeg.my_m3u8 import download_m3u8
 
 # General import
-import requests, os, re, json, sys
+import requests, os, re, json, sys, binascii
 from bs4 import BeautifulSoup
 
 
@@ -94,14 +94,14 @@ def get_m3u8_url(json_win_video, json_win_param, render_quality):
     return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition={render_quality}&token={json_win_param[token_render]}&expires={json_win_param['expires']}"
 
 def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
-    req = requests.get('https://vixcloud.co/storage/enc.key', headers={
+    response = requests.get('https://vixcloud.co/storage/enc.key', headers={
         'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={tv_name}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title}&nextEpisode=1',
     })
 
-    if req.ok:
-        return "".join(["{:02x}".format(c) for c in req.content])
+    if response.ok:
+        return binascii.hexlify(response.content).decode('utf-8')
     else:
-        console.log(f"[red]Error: {req.status_code}")
+        console.log(f"[red]Error: {response.status_code}")
         sys.exit(0)
 
 def get_m3u8_playlist(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
