@@ -36,17 +36,17 @@ def main():
     initialize()
     domain, site_version = Page.domain_version()
 
-    film_search = msg.ask("\n[blue]Search for any movie or tv series title: ").strip()
+    film_search = msg.ask("\n[blue]Search for any movie or tv series title").strip()
     db_title = Page.search(film_search, domain)
     Page.display_search_results(db_title)
 
     if len(db_title) != 0:
         console.print(f"\n[blue]Total result: {len(db_title)}")
         console.print(
-            "\n[green]Insert INDEX [red]number [yellow]or [red][1-2] [green]for a range of movies/tv series [yellow]or [red][1,3,5] [green]to select discontinued movie/tv series"
+            "\n[green]Insert [yellow]INDEX [red]number [green]or [red][1-2] [green]for a range of movies/tv series or [red][1,3,5] [green]to select discontinued movie/tv series"
         )
         console.print("\n[red]In case of a TV Series you will choose seasons and episodes to download")
-        index_select = str(msg.ask("\n[blue]Select INDEX to download: "))
+        index_select = str(msg.ask("\n[blue]Select [yellow]INDEX [blue]to download"))
         if index_select.isnumeric():
             index_select = int(index_select)
             if 0 <= index_select <= len(db_title) - 1:

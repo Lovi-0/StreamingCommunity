@@ -3,6 +3,7 @@
 # Class import
 from Src.Util.headers import get_headers
 from Src.Util.console import console, msg
+from Src.Util.config import config
 from Src.Lib.FFmpeg.my_m3u8 import download_m3u8
 
 # General import
@@ -138,7 +139,8 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
 
     mp4_name = f"{tv_name.replace('+', '_')}_S{str(season_select).zfill(2)}E{str(index_ep_select+1).zfill(2)}"
     mp4_format = f"{mp4_name}.mp4"
-    mp4_path = os.path.join("videos",tv_name, mp4_format)
+    season = mp4_name.rsplit("E", 1)[0]
+    mp4_path = os.path.join(config['root_path'], config['series_folder_name'], tv_name, season, mp4_format)
 
     m3u8_url_audio = get_m3u8_playlist(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, enccoded_name, token_render)
 
@@ -170,7 +172,7 @@ def main_dw_tv(tv_id, tv_name, version, domain):
 
             for ep in eps:
                 console.print(f"[green]Episode: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
-            index_ep_select = str(msg.ask("\n[green]Insert episode [red]number [yellow]or [red](*) [green]to download all episodes [yellow]or [red][1-2] [green]for a range of episodes: "))
+            index_ep_select = str(msg.ask("\n[green]Insert episode [yellow]number [green]or [red](*) [green]to download all episodes or [red][1-2] [green]for a range of episodes: "))
 
             # Download range []
             if "[" in index_ep_select:
@@ -187,7 +189,7 @@ def main_dw_tv(tv_id, tv_name, version, domain):
                     index_ep_select = int(index_ep_select) - 1
                     dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select)
                 else:
-                    console.print("[red]Wrong INDEX for the selected Episode")
+                    console.print("[red]Wrong [yellow]INDEX [red]for the selected Episode")
 
             # Download all
             else:
@@ -196,7 +198,7 @@ def main_dw_tv(tv_id, tv_name, version, domain):
                     print("\n")
 
         else:
-            console.print("[red]Wrong INDEX for the selected Season")
+            console.print("[red]Wrong [yellow]INDEX for the selected Season")
     else:
         for n_season in range(1, num_season_find+1):
             eps = get_info_season(tv_id, tv_name, domain, version, token, n_season)

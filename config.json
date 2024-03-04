@@ -1,0 +1,7 @@
+{
+  "root_path": "videos",
+  "film_folder_name": "Film",
+  "series_folder_name": "Serie",
+  "download_subtitles": false,
+  "convert_to_mp4": true
+}
