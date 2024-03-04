@@ -154,7 +154,7 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
         console.print("[blue]Using m3u8 audio => [red]True")
     # Movie_Name.[Language_Code].vtt
     # Movie_Name.[Language_Code].forced.vtt
-    subtitle_path = os.path.join(config['root_path'], config['series_folder_name'], mp4_name, season)
+    subtitle_path = os.path.join(config['root_path'], config['series_folder_name'], tv_name, season)
     download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_playlist, key=m3u8_key, output_filename=mp4_path, subtitle_folder=subtitle_path, content_name=mp4_name)
 
 

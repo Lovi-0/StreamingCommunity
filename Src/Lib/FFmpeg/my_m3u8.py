@@ -421,7 +421,7 @@ def download_subtitle(url, name_language):
     open(os.path.join(path, name_language + ".vtt"), "wb").write(requests.get(url).content)
 
 
-def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_subtitle=None, key=None,  output_filename=os.path.join("videos", "output.mp4"), log=False, subtitle_folder="subtitles", content_name=""):
+def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_subtitle=None, key=None, output_filename=os.path.join("videos", "output.mp4"), log=False, subtitle_folder="subtitles", content_name=""):
 
     # Get byte of key
     key = bytes.fromhex(key) if key is not None else key
