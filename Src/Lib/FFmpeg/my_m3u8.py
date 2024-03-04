@@ -20,9 +20,10 @@ warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="cryptography")
 
 # Variable
-MAX_WORKER = 20
+MAX_WORKER = config['max_worker']
 DOWNLOAD_SUB = config['download_subtitles']
-DOWNLOAD_DEFAULT_LANGUAGE = config['download_default_language']
+DOWNLOAD_DEFAULT_LANGUAGE = config['download_default_language'] # True to select default language, False to select language
+SELECTED_LANGUAGE = config['selected_language'] # Ex. "English" if DOWNLOAD_DEFAULT_LANGUAGE is False
 failed_segments = []
 
 
@@ -118,8 +119,10 @@ class M3U8_Parser:
         if self.subtitle_playlist:
             for sub_info in self.subtitle_playlist:
                 name_language = sub_info.get("language")
+                full_name = sub_info.get("name")
 
-                if name_language in ["auto", "ita"]:
+
+                if name_language in ["auto"]:
                     continue
 
                 os.makedirs(path, exist_ok=True)
@@ -368,6 +371,13 @@ class M3U8_Downloader:
             print("\n")
 
             self.join_audio()
+            os.renames(f"{self.video_path}.mp4", self.video_path)
+        # else:
+        #     self.join_subtitle(self.video_path)
+        if os.path.exists(f"{self.video_path}.mp4"):
+            os.renames(f"{self.video_path}.mp4", self.video_path)
+        
+
 
     def join_audio(self):
         """Join audio with video and sync it"""
@@ -391,11 +401,76 @@ class M3U8_Downloader:
 
             console.print("[green]Merge completed successfully.")
 
+            # self.join_subtitle(self.video_path + ".mp4")
+
         except ffmpeg.Error as e:
             print("ffmpeg error:", e)
         
         os.remove(self.video_path)
         os.remove(self.audio_path)
+    #todo: join_subtitle
+    # def join_subtitle(self, video_path):
+    #     """Join subtitles with video and sync them"""
+
+    #     subtitle_dir = "videos/subtitle/"
+    #     italian_subtitle_file = "Italian.vtt"
+    #     portuguese_subtitle_file = "Portuguese.vtt"
+
+    #     italian_subtitle_path = os.path.join(subtitle_dir, italian_subtitle_file)
+    #     portuguese_subtitle_path = os.path.join(subtitle_dir, portuguese_subtitle_file)
+
+    #     if not os.path.exists(italian_subtitle_path):
+    #         console.log(f"[red]Subtitle file '{italian_subtitle_file}' not found in '{subtitle_dir}'")
+    #         return
+
+    #     if not os.path.exists(portuguese_subtitle_path):
+    #         console.log(f"[red]Subtitle file '{portuguese_subtitle_file}' not found in '{subtitle_dir}'")
+    #         return
+
+    #     try:
+    #         video_stream = ffmpeg.input(video_path)
+    #         italian_subtitle_stream = ffmpeg.input(italian_subtitle_path)
+    #         portuguese_subtitle_stream = ffmpeg.input(portuguese_subtitle_path)
+
+    #         process = (
+    #             ffmpeg.output(
+    #                 video_stream,
+    #                 italian_subtitle_stream,
+    #                 portuguese_subtitle_stream,
+    #                 f"{os.path.splitext(video_path)[0]}_subtitled.mp4",
+    #                 vcodec="copy",
+    #                 acodec="copy",
+    #                 scodec="mov_text",
+    #                 loglevel='quiet',
+    #             )
+    #             .global_args(
+    #                 '-map',
+    #                 '0:v:0',
+    #                 '-map',
+    #                 '1:s:0',
+    #                 '-metadata:s:s:0',
+    #                 'language=ita',
+    #                 '-map',
+    #                 '2:s:0',
+    #                 '-metadata:s:s:1',
+    #                 'language=por',
+    #                 '-shortest',
+    #                 '-strict',
+    #                 'experimental',
+    #             )
+    #             .run()
+    #         )
+
+
+    #         console.log("[green]Subtitles merged successfully.")
+
+    #     except ffmpeg.Error as e:
+    #         print("ffmpeg error:", e)
+
+    #     os.remove(video_path)  # Optionally remove original video if desired
+    #     os.remove(italian_subtitle_path)
+    #     os.remove(portuguese_subtitle_path)
+
 
 
 # [ main function ]
@@ -422,41 +497,54 @@ def download_subtitle(url, name_language):
 
 
 def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_subtitle=None, key=None, output_filename=os.path.join("videos", "output.mp4"), log=False, subtitle_folder="subtitles", content_name=""):
-
+    m3u8_audio_url=None
     # Get byte of key
     key = bytes.fromhex(key) if key is not None else key
 
-    if m3u8_playlist is not None:
-        console.log(f"[green]Downloading m3u8 from playlist")
+    # if m3u8_playlist is not None:
+    #     console.log(f"[green]Downloading m3u8 from playlist")
 
-        # Parse m3u8 playlist
-        parse_class_m3u8 = M3U8_Parser()
+    #     # Parse m3u8 playlist
+    #     parse_class_m3u8 = M3U8_Parser()
 
-        # Parse directly m3u8 content pass if present
-        if "#EXTM3U" not in m3u8_playlist: 
-            parse_class_m3u8.parse_data(df_make_req(m3u8_playlist))
-        else: 
-            parse_class_m3u8.parse_data(m3u8_playlist)
+    #     # Parse directly m3u8 content pass if present
+    #     if "#EXTM3U" not in m3u8_playlist: 
+    #         parse_class_m3u8.parse_data(df_make_req(m3u8_playlist))
+    #     else: 
+    #         parse_class_m3u8.parse_data(m3u8_playlist)
 
-        # Get italian language if present as default
+    #     # Get italian language if present as default
+    #     if DOWNLOAD_DEFAULT_LANGUAGE:
+    #         m3u8_audio = parse_class_m3u8.get_track_audio("English")
+    #         console.log(f"[green]Select language => [purple]{m3u8_audio}")
+
+
+    #     # Get best quality
+    #     if m3u8_index == None:
+    #         m3u8_index = parse_class_m3u8.get_best_quality()
+    #         if "https" in m3u8_index:
+    #             if log: console.log(f"[green]Select m3u8 index => [purple]{m3u8_index}")
+    #         else:
+    #             console.log("[red]Cant find a valid m3u8 index")
+    #             sys.exit(0)
+
+
+    #     # Download subtitle if present ( normaly in m3u8 playlist )
+    #     if DONWLOAD_SUB: 
+    #         parse_class_m3u8.download_subtitle()
+
+    if m3u8_audio is not None:
+        m3u8_audio_obj = None
         if DOWNLOAD_DEFAULT_LANGUAGE:
-            m3u8_audio = parse_class_m3u8.get_track_audio("Italian")
-            console.log(f"[green]Selected language => [purple]{m3u8_audio}")
-
-        # Get best quality
-        if m3u8_index is None:
-            m3u8_index = parse_class_m3u8.get_best_quality()
-            if "https" in m3u8_index:
-                if log: console.log(f"[green]Selected m3u8 index => [purple]{m3u8_index}")
-            else:
-                console.log("[red]Couldn't find a valid m3u8 index")
-                sys.exit(0)
-
-        # Download subtitle if present ( normally in m3u8 playlist )
-        if DOWNLOAD_SUB:
-            parse_class_m3u8.download_subtitle(subtitle_path=subtitle_folder, content_name=content_name)
-
-    if m3u8_subtitle is not None:
+            m3u8_audio_obj = next((audioobj for audioobj in m3u8_audio if audioobj.get("default", False)), None) or m3u8_audio[0]
+        elif SELECTED_LANGUAGE:
+            m3u8_audio_obj = next((audioobj for audioobj in m3u8_audio if audioobj["lang"] == SELECTED_LANGUAGE), None)
+        if m3u8_audio_obj is None:
+            console.log("[red]Cant find a valid m3u8 audio")
+            sys.exit(0)
+        m3u8_audio_url = m3u8_audio_obj["url"]
+        console.log(f"[green]Select language => [purple]{m3u8_audio_obj['lang']}")
+    if m3u8_subtitle != None:
 
         parse_class_m3u8_sub = M3U8_Parser()
 
@@ -477,4 +565,4 @@ def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_s
 
     if log: 
         console.log(f"[green]Download m3u8 from index [white]=> [purple]{m3u8_index}")
-    M3U8_Downloader(m3u8_index, m3u8_audio, key=key, output_filename=output_filename).start()
+    M3U8_Downloader(m3u8_index, m3u8_audio_url, key=key, output_filename=output_filename).start()

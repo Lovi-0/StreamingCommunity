@@ -81,9 +81,22 @@ def get_m3u8_audio(json_win_video, json_win_param, title_name, token_render):
 
     if req.ok:
         m3u8_cont = req.text.split()
+        m3u8_cont_arr = []
         for row in m3u8_cont:
-            if "audio" in str(row) and "ita" in str(row):
-                return row.split(",")[-1].split('"')[-2]
+            if "audio" in str(row):
+                lang=None
+                default=False
+                for field in row.split(","):
+                    if "NAME" in field:
+                        lang = field.split('"')[-2]
+                    if "DEFAULT" in field:
+                        default_str = field.split('=')[1]
+                        default = default_str.strip() == "YES"
+                audioobj={"url": row.split(",")[-1].split('"')[-2], "lang": lang, "default": default}
+                if audioobj['lang'] is None:
+                    continue
+                m3u8_cont_arr.append(audioobj)
+        return m3u8_cont_arr or None
     else:
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
