@@ -10,6 +10,7 @@ from Src.Lib.FFmpeg.my_m3u8 import download_m3u8
 import requests, os, re, json, sys, binascii
 from bs4 import BeautifulSoup
 
+
 # [func]
 def get_iframe(id_title, domain):
     req = requests.get(url = f"https://streamingcommunity.{domain}/iframe/{id_title}", headers = {
@@ -29,7 +30,8 @@ def get_iframe(id_title, domain):
     else:
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
-    
+
+
 def select_quality(json_win_param):
 
     if json_win_param['token1080p']:
@@ -40,6 +42,7 @@ def select_quality(json_win_param):
         return "480p"
     else:
         return "360p"
+
 
 def parse_content(embed_content):
 
@@ -53,9 +56,11 @@ def parse_content(embed_content):
     json_win_param = json_win_param.replace(",}", "}").replace("'", '"')
     return json.loads(json_win_video), json.loads(json_win_param), select_quality(json.loads(json_win_param))
 
+
 def get_m3u8_url(json_win_video, json_win_param, render_quality):
     token_render = f"token{render_quality}"
     return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition={render_quality}&token={json_win_param[token_render]}&expires={json_win_param['expires']}"
+
 
 def get_m3u8_key(json_win_video, json_win_param, title_name, token_render):
     response = requests.get('https://vixcloud.co/storage/enc.key', headers={
@@ -67,6 +72,7 @@ def get_m3u8_key(json_win_video, json_win_param, title_name, token_render):
     else:
         console.log(f"[red]Error: {response.status_code}")
         sys.exit(0)
+
 
 def get_m3u8_audio(json_win_video, json_win_param, title_name, token_render):
     req = requests.get(f'https://vixcloud.co/playlist/{json_win_video["id"]}', params={'token': json_win_param['token'], 'expires': json_win_param["expires"] }, headers={
@@ -101,7 +107,7 @@ def main_dw_film(id_film, title_name, domain):
 
     m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, title_name, token_render)
 
-    if m3u8_url_audio != None:
+    if m3u8_url_audio is not None:
         console.print("[blue]Using m3u8 audio => [red]True")
-        
-    download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_url, key=m3u8_key, output_filename=mp4_path)
+    subtitle_path = os.path.join(config['root_path'], config['series_folder_name'], mp4_name)
+    download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_url, key=m3u8_key, output_filename=mp4_path, subtitle_folder=subtitle_path, content_name=mp4_name)
