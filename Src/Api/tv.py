@@ -154,9 +154,9 @@ def main_dw_tv(tv_id, tv_name, version, domain):
     token = get_token(tv_id, domain)
 
     num_season_find = get_info_tv(tv_id, tv_name, version, domain)
-    console.print("\n[green]Insert season [red]number [yellow]or [red](*) [green]to download all seasons [yellow]or [red][1-2] [green]for a range of seasons")
+    console.print("\n[green]Insert season [red]number[green], or [red](*) [green]to download all seasons, or [red][1-2] [green]for a range of seasons")
     console.print(f"\n[blue]Season(s) found: [red]{num_season_find}")
-    season_select = str(msg.ask("\n[green]Insert season(s) number: "))
+    season_select = str(msg.ask("\n[green]Insert which season(s) number you'd like to download"))
     if "[" in season_select:
         start, end = map(int, season_select[1:-1].split('-'))
         result = list(range(start, end + 1))
@@ -172,7 +172,7 @@ def main_dw_tv(tv_id, tv_name, version, domain):
 
             for ep in eps:
                 console.print(f"[green]Episode: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
-            index_ep_select = str(msg.ask("\n[green]Insert episode [yellow]number [green]or [red](*) [green]to download all episodes or [red][1-2] [green]for a range of episodes: "))
+            index_ep_select = str(msg.ask("\n[green]Insert episode [blue]number[green], or [red](*) [green]to download all episodes, or [red][1-2] [green]for a range of episodes"))
 
             # Download range []
             if "[" in index_ep_select:
