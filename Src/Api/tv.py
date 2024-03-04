@@ -104,17 +104,29 @@ def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, e
         console.log(f"[red]Error: {response.status_code}")
         sys.exit(0)
 
-def get_m3u8_playlist(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
+def get_m3u8_audio(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
     req = requests.get(f'https://vixcloud.co/playlist/{json_win_video["id"]}', params={'token': json_win_param['token'], 'expires': json_win_param["expires"] }, headers={
         'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={tv_name}&referer=1&expires={json_win_param["expires"]}&description=S{n_stagione}%3AE{n_ep}+{ep_title}&nextEpisode=1'
     })
 
     if req.ok:
         m3u8_cont = req.text.split()
-
+        m3u8_cont_arr = []
         for row in m3u8_cont:
-            if "audio" in str(row) and "ita" in str(row):
-                return row.split(",")[-1].split('"')[-2]
+            if "audio" in str(row):
+                lang=None
+                default=False
+                for field in row.split(","):
+                    if "NAME" in field:
+                        lang = field.split('"')[-2]
+                    if "DEFAULT" in field:
+                        default_str = field.split('=')[1]
+                        default = default_str.strip() == "YES"
+                audioobj={"url": row.split(",")[-1].split('"')[-2], "lang": lang, "default": default}
+                if audioobj['lang'] is None:
+                    continue
+                m3u8_cont_arr.append(audioobj)
+        return m3u8_cont_arr or None
     else:
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
@@ -140,7 +152,7 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     mp4_format = f"{mp4_name}.mp4"
     mp4_path = os.path.join("videos",tv_name, mp4_format)
 
-    m3u8_url_audio = get_m3u8_playlist(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, enccoded_name, token_render)
+    m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, enccoded_name, token_render)
 
     if m3u8_url_audio != None:
         console.print("[blue]Use m3u8 audio => [red]True")
