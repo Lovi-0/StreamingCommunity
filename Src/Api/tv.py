@@ -125,12 +125,12 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
 
     enccoded_name = urllib.parse.quote(eps[index_ep_select]['name'])
 
-    console.print(f"[green]Download ep: [blue]{eps[index_ep_select]['n']} [green]=> [purple]{eps[index_ep_select]['name']}")
+    console.print(f"[green]Downloading episode: [blue]{eps[index_ep_select]['n']} [green]=> [purple]{eps[index_ep_select]['name']}")
     embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
     json_win_video, json_win_param, render_quality = parse_content(embed_content)
 
     token_render = f"token{render_quality}"
-    console.print(f"[blue]Quality select => [red]{render_quality}")
+    console.print(f"[blue]Selected quality => [red]{render_quality}")
 
     m3u8_playlist = get_playlist(json_win_video, json_win_param, render_quality)
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
@@ -143,7 +143,7 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     m3u8_url_audio = get_m3u8_playlist(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, enccoded_name, token_render)
 
     if m3u8_url_audio != None:
-        console.print("[blue]Use m3u8 audio => [red]True")
+        console.print("[blue]Using m3u8 audio => [red]True")
 
     download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_playlist, key=m3u8_key, output_filename=mp4_path)
     
@@ -152,9 +152,9 @@ def main_dw_tv(tv_id, tv_name, version, domain):
     token = get_token(tv_id, domain)
 
     num_season_find = get_info_tv(tv_id, tv_name, version, domain)
-    console.print("\n[green]Insert season [red]number [yellow]or [red](*) [green]to download all seasons [yellow]or [red][1-2] [green]for a range of season")
-    console.print(f"\n[blue]Season find: [red]{num_season_find}")
-    season_select = str(msg.ask("\n[green]Insert season number: "))
+    console.print("\n[green]Insert season [red]number [yellow]or [red](*) [green]to download all seasons [yellow]or [red][1-2] [green]for a range of seasons")
+    console.print(f"\n[blue]Season(s) found: [red]{num_season_find}")
+    season_select = str(msg.ask("\n[green]Insert season(s) number: "))
     if "[" in season_select:
         start, end = map(int, season_select[1:-1].split('-'))
         result = list(range(start, end + 1))
@@ -169,8 +169,8 @@ def main_dw_tv(tv_id, tv_name, version, domain):
             eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
 
             for ep in eps:
-                console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
-            index_ep_select = str(msg.ask("\n[green]Insert ep [red]number [yellow]or [red](*) [green]to download all ep [yellow]or [red][1-2] [green]for a range of ep: "))
+                console.print(f"[green]Episode: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
+            index_ep_select = str(msg.ask("\n[green]Insert episode [red]number [yellow]or [red](*) [green]to download all episodes [yellow]or [red][1-2] [green]for a range of episodes: "))
 
             # Download range []
             if "[" in index_ep_select:
@@ -187,7 +187,7 @@ def main_dw_tv(tv_id, tv_name, version, domain):
                     index_ep_select = int(index_ep_select) - 1
                     dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select)
                 else:
-                    console.print("[red]Wrong index for ep")
+                    console.print("[red]Wrong INDEX for the selected Episode")
 
             # Download all
             else:
@@ -196,7 +196,7 @@ def main_dw_tv(tv_id, tv_name, version, domain):
                     print("\n")
 
         else:
-            console.print("[red]Wrong index for season")
+            console.print("[red]Wrong INDEX for the selected Season")
     else:
         for n_season in range(1, num_season_find+1):
             eps = get_info_season(tv_id, tv_name, domain, version, token, n_season)

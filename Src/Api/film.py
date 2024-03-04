@@ -22,7 +22,7 @@ def get_iframe(id_title, domain):
         try:
             return BeautifulSoup(req_embed, "lxml").find("body").find("script").text
         except:
-            console.log("[red]Cant play this video, (video not available)")
+            console.log("[red]Couldn't play this video file (video not available)")
             sys.exit(0)
 
     else:
@@ -89,7 +89,7 @@ def main_dw_film(id_film, title_name, domain):
     json_win_video, json_win_param, render_quality = parse_content(embed_content)
 
     token_render = f"token{render_quality}"
-    console.print(f"[blue]Quality select => [red]{render_quality}")
+    console.print(f"[blue]Selected quality => [red]{render_quality}")
 
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
     m3u8_key = get_m3u8_key(json_win_video, json_win_param, title_name, token_render)
@@ -101,6 +101,6 @@ def main_dw_film(id_film, title_name, domain):
     m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, title_name, token_render)
 
     if m3u8_url_audio != None:
-        console.print("[blue]Use m3u8 audio => [red]True")
+        console.print("[blue]Using m3u8 audio => [red]True")
         
     download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_url, key=m3u8_key, output_filename=mp4_path)

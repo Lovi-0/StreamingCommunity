@@ -36,30 +36,30 @@ def main():
     initialize()
     domain, site_version = Page.domain_version()
 
-    film_search = msg.ask("\n[blue]Insert word to search in all site: ").strip()
+    film_search = msg.ask("\n[blue]Search for any movie or tv series title: ").strip()
     db_title = Page.search(film_search, domain)
     Page.display_search_results(db_title)
 
     if len(db_title) != 0:
         console.print(f"\n[blue]Total result: {len(db_title)}")
         console.print(
-            "\n[green]Insert index [red]number [yellow]or [red][1-2] [green]for a range of movies/tv [yellow]or [red][1,3,5] [green]to select discontinued movie/tv"
+            "\n[green]Insert INDEX [red]number [yellow]or [red][1-2] [green]for a range of movies/tv series [yellow]or [red][1,3,5] [green]to select discontinued movie/tv series"
         )
-        console.print("\n[red]In case of tv show you will have to choose season and episode to download")
-        index_select = str(msg.ask("\n[blue]Index to download: "))
+        console.print("\n[red]In case of a TV Series you will choose seasons and episodes to download")
+        index_select = str(msg.ask("\n[blue]Select INDEX to download: "))
         if index_select.isnumeric():
             index_select = int(index_select)
             if 0 <= index_select <= len(db_title) - 1:
                 selected_title = db_title[index_select]
 
                 if selected_title['type'] == "movie":
-                    console.print(f"[green]\nMovie select: {selected_title['name']}")
+                    console.print(f"[green]\nSelected Movie: {selected_title['name']}")
                     download_film(selected_title['id'], selected_title['slug'], domain)
                 else:
-                    console.print(f"[green]\nTv select: {selected_title['name']}")
+                    console.print(f"[green]\nSelected TV Series: {selected_title['name']}")
                     download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
             else:
-                console.print("[red]Wrong index for selection")
+                console.print("[red]Wrong INDEX for selection")
         elif "[" in index_select:
             if "-" in index_select:
                 start, end = map(int, index_select[1:-1].split('-'))
@@ -67,27 +67,27 @@ def main():
                 for n in result:
                     selected_title = db_title[n]
                     if selected_title['type'] == "movie":
-                        console.print(f"[green]\nMovie select: {selected_title['name']}")
+                        console.print(f"[green]\nSelected Movie: {selected_title['name']}")
                         download_film(selected_title['id'], selected_title['slug'], domain)
                     else:
-                        console.print(f"[green]\nTv select: {selected_title['name']}")
+                        console.print(f"[green]\nSelected TV Series: {selected_title['name']}")
                         download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
             elif "," in index_select:
                 result = list(map(int, index_select[1:-1].split(',')))
                 for n in result:
                     selected_title = db_title[n]
                     if selected_title['type'] == "movie":
-                        console.print(f"[green]\nMovie select: {selected_title['name']}")
+                        console.print(f"[green]\nSelected Movie: {selected_title['name']}")
                         download_film(selected_title['id'], selected_title['slug'], domain)
                     else:
-                        console.print(f"[green]\nTv select: {selected_title['name']}")
+                        console.print(f"[green]\nSelected TV Series: {selected_title['name']}")
                         download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
             else:
-                console.print("[red]Wrong index for selection")
+                console.print("[red]Wrong INDEX for selection")
     else:
-        console.print("[red]Cant find a single element")
+        console.print("[red]Couldn't find any entries for the selected title")
 
-    console.print("[red]Done")
+    console.print("[red]Done!")
 
 if __name__ == '__main__':
     main()

@@ -66,7 +66,7 @@ def download_and_extract_latest_commit(author, repo_name):
         temp_path = os.path.join(os.path.dirname(os.getcwd()), 'temp_extracted')
         with ZipFile(BytesIO(response.content)) as zip_ref:
             zip_ref.extractall(temp_path)
-        console.log("[green]Extract file ...")
+        console.log("[green]Extracting file ...")
 
 
         # Move files from the temporary folder to the current folder

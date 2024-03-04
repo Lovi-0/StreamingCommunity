@@ -20,7 +20,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="cryptography")
 
 # Variable
 MAX_WORKER = 20
-DONWLOAD_SUB = True
+DOWNLOAD_SUB = True
 DOWNLOAD_DEFAULT_LANGUAGE = False
 failed_segments = []
 
@@ -107,7 +107,7 @@ class M3U8_Parser:
         if self.video_playlist:
             return self.video_playlist[0].get('uri')
         else:
-            print("No video playlist find")
+            print("No video playlist found")
             return None
         
     def download_subtitle(self):
@@ -123,7 +123,7 @@ class M3U8_Parser:
                     continue
 
                 os.makedirs(path, exist_ok=True)
-                console.log(f"[green]Download subtitle: [red]{name_language}")
+                console.log(f"[green]Downloading subtitle: [red]{name_language}")
                 req_sub_content = requests.get(sub_info.get("uri"))
 
                 sub_parse = M3U8_Parser()
@@ -133,13 +133,13 @@ class M3U8_Parser:
                 open(os.path.join(path, name_language + ".vtt"), "wb").write(requests.get(url_subititle).content)
 
         else:
-            console.log("[red]No subtitle find")
+            console.log("[red]No subtitle found")
 
     def get_track_audio(self, language_name):   # Ex. English
         """Return url of audio eng audio playlist if present"""
 
         if self.audio_ts:
-            console.log(f"[cyan]Find {len(self.audio_ts)}, playlist with audio")
+            console.log(f"[cyan]Found {len(self.audio_ts)}, playlist with audio")
 
             if language_name != None:
                 for obj_audio in self.audio_ts:
@@ -149,7 +149,7 @@ class M3U8_Parser:
             return None
         
         else:
-            console.log("[red]Cant find playlist with audio")
+            console.log("[red]Couldn't find any playlist with audio")
                 
 class M3U8_Segments:
     def __init__(self, url, key=None):
@@ -187,7 +187,7 @@ class M3U8_Segments:
             #console.log(f"[red]Ts segments find [white]=> [yellow]{len(self.segments)}")
 
             if len(self.segments) == 0:
-                console.log("[red]Cant find segments to donwload, retry")
+                console.log("[red]Couldn't find any segments to download, retry")
                 sys.exit(0)
 
         else:
@@ -316,7 +316,7 @@ class M3U8_Segments:
         ts_files.sort(key=extract_number)
 
         if len(ts_files) == 0:
-            console.log("[red]Cant find segments to join, retry")
+            console.log("[red]Couldn't find any segments to join, retry")
             sys.exit(0)
 
 
@@ -325,7 +325,7 @@ class M3U8_Segments:
                 relative_path = os.path.relpath(os.path.join(self.temp_folder, ts_file), current_dir)
                 f.write(f"file '{relative_path}'\n")
 
-        console.log("[cyan]Start join all file")
+        console.log("[cyan]Joining all files...")
         try:
             ffmpeg.input(file_list_path, format='concat', safe=0).output(output_filename, c='copy', loglevel='error').run()
         except ffmpeg.Error as e:
@@ -411,7 +411,7 @@ def download_subtitle(url, name_language):
     path = os.path.join("videos", "subtitle")
     os.makedirs(path, exist_ok=True)
 
-    console.log(f"[green]Download subtitle: [red]{name_language}")
+    console.log(f"[green]Downloading subtitle: [red]{name_language}")
     open(os.path.join(path, name_language + ".vtt"), "wb").write(requests.get(url).content)
 
 def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_subtitle=None, key=None,  output_filename=os.path.join("videos", "output.mp4"), log=False):
@@ -420,7 +420,7 @@ def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_s
     key = bytes.fromhex(key) if key is not None else key
 
     if m3u8_playlist != None:
-        console.log(f"[green]Dowload m3u8 from playlist")
+        console.log(f"[green]Downloading m3u8 from playlist")
 
         # Parse m3u8 playlist
         parse_class_m3u8 = M3U8_Parser()
@@ -432,24 +432,24 @@ def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_s
             parse_class_m3u8.parse_data(m3u8_playlist)
 
 
-        # Get italian language in present as defualt
+        # Get italian language if present as default
         if DOWNLOAD_DEFAULT_LANGUAGE:
             m3u8_audio = parse_class_m3u8.get_track_audio("Italian")
-            console.log(f"[green]Select language => [purple]{m3u8_audio}")
+            console.log(f"[green]Selected language => [purple]{m3u8_audio}")
 
 
         # Get best quality
         if m3u8_index == None:
             m3u8_index = parse_class_m3u8.get_best_quality()
             if "https" in m3u8_index:
-                if log: console.log(f"[green]Select m3u8 index => [purple]{m3u8_index}")
+                if log: console.log(f"[green]Selected m3u8 index => [purple]{m3u8_index}")
             else:
-                console.log("[red]Cant find a valid m3u8 index")
+                console.log("[red]Couldn't find a valid m3u8 index")
                 sys.exit(0)
 
 
-        # Download subtitle if present ( normaly in m3u8 playlist )
-        if DONWLOAD_SUB: 
+        # Download subtitle if present ( normally in m3u8 playlist )
+        if DOWNLOAD_SUB:
             parse_class_m3u8.download_subtitle()
 
     if m3u8_subtitle != None:
@@ -463,7 +463,7 @@ def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_s
             parse_class_m3u8_sub.parse_data(m3u8_subtitle)
 
         # Download subtitle if present ( normaly in m3u8 playlist )
-        if DONWLOAD_SUB: 
+        if DOWNLOAD_SUB:
             parse_class_m3u8_sub.download_subtitle()
 
 
@@ -473,5 +473,5 @@ def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_s
     os.makedirs(path, exist_ok=True)
 
     if log: 
-        console.log(f"[green]Dowload m3u8 from index [white]=> [purple]{m3u8_index}")
+        console.log(f"[green]Download m3u8 from index [white]=> [purple]{m3u8_index}")
     M3U8_Downloader(m3u8_index, m3u8_audio, key=key, output_filename=output_filename).start()
