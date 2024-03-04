@@ -97,7 +97,7 @@ def main_dw_film(id_film, title_name, domain):
 
     mp4_name = title_name.replace("+", " ").replace(",", "").replace("-", "_")
     mp4_format = mp4_name + ".mp4"
-    mp4_path = os.path.join(config['root_path'], config['film_folder_name'], mp4_name, mp4_format)
+    mp4_path = os.path.join(config['root_path'], config['movies_folder_name'], mp4_name, mp4_format)
 
     m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, title_name, token_render)
 
