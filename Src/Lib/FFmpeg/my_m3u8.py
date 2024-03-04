@@ -3,6 +3,7 @@
 # Class import
 from Src.Util.console import console
 from Src.Util.headers import get_headers
+from Src.Util.config import config
 from Src.Lib.FFmpeg.util import print_duration_table
 
 # Import
@@ -20,8 +21,8 @@ warnings.filterwarnings("ignore", category=UserWarning, module="cryptography")
 
 # Variable
 MAX_WORKER = 20
-DOWNLOAD_SUB = True
-DOWNLOAD_DEFAULT_LANGUAGE = False
+DOWNLOAD_SUB = config['download_subtitles']
+DOWNLOAD_DEFAULT_LANGUAGE = config['download_default_language']
 failed_segments = []
 
 
@@ -113,7 +114,7 @@ class M3U8_Parser:
     def download_subtitle(self):
         """Download all subtitle if present"""
 
-        path = os.path.join("videos", "subtitle")
+        path = os.path.join(config['root_path'], "Film o Serie", "nome film o stagione serie")
 
         if self.subtitle_playlist:
             for sub_info in self.subtitle_playlist:
@@ -128,9 +129,10 @@ class M3U8_Parser:
 
                 sub_parse = M3U8_Parser()
                 sub_parse.parse_data(req_sub_content.text)
-                url_subititle = sub_parse.subtitle[0]
-
-                open(os.path.join(path, name_language + ".vtt"), "wb").write(requests.get(url_subititle).content)
+                url_subtitle = sub_parse.subtitle[0]
+                # Movie_Name.[Language_Code].vtt
+                # Movie_Name.[Language_Code].forced.vtt
+                open(os.path.join(path, "nome film o serie" ,f".{name_language}" + "se conteneva forced: .forced" + ".vtt"), "wb").write(requests.get(url_subtitle).content)
 
         else:
             console.log("[red]No subtitle found")
@@ -346,7 +348,7 @@ class M3U8_Downloader:
 
     def start(self):
         video_m3u8 = M3U8_Segments(self.m3u8_url, self.key)
-        console.log("[green]Download video ts")
+        console.log("[green]Downloading video ts")
         video_m3u8.get_info()
         video_m3u8.download_ts()
         video_m3u8.join(self.video_path)
@@ -355,7 +357,7 @@ class M3U8_Downloader:
 
         if self.m3u8_audio != None:
             audio_m3u8 = M3U8_Segments(self.m3u8_audio, self.key)
-            console.log("[green]Download audio ts")
+            console.log("[green]Downloading audio ts")
             audio_m3u8.get_info()
             audio_m3u8.download_ts()
             audio_m3u8.join(self.audio_path)
@@ -462,7 +464,7 @@ def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_s
         else: 
             parse_class_m3u8_sub.parse_data(m3u8_subtitle)
 
-        # Download subtitle if present ( normaly in m3u8 playlist )
+        # Download subtitle if present ( normally in m3u8 playlist )
         if DOWNLOAD_SUB:
             parse_class_m3u8_sub.download_subtitle()
 
