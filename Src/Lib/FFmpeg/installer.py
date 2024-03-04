@@ -55,7 +55,7 @@ def check_ffmpeg():
             console.print("[cyan]FFmpeg is not in the PATH. Downloading and adding to the PATH...[/cyan]")
 
             if not isAdmin():
-                console.log("[red]You need to be admin to proceed!")
+                console.log("[red]You need admin privileges to proceed!")
                 sys.exit(0)  
 
             download_ffmpeg()

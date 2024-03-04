@@ -19,7 +19,7 @@ def get_install_version():
     return about['__version__']
 
 def main_update():
-    console.print("[green]Checking github version ...")
+    console.print("[green]Checking GitHub version ...")
 
     json = requests.get(f"https://api.github.com/repos/{repo_user}/{repo_name}/releases").json()[0]
     stargazers_count = requests.get(f"https://api.github.com/repos/{repo_user}/{repo_name}").json()['stargazers_count']
@@ -34,11 +34,11 @@ def main_update():
 
     if get_install_version() != last_version: 
         console.print(f"[red]=> A new version is available: [green]{json['zipball_url']}")
-        console.print(f"[red]=> Versione: [yellow]{json['name']}")
+        console.print(f"[red]=> New Version: [yellow]{json['name']}")
         
     else: 
-        console.print(f"[red]=> Everything up to date")
-        console.print(f"[red]=> Last version: [yellow]{json['name']}")
+        console.print(f"[red]=> Everything is up to date")
+        console.print(f"[red]=> You're on Version: [yellow]{json['name']}")
 
     
     print("\n")

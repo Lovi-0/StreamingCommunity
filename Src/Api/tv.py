@@ -3,6 +3,7 @@
 # Class import
 from Src.Util.headers import get_headers
 from Src.Util.console import console, msg
+from Src.Util.config import config
 from Src.Lib.FFmpeg.my_m3u8 import download_m3u8
 
 # General import
@@ -15,6 +16,7 @@ def get_token(id_tv, domain):
     session = requests.Session()
     session.get(f"https://streamingcommunity.{domain}/watch/{id_tv}")
     return session.cookies['XSRF-TOKEN']
+
 
 def get_info_tv(id_film, title_name, site_version, domain):
 
@@ -30,6 +32,7 @@ def get_info_tv(id_film, title_name, site_version, domain):
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
 
+
 def get_info_season(tv_id, tv_name, domain, version, token, n_stagione):
     req = requests.get(f'https://streamingcommunity.{domain}/titles/{tv_id}-{tv_name}/stagione-{n_stagione}', headers={
         'authority': f'streamingcommunity.{domain}', 'referer': f'https://streamingcommunity.broker/titles/{tv_id}-{tv_name}',
@@ -41,6 +44,7 @@ def get_info_season(tv_id, tv_name, domain, version, token, n_stagione):
     else:
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
+
 
 def get_iframe(tv_id, ep_id, domain, token):
     req = requests.get(f'https://streamingcommunity.{domain}/iframe/{tv_id}', params={'episode_id': ep_id, 'next_episode': '1'}, cookies={'XSRF-TOKEN': token}, headers={
@@ -85,13 +89,16 @@ def parse_content(embed_content):
     json_win_param = json_win_param.replace(",}", "}").replace("'", '"')
     return json.loads(json_win_video), json.loads(json_win_param), select_quality(json.loads(json_win_param))
 
+
 def get_playlist(json_win_video, json_win_param, render_quality):
     token_render = f"token{render_quality}"
     return f"https://vixcloud.co/playlist/{json_win_video['id']}?token={json_win_param['token']}&{token_render}={json_win_param[token_render]}&expires={json_win_param['expires']}"
 
+
 def get_m3u8_url(json_win_video, json_win_param, render_quality):
     token_render = f"token{render_quality}"
     return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition={render_quality}&token={json_win_param[token_render]}&expires={json_win_param['expires']}"
+
 
 def get_m3u8_key_ep(json_win_video, json_win_param, tv_name, n_stagione, n_ep, ep_title, token_render):
     response = requests.get('https://vixcloud.co/storage/enc.key', headers={
@@ -123,38 +130,42 @@ def get_m3u8_playlist(json_win_video, json_win_param, tv_name, n_stagione, n_ep,
 # [func \ main]
 def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select):
 
-    enccoded_name = urllib.parse.quote(eps[index_ep_select]['name'])
+    encoded_name = urllib.parse.quote(eps[index_ep_select]['name'])
 
-    console.print(f"[green]Download ep: [blue]{eps[index_ep_select]['n']} [green]=> [purple]{eps[index_ep_select]['name']}")
+    console.print(f"[green]Downloading episode: [blue]{eps[index_ep_select]['n']} [green]=> [purple]{eps[index_ep_select]['name']}")
     embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
     json_win_video, json_win_param, render_quality = parse_content(embed_content)
 
     token_render = f"token{render_quality}"
-    console.print(f"[blue]Quality select => [red]{render_quality}")
+    console.print(f"[blue]Selected quality => [red]{render_quality}")
 
     m3u8_playlist = get_playlist(json_win_video, json_win_param, render_quality)
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
-    m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, enccoded_name, token_render)
+    m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, encoded_name, token_render)
 
     mp4_name = f"{tv_name.replace('+', '_')}_S{str(season_select).zfill(2)}E{str(index_ep_select+1).zfill(2)}"
     mp4_format = f"{mp4_name}.mp4"
-    mp4_path = os.path.join("videos",tv_name, mp4_format)
+    season = mp4_name.rsplit("E", 1)[0]
+    mp4_path = os.path.join(config['root_path'], config['series_folder_name'], tv_name, season, mp4_format)
 
-    m3u8_url_audio = get_m3u8_playlist(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, enccoded_name, token_render)
+    m3u8_url_audio = get_m3u8_playlist(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, encoded_name, token_render)
 
-    if m3u8_url_audio != None:
-        console.print("[blue]Use m3u8 audio => [red]True")
+    if m3u8_url_audio is not None:
+        console.print("[blue]Using m3u8 audio => [red]True")
+    # Movie_Name.[Language_Code].vtt
+    # Movie_Name.[Language_Code].forced.vtt
+    subtitle_path = os.path.join(config['root_path'], config['series_folder_name'], tv_name, season)
+    download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_playlist, key=m3u8_key, output_filename=mp4_path, subtitle_folder=subtitle_path, content_name=mp4_name)
 
-    download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_playlist, key=m3u8_key, output_filename=mp4_path)
-    
+
 def main_dw_tv(tv_id, tv_name, version, domain):
 
     token = get_token(tv_id, domain)
 
     num_season_find = get_info_tv(tv_id, tv_name, version, domain)
-    console.print("\n[green]Insert season [red]number [yellow]or [red](*) [green]to download all seasons [yellow]or [red][1-2] [green]for a range of season")
-    console.print(f"\n[blue]Season find: [red]{num_season_find}")
-    season_select = str(msg.ask("\n[green]Insert season number: "))
+    console.print("\n[green]Insert season [red]number[green], or [red](*) [green]to download all seasons, or [red][1-2] [green]for a range of seasons")
+    console.print(f"\n[blue]Season(s) found: [red]{num_season_find}")
+    season_select = str(msg.ask("\n[green]Insert which season(s) number you'd like to download"))
     if "[" in season_select:
         start, end = map(int, season_select[1:-1].split('-'))
         result = list(range(start, end + 1))
@@ -169,8 +180,8 @@ def main_dw_tv(tv_id, tv_name, version, domain):
             eps = get_info_season(tv_id, tv_name, domain, version, token, season_select)
 
             for ep in eps:
-                console.print(f"[green]Ep: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
-            index_ep_select = str(msg.ask("\n[green]Insert ep [red]number [yellow]or [red](*) [green]to download all ep [yellow]or [red][1-2] [green]for a range of ep: "))
+                console.print(f"[green]Episode: [blue]{ep['n']} [green]=> [purple]{ep['name']}")
+            index_ep_select = str(msg.ask("\n[green]Insert episode [blue]number[green], or [red](*) [green]to download all episodes, or [red][1-2] [green]for a range of episodes"))
 
             # Download range []
             if "[" in index_ep_select:
@@ -187,7 +198,7 @@ def main_dw_tv(tv_id, tv_name, version, domain):
                     index_ep_select = int(index_ep_select) - 1
                     dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select)
                 else:
-                    console.print("[red]Wrong index for ep")
+                    console.print("[red]Wrong [yellow]INDEX [red]for the selected Episode")
 
             # Download all
             else:
@@ -196,7 +207,7 @@ def main_dw_tv(tv_id, tv_name, version, domain):
                     print("\n")
 
         else:
-            console.print("[red]Wrong index for season")
+            console.print("[red]Wrong [yellow]INDEX for the selected Season")
     else:
         for n_season in range(1, num_season_find+1):
             eps = get_info_season(tv_id, tv_name, domain, version, token, n_season)

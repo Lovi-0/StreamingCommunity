@@ -26,7 +26,7 @@ def domain_version():
         return domain, version
 
     except Exception as e:
-        console.log("[red]Cant get version, problem with domain. Try again.")
+        console.log("[red]Couldn't get the version, there's a problem with the domain. Try again.")
         sys.exit(0)
 
 

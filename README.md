@@ -24,13 +24,13 @@ pip install -r requirements.txt
 
 ## Usage
 Run the script with the following command:
-```python
+```powershell
 python run.py
 ```
 
 ## Auto Update
 Keep your script up to date with the latest features by running:
-```python
+```powershell
 python update.py
 ```
 
@@ -39,9 +39,31 @@ python update.py
 
 - Download Specific Episodes or Entire Series: Seamlessly retrieve specific episodes or entire series using intuitive commands. Specify a range of episodes with square brackets notation, e.g., [5-7], or download all episodes with an asterisk (*).
 
-- Download Subtitles: Automatically fetch subtitles if available for downloaded content. (Note: To disable this feature, navigate to ".\Src\Lib\FFmpeg\my_m3u8" and change 'DOWNLOAD_SUB' to False in the configuration file.)
+- Download Subtitles: Automatically fetch subtitles if available for downloaded content. (Note: To disable this feature, see [Configuration](#configuration))
 
 - Sync Audio and Video: Ensure perfect synchronization between audio and video during the download process for an enhanced viewing experience.
+
+## Configuration
+
+You can change some behaviors by tweaking the configuration file.
+
+```json
+{
+  "root_path": "videos",
+  "movies_folder_name": "Film",
+  "series_folder_name": "Serie",
+  "download_subtitles": true,
+  "download_default_language": false
+}
+```
+#### Options
+| Key                       | Default Value | Description                                                                        | Value Example            |
+|---------------------------|---------------|------------------------------------------------------------------------------------|--------------------------|
+| root_path                 | videos        | Path where the script will add movies and tv series. Do not put trailing slash.    | media/streamingcommunity |
+| movies_folder_name        | Film          | The folder name where all the movies will be placed. Do not put trailing slash.    | downloaded-movies        |
+| series_folder_name        | Serie         | The folder name where all the TV Series will be placed. Do not put trailing slash. | mytvseries               |
+| download_subtitles        | true          | Whether or not you want all the found subtitles to be downloaded.                  | false                    |
+| download_default_language | false         | Whether or not you want to download only the default Italian audio language.       | true                     |
 
 ## Tutorial
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
