@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="cryptography")
 
 # Variable
-MAX_WORKER = 150
+MAX_WORKER = 20
 DONWLOAD_SUB = True
 DOWNLOAD_DEFAULT_LANGUAGE = False
 failed_segments = []

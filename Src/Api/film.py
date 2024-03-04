@@ -94,7 +94,7 @@ def main_dw_film(id_film, title_name, domain):
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
     m3u8_key = get_m3u8_key(json_win_video, json_win_param, title_name, token_render)
 
-    mp4_name = title_name.replace("+", " ").replace(",", "")
+    mp4_name = title_name.replace("+", " ").replace(",", "").replace("-", "_")
     mp4_format = mp4_name + ".mp4"
     mp4_path = os.path.join("videos", mp4_format)
 

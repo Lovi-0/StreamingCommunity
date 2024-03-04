@@ -6,7 +6,7 @@ from Src.Util.console import console, msg
 from Src.Lib.FFmpeg.my_m3u8 import download_m3u8
 
 # General import
-import requests, os, re, json, sys, binascii
+import requests, os, re, json, sys, binascii, urllib
 from bs4 import BeautifulSoup
 
 
@@ -123,6 +123,8 @@ def get_m3u8_playlist(json_win_video, json_win_param, tv_name, n_stagione, n_ep,
 # [func \ main]
 def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_select):
 
+    enccoded_name = urllib.parse.quote(eps[index_ep_select]['name'])
+
     console.print(f"[green]Download ep: [blue]{eps[index_ep_select]['n']} [green]=> [purple]{eps[index_ep_select]['name']}")
     embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
     json_win_video, json_win_param, render_quality = parse_content(embed_content)
@@ -132,13 +134,13 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
 
     m3u8_playlist = get_playlist(json_win_video, json_win_param, render_quality)
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
-    m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
+    m3u8_key = get_m3u8_key_ep(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, enccoded_name, token_render)
 
     mp4_name = f"{tv_name.replace('+', '_')}_S{str(season_select).zfill(2)}E{str(index_ep_select+1).zfill(2)}"
     mp4_format = f"{mp4_name}.mp4"
     mp4_path = os.path.join("videos",tv_name, mp4_format)
 
-    m3u8_url_audio = get_m3u8_playlist(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, eps[index_ep_select]['name'], token_render)
+    m3u8_url_audio = get_m3u8_playlist(json_win_video, json_win_param, tv_name, season_select, index_ep_select+1, enccoded_name, token_render)
 
     if m3u8_url_audio != None:
         console.print("[blue]Use m3u8 audio => [red]True")
