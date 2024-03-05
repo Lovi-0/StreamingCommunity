@@ -1,7 +1,7 @@
 {
   "root_path": "videos",
-  "movies_folder_name": "Film",
-  "series_folder_name": "Serie",
+  "movies_folder_name": "Movies",
+  "series_folder_name": "Series",
   "download_subtitles": true,
   "download_default_language": true,
   "selected_language": "English",
