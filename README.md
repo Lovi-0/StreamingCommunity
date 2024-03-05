@@ -68,8 +68,9 @@ You can change some behaviors by tweaking the configuration file.
 | download_default_language | true          | Whether or not you want to download only the default Italian audio language.             | false                    |
 | selected_language         | English       | If `"download_default_language"` is `False` the script will download this language       | French                   |
 | max_worker                | 20            | How many workers will cooperate to download .ts file (High value may slow down your pc)  | 30                       |
-[!IMPORTANT]
-If you're on **Windows** you'll need to use double black slashes. Otherwise, one slash is fine.
+
+> [!IMPORTANT]
+> If you're on **Windows** you'll need to use double black slashes. Otherwise, one slash is fine.
 
 Path examples:
 
