@@ -119,8 +119,6 @@ class M3U8_Parser:
         if self.subtitle_playlist:
             for sub_info in self.subtitle_playlist:
                 name_language = sub_info.get("language")
-                full_name = sub_info.get("name")
-
 
                 if name_language in ["auto"]:
                     continue
@@ -136,8 +134,19 @@ class M3U8_Parser:
                 # Subtitles convention:
                 # Movie_Name.[Language_Code].vtt
                 # Movie_Name.[Language_Code].forced.vtt # If forced
-                # Implementare "forced"
-                open(os.path.join(path, content_name + f".{name_language}" + ".vtt"), "wb").write(requests.get(url_subtitle).content)
+                if "forced" in name_language.lower():
+                    name_language = name_language.lower().replace("forced", "").strip()
+                    name_language = name_language.lower().replace("-", "").strip()
+                    open(
+                        os.path.join(
+                            path, f"{content_name}.{name_language}.forced.vtt"
+                        ),
+                        "wb",
+                    ).write(requests.get(url_subtitle).content)
+                else:
+                    open(
+                        os.path.join(path, f"{content_name}.{name_language}.vtt"), "wb"
+                    ).write(requests.get(url_subtitle).content)
 
         else:
             console.log("[red]No subtitle found")
@@ -371,9 +380,7 @@ class M3U8_Downloader:
             print("\n")
 
             self.join_audio()
-            os.renames(f"{self.video_path}.mp4", self.video_path)
-        # else:
-        #     self.join_subtitle(self.video_path)
+            
         if os.path.exists(f"{self.video_path}.mp4"):
             os.renames(f"{self.video_path}.mp4", self.video_path)
         
@@ -401,75 +408,11 @@ class M3U8_Downloader:
 
             console.print("[green]Merge completed successfully.")
 
-            # self.join_subtitle(self.video_path + ".mp4")
-
         except ffmpeg.Error as e:
             print("ffmpeg error:", e)
         
         os.remove(self.video_path)
         os.remove(self.audio_path)
-    #todo: join_subtitle
-    # def join_subtitle(self, video_path):
-    #     """Join subtitles with video and sync them"""
-
-    #     subtitle_dir = "videos/subtitle/"
-    #     italian_subtitle_file = "Italian.vtt"
-    #     portuguese_subtitle_file = "Portuguese.vtt"
-
-    #     italian_subtitle_path = os.path.join(subtitle_dir, italian_subtitle_file)
-    #     portuguese_subtitle_path = os.path.join(subtitle_dir, portuguese_subtitle_file)
-
-    #     if not os.path.exists(italian_subtitle_path):
-    #         console.log(f"[red]Subtitle file '{italian_subtitle_file}' not found in '{subtitle_dir}'")
-    #         return
-
-    #     if not os.path.exists(portuguese_subtitle_path):
-    #         console.log(f"[red]Subtitle file '{portuguese_subtitle_file}' not found in '{subtitle_dir}'")
-    #         return
-
-    #     try:
-    #         video_stream = ffmpeg.input(video_path)
-    #         italian_subtitle_stream = ffmpeg.input(italian_subtitle_path)
-    #         portuguese_subtitle_stream = ffmpeg.input(portuguese_subtitle_path)
-
-    #         process = (
-    #             ffmpeg.output(
-    #                 video_stream,
-    #                 italian_subtitle_stream,
-    #                 portuguese_subtitle_stream,
-    #                 f"{os.path.splitext(video_path)[0]}_subtitled.mp4",
-    #                 vcodec="copy",
-    #                 acodec="copy",
-    #                 scodec="mov_text",
-    #                 loglevel='quiet',
-    #             )
-    #             .global_args(
-    #                 '-map',
-    #                 '0:v:0',
-    #                 '-map',
-    #                 '1:s:0',
-    #                 '-metadata:s:s:0',
-    #                 'language=ita',
-    #                 '-map',
-    #                 '2:s:0',
-    #                 '-metadata:s:s:1',
-    #                 'language=por',
-    #                 '-shortest',
-    #                 '-strict',
-    #                 'experimental',
-    #             )
-    #             .run()
-    #         )
-
-
-    #         console.log("[green]Subtitles merged successfully.")
-
-    #     except ffmpeg.Error as e:
-    #         print("ffmpeg error:", e)
-
-    #     os.remove(video_path)  # Optionally remove original video if desired
-    #     os.remove(italian_subtitle_path)
-    #     os.remove(portuguese_subtitle_path)
 
 
 
