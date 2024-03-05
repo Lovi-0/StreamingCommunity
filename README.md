@@ -2,7 +2,7 @@
 	<img src="Src/Assets/min_logo.png" style="max-width: 55%;" alt="video working" />
 </p>
 
-## Streaming community downloader
+## StreamingCommunity Downloader
 <p align="center">
 	<img src="Src/Assets/run.gif" style="max-width: 55%;" alt="video working" />
 </p>
@@ -72,7 +72,7 @@ You can change some behaviors by tweaking the configuration file.
 > [!IMPORTANT]
 > If you're on **Windows** you'll need to use double black slashes. Otherwise, one slash is fine.
 
-Path examples:
+#### Path examples:
 
 * Windows: `C:\\MyLibrary\\Folder` or `\\\\MyServer\\MyLibrary` (if you want to use a network folder).
 
