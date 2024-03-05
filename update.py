@@ -42,7 +42,7 @@ def keep_specific_items(directory, keep_folder, keep_file):
                 os.remove(item_path)
 
     except PermissionError as pe:
-        print(f"PermissionError: {pe}. Check permissions and try running the script as administrator.")
+        print(f"PermissionError: {pe}. Check permissions and try running the script with admin privileges.")
     except Exception as e:
         print(f"Error: {e}")
 
@@ -51,13 +51,13 @@ def download_and_extract_latest_commit(author, repo_name):
     # Get the latest commit information using GitHub API
     api_url = f'https://api.github.com/repos/{author}/{repo_name}/commits?per_page=1'
     response = requests.get(api_url)
-    console.log("[green]Make req repo github")
+    console.log("[green]Making a request to GitHub repository...")
 
     if response.status_code == 200:
         commit_info = response.json()[0]
         commit_sha = commit_info['sha']
         zipball_url = f'https://github.com/{author}/{repo_name}/archive/{commit_sha}.zip'
-        console.log("[green]Get zip file from repo")
+        console.log("[green]Getting zip file from repository...")
 
         # Download the zipball
         response = requests.get(zipball_url)
