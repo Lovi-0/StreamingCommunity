@@ -340,10 +340,10 @@ class M3U8_Segments:
 
         console.log("[cyan]Joining all files...")
         try:
-            ffmpeg.input(file_list_path, format='concat', safe=0).output(output_filename, c='copy', loglevel='error').run()
+            ffmpeg.input(file_list_path, format='concat', safe=0).output(output_filename, map_metadata='-1', c='copy', loglevel='error').run()
         except ffmpeg.Error as e:
             console.log(f"[red]Error saving MP4: {e.stdout}")
-            sys.exit(0)
+            #sys.exit(0)
             
         console.log(f"[cyan]Clean ...")
         os.remove(file_list_path)
@@ -385,6 +385,7 @@ class M3U8_Downloader:
 
     def join_audio(self):
         """Join audio with video and sync it"""
+        console.log("[cyan]Join audio and video")
 
         try:
             video_stream = ffmpeg.input(self.video_path)
@@ -399,7 +400,11 @@ class M3U8_Downloader:
                     acodec="copy",
                     loglevel='error'
                 )
-                .global_args('-map', '0:v:0', '-map', '1:a:0', '-shortest', '-strict', 'experimental')
+                .global_args(
+                    '-map', '0:v:0', 
+                    '-map', '1:a:0', 
+                    '-shortest', '-strict', 
+                    'experimental')
                 .run()
             )
 
