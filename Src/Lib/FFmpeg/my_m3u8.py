@@ -134,19 +134,16 @@ class M3U8_Parser:
                 # Subtitles convention:
                 # Movie_Name.[Language_Code].vtt
                 # Movie_Name.[Language_Code].forced.vtt # If forced
+                subtitle_name = ""
                 if "forced" in name_language.lower():
                     name_language = name_language.lower().replace("forced", "").strip()
                     name_language = name_language.lower().replace("-", "").strip()
-                    open(
-                        os.path.join(
-                            path, f"{content_name}.{name_language}.forced.vtt"
-                        ),
-                        "wb",
-                    ).write(requests.get(url_subtitle).content)
+                    subtitle_name = f"{content_name}.{name_language}.forced.vtt"
                 else:
-                    open(
-                        os.path.join(path, f"{content_name}.{name_language}.vtt"), "wb"
-                    ).write(requests.get(url_subtitle).content)
+                    subtitle_name = f"{content_name}.{name_language}.vtt"
+                open(
+                    os.path.join(path, subtitle_name), "wb"
+                ).write(requests.get(url_subtitle).content)
 
         else:
             console.log("[red]No subtitle found")
@@ -380,7 +377,7 @@ class M3U8_Downloader:
             print("\n")
 
             self.join_audio()
-            
+
         if os.path.exists(f"{self.video_path}.mp4"):
             os.renames(f"{self.video_path}.mp4", self.video_path)
         
