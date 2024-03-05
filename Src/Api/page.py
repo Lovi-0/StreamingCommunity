@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 def domain_version():
     domain_req = requests.get("https://api.telegra.ph/getPage/Link-Aggiornato-StreamingCommunity-01-17")
     domain = domain_req.json()['result']['description'].split(".")[1]
-    console.print("[green]Get rules ...")
+    console.print("[green]Getting rules...")
 
     console.print(f"[blue]Test domain [white]=> [red]{domain}")
     site_url = f"https://streamingcommunity.{domain}"

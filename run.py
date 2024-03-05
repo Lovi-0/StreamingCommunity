@@ -26,17 +26,18 @@ def initialize():
     try:
         main_update()
     except Exception as e:
-        console.print(f"[blue]Req github [white]=> [red]Failed: {e}")
+        console.print(f"[blue]Request GitHub [white]=> [red]Failed: {e}")
 
     check_ffmpeg()
     print("\n")
+
 
 def main():
 
     initialize()
     domain, site_version = Page.domain_version()
 
-    film_search = msg.ask("\n[blue]Search for any movie or tv series title").strip()
+    film_search = msg.ask("\n[blue]Search for any Movie or TV Series title").strip()
     db_title = Page.search(film_search, domain)
     Page.display_search_results(db_title)
 
@@ -88,6 +89,7 @@ def main():
         console.print("[red]Couldn't find any entries for the selected title")
 
     console.print("[red]Done!")
+
 
 if __name__ == '__main__':
     main()
