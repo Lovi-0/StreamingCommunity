@@ -3,5 +3,7 @@
   "movies_folder_name": "Film",
   "series_folder_name": "Serie",
   "download_subtitles": true,
-  "download_default_language": false
+  "download_default_language": true,
+  "selected_language": "English",
+  "max_worker": 20
 }

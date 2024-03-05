@@ -53,7 +53,9 @@ You can change some behaviors by tweaking the configuration file.
   "movies_folder_name": "Film",
   "series_folder_name": "Serie",
   "download_subtitles": true,
-  "download_default_language": false
+  "download_default_language": true,
+  "selected_language": "English",
+  "max_worker": 20
 }
 ```
 #### Options
@@ -63,7 +65,9 @@ You can change some behaviors by tweaking the configuration file.
 | movies_folder_name        | Film          | The folder name where all the movies will be placed. Do not put trailing slash.    | downloaded-movies        |
 | series_folder_name        | Serie         | The folder name where all the TV Series will be placed. Do not put trailing slash. | mytvseries               |
 | download_subtitles        | true          | Whether or not you want all the found subtitles to be downloaded.                  | false                    |
-| download_default_language | false         | Whether or not you want to download only the default Italian audio language.       | true                     |
+| download_default_language | true          | Whether or not you want to download only the default Italian audio language.       | true                     |
+| selected_language         | English       | If "download_default_language" is False the script will download this language     | English                  |
+| max_worker                | 20            | How many workers will cooperate to download .ts file (High value may lag your pc)  | 20                       |
 
 ## Tutorial
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
