@@ -4,6 +4,7 @@ bin
 lib64
 *__pycache__
 pyvenv.cfg
+.idea
 
 # Project specific
 videos/
