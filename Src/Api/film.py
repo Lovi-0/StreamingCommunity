@@ -68,6 +68,9 @@ def get_m3u8_url(json_win_video, json_win_param, render_quality):
     token_render = f"token{render_quality}"
     return f"https://vixcloud.co/playlist/{json_win_video['id']}?type=video&rendition={render_quality}&token={json_win_param[token_render]}&expires={json_win_param['expires']}"
 
+def get_playlist(json_win_video, json_win_param, render_quality):
+    token_render = f"token{render_quality}"
+    return f"https://vixcloud.co/playlist/{json_win_video['id']}?token={json_win_param['token']}&{token_render}={json_win_param[token_render]}&expires={json_win_param['expires']}"
 
 def get_m3u8_key(json_win_video, json_win_param, title_name, token_render):
     response = requests.get('https://vixcloud.co/storage/enc.key', headers={
@@ -109,6 +112,7 @@ def main_dw_film(id_film, title_name, domain):
 
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
     m3u8_key = get_m3u8_key(json_win_video, json_win_param, title_name, token_render)
+    m3u8_playlist = get_playlist(json_win_video, json_win_param, render_quality)
 
     mp4_name = title_name.replace("+", " ").replace(",", "").replace("-", "_")
     mp4_format = mp4_name + ".mp4"
@@ -118,6 +122,6 @@ def main_dw_film(id_film, title_name, domain):
 
     if m3u8_url_audio is not None:
         console.print("[blue]Using m3u8 audio => [red]True")
-    subtitle_path = os.path.join(config['root_path'], config['series_folder_name'], mp4_name)
-    download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_url, key=m3u8_key,
+    subtitle_path = os.path.join(config['root_path'], config['movies_folder_name'], mp4_name)
+    download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_playlist, key=m3u8_key,
                   output_filename=mp4_path, subtitle_folder=subtitle_path, content_name=mp4_name)
