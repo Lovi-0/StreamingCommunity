@@ -2,7 +2,7 @@
 	<img src="Src/Assets/min_logo.png" style="max-width: 55%;" alt="video working" />
 </p>
 
-## Streaming community downloader
+## StreamingCommunity Downloader
 <p align="center">
 	<img src="Src/Assets/run.gif" style="max-width: 55%;" alt="video working" />
 </p>
@@ -59,15 +59,24 @@ You can change some behaviors by tweaking the configuration file.
 }
 ```
 #### Options
-| Key                       | Default Value | Description                                                                             | Value Example            |
-|---------------------------|---------------|-----------------------------------------------------------------------------------------|--------------------------|
-| root_path                 | videos        | Path where the script will add movies and tv series folders. Do not put trailing slash. | media/streamingcommunity |
-| movies_folder_name        | Movies        | The folder name where all the movies will be placed. Do not put trailing slash.         | downloaded-movies        |
-| series_folder_name        | Series        | The folder name where all the TV Series will be placed. Do not put trailing slash.      | mytvseries               |
-| download_subtitles        | true          | Whether or not you want all the found subtitles to be downloaded.                       | false                    |
-| download_default_language | true          | Whether or not you want to download only the default Italian audio language.            | false                    |
-| selected_language         | English       | If `"download_default_language"` is `False` the script will download this language      | French                   |
-| max_worker                | 20            | How many workers will cooperate to download .ts file (High value may slow down your pc) | 30                       |
+| Key                       | Default Value | Description                                                                              | Value Example            |
+|---------------------------|---------------|------------------------------------------------------------------------------------------|--------------------------|
+| root_path                 | videos        | *Path where the script will add movies and tv series folders. Do not put trailing slash. | media/streamingcommunity |
+| movies_folder_name        | Movies        | The folder name where all the movies will be placed. Do not put trailing slash.          | downloaded-movies        |
+| series_folder_name        | Series        | The folder name where all the TV Series will be placed. Do not put trailing slash.       | mytvseries               |
+| download_subtitles        | true          | Whether or not you want all the found subtitles to be downloaded.                        | false                    |
+| download_default_language | true          | Whether or not you want to download only the default Italian audio language.             | false                    |
+| selected_language         | English       | If `"download_default_language"` is `False` the script will download this language       | French                   |
+| max_worker                | 20            | How many workers will cooperate to download .ts file (High value may slow down your pc)  | 30                       |
+
+> [!IMPORTANT]
+> If you're on **Windows** you'll need to use double black slashes. Otherwise, one slash is fine.
+
+#### Path examples:
+
+* Windows: `C:\\MyLibrary\\Folder` or `\\\\MyServer\\MyLibrary` (if you want to use a network folder).
+
+* Linux/MacOS: `Desktop/MyLibrary/Folder`
 
 ## Tutorial
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
