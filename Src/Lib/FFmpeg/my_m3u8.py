@@ -134,7 +134,7 @@ class M3U8_Parser:
                 # Subtitles convention:
                 # Movie_Name.[Language_Code].vtt
                 # Movie_Name.[Language_Code].forced.vtt # If forced
-                subtitle_name = ""
+
                 if "forced" in name_language.lower():
                     name_language = name_language.lower().replace("forced", "").strip()
                     name_language = name_language.lower().replace("-", "").strip()
