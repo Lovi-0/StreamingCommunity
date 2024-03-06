@@ -52,7 +52,7 @@ def get_info_season(tv_id, tv_name, domain, version, token, n_season):
         })
 
     if req.ok:
-        return [{'id': ep['id'], 'n': ep['number'], 'name': ep['name']} for ep in
+        return [{'id': ep['id'], 'n': ep['number'], 'name': ep['name'] if ep['name'] is not None else ""} for ep in
                 req.json()['props']['loadedSeason']['episodes']]
     else:
         console.log(f"[red]Error: {req.status_code}")
@@ -77,9 +77,13 @@ def get_iframe(tv_id, ep_id, domain, token):
     """
 
     if req.ok:
-        url_embed = BeautifulSoup(req.text, "lxml").find("iframe").get("src")
-        req_embed = requests.get(url_embed, headers={"User-agent": get_headers()}).text
-        return BeautifulSoup(req_embed, "lxml").find("body").find("script").text
+        try:
+            url_embed = BeautifulSoup(req.text, "lxml").find("iframe").get("src")
+            req_embed = requests.get(url_embed, headers={"User-agent": get_headers()}).text
+            return BeautifulSoup(req_embed, "lxml").find("body").find("script").text
+        except:
+            console.log("[red]Error with episode. Skipping...")
+            return None
     else:
         console.log(f"[red]Error: {req.status_code}")
         sys.exit(0)
@@ -153,6 +157,8 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, token, tv_name, season_sel
     console.print(
         f"[green]Downloading episode: [blue]{eps[index_ep_select]['n']} [green]=> [purple]{eps[index_ep_select]['name']}")
     embed_content = get_iframe(tv_id, eps[index_ep_select]['id'], domain, token)
+    if embed_content is None:
+        return
     json_win_video, json_win_param, render_quality = parse_content(embed_content)
 
     token_render = f"token{render_quality}"
