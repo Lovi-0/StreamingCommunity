@@ -102,9 +102,7 @@ class M3U8_Parser:
             print(f"Error parsing M3U8 content: {e}")
 
     def get_best_quality(self):
-        """Need to fix, return m3u8 valid with best quality"""
 
-        # To fix
         if self.video_playlist:
             return self.video_playlist[0].get('uri')
         else:
@@ -119,9 +117,6 @@ class M3U8_Parser:
         if self.subtitle_playlist:
             for sub_info in self.subtitle_playlist:
                 name_language = sub_info.get("language")
-
-                if name_language in ["auto"]:
-                    continue
 
                 os.makedirs(path, exist_ok=True)
                 console.log(f"[green]Downloading subtitle: [red]{name_language}")
@@ -141,6 +136,8 @@ class M3U8_Parser:
                     subtitle_name = f"{content_name}.{name_language}.forced.vtt"
                 else:
                     subtitle_name = f"{content_name}.{name_language}.vtt"
+
+                # Save vtt to path
                 open(
                     os.path.join(path, subtitle_name), "wb"
                 ).write(requests.get(url_subtitle).content)
@@ -443,40 +440,8 @@ def download_subtitle(url, name_language):
 
 def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_subtitle=None, key=None, output_filename=os.path.join("videos", "output.mp4"), log=False, subtitle_folder="subtitles", content_name=""):
     m3u8_audio_url=None
-    # Get byte of key
+
     key = bytes.fromhex(key) if key is not None else key
-
-    # if m3u8_playlist is not None:
-    #     console.log(f"[green]Downloading m3u8 from playlist")
-
-    #     # Parse m3u8 playlist
-    #     parse_class_m3u8 = M3U8_Parser()
-
-    #     # Parse directly m3u8 content pass if present
-    #     if "#EXTM3U" not in m3u8_playlist: 
-    #         parse_class_m3u8.parse_data(df_make_req(m3u8_playlist))
-    #     else: 
-    #         parse_class_m3u8.parse_data(m3u8_playlist)
-
-    #     # Get italian language if present as default
-    #     if DOWNLOAD_DEFAULT_LANGUAGE:
-    #         m3u8_audio = parse_class_m3u8.get_track_audio("English")
-    #         console.log(f"[green]Select language => [purple]{m3u8_audio}")
-
-
-    #     # Get best quality
-    #     if m3u8_index == None:
-    #         m3u8_index = parse_class_m3u8.get_best_quality()
-    #         if "https" in m3u8_index:
-    #             if log: console.log(f"[green]Select m3u8 index => [purple]{m3u8_index}")
-    #         else:
-    #             console.log("[red]Cant find a valid m3u8 index")
-    #             sys.exit(0)
-
-
-    #     # Download subtitle if present ( normaly in m3u8 playlist )
-    #     if DONWLOAD_SUB: 
-    #         parse_class_m3u8.download_subtitle()
 
     if m3u8_audio is not None:
         m3u8_audio_obj = None
