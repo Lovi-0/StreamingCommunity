@@ -18,20 +18,31 @@ Make sure you have the following prerequisites installed on your system:
 
 ## Installation library
 Install the required Python libraries using the following command:
-```bash
+```
 pip install -r requirements.txt
 ```
 
 ## Usage
 Run the script with the following command:
+#### On Windows:
 ```powershell
 python run.py
 ```
 
+#### On Linux/MacOS:
+```bash
+python3 run.py
+```
+
 ## Auto Update
 Keep your script up to date with the latest features by running:
+#### On Windows:
 ```powershell
 python update.py
+```
+#### On Linux/MacOS:
+```bash
+python3 update.py
 ```
 
 ## Features
@@ -59,15 +70,15 @@ You can change some behaviors by tweaking the configuration file.
 }
 ```
 #### Options
-| Key                       | Default Value | Description                                                                              | Value Example            |
-|---------------------------|---------------|------------------------------------------------------------------------------------------|--------------------------|
-| root_path                 | videos        | *Path where the script will add movies and tv series folders. Do not put trailing slash. | media/streamingcommunity |
-| movies_folder_name        | Movies        | The folder name where all the movies will be placed. Do not put trailing slash.          | downloaded-movies        |
-| series_folder_name        | Series        | The folder name where all the TV Series will be placed. Do not put trailing slash.       | mytvseries               |
-| download_subtitles        | true          | Whether or not you want all the found subtitles to be downloaded.                        | false                    |
-| download_default_language | true          | Whether or not you want to download only the default Italian audio language.             | false                    |
-| selected_language         | English       | If `"download_default_language"` is `False` the script will download this language       | French                   |
-| max_worker                | 20            | How many workers will cooperate to download .ts file (High value may slow down your pc)  | 30                       |
+| Key                       | Default Value | Description                                                                                                                   | Value Example            |
+|---------------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------|--------------------------|
+| root_path                 | videos        | Path where the script will add movies and tv series folders (see [Path Examples](#Path-examples)). Do not put trailing slash. | media/streamingcommunity |
+| movies_folder_name        | Movies        | The folder name where all the movies will be placed. Do not put trailing slash.                                               | downloaded-movies        |
+| series_folder_name        | Series        | The folder name where all the TV Series will be placed. Do not put trailing slash.                                            | mytvseries               |
+| download_subtitles        | true          | Whether or not you want all the found subtitles to be downloaded.                                                             | false                    |
+| download_default_language | true          | Whether or not you want to download only the default Italian audio language.                                                  | false                    |
+| selected_language         | English       | If `"download_default_language"` is `False` the script will download this language.                                           | French                   |
+| max_worker                | 20            | How many workers will cooperate to download .ts file. **High value may slow down your pc**.                                   | 30                       |
 
 > [!IMPORTANT]
 > If you're on **Windows** you'll need to use double black slashes. Otherwise, one slash is fine.
