@@ -81,7 +81,7 @@ You can change some behaviors by tweaking the configuration file.
 | max_worker                | 20            | How many workers will cooperate to download .ts file. **High value may slow down your pc**.                                   | 30                       |
 
 > [!IMPORTANT]
-> If you're on **Windows** you'll need to use double black slashes. Otherwise, one slash is fine.
+> If you're on **Windows** you'll need to use double black slashes. On Linux/MacOS, one slash is fine.
 
 #### Path examples:
 
