@@ -9,15 +9,16 @@ import requests
 import sys
 from bs4 import BeautifulSoup
 
+
+# Class import
 from Src.Lib.FFmpeg.my_m3u8 import download_m3u8
 from Src.Lib.FFmpeg.util import audio_extractor_m3u8
 from Src.Util.config import config
 from Src.Util.console import console
-# Class import
 from Src.Util.headers import get_headers
 
 
-# [func]
+
 def get_iframe(id_title, domain):
     req = requests.get(url=f"https://streamingcommunity.{domain}/iframe/{id_title}", headers={
         "User-agent": get_headers()
@@ -72,10 +73,8 @@ def get_playlist(json_win_video, json_win_param, render_quality):
     token_render = f"token{render_quality}"
     return f"https://vixcloud.co/playlist/{json_win_video['id']}?token={json_win_param['token']}&{token_render}={json_win_param[token_render]}&expires={json_win_param['expires']}"
 
-def get_m3u8_key(json_win_video, json_win_param, title_name, token_render):
-    response = requests.get('https://vixcloud.co/storage/enc.key', headers={
-        'referer': f'https://vixcloud.co/embed/{json_win_video["id"]}?token={json_win_param[token_render]}&title={title_name}&referer=1&expires={json_win_param["expires"]}',
-    })
+def get_m3u8_key():
+    response = requests.get('https://vixcloud.co/storage/enc.key')
 
     if response.ok:
         return binascii.hexlify(response.content).decode('utf-8')
@@ -111,7 +110,7 @@ def main_dw_film(id_film, title_name, domain):
     console.print(f"[blue]Selected quality => [red]{render_quality}")
 
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
-    m3u8_key = get_m3u8_key(json_win_video, json_win_param, title_name, token_render)
+    m3u8_key = get_m3u8_key()
     m3u8_playlist = get_playlist(json_win_video, json_win_param, render_quality)
 
     mp4_name = title_name.replace("+", " ").replace(",", "").replace("-", "_")
@@ -123,5 +122,6 @@ def main_dw_film(id_film, title_name, domain):
     if m3u8_url_audio is not None:
         console.print("[blue]Using m3u8 audio => [red]True")
     subtitle_path = os.path.join(config['root_path'], config['movies_folder_name'], mp4_name)
+
     download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_playlist, key=m3u8_key,
                   output_filename=mp4_path, subtitle_folder=subtitle_path, content_name=mp4_name)

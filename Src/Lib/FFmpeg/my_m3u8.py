@@ -126,10 +126,6 @@ class M3U8_Parser:
                 sub_parse.parse_data(req_sub_content.text)
                 url_subtitle = sub_parse.subtitle[0]
 
-                # Subtitles convention:
-                # Movie_Name.[Language_Code].vtt
-                # Movie_Name.[Language_Code].forced.vtt # If forced
-
                 if "forced" in name_language.lower():
                     name_language = name_language.lower().replace("forced", "").strip()
                     name_language = name_language.lower().replace("-", "").strip()
@@ -160,7 +156,6 @@ class M3U8_Parser:
         
         else:
             console.log("[red]Couldn't find any playlist with audio")
-
 
 class M3U8_Segments:
     def __init__(self, url, key=None):
@@ -195,7 +190,6 @@ class M3U8_Segments:
 
         if response.ok:
             self.parse_data(response.text)
-            # console.log(f"[red]Ts segments find [white]=> [yellow]{len(self.segments)}")
 
             if len(self.segments) == 0:
                 console.log("[red]Couldn't find any segments to download, retry")
@@ -224,17 +218,14 @@ class M3U8_Segments:
                 if response.status_code == 200:
                     return response.content
                 else:
-                    # print(f"Failed to fetch {ts_url}: {response.status_code}")
                     failed_segments.append(str(url_number))
                     return None
                 
             except Exception as e:
-                # print(f"Failed to fetch {ts_url}: {str(e)}")
                 failed_segments.append(str(url_number))
                 return None
         
         else:
-            # print("Skip ", ts_url, " arr ", failed_segments)
             return None
 
     def save_ts(self, index, progress_counter, quit_event):
@@ -257,11 +248,8 @@ class M3U8_Segments:
         progress_counter.update(1)
           
     def download_ts(self):
-        """Loop to download all segment of playlist m3u8 and break it if there is no progress"""
-
         progress_counter = tqdm(total=len(self.segments), unit="bytes", desc="[yellow]Download")
         
-        # Event to signal when to quit
         quit_event = threading.Event()
         timeout_occurred = False
 
@@ -272,7 +260,7 @@ class M3U8_Segments:
             with ThreadPoolExecutor(max_workers=MAX_WORKER) as executor:
                 futures = []
                 for index in range(len(self.segments)):
-                    if timeout_occurred:  # Check if timeout occurred before submitting tasks
+                    if timeout_occurred:
                         break
                     future = executor.submit(self.save_ts, index, progress_counter, quit_event)
                     futures.append(future)
@@ -282,13 +270,12 @@ class M3U8_Segments:
                         future.result()
                     except Exception as e:
                         print(f"An error occurred: {str(e)}")
-                        # Handle the error as needed
+
         finally:
             progress_counter.close()
-            quit_event.set()  # Signal the timer thread to quit
-            timer_thread.join()  # Ensure the timer thread is terminated
+            quit_event.set()
+            timer_thread.join()
 
-        # Continue with the rest of your code here...
 
     def timer(self, progress_counter, quit_event, timeout_checker):
         start_time = time.time()
@@ -298,21 +285,20 @@ class M3U8_Segments:
             current_count = progress_counter.n
 
             if current_count != last_count:
-                start_time = time.time()  # Update start time when progress is made
+                start_time = time.time()
                 last_count = current_count
 
             elapsed_time = time.time() - start_time
             if elapsed_time > self.progress_timeout:
                 console.log(f"[red]No progress for {self.progress_timeout} seconds.")
                 console.log("[red]Breaking ThreadPoolExecutor...")
-                timeout_checker()  # Set the flag indicating a timeout
-                quit_event.set()  # Signal the main thread to quit
-                break  # Break the loop instead of exiting
+                timeout_checker()
+                quit_event.set()
+                break
 
             time.sleep(1)
 
-        # Execution reaches here when the loop is broken
-        progress_counter.refresh()  # Refresh the progress bar to reflect the last progress
+        progress_counter.refresh()
 
     def join(self, output_filename):
         """Join all segments file to a mp4 file name"""
@@ -340,12 +326,10 @@ class M3U8_Segments:
             ffmpeg.input(file_list_path, format='concat', safe=0).output(output_filename, map_metadata='-1', c='copy', loglevel='error').run()
         except ffmpeg.Error as e:
             console.log(f"[red]Error saving MP4: {e.stdout}")
-            #sys.exit(0)
             
         console.log(f"[cyan]Clean ...")
         os.remove(file_list_path)
         shutil.rmtree("tmp", ignore_errors=True)
-
 
 class M3U8_Downloader:
     def __init__(self, m3u8_url, m3u8_audio = None, key=None, output_filename="output.mp4"):
@@ -378,10 +362,7 @@ class M3U8_Downloader:
         if os.path.exists(f"{self.video_path}.mp4"):
             os.renames(f"{self.video_path}.mp4", self.video_path)
         
-
-
     def join_audio(self):
-        """Join audio with video and sync it"""
         console.log("[cyan]Join audio and video")
 
         try:
@@ -414,11 +395,8 @@ class M3U8_Downloader:
         os.remove(self.audio_path)
 
 
-
 # [ main function ]
 def df_make_req(url):
-    """Make req to get text"""
-
     response = requests.get(url)
 
     if response.ok:
@@ -427,19 +405,16 @@ def df_make_req(url):
         console.log(f"[red]Wrong url, error: {response.status_code}")
         sys.exit(0)
 
-
 def download_subtitle(url, name_language):
-    """Make req to vtt url and save to video subtitle folder"""
-
     path = os.path.join("videos", "subtitle")
     os.makedirs(path, exist_ok=True)
 
     console.log(f"[green]Downloading subtitle: [red]{name_language}")
     open(os.path.join(path, name_language + ".vtt"), "wb").write(requests.get(url).content)
 
-
 def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_subtitle=None, key=None, output_filename=os.path.join("videos", "output.mp4"), log=False, subtitle_folder="subtitles", content_name=""):
     m3u8_audio_url=None
+    # m3u8_playlist never use in this version
 
     key = bytes.fromhex(key) if key is not None else key
 
@@ -454,6 +429,7 @@ def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_s
             sys.exit(0)
         m3u8_audio_url = m3u8_audio_obj["url"]
         console.log(f"[green]Select language => [purple]{m3u8_audio_obj['lang']}")
+
     if m3u8_subtitle != None:
 
         parse_class_m3u8_sub = M3U8_Parser()

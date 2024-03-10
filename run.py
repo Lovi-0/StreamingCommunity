@@ -31,7 +31,6 @@ def initialize():
     check_ffmpeg()
     print("\n")
 
-
 def main():
 
     initialize()
@@ -89,7 +88,6 @@ def main():
         console.print("[red]Couldn't find any entries for the selected title")
 
     console.print("[red]Done!")
-
 
 if __name__ == '__main__':
     main()
