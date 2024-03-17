@@ -13,40 +13,60 @@ from Src.Lib.FFmpeg.installer import check_ffmpeg
 # Import
 import sys
 
-# [ main ]
-def initialize():
+def initialize() -> None:
+    """
+    Initializes the application by performing necessary setup tasks.
+    """
 
+    # Checking Python version
     if sys.version_info < (3, 11):
         console.log("Install python version > 3.11")
         sys.exit(0)
 
+    # Removing temporary folder
     remove_folder("tmp")
     msg_start()
 
     try:
+        # Updating application
         main_update()
     except Exception as e:
         console.print(f"[blue]Request GitHub [white]=> [red]Failed: {e}")
 
+    # Checking FFmpeg installation
     check_ffmpeg()
     print("\n")
 
-def main():
 
+def main() -> None:
+    """
+    Main function to execute the application logic.
+    """
+
+    # Initializing the application
     initialize()
+
+    # Retrieving domain and site version
     domain, site_version = Page.domain_version()
 
+    # Searching for movie or TV series title
     film_search = msg.ask("\n[blue]Search for any Movie or TV Series title").strip()
     db_title = Page.search(film_search, domain)
     Page.display_search_results(db_title)
 
-    if len(db_title) != 0:
+    if db_title:
+
+        # Displaying total results
         console.print(f"\n[blue]Total result: {len(db_title)}")
+
+        # Asking user to select title(s) to download
         console.print(
             "\n[green]Insert [yellow]INDEX [red]number[green], or [red][1-2] [green]for a range of movies/tv series, or [red][1,3,5] [green]to select discontinued movie/tv series"
         )
         console.print("\n[red]In case of a TV Series you will also choose seasons and episodes to download")
-        index_select = str(msg.ask("\n[blue]Select [yellow]INDEX [blue]to download"))
+        index_select = str(msg.ask("\n[blue]Select [yellow]INDEX [blue]to download")).strip()
+
+        # For only number ( to fix )
         if index_select.isnumeric():
             index_select = int(index_select)
             if 0 <= index_select <= len(db_title) - 1:
@@ -60,6 +80,8 @@ def main():
                     download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
             else:
                 console.print("[red]Wrong INDEX for selection")
+
+        # For range like [5-15] ( to fix )
         elif "[" in index_select:
             if "-" in index_select:
                 start, end = map(int, index_select[1:-1].split('-'))
@@ -72,6 +94,8 @@ def main():
                     else:
                         console.print(f"[green]\nSelected TV Series: {selected_title['name']}")
                         download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
+
+            # For a list of specific ( to fix )
             elif "," in index_select:
                 result = list(map(int, index_select[1:-1].split(',')))
                 for n in result:
