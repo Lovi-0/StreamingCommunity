@@ -1,9 +1,10 @@
 {
-  "root_path": "videos",
-  "movies_folder_name": "Movies",
-  "series_folder_name": "Series",
-  "download_subtitles": true,
-  "download_default_language": true,
-  "selected_language": "English",
-  "max_worker": 20
+    "root_path": "videos",
+    "movies_folder_name": "Movies",
+    "series_folder_name": "Series",
+    "download_subtitles": true,
+    "download_default_language": true,
+    "selected_language": "English",
+    "max_worker": 20,
+    "domain": "forum"
 }
