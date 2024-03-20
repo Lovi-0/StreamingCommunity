@@ -10,3 +10,4 @@ pyvenv.cfg
 videos/
 tmp/
 debug.log
+run.exe

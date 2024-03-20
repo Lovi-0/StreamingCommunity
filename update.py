@@ -141,3 +141,5 @@ def main_upload() -> None:
         download_and_extract_latest_commit(repository_owner, repository_name, ["config.json"])
 
 main_upload()
+
+# pyinstaller --onefile --add-data "./Src/upload/__version__.py;Src/upload" run.py

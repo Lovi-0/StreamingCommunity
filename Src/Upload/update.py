@@ -10,7 +10,6 @@ import os, requests, time
 repo_name = "StreamingCommunity_api"
 repo_user = "ghost6446"
 main = os.path.abspath(os.path.dirname(__file__))
-base = "\\".join(main.split("\\")[:-1])
 
 def get_install_version():
     about = {}

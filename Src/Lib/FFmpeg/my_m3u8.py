@@ -303,9 +303,7 @@ class M3U8_Segments:
     def join(self, output_filename):
         """Join all segments file to a mp4 file name"""
 
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-        file_list_path = os.path.join(current_dir, 'file_list.txt')
-
+        file_list_path = os.path.join('file_list.txt')
         ts_files = [f for f in os.listdir(self.temp_folder) if f.endswith(".ts")]
 
         def extract_number(file_name):
@@ -318,7 +316,7 @@ class M3U8_Segments:
 
         with open(file_list_path, 'w') as f:
             for ts_file in ts_files:
-                relative_path = os.path.relpath(os.path.join(self.temp_folder, ts_file), current_dir)
+                relative_path = os.path.relpath(os.path.join(self.temp_folder, ts_file))
                 f.write(f"file '{relative_path}'\n")
 
         console.log("[cyan]Joining all files...")

@@ -1,5 +1,4 @@
-import json
-from pathlib import Path
+import json, os
 
 class ConfigManager:
     def __init__(self, file_path):
@@ -18,6 +17,6 @@ class ConfigManager:
 
             
 # Example usage:
-config_path = Path(__file__).parent.parent.parent / 'config.json'
+config_path = os.path.join('config.json')
 config_manager = ConfigManager(config_path)
 config = config_manager.load_config()

@@ -115,6 +115,8 @@ def main():
 
 if __name__ == '__main__':
 
+    main()
+
     while 1:
         cmd_insert = input("Quit the script [yes/no]: ")
 
