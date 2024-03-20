@@ -13,7 +13,7 @@ from Src.Lib.FFmpeg.installer import check_ffmpeg
 # Import
 import sys
 
-def initialize() -> None:
+def initialize():
     """
     Initializes the application by performing necessary setup tasks.
     """
@@ -38,7 +38,7 @@ def initialize() -> None:
     print("\n")
 
 
-def main() -> None:
+def main():
     """
     Main function to execute the application logic.
     """
@@ -114,4 +114,11 @@ def main() -> None:
     console.print("[red]Done!")
 
 if __name__ == '__main__':
-    main()
+
+    while 1:
+        cmd_insert = input("Quit the script [yes/no]: ")
+
+        if cmd_insert == "y" or cmd_insert == "yes":
+            main()
+        else:
+            break
