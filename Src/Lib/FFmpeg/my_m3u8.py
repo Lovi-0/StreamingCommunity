@@ -21,9 +21,10 @@ warnings.filterwarnings("ignore", category=UserWarning, module="cryptography")
 
 # Variable
 MAX_WORKER = config['max_worker']
+DOWNLOAD_PATH = config['root_path']
 DOWNLOAD_SUB = config['download_subtitles']
-DOWNLOAD_DEFAULT_LANGUAGE = config['download_default_language'] # True to select default language, False to select language
-SELECTED_LANGUAGE = config['selected_language'] # Ex. "English" if DOWNLOAD_DEFAULT_LANGUAGE is False
+DOWNLOAD_DEFAULT_LANGUAGE = config['download_default_language']
+SELECTED_LANGUAGE = config['selected_language']
 failed_segments = []
 
 
@@ -319,13 +320,13 @@ class M3U8_Segments:
                 relative_path = os.path.relpath(os.path.join(self.temp_folder, ts_file))
                 f.write(f"file '{relative_path}'\n")
 
-        console.log("[cyan]Joining all files...")
+        #console.log("[cyan]Joining all files...")
         try:
             ffmpeg.input(file_list_path, format='concat', safe=0).output(output_filename, map_metadata='-1', c='copy', loglevel='error').run()
         except ffmpeg.Error as e:
             console.log(f"[red]Error saving MP4: {e.stdout}")
             
-        console.log(f"[cyan]Clean ...")
+        #console.log(f"[cyan]Clean ...")
         os.remove(file_list_path)
         shutil.rmtree("tmp", ignore_errors=True)
 
@@ -335,25 +336,23 @@ class M3U8_Downloader:
         self.m3u8_audio = m3u8_audio
         self.key = key
         self.video_path = output_filename
-        self.audio_path = os.path.join("videos", "audio.mp4")
+        self.audio_path = os.path.join(DOWNLOAD_PATH, "audio.mp4")
 
     def start(self):
         video_m3u8 = M3U8_Segments(self.m3u8_url, self.key)
-        console.log("[green]Downloading video ts")
+        console.log("[purple]Downloading video ts")
         video_m3u8.get_info()
         video_m3u8.download_ts()
         video_m3u8.join(self.video_path)
         print_duration_table(self.video_path)
-        print("\n")
 
         if self.m3u8_audio is not None:
             audio_m3u8 = M3U8_Segments(self.m3u8_audio, self.key)
-            console.log("[green]Downloading audio ts")
+            console.log("[purple]Downloading audio ts")
             audio_m3u8.get_info()
             audio_m3u8.download_ts()
             audio_m3u8.join(self.audio_path)
             print_duration_table(self.audio_path)
-            print("\n")
 
             self.join_audio()
 
@@ -361,7 +360,7 @@ class M3U8_Downloader:
             os.renames(f"{self.video_path}.mp4", self.video_path)
         
     def join_audio(self):
-        console.log("[cyan]Join audio and video")
+        console.log("[purple]Join audio and video")
 
         try:
             video_stream = ffmpeg.input(self.video_path)
@@ -404,13 +403,24 @@ def df_make_req(url):
         sys.exit(0)
 
 def download_subtitle(url, name_language):
-    path = os.path.join("videos", "subtitle")
+    path = os.path.join(DOWNLOAD_PATH, "subtitle")
     os.makedirs(path, exist_ok=True)
 
     console.log(f"[green]Downloading subtitle: [red]{name_language}")
     open(os.path.join(path, name_language + ".vtt"), "wb").write(requests.get(url).content)
 
-def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_subtitle=None, key=None, output_filename=os.path.join("videos", "output.mp4"), log=False, subtitle_folder="subtitles", content_name=""):
+def download_m3u8(
+        m3u8_playlist=None, 
+        m3u8_index = None, 
+        m3u8_audio=None, 
+        m3u8_subtitle=None, 
+        key=None, 
+        output_filename=os.path.join(DOWNLOAD_PATH, "output.mp4"), 
+        log=False, 
+        subtitle_folder="subtitles", 
+        content_name=""
+    ):
+
     m3u8_audio_url=None
     # m3u8_playlist never use in this version
 
@@ -443,7 +453,6 @@ def download_m3u8(m3u8_playlist=None, m3u8_index = None, m3u8_audio=None, m3u8_s
             parse_class_m3u8_sub.download_subtitle(subtitle_path=subtitle_folder, content_name=content_name)
 
     # Download m3u8 index, with segments
-    # os.makedirs("videos", exist_ok=True)
     path = os.path.dirname(output_filename)
     os.makedirs(path, exist_ok=True)
 
