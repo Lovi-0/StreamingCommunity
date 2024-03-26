@@ -145,10 +145,10 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, tv_name, season_select):
     m3u8_url = get_m3u8_url(json_win_video, json_win_param, render_quality)
     m3u8_key = get_m3u8_key_ep()
 
-    mp4_name = f"{tv_name.replace('+', '_')}_S{str(season_select).zfill(2)}E{str(index_ep_select + 1).zfill(2)}"
+    mp4_name = f"S{str(season_select).zfill(2)}E{str(index_ep_select + 1).zfill(2)}"
     mp4_format = f"{mp4_name}.mp4"
     season = mp4_name.rsplit("E", 1)[0]
-    mp4_path = os.path.join(config['root_path'], config['series_folder_name'], tv_name, season, mp4_format)
+    mp4_path = os.path.join(config['root_path'], config['series_folder_name'], mp4_format)
 
     m3u8_url_audio = get_m3u8_audio(json_win_video, json_win_param, tv_name, season_select, index_ep_select + 1,
                                     encoded_name, token_render)
@@ -157,8 +157,15 @@ def dw_single_ep(tv_id, eps, index_ep_select, domain, tv_name, season_select):
         console.print("[blue]Using m3u8 audio => [red]True")
 
     subtitle_path = os.path.join(config['root_path'], config['series_folder_name'], tv_name, season)
-    download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_playlist, key=m3u8_key,
-                  output_filename=mp4_path, subtitle_folder=subtitle_path, content_name=mp4_name)
+    download_m3u8(
+        m3u8_index = m3u8_url, 
+        m3u8_audio = m3u8_url_audio, 
+        m3u8_subtitle = m3u8_playlist, 
+        key = m3u8_key,
+        output_filename = mp4_path, 
+        subtitle_folder = subtitle_path, 
+        content_name = mp4_name
+    )
 
 
 def main_dw_tv(tv_id, tv_name, version, domain):

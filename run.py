@@ -1,4 +1,4 @@
-# 10.12.23 -> 31.01.24
+# 10.12.23 -> 1.02.24
 
 # Class
 import Src.Api.page as Page
@@ -118,9 +118,9 @@ if __name__ == '__main__':
     main()
 
     while 1:
-        cmd_insert = input("Quit the script [yes/no]: ")
+        cmd_insert = str(msg.ask("[red]Quit the script ? [red][[yellow]yes[red] / [yellow]no[red]]"))
 
-        if cmd_insert == "y" or cmd_insert == "yes":
-            main()
-        else:
+        if cmd_insert in ['y', 'yes', 'ye']:
             break
+        else:
+            main()

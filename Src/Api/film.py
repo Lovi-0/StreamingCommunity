@@ -123,5 +123,12 @@ def main_dw_film(id_film, title_name, domain):
         console.print("[blue]Using m3u8 audio => [red]True")
     subtitle_path = os.path.join(config['root_path'], config['movies_folder_name'], mp4_name)
 
-    download_m3u8(m3u8_index=m3u8_url, m3u8_audio=m3u8_url_audio, m3u8_subtitle=m3u8_playlist, key=m3u8_key,
-                  output_filename=mp4_path, subtitle_folder=subtitle_path, content_name=mp4_name)
+    download_m3u8(
+        m3u8_index = m3u8_url, 
+        m3u8_audio = m3u8_url_audio, 
+        m3u8_subtitle = m3u8_playlist, 
+        key = m3u8_key,
+        output_filename = mp4_path, 
+        subtitle_folder = subtitle_path, 
+        content_name = mp4_name
+    )
