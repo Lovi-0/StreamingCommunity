@@ -54,19 +54,17 @@ class M3U8_Parser:
         self.audio_ts = []
 
     def parse_data(self, m3u8_content):
-        """Extract all info present in m3u8 content"""
 
         try:
             m3u8_obj = M3U8_Lib(m3u8_content)
 
             for playlist in m3u8_obj.playlists:
-                self.video_playlist.append({"uri": playlist.uri})
-                self.stream_infos = ({
-                    "bandwidth": playlist.stream_info.bandwidth,
-                    "codecs": playlist.stream_info.codecs,
-                    "resolution": playlist.stream_info.resolution
-                })
-
+                self.video_playlist.append({
+                    "uri": playlist.uri, 
+                    "width": playlist.stream_info.resolution, 
+                    "codecs": playlist.stream_info.codecs
+            })
+                
             for key in m3u8_obj.keys:
                 if key is not None:
                     self.keys = ({
@@ -84,7 +82,8 @@ class M3U8_Parser:
                         "language": media.language,
                         "uri": media.uri
                     })
-                else:
+
+                if media.type == "AUDIO":
                     self.audio_ts.append({
                         "type": media.type,
                         "name": media.name,
@@ -111,7 +110,6 @@ class M3U8_Parser:
             return None
         
     def download_subtitle(self, subtitle_path, content_name):
-        """Download all subtitle if present"""
 
         path = subtitle_path
 
@@ -134,16 +132,13 @@ class M3U8_Parser:
                 else:
                     subtitle_name = f"{content_name}.{name_language}.vtt"
 
-                # Save vtt to path
-                open(
-                    os.path.join(path, subtitle_name), "wb"
+                open(os.path.join(path, subtitle_name), "wb"
                 ).write(requests.get(url_subtitle).content)
 
         else:
             console.log("[red]No subtitle found")
 
-    def get_track_audio(self, language_name):   # Ex. English
-        """Return url of audio eng audio playlist if present"""
+    def get_track_audio(self, language_name): 
 
         if self.audio_ts:
             console.log(f"[cyan]Found {len(self.audio_ts)}, playlist with audio")
@@ -172,8 +167,6 @@ class M3U8_Segments:
         self.max_retry = 3
 
     def parse_data(self, m3u8_content):
-         
-        # Parse index m3u8
         m3u8_parser = M3U8_Parser()
         m3u8_parser.parse_data(m3u8_content)
         
@@ -185,8 +178,6 @@ class M3U8_Segments:
         self.segments = m3u8_parser.segments
 
     def get_info(self):
-        """Make req to index m3u8"""
-
         response = requests.get(self.url, headers={'user-agent': get_headers()})
 
         if response.ok:
@@ -201,8 +192,6 @@ class M3U8_Segments:
             sys.exit(0)
 
     def get_req_ts(self, ts_url):
-        """Single req to a ts file to get content"""
-
         url_number = self.segments.index(ts_url)
 
         is_valid = True
@@ -214,7 +203,7 @@ class M3U8_Segments:
         if is_valid:
 
             try:
-                response = requests.get(ts_url, headers={'user-agent': get_headers()}, timeout=10)
+                response = requests.get(ts_url, headers={'user-agent': get_headers()}, timeout=5)
 
                 if response.status_code == 200:
                     return response.content
@@ -229,9 +218,11 @@ class M3U8_Segments:
         else:
             return None
 
-    def save_ts(self, index, progress_counter, quit_event):
-        """Save ts file and decrypt if there is iv present in decryption class"""
-        
+    def save_ts(self, index, progress_counter, stop_event):
+
+        if stop_event.is_set():
+            return
+
         ts_url = self.segments[index]
         ts_filename = os.path.join(self.temp_folder, f"{index}.ts")
 
@@ -250,35 +241,32 @@ class M3U8_Segments:
           
     def download_ts(self):
         progress_counter = tqdm(total=len(self.segments), unit="bytes", desc="[yellow]Download")
-        
-        quit_event = threading.Event()
-        timeout_occurred = False
+        stop_event = threading.Event()
+        progress_thread = threading.Thread(target=self.timer, args=(progress_counter, stop_event))
+        progress_thread.start()
 
-        timer_thread = threading.Thread(target=self.timer, args=(progress_counter, quit_event, lambda: timeout_occurred))
-        timer_thread.start()
+        with ThreadPoolExecutor(max_workers=MAX_WORKER) as executor:
+            futures = []
 
-        try:
-            with ThreadPoolExecutor(max_workers=MAX_WORKER) as executor:
-                futures = []
-                for index in range(len(self.segments)):
-                    if timeout_occurred:
-                        break
-                    future = executor.submit(self.save_ts, index, progress_counter, quit_event)
-                    futures.append(future)
-                    
+            # Submit tasks for downloading segments
+            for index in range(len(self.segments)):
+                future = executor.submit(self.save_ts, index, progress_counter, stop_event)
+                futures.append(future)
+
+            try:
                 for future in as_completed(futures):
-                    try:
-                        future.result()
-                    except Exception as e:
-                        print(f"An error occurred: {str(e)}")
+                    future.result()
+                    if progress_counter.n >= len(self.segments) * 0.995:
+                        console.log(f"[yellow]Progress reached {0.995*100}%. Stopping.")
+                        break
 
-        finally:
-            progress_counter.close()
-            quit_event.set()
-            timer_thread.join()
+            except KeyboardInterrupt:
+                console.log("[red]Ctrl+C detected. Exiting gracefully [white]...")
+                stop_event.set()
 
+        progress_thread.join()
 
-    def timer(self, progress_counter, quit_event, timeout_checker):
+    def timer(self, progress_counter, quit_event):
         start_time = time.time()
         last_count = 0
 
@@ -286,17 +274,15 @@ class M3U8_Segments:
             current_count = progress_counter.n
 
             if current_count != last_count:
-                start_time = time.time()
+                start_time = time.time() 
                 last_count = current_count
 
             elapsed_time = time.time() - start_time
+
             if elapsed_time > self.progress_timeout:
-                console.log(f"[red]No progress for {self.progress_timeout} seconds.")
-                console.log("[red]Breaking ThreadPoolExecutor...")
-                timeout_checker()
+                console.log(f"[red]No progress for {self.progress_timeout} seconds.  Stopping.")
                 quit_event.set()
                 break
-
             time.sleep(1)
 
         progress_counter.refresh()
@@ -320,13 +306,11 @@ class M3U8_Segments:
                 relative_path = os.path.relpath(os.path.join(self.temp_folder, ts_file))
                 f.write(f"file '{relative_path}'\n")
 
-        #console.log("[cyan]Joining all files...")
         try:
             ffmpeg.input(file_list_path, format='concat', safe=0).output(output_filename, map_metadata='-1', c='copy', loglevel='error').run()
         except ffmpeg.Error as e:
             console.log(f"[red]Error saving MP4: {e.stdout}")
             
-        #console.log(f"[cyan]Clean ...")
         os.remove(file_list_path)
         shutil.rmtree("tmp", ignore_errors=True)
 

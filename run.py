@@ -11,12 +11,15 @@ from Src.Upload.update import main_update
 from Src.Lib.FFmpeg.installer import check_ffmpeg
 
 # Import
-import sys
+import sys, platform
 
 def initialize():
     """
     Initializes the application by performing necessary setup tasks.
     """
+
+    # Get system where script is run
+    run_system = platform.system()
 
     # Checking Python version
     if sys.version_info < (3, 11):
@@ -34,7 +37,9 @@ def initialize():
         console.print(f"[blue]Request GitHub [white]=> [red]Failed: {e}")
 
     # Checking FFmpeg installation
-    check_ffmpeg()
+    if run_system != 'Windows':
+        check_ffmpeg()
+    
     print("\n")
 
 
