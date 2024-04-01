@@ -14,7 +14,7 @@ import binascii
 import logging
 import sys
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlencode
+from urllib.parse import urljoin, urlencode, quote
 
 
 class VideoSource:
@@ -243,8 +243,11 @@ class VideoSource:
         """
         try:
 
+            # Fix title for latin-1
+            title = quote(self.window_video.name)
+
             # Set referer header for the request
-            self.headers['referer'] = f'https://vixcloud.co/embed/{self.window_video.id}?token={self.window_parameter.token}&title={self.window_video.name.replace(" ", "+")}&referer=1&expires={self.window_parameter.expires}&canPlayFHD=1'
+            self.headers['referer'] = f'https://vixcloud.co/embed/{self.window_video.id}?token={self.window_parameter.token}&title={title}&referer=1&expires={self.window_parameter.expires}&canPlayFHD=1'
             
             # Make a request to get key content
             response = requests.get('https://vixcloud.co/storage/enc.key', headers=self.headers)

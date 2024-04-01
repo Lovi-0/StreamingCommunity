@@ -376,6 +376,54 @@ class M3U8_Segments:
         # Refresh progress bar
         progress_counter.refresh()
 
+    def join(self, output_filename: str, video_decoding: str = None, audio_decoding: str = None):
+        """
+        Join all segments file to a mp4 file name
+        !! NOT USED
+        
+        Parameters:
+        - video_decoding(str): video decoding to use with ffmpeg for only video
+        - audio_decoding(str): audio decoding to use with ffmpeg for only audio
+        - output_filename (str): The name of the output mp4 file.
+        """
+
+        # Print output of failed segments if present
+        if len(failed_segments) > 0:
+            logging.error(f"[M3U8_Segments] Failed segments = {failed_segments}")
+            logging.warning("[M3U8_Segments] Audio and video can be out of sync !!!")
+            console.log("[red]Audio and video can be out of sync !!!")
+        
+        # Get current dir and create file_list with path of all ts file
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        file_list_path = os.path.join(current_dir, 'file_list.txt')
+
+        # Sort files (1.ts, 2.ts, ...)
+        ts_files = [f for f in os.listdir(self.temp_folder) if f.endswith(".ts")]
+        def extract_number(file_name):
+            return int(''.join(filter(str.isdigit, file_name)))
+        ts_files.sort(key=extract_number)
+
+        # Check if there is file to json
+        if len(ts_files) < MIN_TS_FILES_IN_FOLDER:
+            logging.error(f"No .ts file to join in folder: {self.temp_folder}")
+            sys.exit(0)
+
+        # Save files sorted in a txt file with absolute path to fix problem with ( C:\\path (win))
+        with open(file_list_path, 'w') as file_list:
+            for ts_file in ts_files:
+                absolute_path = os.path.abspath(os.path.join(self.temp_folder, ts_file))
+                file_list.write(f"file '{absolute_path}'\n")
+
+        console.log("[cyan]Start joining all files")
+
+        # ADD IF 
+        concatenate_and_save(
+            file_list_path = file_list_path,
+            output_filename = output_filename,
+            video_decoding = video_decoding,
+            audio_decoding = audio_decoding 
+        )
+
 
 class Downloader():
     def __init__(self, output_filename: str = None, m3u8_playlist:str = None,  m3u8_index:str = None, key: str = None):
