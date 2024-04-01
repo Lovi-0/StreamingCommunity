@@ -1,131 +1,166 @@
-# 10.12.23 -> 1.02.24
+# 10.12.23 -> 31.01.24
 
 # Class
-import Src.Api.page as Page
-from Src.Api.film import main_dw_film as download_film
-from Src.Api.tv import main_dw_tv as download_tv
-from Src.Util.message import msg_start
+from Src.Api import (
+    get_version_and_domain, 
+    download_series, 
+    download_film, 
+    search, 
+    anime_search, 
+    anime_download_series,
+    anime_download_film,
+    get_select_title
+)
+from Src.Util.message import start_message
 from Src.Util.console import console, msg
-from Src.Util.os import remove_folder
-from Src.Upload.update import main_update
-from Src.Lib.FFmpeg.installer import check_ffmpeg
+from Src.Util.config import config_manager
+from Src.Util.os import remove_folder, remove_file
+from Src.Upload.update import update as git_update
+from Src.Lib.FFmpeg import check_ffmpeg
+from Src.Util.logger import Logger
 
 # Import
-import sys, platform
+import sys
+import logging
+import platform
 
+# Variable
+DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
+DEBUG_GET_ALL_INFO = config_manager.get_bool('DEFAULT', 'get_info')
+SWITCH_TO = config_manager.get_bool('DEFAULT', 'swith_anime')
+CLOSE_CONSOLE =  config_manager.get_bool('DEFAULT', 'not_close')
+
+
+# [ main ]
 def initialize():
     """
-    Initializes the application by performing necessary setup tasks.
+    Initialize the application.
+    Checks Python version, removes temporary folder, and displays start message.
     """
 
     # Get system where script is run
     run_system = platform.system()
 
-    # Checking Python version
+    # Enable debug with info
+    if DEBUG_MODE:
+        logging.basicConfig(level=logging.DEBUG)
+        logging.getLogger('root').setLevel(logging.INFO)
+    else:
+        logging.basicConfig(level=logging.ERROR)
+        logging.getLogger('root').setLevel(logging.ERROR)
+
+
     if sys.version_info < (3, 11):
         console.log("Install python version > 3.11")
         sys.exit(0)
 
     # Removing temporary folder
     remove_folder("tmp")
-    msg_start()
+    remove_file("debug.log")
+    start_message()
 
+    # Attempting GitHub update
     try:
-        # Updating application
-        main_update()
+        git_update()
     except Exception as e:
-        console.print(f"[blue]Request GitHub [white]=> [red]Failed: {e}")
+        console.print(f"[blue]Req github [white]=> [red]Failed: {e}")
 
-    # Checking FFmpeg installation
-    if run_system != 'Windows':
+    # Checking ffmpeg availability ( only win )
+    if run_system == 'Windows':
         check_ffmpeg()
-    
-    print("\n")
-
 
 def main():
     """
-    Main function to execute the application logic.
+    Main function of the application.
     """
 
-    # Initializing the application
+    # Get site domain and version
+    initialize()
+    site_version, domain = get_version_and_domain()
+
+    # Make request to site to get content that corrsisponde to that string
+    film_search = msg.ask("\n[cyan]Insert word to search in all site: ").strip()
+    len_database = search(film_search, domain)
+
+    if len_database != 0:
+
+        # Select title from list
+        select_title = get_select_title()
+
+        # For series
+        if select_title.type == 'tv':
+            download_series(
+                tv_id=select_title.id,
+                tv_name=select_title.slug, 
+                version=site_version, 
+                domain=domain
+            )
+        
+        # For film
+        else:
+            download_film(
+                id_film=select_title.id, 
+                title_name=select_title.slug, 
+                domain=domain
+            )
+    
+    # If no media find
+    else:
+        console.print("[red]Cant find a single element")
+
+    # End
+    console.print("\n[red]Done")
+
+def main_switch():
+    """
+    Main function for anime unity
+    """
+
+    # Get site domain and version
     initialize()
 
-    # Retrieving domain and site version
-    domain, site_version = Page.domain_version()
+    # Make request to site to get content that corrsisponde to that string
+    film_search = msg.ask("\n[cyan]Insert word to search in all site: ").strip()
+    len_database = anime_search(film_search)
 
-    # Searching for movie or TV series title
-    film_search = msg.ask("\n[blue]Search for any Movie or TV Series title").strip()
-    db_title = Page.search(film_search, domain)
-    Page.display_search_results(db_title)
+    if len_database != 0:
 
-    if db_title:
+        # Select title from list
+        select_title = get_select_title()
+        
+        # For series
+        if select_title.type == 'TV':
+            anime_download_series(
+                tv_id=select_title.id,
+                tv_name=select_title.slug
+            )
+        
+        # For film
+        else:
+            anime_download_film(
+                id_film=select_title.id, 
+                title_name=select_title.slug
+            )
 
-        # Displaying total results
-        console.print(f"\n[blue]Total result: {len(db_title)}")
-
-        # Asking user to select title(s) to download
-        console.print(
-            "\n[green]Insert [yellow]INDEX [red]number[green], or [red][1-2] [green]for a range of movies/tv series, or [red][1,3,5] [green]to select discontinued movie/tv series"
-        )
-        console.print("\n[red]In case of a TV Series you will also choose seasons and episodes to download")
-        index_select = str(msg.ask("\n[blue]Select [yellow]INDEX [blue]to download")).strip()
-
-        # For only number ( to fix )
-        if index_select.isnumeric():
-            index_select = int(index_select)
-            if 0 <= index_select <= len(db_title) - 1:
-                selected_title = db_title[index_select]
-
-                if selected_title['type'] == "movie":
-                    console.print(f"[green]\nSelected Movie: {selected_title['name']}")
-                    download_film(selected_title['id'], selected_title['slug'], domain)
-                else:
-                    console.print(f"[green]\nSelected TV Series: {selected_title['name']}")
-                    download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
-            else:
-                console.print("[red]Wrong INDEX for selection")
-
-        # For range like [5-15] ( to fix )
-        elif "[" in index_select:
-            if "-" in index_select:
-                start, end = map(int, index_select[1:-1].split('-'))
-                result = list(range(start, end + 1))
-                for n in result:
-                    selected_title = db_title[n]
-                    if selected_title['type'] == "movie":
-                        console.print(f"[green]\nSelected Movie: {selected_title['name']}")
-                        download_film(selected_title['id'], selected_title['slug'], domain)
-                    else:
-                        console.print(f"[green]\nSelected TV Series: {selected_title['name']}")
-                        download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
-
-            # For a list of specific ( to fix )
-            elif "," in index_select:
-                result = list(map(int, index_select[1:-1].split(',')))
-                for n in result:
-                    selected_title = db_title[n]
-                    if selected_title['type'] == "movie":
-                        console.print(f"[green]\nSelected Movie: {selected_title['name']}")
-                        download_film(selected_title['id'], selected_title['slug'], domain)
-                    else:
-                        console.print(f"[green]\nSelected TV Series: {selected_title['name']}")
-                        download_tv(selected_title['id'], selected_title['slug'], site_version, domain)
-            else:
-                console.print("[red]Wrong INDEX for selection")
+    # If no media find
     else:
-        console.print("[red]Couldn't find any entries for the selected title")
+        console.print("[red]Cant find a single element")
 
-    console.print("[red]Done!")
 
 if __name__ == '__main__':
 
-    main()
+    logger = Logger()
 
-    while 1:
-        cmd_insert = str(msg.ask("[red]Quit the script ? [red][[yellow]yes[red] / [yellow]no[red]]"))
-
-        if cmd_insert in ['y', 'yes', 'ye']:
-            break
-        else:
+    if not SWITCH_TO:
+        if not CLOSE_CONSOLE:
             main()
+        else:
+            while 1:
+                main()
+
+    else:
+        if not CLOSE_CONSOLE:
+            main_switch()
+        else:
+            while 1:
+                main_switch()

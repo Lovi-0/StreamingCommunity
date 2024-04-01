@@ -1,5 +1,5 @@
 __title__ = 'Streaming_community'
-__version__ = 'v0.9.2'
+__version__ = 'v1.0.0'
 __author__ = 'Ghost6446'
 __description__ = 'A command-line program to download film'
 __license__ = 'MIT License'

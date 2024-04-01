@@ -1,10 +1,55 @@
 {
-    "root_path": "videos",
-    "movies_folder_name": "Movies",
-    "series_folder_name": "Series",
-    "download_subtitles": true,
-    "download_default_language": true,
-    "selected_language": "English",
-    "max_worker": 20,
-    "domain": "forum"
+    "DEFAULT": {
+        "debug": false,
+        "log_file": "debug.txt",
+        "log_to_file": true,
+        "get_info": false,
+        "show_message": true,
+        "clean_console": true,
+        "bypass_ffmpeg": true,
+        "bypass_github": true,
+        "get_moment_title": false,
+        "root_path": "Video",
+        "movies_folder_name": "Movies",
+        "series_folder_name": "Series",
+        "anime_folder_name": "Anime",
+        "not_close": false,
+        "swith_anime": false
+    },
+    "SITE": {
+        "streaming_site_name": "streamingcommunity",
+        "streaming_domain": "forum",
+        "anime_site_name": "animeunity",
+        "anime_domain": "to"
+    },
+    "M3U8": {
+        "tdqm_workers": 20,
+        "tqdm_progress_timeout": 10,
+        "minium_ts_files_in_folder": 15,
+        "donwload_percentage": 1,
+        "requests_timeout": 5,
+        "enable_time_quit": false,
+        "tqdm_show_progress": false,
+        "cleanup_tmp_folder": true
+    },
+    "M3U8_OPTIONS": {
+        "download_audio": true,
+        "download_subtitles": true,
+        "specific_list_audio": [
+            "ita"
+        ],
+        "specific_list_subtitles": [
+            "eng"
+        ],
+        "request": {
+            "index": {
+                "authority": "vixcloud.co",
+                "user-agent": ""
+            },
+            "segments": {
+                "Origin": "https://vixcloud.co",
+                "user-agent": ""
+            }
+        }
+    }
 }
