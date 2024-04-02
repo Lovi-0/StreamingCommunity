@@ -29,18 +29,20 @@ from Src.Util.os import (
     compute_sha1_hash,
     convert_to_hex
 )
-from Src.Lib.FFmpeg.util.helper import (
-    print_duration_table,
-    transcode_with_subtitles,
-    join_audios,
-    concatenate_and_save
-)
 
 # Logic class
-from .util.math_calc import TSFileSizeCalculator
-from .util.url_fix import M3U8_UrlFix
-from .util.decryption import M3U8_Decryption
-from .util.parser import M3U8_Parser
+from .util import (
+    print_duration_table,
+    concatenate_and_save,
+    join_audios,
+    transcode_with_subtitles
+)
+from .util import (
+    M3U8_Decryption,
+    M3U8_Ts_Files,
+    M3U8_Parser,
+    M3U8_UrlFix
+)
 
 # Config
 Download_audio = config_manager.get_bool('M3U8_OPTIONS', 'download_audio')
@@ -49,11 +51,11 @@ DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_OPTIONS', 'specific_list
 DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_OPTIONS', 'specific_list_subtitles')
 TQDM_MAX_WORKER = config_manager.get_int('M3U8', 'tdqm_workers')
 TQDM_PROGRESS_TIMEOUT = config_manager.get_int('M3U8', 'tqdm_progress_timeout')
-COMPLETED_PERCENTAGE = config_manager.get_float('M3U8', 'donwload_percentage')
+COMPLETED_PERCENTAGE = config_manager.get_float('M3U8', 'download_percentage')
 REQUESTS_TIMEOUT = config_manager.get_int('M3U8', 'requests_timeout')
 ENABLE_TIME_TIMEOUT = config_manager.get_bool('M3U8', 'enable_time_quit')
 TQDM_SHOW_PROGRESS = config_manager.get_bool('M3U8', 'tqdm_show_progress')
-MIN_TS_FILES_IN_FOLDER = config_manager.get_int('M3U8', 'minium_ts_files_in_folder')
+MIN_TS_FILES_IN_FOLDER = config_manager.get_int('M3U8', 'minimum_ts_files_in_folder')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8', 'cleanup_tmp_folder')
 
 # Variable
@@ -88,7 +90,7 @@ class M3U8_Segments:
         # Config
         self.enable_timer = ENABLE_TIME_TIMEOUT
         self.progress_timeout = TQDM_PROGRESS_TIMEOUT
-        self.class_ts_files_size = TSFileSizeCalculator()
+        self.class_ts_files_size = M3U8_Ts_Files()
 
     def parse_data(self, m3u8_content: str) -> None:
         """

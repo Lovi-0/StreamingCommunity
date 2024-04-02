@@ -5,6 +5,7 @@ from Src.Util.console import console, msg
 from Src.Util.config import config_manager
 from Src.Util.table import TVShowManager
 from Src.Util.message import start_message
+from Src.Util.os import remove_special_characters
 from Src.Lib.FFmpeg.my_m3u8 import Downloader
 from .Class import VideoSource
 
@@ -24,6 +25,7 @@ video_source.set_url_base_name(STREAM_SITE_NAME)
 table_show_manager = TVShowManager()
 
 
+# --> LOGIC
 def manage_selection(cmd_insert: str, max_count: int) -> list[int]:
     """
     Manage user selection for seasons to download.
@@ -51,7 +53,7 @@ def manage_selection(cmd_insert: str, max_count: int) -> list[int]:
     elif cmd_insert == "*":
         list_season_select = list(range(1, max_count+1))
 
-    # Return list of selected seasons
+    # Return list of selected seasons)
     return list_season_select
 
 def display_episodes_list() -> str:
@@ -90,6 +92,8 @@ def display_episodes_list() -> str:
 
     return last_command
 
+
+# --> DOWNLOAD
 def donwload_video(tv_name: str, index_season_selected: int, index_episode_selected: int) -> None:
     """
     Download a single episode video.
@@ -106,8 +110,8 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
     episode_id = video_source.obj_episode_manager.episodes[index_episode_selected - 1].id
 
     # Define filename and path for the downloaded video
-    mp4_name = f"{index_episode_selected}.mp4"
-    mp4_path = os.path.join(ROOT_PATH, SERIES_FOLDER, tv_name, f"S{index_season_selected}", f"E{index_episode_selected}")
+    mp4_name = f"{index_episode_selected}_{remove_special_characters(video_source.obj_episode_manager.episodes[index_episode_selected - 1].name)}.mp4"
+    mp4_path = os.path.join(ROOT_PATH, SERIES_FOLDER, tv_name, f"S{index_season_selected}")
     os.makedirs(mp4_path, exist_ok=True)
 
     # Get iframe and content for the episode
@@ -146,25 +150,26 @@ def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: boo
 
     # Download all episodes wihtout ask
     if donwload_all:
-        for i_episode in range(0, episodes_count):
+        for i_episode in range(1, episodes_count+1):
             donwload_video(tv_name, index_season_selected, i_episode)
 
-        # Exit
-        console.print("\n[red]Done")
-        sys.exit(0)
+        console.print(f"\n[red]Download [yellow]season: [red]{index_season_selected}.")
 
-    # Display episodes list and manage user selection
-    last_command = display_episodes_list()
-    list_episode_select = manage_selection(last_command, episodes_count)
+    # If not download all episode but a single season
+    if not donwload_all:
 
-    # Download selected episodes
-    if len(list_episode_select) == 1 and last_command != "*":
-        donwload_video(tv_name, index_season_selected, list_episode_select[0])
+        # Display episodes list and manage user selection
+        last_command = display_episodes_list()
+        list_episode_select = manage_selection(last_command, episodes_count)
 
-    # Download all other episodes selecter
-    else:
-        for i_episode in list_episode_select:
-            donwload_video(tv_name, index_season_selected, i_episode)
+        # Download selected episodes
+        if len(list_episode_select) == 1 and last_command != "*":
+            donwload_video(tv_name, index_season_selected, list_episode_select[0])
+
+        # Download all other episodes selecter
+        else:
+            for i_episode in list_episode_select:
+                donwload_video(tv_name, index_season_selected, i_episode)
 
 def download_series(tv_id: str, tv_name: str, version: str, domain: str) -> None:
     """

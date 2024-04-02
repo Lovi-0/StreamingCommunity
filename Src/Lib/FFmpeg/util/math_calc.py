@@ -2,7 +2,7 @@
 
 from Src.Util.os import format_size
 
-class TSFileSizeCalculator:
+class M3U8_Ts_Files:
     def __init__(self):
         """
         Initialize the TSFileSizeCalculator object.

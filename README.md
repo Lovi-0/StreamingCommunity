@@ -93,8 +93,8 @@ You can change some behaviors by tweaking the configuration file.
     "M3U8": {
         "tdqm_workers": 20,
         "tqdm_progress_timeout": 10,
-        "minium_ts_files_in_folder": 15,
-        "donwload_percentage": 1,
+        "minimum_ts_files_in_folder": 15,
+        "download_percentage": 1,
         "requests_timeout": 5,
         "enable_time_quit": false,
         "tqdm_show_progress": false,
@@ -136,8 +136,8 @@ You can change some behaviors by tweaking the configuration file.
 | M3U8                       |               | Contains options specific to M3U8.                                                                                          |                          |
 | tdqm_workers               | 20            | The number of workers that will cooperate to download .ts files.**A high value may slow down your PC**                      | 40                       |
 | tqdm_progress_timeout      | 10            | The timeout duration for progress display updates in seconds after quit download.                                           | 5                        |
-| minium_ts_files_in_folder  | 15            | The minimum number of .ts files expected in a folder.                                                                       | 10                       |
-| donwload_percentage        | 1             | The percentage of download completion required to consider the download complete.                                           | 0.95                     |
+| minimum_ts_files_in_folder | 15            | The minimum number of .ts files expected in a folder.                                                                       | 10                       |
+| download_percentage        | 1             | The percentage of download completion required to consider the download complete.                                           | 0.95                     |
 | requests_timeout           | 5             | The timeout duration for HTTP requests in seconds.                                                                          | 10                       |
 | enable_time_quit           | false         | Whether to enable quitting the download after a certain time period.                                                        | true                     |
 | tqdm_show_progress         | false         | Whether to show progress during downloads or not.**May slow down your PC**                                                  | true                     |

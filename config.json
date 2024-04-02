@@ -23,8 +23,8 @@
     "M3U8": {
         "tdqm_workers": 20,
         "tqdm_progress_timeout": 10,
-        "minium_ts_files_in_folder": 15,
-        "donwload_percentage": 1,
+        "minimum_ts_files_in_folder": 15,
+        "download_percentage": 1,
         "requests_timeout": 5,
         "enable_time_quit": false,
         "tqdm_show_progress": false,

@@ -7,6 +7,7 @@ import time
 import json
 import hashlib
 import logging
+import re
 
 def remove_folder(folder_path: str) -> None:
     """
@@ -39,14 +40,32 @@ def remove_file(file_path: str) -> None:
             print(f"Error removing file '{file_path}': {e}")
     #else:
     #    print(f"File '{file_path}' does not exist.")
+            
+def remove_special_characters(filename) -> str:
+    """
+    Removes special characters from a filename to make it suitable for creating a filename in Windows.
+    
+    Args:
+        filename (str): The original filename containing special characters.
+    
+    Returns:
+        str: The cleaned filename without special characters.
+    """
 
-def move_file_one_folder_up(file_path):
+    # Define the regex pattern to match special characters
+    pattern = r'[^\w\-_\. ]'
+    
+    # Replace special characters with an empty string
+    cleaned_filename = re.sub(pattern, '', filename)
+    
+    return cleaned_filename
+
+def move_file_one_folder_up(file_path) -> None:
     """
     Move a file one folder up from its current location.
 
     Args:
         file_path (str): Path to the file to be moved.
-
     """
     
     # Get the directory of the file
@@ -79,7 +98,7 @@ def read_json(path: str):
 
     return config
 
-def save_json(json_obj, path: str) -> (None):
+def save_json(json_obj, path: str) -> None:
     """Saves JSON object to the specified file path.
 
     Args:
@@ -90,7 +109,7 @@ def save_json(json_obj, path: str) -> (None):
     with open(path, 'w') as file:
         json.dump(json_obj, file, indent=4)  # Adjust the indentation as needed
 
-def clean_json(path: str) -> (None):
+def clean_json(path: str) -> None:
     """Reads JSON data from the file, cleans it, and saves it back.
 
     Args:
@@ -113,7 +132,7 @@ def clean_json(path: str) -> (None):
     # Save the modified JSON data back to the file
     save_json(modified_data, path)
 
-def format_size(size_bytes: float):
+def format_size(size_bytes: float) -> str:
     """
     Format the size in bytes into a human-readable format.
 
@@ -135,7 +154,7 @@ def format_size(size_bytes: float):
     # Round the size to two decimal places and return with the appropriate unit
     return f"{size_bytes:.2f} {units[unit_index]}"
 
-def compute_sha1_hash(input_string: str) -> (str):
+def compute_sha1_hash(input_string: str) -> str:
     """
     Computes the SHA-1 hash of the input string.
 
@@ -151,7 +170,7 @@ def compute_sha1_hash(input_string: str) -> (str):
     # Return the hashed string
     return hashed_string
 
-def decode_bytes(bytes_data: bytes, encodings_to_try: list[str] = None) -> (str):
+def decode_bytes(bytes_data: bytes, encodings_to_try: list[str] = None) -> str:
     """
     Decode a byte sequence using a list of encodings and return the decoded string.
 
