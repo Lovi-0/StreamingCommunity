@@ -54,6 +54,7 @@ TQDM_PROGRESS_TIMEOUT = config_manager.get_int('M3U8', 'tqdm_progress_timeout')
 COMPLETED_PERCENTAGE = config_manager.get_float('M3U8', 'download_percentage')
 REQUESTS_TIMEOUT = config_manager.get_int('M3U8', 'requests_timeout')
 ENABLE_TIME_TIMEOUT = config_manager.get_bool('M3U8', 'enable_time_quit')
+USE_OPENSSL = config_manager.get_bool('M3U8', 'use_openssl')
 TQDM_SHOW_PROGRESS = config_manager.get_bool('M3U8', 'tqdm_show_progress')
 MIN_TS_FILES_IN_FOLDER = config_manager.get_int('M3U8', 'minimum_ts_files_in_folder')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8', 'cleanup_tmp_folder')
@@ -226,11 +227,13 @@ class M3U8_Segments:
         - progress_counter (tqdm): The progress counter object.
         - stop_event (threading.Event): The event to signal when to quit.
         """
+
         # Break if stop event is true
         if stop_event.is_set():
             return
 
         try:
+
             # Get ts url and create a filename based on index
             ts_url = self.segments[index]
             ts_filename = os.path.join(self.temp_folder, f"{index}.ts")
@@ -246,12 +249,21 @@ class M3U8_Segments:
 
             # If data is retrieved
             if ts_content is not None:
+                
                 # Create a file to save data
                 with open(ts_filename, "wb") as ts_file:
+
                     # Decrypt if there is an IV in the main M3U8 index
                     if self.key and self.decryption.iv:
-                        decrypted_data = self.decryption.decrypt(ts_content)
-                        ts_file.write(decrypted_data)
+
+                        # pycryptodomex, faster using win11
+                        if USE_OPENSSL:
+                            self.decryption.decrypt_openssl(ts_content, ts_filename)
+                        else:
+                            decrypted_data = self.decryption.decrypt(ts_content)
+                            ts_file.write(decrypted_data)
+
+                    # For no iv and key
                     else:
                         ts_file.write(ts_content)
 

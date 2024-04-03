@@ -26,6 +26,7 @@
         "minimum_ts_files_in_folder": 15,
         "download_percentage": 1,
         "requests_timeout": 5,
+        "use_openssl": false,
         "enable_time_quit": false,
         "tqdm_show_progress": false,
         "cleanup_tmp_folder": true

@@ -5,7 +5,6 @@ from .helper import (
     get_video_duration,
     format_duration,
     print_duration_table,
-    compute_sha1_hash,
     add_subtitle,
     concatenate_and_save,
     join_audios,

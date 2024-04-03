@@ -5,11 +5,11 @@ from Src.Util.console import console
 
 # Import
 import ffmpeg
-import hashlib
+import subprocess
 import os
+import json
 import logging
 import shutil
-
 
 def has_audio_stream(video_path: str) -> bool:
     """
@@ -21,10 +21,20 @@ def has_audio_stream(video_path: str) -> bool:
     Returns:
     - has_audio (bool): True if the input video has an audio stream, False otherwise.
     """
+    
     try:
-        probe_result = ffmpeg.probe(video_path, select_streams='a')
-        return bool(probe_result['streams'])
-    except ffmpeg.Error:
+
+        ffprobe_cmd = ['ffprobe', '-v', 'error', '-print_format', 'json', '-select_streams', 'a', '-show_streams', video_path]
+        result = subprocess.run(ffprobe_cmd, capture_output=True, text=True, check=True)
+
+        # Parse JSON output
+        probe_result = json.loads(result.stdout)
+
+        # Check if there are audio streams
+        return bool(probe_result.get('streams', []))
+    
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error: {e.stderr}")
         return None
 
 def get_video_duration(file_path: str) -> (float):
@@ -41,16 +51,17 @@ def get_video_duration(file_path: str) -> (float):
 
     try:
 
-        # Use FFmpeg probe to get video information
-        probe = ffmpeg.probe(file_path)
+        ffprobe_cmd = ['ffprobe', '-v', 'error', '-show_format', '-print_format', 'json', file_path]
+        result = subprocess.run(ffprobe_cmd, capture_output=True, text=True, check=True)
+
+        # Parse JSON output
+        probe_result = json.loads(result.stdout)
 
         # Extract duration from the video information
-        return float(probe['format']['duration'])
-
-    except ffmpeg.Error as e:
-
-        # Handle FFmpeg errors
-        print(f"Error: {e.stderr}")
+        return float(probe_result['format']['duration'])
+    
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error: {e.stderr}")
         return None
 
 def format_duration(seconds: float) -> list[int, int, int]:
@@ -86,22 +97,6 @@ def print_duration_table(file_path: str) -> None:
 
         # Print the formatted duration
         console.log(f"[cyan]Info [green]'{file_path}': [purple]{int(hours)}[red]h [purple]{int(minutes)}[red]m [purple]{int(seconds)}[red]s")
-
-def compute_sha1_hash(input_string: str) -> (str):
-    """
-    Computes the SHA-1 hash of the input string.
-
-    Args:
-    input_string (str): The string to be hashed.
-
-    Returns:
-    str: The SHA-1 hash of the input string.
-    """
-    # Compute the SHA-1 hash
-    hashed_string = hashlib.sha1(input_string.encode()).hexdigest()
-    
-    # Return the hashed string
-    return hashed_string
 
 # SINGLE SUBTITLE
 def add_subtitle(input_video_path: str, input_subtitle_path: str, output_video_path: str, subtitle_language: str = 'ita', prefix: str = "single_sub") -> str:
