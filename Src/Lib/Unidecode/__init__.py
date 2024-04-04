@@ -1,138 +1,143 @@
-# -*- coding: utf-8 -*-
-# vi:tabstop=4:expandtab:sw=4
-"""Transliterate Unicode text into plain 7-bit ASCII.
+# 04.04.24
 
-Example usage:
 
->>> from unidecode import unidecode
->>> unidecode("\u5317\u4EB0")
-"Bei Jing "
+# Import
+import os
+import logging
+import importlib.util
 
-The transliteration uses a straightforward map, and doesn't have alternatives
-for the same character based on language, position, or anything else.
-
-A standard string object will be returned. If you need bytes, use:
-
->>> unidecode("Κνωσός").encode("ascii")
-b'Knosos'
-"""
-import warnings
-from typing import Dict, Optional, Sequence
-
-Cache = {} # type: Dict[int, Optional[Sequence[Optional[str]]]]
+# Variable
+Cache = {}
 
 class UnidecodeError(ValueError):
-    def __init__(self, message: str, index: Optional[int] = None) -> None:
-        """Raised for Unidecode-related errors.
+    pass
 
-        The index attribute contains the index of the character that caused
-        the error.
-        """
-        super(UnidecodeError, self).__init__(message)
-        self.index = index
+def transliterate_nonascii(string: str, errors: str = 'ignore', replace_str: str = '?') -> str:
+    """Transliterates non-ASCII characters in a string to their ASCII counterparts.
 
+    Args:
+        string (str): The input string containing non-ASCII characters.
+        errors (str): Specifies the treatment of errors. Can be 'ignore', 'strict', 'replace', or 'preserve'.
+        replace_str (str): The replacement string used when errors='replace'.
 
-def unidecode_expect_ascii(string: str, errors: str = 'ignore', replace_str: str = '?') -> str:
-    """Transliterate an Unicode object into an ASCII string
-
-    >>> unidecode("\u5317\u4EB0")
-    "Bei Jing "
-
-    This function first tries to convert the string using ASCII codec.
-    If it fails (because of non-ASCII characters), it falls back to
-    transliteration using the character tables.
-
-    This is approx. five times faster if the string only contains ASCII
-    characters, but slightly slower than unicode_expect_nonascii if
-    non-ASCII characters are present.
-
-    errors specifies what to do with characters that have not been
-    found in replacement tables. The default is 'ignore' which ignores
-    the character. 'strict' raises an UnidecodeError. 'replace'
-    substitutes the character with replace_str (default is '?').
-    'preserve' keeps the original character.
-
-    Note that if 'preserve' is used the returned string might not be
-    ASCII!
+    Returns:
+        str: The transliterated string with non-ASCII characters replaced.
     """
+    return _transliterate(string, errors, replace_str)
 
-    try:
-        bytestring = string.encode('ASCII')
-    except UnicodeEncodeError:
-        pass
-    else:
-        return string
+def _get_ascii_representation(char: str) -> str:
+    """Obtains the ASCII representation of a Unicode character.
 
-    return _unidecode(string, errors, replace_str)
+    Args:
+        char (str): The Unicode character.
 
-def unidecode_expect_nonascii(string: str, errors: str = 'ignore', replace_str: str = '?') -> str:
-    """Transliterate an Unicode object into an ASCII string
-
-    >>> unidecode("\u5317\u4EB0")
-    "Bei Jing "
-
-    See unidecode_expect_ascii.
+    Returns:
+        str: The ASCII representation of the character.
     """
-
-    return _unidecode(string, errors, replace_str)
-
-unidecode = unidecode_expect_ascii
-
-def _get_repl_str(char: str) -> Optional[str]:
     codepoint = ord(char)
 
+    # If the character is ASCII, return it as is
     if codepoint < 0x80:
-        # Already ASCII
         return str(char)
 
+    # Ignore characters outside the BMP (Basic Multilingual Plane)
     if codepoint > 0xeffff:
-        # No data on characters in Private Use Area and above.
         return None
 
+    # Warn about surrogate characters
     if 0xd800 <= codepoint <= 0xdfff:
-        warnings.warn(  "Surrogate character %r will be ignored. "
-                        "You might be using a narrow Python build." % (char,),
-                        RuntimeWarning, 2)
+        logging.warning("Surrogate character %r will be ignored. "
+                        "You might be using a narrow Python build.", char)
 
-    section = codepoint >> 8   # Chop off the last two hex digits
-    position = codepoint % 256 # Last two hex digits
+    # Calculate section and position
+    section = codepoint >> 8
+    position = codepoint % 256 
 
     try:
+        # Look up the character in the cache
         table = Cache[section]
     except KeyError:
         try:
-            mod = __import__('unidecode.x%03x'%(section), globals(), locals(), ['data'])
+            # Import the module corresponding to the section
+            module_name = f"x{section:03x}.py"
+            main = os.path.abspath(os.path.dirname(__file__))
+            module_path = os.path.join(main, module_name)
+            spec = importlib.util.spec_from_file_location(module_name, module_path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
         except ImportError:
-            # No data on this character
+            # If module import fails, set cache entry to None and return
             Cache[section] = None
             return None
 
-        Cache[section] = table = mod.data
+        # Update cache with module data
+        Cache[section] = table = module.data
 
+    # Return the ASCII representation if found, otherwise None
     if table and len(table) > position:
         return table[position]
     else:
         return None
 
-def _unidecode(string: str, errors: str, replace_str:str) -> str:
+def _transliterate(string: str, errors: str, replace_str: str) -> str:
+    """Main transliteration function.
+
+    Args:
+        string (str): The input string.
+        errors (str): Specifies the treatment of errors. Can be 'ignore', 'strict', 'replace', or 'preserve'.
+        replace_str (str): The replacement string used when errors='replace'.
+
+    Returns:
+        str: The transliterated string.
+    """
     retval = []
 
-    for index, char in enumerate(string):
-        repl = _get_repl_str(char)
+    for char in string:
+        # Get the ASCII representation of the character
+        ascii_char = _get_ascii_representation(char)
 
-        if repl is None:
+        if ascii_char is None:
+            # Handle errors based on the specified policy
             if errors == 'ignore':
-                repl = ''
+                ascii_char = ''
             elif errors == 'strict':
-                raise UnidecodeError('no replacement found for character %r '
-                        'in position %d' % (char, index), index)
+                logging.error(f'No replacement found for character {char!r}')
+                raise UnidecodeError(f'no replacement found for character {char!r}')
             elif errors == 'replace':
-                repl = replace_str
+                ascii_char = replace_str
             elif errors == 'preserve':
-                repl = char
+                ascii_char = char
             else:
-                raise UnidecodeError('invalid value for errors parameter %r' % (errors,))
+                logging.error(f'Invalid value for errors parameter {errors!r}')
+                raise UnidecodeError(f'invalid value for errors parameter {errors!r}')
 
-        retval.append(repl)
+        # Append the ASCII representation to the result
+        retval.append(ascii_char)
 
     return ''.join(retval)
+
+def transliterate_expect_ascii(string: str, errors: str = 'ignore', replace_str: str = '?') -> str:
+    """Transliterates non-ASCII characters in a string, expecting ASCII input.
+
+    Args:
+        string (str): The input string containing non-ASCII characters.
+        errors (str): Specifies the treatment of errors. Can be 'ignore', 'strict', 'replace', or 'preserve'.
+        replace_str (str): The replacement string used when errors='replace'.
+
+    Returns:
+        str: The transliterated string with non-ASCII characters replaced.
+    """
+    try:
+        # Check if the string can be encoded as ASCII
+        string.encode('ASCII')
+    except UnicodeEncodeError:
+        # If encoding fails, fall back to transliteration
+        pass
+    else:
+        # If the string is already ASCII, return it as is
+        return string
+
+    # Otherwise, transliterate non-ASCII characters
+    return _transliterate(string, errors, replace_str)
+
+transliterate = transliterate_expect_ascii
