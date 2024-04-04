@@ -207,11 +207,11 @@ class M3U8_Segments:
                 return response.content
 
             else:
-                logging.info(f"Skipping invalid URL: {ts_url}")
+                logging.warn(f"Skipping invalid URL: {ts_url}")
                 return None
 
         except requests.exceptions.RequestException as req_err:
-            logging.error(f"Error occurred during request to {ts_url}: {req_err}")
+            logging.warn(f"Error occurred during request to {ts_url}: {req_err}")
             return None
 
         except Exception as e:

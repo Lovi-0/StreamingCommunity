@@ -58,3 +58,12 @@ class EpisodeManager:
             int: Number of episodes.
         """
         return len(self.episodes)
+    
+    def clear(self) -> None:
+        """
+        This method clears the episodes list.
+
+        Args:
+            self: The object instance.
+        """
+        self.episodes.clear()

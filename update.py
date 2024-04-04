@@ -135,4 +135,5 @@ def main_upload():
 main_upload()
 
 # win
-# pyinstaller --onefile --add-data "./Src/upload/__version__.py;Src/upload" run.py
+# pyinstaller --upx-dir="C:\Program Files\upx" --onefile run.py
+

@@ -77,4 +77,12 @@ class MediaManager:
         """
         return len(self.media_list)
 
+    def clear(self) -> None:
+        """
+        This method clears the medias list.
+
+        Args:
+            self: The object instance.
+        """
+        self.media_list.clear()
 

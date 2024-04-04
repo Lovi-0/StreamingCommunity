@@ -60,3 +60,12 @@ class TitleManager:
             int: Number of titles.
         """
         return len(self.titles)
+    
+    def clear(self) -> None:
+        """
+        This method clears the titles list.
+
+        Args:
+            self: The object instance.
+        """
+        self.titles.clear()

@@ -1,6 +1,7 @@
 # 01.03.2023
 
 # Class import
+from .version import __version__
 from Src.Util.console import console
 
 # General import
@@ -13,20 +14,6 @@ repo_name = "StreamingCommunity_api"
 repo_user = "ghost6446"
 main = os.path.abspath(os.path.dirname(__file__))
 
-
-def get_install_version():
-    """
-    Get the installed version from the '__version__.py' file.
-    """
-
-    about = {}
-
-    version_file_path = os.path.join(main, '__version__.py')
-    
-    with open(version_file_path, 'r', encoding='utf-8') as f:
-        exec(f.read(), about)
-
-    return about['__version__']
 
 def update():
     """
@@ -56,10 +43,8 @@ def update():
     else:
         percentual_stars = 0
 
-    installed_version = get_install_version()
-
     # Check installed version
-    if installed_version != last_version:
+    if __version__ != last_version:
         console.print(f"[red]Version: [yellow]{last_version}")
     else:
         console.print(f"[red]Everything up to date")
