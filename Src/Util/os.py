@@ -1,6 +1,5 @@
 # 24.01.24
 
-# Import
 import shutil
 import os
 import time
@@ -8,6 +7,7 @@ import json
 import hashlib
 import logging
 import re
+
 
 def remove_folder(folder_path: str) -> None:
     """
@@ -22,6 +22,7 @@ def remove_folder(folder_path: str) -> None:
             shutil.rmtree(folder_path)
         except OSError as e:
             print(f"Error removing folder '{folder_path}': {e}")
+
 
 def remove_file(file_path: str) -> None:
     """
@@ -38,9 +39,8 @@ def remove_file(file_path: str) -> None:
             os.remove(file_path)
         except OSError as e:
             print(f"Error removing file '{file_path}': {e}")
-    #else:
-    #    print(f"File '{file_path}' does not exist.")
-            
+
+
 def remove_special_characters(filename) -> str:
     """
     Removes special characters from a filename to make it suitable for creating a filename in Windows.
@@ -59,6 +59,7 @@ def remove_special_characters(filename) -> str:
     cleaned_filename = re.sub(pattern, '', filename)
     
     return cleaned_filename
+
 
 def move_file_one_folder_up(file_path) -> None:
     """
@@ -83,6 +84,7 @@ def move_file_one_folder_up(file_path) -> None:
     # Move the file
     os.rename(file_path, new_path)
 
+
 def read_json(path: str):
     """Reads JSON file and returns its content.
 
@@ -98,6 +100,7 @@ def read_json(path: str):
 
     return config
 
+
 def save_json(json_obj, path: str) -> None:
     """Saves JSON object to the specified file path.
 
@@ -108,6 +111,7 @@ def save_json(json_obj, path: str) -> None:
     
     with open(path, 'w') as file:
         json.dump(json_obj, file, indent=4)  # Adjust the indentation as needed
+
 
 def clean_json(path: str) -> None:
     """Reads JSON data from the file, cleans it, and saves it back.
@@ -132,6 +136,7 @@ def clean_json(path: str) -> None:
     # Save the modified JSON data back to the file
     save_json(modified_data, path)
 
+
 def format_size(size_bytes: float) -> str:
     """
     Format the size in bytes into a human-readable format.
@@ -154,6 +159,7 @@ def format_size(size_bytes: float) -> str:
     # Round the size to two decimal places and return with the appropriate unit
     return f"{size_bytes:.2f} {units[unit_index]}"
 
+
 def compute_sha1_hash(input_string: str) -> str:
     """
     Computes the SHA-1 hash of the input string.
@@ -169,6 +175,7 @@ def compute_sha1_hash(input_string: str) -> str:
     
     # Return the hashed string
     return hashed_string
+
 
 def decode_bytes(bytes_data: bytes, encodings_to_try: list[str] = None) -> str:
     """
@@ -199,6 +206,7 @@ def decode_bytes(bytes_data: bytes, encodings_to_try: list[str] = None) -> str:
     logging.warning("Unable to decode the data as text. Treating it as raw bytes.")
     logging.info("Raw byte data: %s", bytes_data)
     return None
+
 
 def convert_to_hex(bytes_data: bytes) -> str:
     """

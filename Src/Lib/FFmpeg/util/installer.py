@@ -1,9 +1,5 @@
 # 24.01.2023
 
-# Class
-from Src.Util.console import console
-
-# Import
 import subprocess
 import os
 import requests
@@ -12,7 +8,10 @@ import sys
 import ctypes
 
 
-# [ func ]
+# Internal utilities
+from Src.Util.console import console
+
+
 def isAdmin() -> (bool):
     """ 
     Check if the current user has administrative privileges.
@@ -28,6 +27,7 @@ def isAdmin() -> (bool):
         is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
 
     return is_admin
+
 
 def get_version():
     """
@@ -54,6 +54,7 @@ def get_version():
         # If there's an error executing the FFmpeg command
         print("Error executing FFmpeg command:", e.output.strip())
         raise e
+
 
 def download_ffmpeg():
     """
@@ -101,6 +102,7 @@ def download_ffmpeg():
         # If the downloaded file is not a valid zip file
         print(f"Failed to extract FFmpeg zip file: {e}")
         raise e
+
 
 def check_ffmpeg():
     """

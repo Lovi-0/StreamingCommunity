@@ -4,6 +4,7 @@ import json
 import os
 from typing import Any, List
 
+
 class ConfigManager:
     def __init__(self, file_path: str = 'config.json') -> None:
         """Initialize the ConfigManager.

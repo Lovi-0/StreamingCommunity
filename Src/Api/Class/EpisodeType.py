@@ -21,6 +21,7 @@ class Episode:
         self.created_at: str = data.get('created_at', '')
         self.updated_at: str = data.get('updated_at', '')
 
+
 class EpisodeManager:
     def __init__(self):
         """

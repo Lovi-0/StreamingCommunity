@@ -2,6 +2,7 @@
 
 from typing import List, Dict, Union
 
+
 class Title:
     def __init__(self, title_data: Dict[str, Union[int, str, None]]):
         """
@@ -19,6 +20,7 @@ class Title:
         self.created_at: str = title_data.get('created_at')
         self.updated_at: str = title_data.get('updated_at')
         self.episodes_count: int = title_data.get('episodes_count')
+
 
 class TitleManager:
     def __init__(self):

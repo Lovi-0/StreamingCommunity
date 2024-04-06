@@ -2,6 +2,7 @@
 
 from typing import Dict, Any
 
+
 class WindowVideo:
     def __init__(self, data: Dict[str, Any]):
         """
@@ -24,6 +25,7 @@ class WindowVideo:
         self.legacy: bool = data.get('legacy', '')
         self.folder_id: int = data.get('folder_id', '')
         self.created_at_diff: str = data.get('created_at_diff', '')
+
 
 class WindowParameter:
     def __init__(self, data: Dict[str, Any]):

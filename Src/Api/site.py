@@ -1,25 +1,31 @@
 # 10.12.23
 
-# Class import
+import sys
+import json
+import logging
+
+
+# External libraries
+import requests
+from bs4 import BeautifulSoup
+
+
+# Internal utilities
 from Src.Util.table import TVShowManager
 from Src.Util.headers import get_headers
 from Src.Util.console import console
 from Src.Util.config import config_manager
 from .Class import MediaManager, MediaItem
 
-# General import
-import sys
-import json
-import logging
-import requests
-from bs4 import BeautifulSoup
 
 # Config
 GET_TITLES_OF_MOMENT = config_manager.get_bool('DEFAULT', 'get_moment_title')
 
+
 # Variable
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
+
 
 def get_token(site_name: str, domain: str) -> dict:
     """
@@ -61,6 +67,7 @@ def get_token(site_name: str, domain: str) -> dict:
         'csrf_token': find_csrf_token
     }
 
+
 def get_moment_titles(domain: str, version: str, prefix: str):
     """
     Retrieves the title name from a specified domain using the provided version and prefix.
@@ -100,6 +107,7 @@ def get_moment_titles(domain: str, version: str, prefix: str):
         logging.error("Error occurred: %s", str(e))
         return None
 
+
 def get_domain() -> str:
     """
     Fetches the domain from a Telegra.ph API response.
@@ -122,6 +130,7 @@ def get_domain() -> str:
     except Exception as e:
         logging.error(f"Error fetching domain: {e}")
         sys.exit(0)
+
 
 def test_site(domain: str) -> str:
     """
@@ -151,6 +160,7 @@ def test_site(domain: str) -> str:
         logging.error(f"Error testing site: {e}")
         return None
 
+
 def get_version(text: str) -> str:
     """
     Extracts the version from the HTML text of a webpage.
@@ -173,6 +183,7 @@ def get_version(text: str) -> str:
     except Exception as e:
         logging.error(f"Error extracting version: {e}")
         sys.exit(0)
+
 
 def get_version_and_domain() -> tuple[str, str]:
     """
@@ -215,6 +226,7 @@ def get_version_and_domain() -> tuple[str, str]:
         logging.error(f"Error getting version and domain: {e}")
         sys.exit(0)
 
+
 def search(title_search: str, domain: str) -> int:
     """
     Search for titles based on a search query.
@@ -236,6 +248,7 @@ def search(title_search: str, domain: str) -> int:
 
     # Return the number of titles found
     return media_search_manager.get_length()
+
 
 def update_domain_anime():
     """
@@ -267,6 +280,7 @@ def update_domain_anime():
 
         # Extract the domain from the URL and update the config
         config_manager.set_key('SITE', 'anime_domain', new_site_url.split(".")[-1])
+
 
 def anime_search(title_search: str) -> int:
     """
@@ -321,6 +335,7 @@ def anime_search(title_search: str) -> int:
 
     # Return the length of media search manager
     return media_search_manager.get_length()
+
 
 def get_select_title() -> MediaItem:
     """

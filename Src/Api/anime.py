@@ -1,16 +1,20 @@
 # 11.03.24
 
-# Class import
+import os
+import logging
+
+
+# External libraries
+import requests
+
+
+# Internal utilities
 from Src.Util.console import console, msg
 from Src.Util.config import config_manager
 from Src.Lib.FFmpeg.my_m3u8 import Downloader
 from Src.Util.message import start_message
 from .Class import VideoSource
 
-# General import
-import os
-import logging
-import requests
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
@@ -19,6 +23,7 @@ MOVIE_FOLDER = config_manager.get('DEFAULT', 'movies_folder_name')
 SERIES_FOLDER = config_manager.get('DEFAULT', 'series_folder_name')
 URL_SITE_NAME = config_manager.get('SITE', 'anime_site_name')  
 SITE_DOMAIN = config_manager.get('SITE', 'anime_domain')  
+
 
 # Variable
 video_source = VideoSource()

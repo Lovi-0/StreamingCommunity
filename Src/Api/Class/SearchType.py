@@ -1,6 +1,5 @@
 # 03.03.24
 
-# Import
 from typing import List
 
 class Image:

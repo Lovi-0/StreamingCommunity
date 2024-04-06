@@ -1,13 +1,14 @@
 # 01.03.2023
 
-# Class import
-from .version import __version__
-from Src.Util.console import console
-
-# General import
 import os
 import requests
 import time
+
+
+# Internal utilities
+from .version import __version__
+from Src.Util.console import console
+
 
 # Variable
 repo_name = "StreamingCommunity_api"

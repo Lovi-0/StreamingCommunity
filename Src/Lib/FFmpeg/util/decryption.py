@@ -1,13 +1,14 @@
 # 03.04.24
 
-# Import
 import subprocess
 import logging
 import os
 
+
 # External library
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
+
 
 class AES_ECB:
     def __init__(self, key: bytes) -> None:
@@ -48,6 +49,7 @@ class AES_ECB:
         cipher = AES.new(self.key, AES.MODE_ECB)
         decrypted_data = cipher.decrypt(ciphertext)
         return unpad(decrypted_data, AES.block_size)
+
 
 class AES_CBC:
     def __init__(self, key: bytes, iv: bytes) -> None:
@@ -91,6 +93,7 @@ class AES_CBC:
         decrypted_data = cipher.decrypt(ciphertext)
         return unpad(decrypted_data, AES.block_size)
 
+
 class AES_CTR:
     def __init__(self, key: bytes, nonce: bytes) -> None:
         """
@@ -131,6 +134,7 @@ class AES_CTR:
         """
         cipher = AES.new(self.key, AES.MODE_CTR, nonce=self.nonce)
         return cipher.decrypt(ciphertext)
+
 
 class M3U8_Decryption:
     def __init__(self, key: bytes, iv: bytes = None) -> None:

@@ -1,10 +1,11 @@
-# 3.12.23 -> 10.12.23 -> 20.03.24
+# 4.04.24
 
-# Import
-import fake_useragent
+import logging
 
-# Variable
-useragent = fake_useragent.UserAgent(use_external_data=True)
+
+# Internal utilities
+from Src.Lib.Request.user_agent import ua
+
 
 def get_headers() -> str:
     """
@@ -15,4 +16,7 @@ def get_headers() -> str:
     """
     
     # Get a random user agent string from the user agent rotator
-    return useragent.firefox
+    random_headers = ua.get_random_user_agent("firefox")
+
+    logging.info(f"Use headers: {random_headers}")
+    return random_headers

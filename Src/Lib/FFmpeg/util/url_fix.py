@@ -1,9 +1,9 @@
 # 29.03.24
 
-# Import
-import logging
 import sys
+import logging
 from urllib.parse import urlparse, urljoin
+
 
 class M3U8_UrlFix:
     def __init__(self) -> None:

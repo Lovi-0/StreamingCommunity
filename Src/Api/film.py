@@ -1,20 +1,22 @@
 # 3.12.23 -> 10.12.23
 
-# Class import
+import os
+import logging
+
+
+# Internal utilities
 from Src.Util.console import console
 from Src.Util.config import config_manager
 from Src.Lib.FFmpeg.my_m3u8 import Downloader
 from Src.Util.message import start_message
 from .Class import VideoSource
 
-# General import
-import os
-import logging
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
 MOVIE_FOLDER = config_manager.get('DEFAULT', 'movies_folder_name')
 STREAM_SITE_NAME = config_manager.get('SITE', 'streaming_site_name')
+
 
 # Variable
 video_source = VideoSource()

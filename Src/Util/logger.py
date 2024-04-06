@@ -1,11 +1,12 @@
 # 26.03.24
 
-# Class import
-from Src.Util.config import config_manager
-
-# Import
 import logging
 from logging.handlers import RotatingFileHandler
+
+
+# Internal utilities
+from Src.Util.config import config_manager
+
 
 class Logger:
     def __init__(self):

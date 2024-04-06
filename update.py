@@ -1,16 +1,25 @@
 # 10.12.24
 
-# General imports
-import requests
 import os
 import shutil
-from zipfile import ZipFile
 from io import BytesIO
+from zipfile import ZipFile
+
+
+# Internal utilities
+from Src.Util.config import config_manager
+
+
+# External libraries
+import requests
 from rich.console import Console
+
 
 # Variable
 console = Console()
 local_path = os.path.join(".")
+ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
+
 
 def move_content(source: str, destination: str) :
     """
@@ -35,6 +44,7 @@ def move_content(source: str, destination: str) :
         # Otherwise, move the file, replacing if it already exists
         else:
             shutil.move(source_path, destination_path)
+
 
 def keep_specific_items(directory: str, keep_folder: str, keep_file: str):
     """
@@ -65,6 +75,7 @@ def keep_specific_items(directory: str, keep_folder: str, keep_file: str):
 
     except Exception as e:
         print(f"Error: {e}")
+
 
 def download_and_extract_latest_commit(author: str, repo_name: str):
     """
@@ -115,6 +126,7 @@ def download_and_extract_latest_commit(author: str, repo_name: str):
     else:
         console.log(f"[red]Failed to fetch commit information. Status code: {response.status_code}")
 
+
 def main_upload():
     """
     Main function to upload the latest commit of a GitHub repository.
@@ -128,9 +140,10 @@ def main_upload():
     if cmd_insert == "yes":
 
         # Remove all old file
-        keep_specific_items(".", "videos", "upload.py")
+        keep_specific_items(".", ROOT_PATH, "upload.py")
 
         download_and_extract_latest_commit(repository_owner, repository_name)
+
 
 main_upload()
 

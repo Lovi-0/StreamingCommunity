@@ -1,15 +1,16 @@
 # 03.03.24
 
-# Class import
-from .message import start_message
-
-# Import
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 from rich.prompt import Prompt
 from rich.style import Style
 from typing import Dict, List, Any
+
+
+# Internal utilities
+from .message import start_message
+
 
 class TVShowManager:
     def __init__(self):

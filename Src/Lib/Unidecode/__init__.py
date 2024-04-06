@@ -1,16 +1,17 @@
 # 04.04.24
 
-
-# Import
 import os
 import logging
 import importlib.util
 
+
 # Variable
 Cache = {}
 
+
 class UnidecodeError(ValueError):
     pass
+
 
 def transliterate_nonascii(string: str, errors: str = 'ignore', replace_str: str = '?') -> str:
     """Transliterates non-ASCII characters in a string to their ASCII counterparts.
@@ -24,6 +25,7 @@ def transliterate_nonascii(string: str, errors: str = 'ignore', replace_str: str
         str: The transliterated string with non-ASCII characters replaced.
     """
     return _transliterate(string, errors, replace_str)
+
 
 def _get_ascii_representation(char: str) -> str:
     """Obtains the ASCII representation of a Unicode character.
@@ -79,6 +81,7 @@ def _get_ascii_representation(char: str) -> str:
     else:
         return None
 
+
 def _transliterate(string: str, errors: str, replace_str: str) -> str:
     """Main transliteration function.
 
@@ -116,6 +119,7 @@ def _transliterate(string: str, errors: str, replace_str: str) -> str:
 
     return ''.join(retval)
 
+
 def transliterate_expect_ascii(string: str, errors: str = 'ignore', replace_str: str = '?') -> str:
     """Transliterates non-ASCII characters in a string, expecting ASCII input.
 
@@ -140,4 +144,6 @@ def transliterate_expect_ascii(string: str, errors: str = 'ignore', replace_str:
     # Otherwise, transliterate non-ASCII characters
     return _transliterate(string, errors, replace_str)
 
+
+# Out
 transliterate = transliterate_expect_ascii

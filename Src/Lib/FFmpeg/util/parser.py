@@ -1,12 +1,16 @@
 # 29.04.25
 
-# Class import
+import logging
+
+
+# Internal utilities
 from Src.Util.headers import get_headers
 
-# Import
-from m3u8 import M3U8
-import logging
+
+# External libraries
 import requests
+from m3u8 import M3U8
+
 
 class M3U8_Parser:
     def __init__(self, DOWNLOAD_SPECIFIC_SUBTITLE = None):

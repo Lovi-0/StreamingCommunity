@@ -1,15 +1,19 @@
 # 31.01.24
 
-# Class
-from Src.Util.console import console
-
-# Import
-import ffmpeg
 import subprocess
 import os
 import json
 import logging
 import shutil
+
+
+# External libraries
+import ffmpeg
+
+
+# Internal utilities
+from Src.Util.console import console
+
 
 def has_audio_stream(video_path: str) -> bool:
     """
@@ -36,6 +40,7 @@ def has_audio_stream(video_path: str) -> bool:
     except subprocess.CalledProcessError as e:
         logging.error(f"Error: {e.stderr}")
         return None
+
 
 def get_video_duration(file_path: str) -> (float):
     """
@@ -64,6 +69,7 @@ def get_video_duration(file_path: str) -> (float):
         logging.error(f"Error: {e.stderr}")
         return None
 
+
 def format_duration(seconds: float) -> list[int, int, int]:
     """
     Format duration in seconds into hours, minutes, and seconds.
@@ -79,6 +85,7 @@ def format_duration(seconds: float) -> list[int, int, int]:
     minutes, seconds = divmod(remainder, 60)
 
     return int(hours), int(minutes), int(seconds)
+
 
 def print_duration_table(file_path: str) -> None:
     """
@@ -98,7 +105,7 @@ def print_duration_table(file_path: str) -> None:
         # Print the formatted duration
         console.log(f"[cyan]Info [green]'{file_path}': [purple]{int(hours)}[red]h [purple]{int(minutes)}[red]m [purple]{int(seconds)}[red]s")
 
-# SINGLE SUBTITLE
+
 def add_subtitle(input_video_path: str, input_subtitle_path: str, output_video_path: str, subtitle_language: str = 'ita', prefix: str = "single_sub") -> str:
     """
     Convert a video with a single subtitle.
@@ -153,7 +160,7 @@ def add_subtitle(input_video_path: str, input_subtitle_path: str, output_video_p
     # Return
     return output_video_path
 
-# SEGMENTS
+
 def concatenate_and_save(file_list_path: str, output_filename: str, video_decoding: str = None, audio_decoding: str = None, prefix: str = "segments", output_directory: str = None) -> str:
     """
     Concatenate input files and save the output with specified decoding parameters.
@@ -222,7 +229,7 @@ def concatenate_and_save(file_list_path: str, output_filename: str, video_decodi
     # Return
     return output_file_path
 
-# AUDIOS
+
 def join_audios(video_path: str, audio_tracks: list[dict[str, str]], prefix: str = "merged") -> str:
     """
     Join video with multiple audio tracks and sync them if there are matching segments.
@@ -300,7 +307,7 @@ def join_audios(video_path: str, audio_tracks: list[dict[str, str]], prefix: str
         logging.error("[M3U8_Downloader] Ffmpeg error: %s", ffmpeg_error)
         return ""
 
-# SUBTITLES
+
 def transcode_with_subtitles(video: str, subtitles_list: list[dict[str, str]], output_file: str, prefix: str = "transcoded") -> str:
 
     """

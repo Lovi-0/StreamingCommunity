@@ -1,16 +1,21 @@
 # 3.12.23 -> 19.07.24
 
-# Class import
-from .config import config_manager
-from Src.Util.console import console
-
-# Import
 import os
 import platform
+
+
+# External libraries
+from Src.Util.console import console
+
+
+# Internal utilities
+from .config import config_manager
+
 
 # Variable
 CLEAN = config_manager.get_bool('DEFAULT', 'clean_console')
 SHOW = config_manager.get_bool('DEFAULT', 'show_message')
+
 
 def get_os_system():
     """
@@ -18,6 +23,7 @@ def get_os_system():
     """
     os_system = platform.system()
     return os_system
+
 
 def start_message():
     """

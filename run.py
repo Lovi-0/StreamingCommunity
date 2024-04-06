@@ -1,6 +1,11 @@
 # 10.12.23 -> 31.01.24
 
-# Class
+import sys
+import logging
+import platform
+
+
+# Internal utilities
 from Src.Api import (
     get_version_and_domain, 
     download_series, 
@@ -19,10 +24,6 @@ from Src.Upload.update import update as git_update
 from Src.Lib.FFmpeg import check_ffmpeg
 from Src.Util.logger import Logger
 
-# Import
-import sys
-import logging
-import platform
 
 # Variable
 DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
@@ -31,7 +32,6 @@ SWITCH_TO = config_manager.get_bool('DEFAULT', 'swith_anime')
 CLOSE_CONSOLE =  config_manager.get_bool('DEFAULT', 'not_close')
 
 
-# [ main ]
 def initialize():
     """
     Initialize the application.

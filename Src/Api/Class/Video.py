@@ -1,20 +1,24 @@
 # 01.03.24
 
-# Class import
-from Src.Util.headers import get_headers
-from .SeriesType import TitleManager
-from .EpisodeType import EpisodeManager
-from .WindowType import WindowVideo, WindowParameter
-
-# Import
 import requests
 import re
 import json
 import binascii
 import logging
 import sys
-from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlencode, quote
+
+
+# External libraries
+import requests
+from bs4 import BeautifulSoup
+
+
+# Internal utilities
+from Src.Util.headers import get_headers
+from .SeriesType import TitleManager
+from .EpisodeType import EpisodeManager
+from .WindowType import WindowVideo, WindowParameter
 
 
 class VideoSource:

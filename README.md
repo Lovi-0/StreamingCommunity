@@ -7,7 +7,7 @@
 This repository provide a simple script designed to facilitate the downloading of films and series from a popular streaming community platform. The script allows users to download individual films, entire series, or specific episodes, providing a seamless experience for content consumers.
 
 ## Join us
-You can chat, help improve this repo, or just hang around for some fun in the **Git_StreamingCommunity** Discord [Server](https://discord.com/invite/qP3nsCXV5z)
+You can chat, help improve this repo, or just hang around for some fun in the **Git_StreamingCommunity** Discord [Server](https://discord.gg/we8n4tfxFs)
 # Table of Contents
 
 * [INSTALLATION](#installation)

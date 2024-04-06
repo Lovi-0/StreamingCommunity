@@ -1,6 +1,5 @@
 # 5.01.24 -> 7.01.24 -> 20.02.24 -> 29.03.24
 
-# Importing modules
 import os
 import sys
 import time
@@ -8,15 +7,18 @@ import threading
 import logging
 import warnings
 
+
 # Disable specific warnings
 from tqdm import TqdmExperimentalWarning
 warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="cryptography")
 
+
 # External libraries
 import requests
 from tqdm.rich import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 
 # Internal utilities
 from Src.Util.console import console
@@ -29,6 +31,7 @@ from Src.Util.os import (
     compute_sha1_hash,
     convert_to_hex
 )
+
 
 # Logic class
 from .util import (
@@ -43,6 +46,7 @@ from .util import (
     M3U8_Parser,
     M3U8_UrlFix
 )
+
 
 # Config
 Download_audio = config_manager.get_bool('M3U8_OPTIONS', 'download_audio')
@@ -59,12 +63,12 @@ TQDM_SHOW_PROGRESS = config_manager.get_bool('M3U8', 'tqdm_show_progress')
 MIN_TS_FILES_IN_FOLDER = config_manager.get_int('M3U8', 'minimum_ts_files_in_folder')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8', 'cleanup_tmp_folder')
 
+
 # Variable
 config_headers = config_manager.get_dict('M3U8_OPTIONS', 'request')
 failed_segments = []
 class_urlFix = M3U8_UrlFix()
 
-# [ main class ]
 
 class M3U8_Segments:
     def __init__(self, url, folder, key=None):

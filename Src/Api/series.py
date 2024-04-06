@@ -1,6 +1,11 @@
 # 3.12.23 -> 10.12.23
 
-# Class import
+import os
+import sys
+import logging
+
+
+# Internal utilities
 from Src.Util.console import console, msg
 from Src.Util.config import config_manager
 from Src.Util.table import TVShowManager
@@ -9,15 +14,12 @@ from Src.Lib.Unidecode import transliterate
 from Src.Lib.FFmpeg.my_m3u8 import Downloader
 from .Class import VideoSource
 
-# General import
-import os
-import logging
-import sys
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
 SERIES_FOLDER = config_manager.get('DEFAULT', 'series_folder_name')
 STREAM_SITE_NAME = config_manager.get('SITE', 'streaming_site_name')
+
 
 # Variable
 video_source = VideoSource()
@@ -55,6 +57,7 @@ def manage_selection(cmd_insert: str, max_count: int) -> list[int]:
 
     # Return list of selected seasons)
     return list_season_select
+
 
 def display_episodes_list() -> str:
     """
@@ -133,6 +136,7 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
         logging.error(f"(donwload_video) Error downloading film: {e}")
         pass
 
+
 def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: bool = False) -> None:
     """
     Download all episodes of a season.
@@ -173,6 +177,7 @@ def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: boo
         else:
             for i_episode in list_episode_select:
                 donwload_video(tv_name, index_season_selected, i_episode)
+
 
 def download_series(tv_id: str, tv_name: str, version: str, domain: str) -> None:
     """

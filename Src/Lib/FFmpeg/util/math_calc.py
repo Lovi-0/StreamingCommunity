@@ -1,6 +1,8 @@
 # 29.02.24
 
+# Internal utilities
 from Src.Util.os import format_size
+
 
 class M3U8_Ts_Files:
     def __init__(self):
