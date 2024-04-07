@@ -6,6 +6,7 @@ import os
 import random
 import threading
 import json
+import tempfile
 from typing import Dict, List
 
 # Internal utilities
@@ -80,7 +81,7 @@ class UserAgentManager:
     def __init__(self):
 
         # Get path to temp file where save all user agents
-        self.user_agent_file = os.path.join(os.environ.get('TEMP'), 'fake_user_agent.json')
+        self.user_agent_file = os.path.join(tempfile.gettempdir(), 'fake_user_agent.json')
 
         # If file dont exist, creaet it
         if not os.path.exists(self.user_agent_file):
