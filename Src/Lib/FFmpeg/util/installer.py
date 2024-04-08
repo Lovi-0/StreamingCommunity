@@ -1,32 +1,30 @@
 # 24.01.2023
 
-import subprocess
+
+import logging
 import os
-import requests
-import zipfile
-import sys
-import ctypes
+import shutil
+import subprocess
+import urllib.request
+from tqdm.rich import tqdm
 
 
 # Internal utilities
+from Src.Util.os import decompress_file
+from Src.Util._win32 import set_env_path
 from Src.Util.console import console
 
+# Constants
+FFMPEG_BUILDS = {
+    'release-full': {
+        '7z': ('release-full', 'full_build'),
+        'zip': (None, 'full_build')
+    }
+}
+INSTALL_DIR = os.path.expanduser("~")
 
-def isAdmin() -> (bool):
-    """ 
-    Check if the current user has administrative privileges.
-
-    Returns:
-        bool: True if the user is an administrator, False otherwise.
-    """
-
-    try:
-        is_admin = (os.getuid() == 0)
-
-    except AttributeError:
-        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-
-    return is_admin
+# Variable
+show_version = False
 
 
 def get_version():
@@ -55,54 +53,141 @@ def get_version():
         print("Error executing FFmpeg command:", e.output.strip())
         raise e
 
+def get_ffmpeg_download_url(build: str = 'release-full', format: str = 'zip') -> str:
+    '''
+    Construct the URL for downloading FFMPEG build.
+
+    Args:
+        build (str): The type of FFMPEG build.
+        format (str): The format of the build (e.g., zip, 7z).
+
+    Returns:
+        str: The URL for downloading the FFMPEG build.
+    '''
+    for ffbuild_name, formats in FFMPEG_BUILDS.items():
+        for ffbuild_format, names in formats.items():
+            if not (format is None or format == ffbuild_format):
+                continue
+
+            if names[0]:
+                return f'https://gyan.dev/ffmpeg/builds/ffmpeg-{names[0]}.{ffbuild_format}'
+            if names[1]:
+                github_version = urllib.request.urlopen(
+                    'https://www.gyan.dev/ffmpeg/builds/release-version').read().decode()
+                assert github_version, 'failed to retreive latest version from github'
+                return (
+                    'https://github.com/GyanD/codexffmpeg/releases/download/'
+                    f'{github_version}/ffmpeg-{github_version}-{names[1]}.{ffbuild_format}'
+                )
+            
+    raise ValueError(f'{build} as format {format} does not exist')
+
+class FFMPEGDownloader:
+    def __init__(self, url: str, destination: str, hash_url: str = None) -> None:
+        '''
+        Initialize the FFMPEGDownloader object.
+
+        Args:
+            url (str): The URL to download the file from.
+            destination (str): The path where the downloaded file will be saved.
+            hash_url (str): The URL containing the file's expected hash.
+        '''
+        self.url = url
+        self.destination = destination
+        self.expected_hash = urllib.request.urlopen(hash_url).read().decode() if hash_url is not None else None
+        with urllib.request.urlopen(self.url) as data:
+            self.file_size = data.length
+
+    def download(self) -> None:
+        '''
+        Download the file from the provided URL.
+        '''
+        try:
+            with urllib.request.urlopen(self.url) as response, open(self.destination, 'wb') as out_file:
+                with tqdm(total=self.file_size, unit='B', unit_scale=True, unit_divisor=1024, desc='[yellow]Downloading') as pbar:
+                    while True:
+                        data = response.read(4096)
+                        if not data:
+                            break
+                        out_file.write(data)
+                        pbar.update(len(data))
+        except Exception as e:
+            logging.error(f"Error downloading file: {e}")
+            raise
+
+def move_ffmpeg_exe_to_top_level(install_dir: str) -> None:
+    '''
+    Move the FFMPEG executable to the top-level directory.
+
+    Args:
+        install_dir (str): The directory to search for the executable.
+    '''
+    try:
+        for root, _, files in os.walk(install_dir):
+            for file in files:
+                if file == 'ffmpeg.exe':
+                    base_path = os.path.abspath(os.path.join(root, '..'))
+                    to_remove = os.listdir(install_dir)
+
+                    # Move ffmpeg.exe to the top level
+                    for item in os.listdir(base_path):
+                        shutil.move(os.path.join(base_path, item), install_dir)
+
+                    # Remove other files from the top level
+                    for item in to_remove:
+                        item = os.path.join(install_dir, item)
+                        if os.path.isdir(item):
+                            shutil.rmtree(item)
+                        else:
+                            os.remove(item)
+                    break
+    except Exception as e:
+        logging.error(f"Error moving ffmpeg executable: {e}")
+        raise
+
+def add_install_dir_to_environment_path(install_dir: str) -> None:
+    '''
+    Add the install directory to the environment PATH variable.
+
+    Args:
+        install_dir (str): The directory to be added to the environment PATH variable.
+    '''
+
+    install_dir = os.path.abspath(os.path.join(install_dir, 'bin'))
+    set_env_path(install_dir)
 
 def download_ffmpeg():
-    """
-    Download FFmpeg binary for Windows and add it to the system PATH.
+        
+    # Get FFMPEG download URL
+    ffmpeg_url = get_ffmpeg_download_url()
 
-    This function downloads the FFmpeg binary zip file from the specified URL,
-    extracts it to a directory named 'ffmpeg', and adds the 'bin' directory of
-    FFmpeg to the system PATH so that it can be accessed from the command line.
-    """
+    # Generate install directory path
+    install_dir = os.path.join(INSTALL_DIR, 'FFMPEG')
 
-    # SInizializate start variable
-    ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z"
-    ffmpeg_dir = "ffmpeg"
+    console.print(f"[cyan]f'Making install directory: [red]{install_dir!r}")
+    logging.info(f'Making install directory {install_dir!r}')
+    os.makedirs(install_dir, exist_ok=True)
 
-    print("[yellow]Downloading FFmpeg...[/yellow]")
+    # Download FFMPEG
+    console.print(f'[cyan]Downloading: [red]{ffmpeg_url!r} [cyan]to [red]{os.path.join(install_dir, os.path.basename(ffmpeg_url))!r}')
+    logging.info(f'Downloading {ffmpeg_url!r} to {os.path.join(install_dir, os.path.basename(ffmpeg_url))!r}')
+    downloader = FFMPEGDownloader(ffmpeg_url, os.path.join(install_dir, os.path.basename(ffmpeg_url)))
+    downloader.download()
 
-    try:
-        response = requests.get(ffmpeg_url)
+    # Decompress downloaded file
+    console.print(f'[cyan]Decompressing downloaded file to: [red]{install_dir!r}')
+    logging.info(f'Decompressing downloaded file to {install_dir!r}')
+    decompress_file(os.path.join(install_dir, os.path.basename(ffmpeg_url)), install_dir)
 
-        # Create the directory to extract FFmpeg if it doesn't exist
-        os.makedirs(ffmpeg_dir, exist_ok=True)
+    # Move ffmpeg executable to top level
+    console.print(f'[cyan]Moving ffmpeg executable to top level of [red]{install_dir!r}')
+    logging.info(f'Moving ffmpeg executable to top level of {install_dir!r}')
+    move_ffmpeg_exe_to_top_level(install_dir)
 
-        # Save the zip file
-        zip_file_path = os.path.join(ffmpeg_dir, "ffmpeg.zip")
-        with open(zip_file_path, "wb") as zip_file:
-            zip_file.write(response.content)
-
-        # Extract the zip file
-        with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
-            zip_ref.extractall(ffmpeg_dir)
-
-        # Add the FFmpeg directory to the system PATH
-        ffmpeg_bin_dir = os.path.join(os.getcwd(), ffmpeg_dir, "bin")
-        os.environ["PATH"] += os.pathsep + ffmpeg_bin_dir
-
-        # Remove the downloaded zip file
-        os.remove(zip_file_path)
-
-    except requests.RequestException as e:
-        # If there's an issue with downloading FFmpeg
-        print(f"Failed to download FFmpeg: {e}")
-        raise e
-
-    except zipfile.BadZipFile as e:
-        # If the downloaded file is not a valid zip file
-        print(f"Failed to extract FFmpeg zip file: {e}")
-        raise e
-
+    # Add install directory to environment PATH variable
+    console.print(f'[cyan]Adding [red]{install_dir} [cyan]to environment PATH variable')
+    logging.info(f'Adding {install_dir} to environment PATH variable')
+    add_install_dir_to_environment_path(install_dir)
 
 def check_ffmpeg():
     """
@@ -117,29 +202,26 @@ def check_ffmpeg():
 
     try:
         # Try running the FFmpeg command to check if it exists
-        subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        subprocess.run(["ffmpeg", "-version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         console.print("[blue]FFmpeg is installed. \n")
 
         # Get and print FFmpeg version
-        #get_version()
+        if show_version:
+            get_version()
 
-    except subprocess.CalledProcessError:
+    except:
+
         try:
             # If FFmpeg is not found, attempt to download and add it to the PATH
             console.print("[cyan]FFmpeg is not found in the PATH. Downloading and adding to the PATH...[/cyan]")
 
-            # Check if user has admin privileges
-            if not isAdmin():
-                console.log("[red]You need to be admin to proceed!")
-                sys.exit(0)  
-
             # Download FFmpeg and add it to the PATH
             download_ffmpeg()
-            sys.exit(0)
+            raise
 
         except Exception as e:
 
             # If unable to download or add FFmpeg to the PATH
             console.print("[red]Unable to download or add FFmpeg to the PATH.[/red]")
             console.print(f"Error: {e}")
-            sys.exit(0)
+            raise

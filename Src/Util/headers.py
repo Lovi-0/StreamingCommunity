@@ -18,5 +18,5 @@ def get_headers() -> str:
     # Get a random user agent string from the user agent rotator
     random_headers = ua.get_random_user_agent("firefox")
 
-    logging.info(f"Use headers: {random_headers}")
+    #logging.info(f"Use headers: {random_headers}")
     return random_headers

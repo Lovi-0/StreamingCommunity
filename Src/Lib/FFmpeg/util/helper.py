@@ -13,6 +13,27 @@ import ffmpeg
 
 # Internal utilities
 from Src.Util.console import console
+from Src.Util.config import config_manager
+
+
+# Variable
+DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
+DEBUG_FFMPEG = "debug" if DEBUG_MODE else "error"
+
+
+
+"""
+DOC:
+
+The `'c': 'copy'` option in the `output_args` dictionary indicates that ffmpeg should perform stream copying for both the audio and video streams. 
+Stream copying means that the audio and video streams are copied directly from the input file(s) to the output file without any re-encoding. 
+This process preserves the original quality of the streams and is much faster than re-encoding.
+
+When using `'c': 'copy'`, ffmpeg simply copies the bitstream from the input file(s) to the output file without decoding or altering it. 
+This is useful when you want to quickly concatenate or merge multimedia files without any loss in quality or additional processing time. 
+It's particularly efficient when the input and output formats are compatible, and you don't need to make any modifications to the streams.
+"""
+
 
 
 def has_audio_stream(video_path: str) -> bool:
@@ -185,17 +206,10 @@ def concatenate_and_save(file_list_path: str, output_filename: str, video_decodi
         }
 
         output_args = {
-            'c': 'copy', 
-            'loglevel': 'error',
+            'c': 'copy',
+            'loglevel': DEBUG_FFMPEG,
             'y': None
         }
-
-        # Add encoding parameter for video and audio
-        global_args = []
-        if video_decoding:
-            global_args.extend(['-c:v', video_decoding])
-        if audio_decoding:
-            global_args.extend(['-c:a', audio_decoding])
 
         # Set up the output file name by modifying the video file name
         output_file_name = os.path.splitext(output_filename)[0] + f"_{prefix}.mp4"
@@ -208,10 +222,22 @@ def concatenate_and_save(file_list_path: str, output_filename: str, video_decodi
 
         # Concatenate input files and output
         output = (
-            ffmpeg.input(file_list_path, **input_args)
-            .output(output_file_path, **output_args)
-            .global_args(*global_args)
+            ffmpeg.input(
+                file_list_path, 
+                **input_args
+            )
+            .output(
+                output_file_path, 
+                **output_args
+            )
         )
+
+        # Overwrite output file if exists
+        output = ffmpeg.overwrite_output(output)
+
+        # Retrieve the command that will be executed
+        command = output.compile()
+        logging.info(f"Execute command: {command}")
 
         # Execute the process
         process = output.run()
@@ -278,11 +304,11 @@ def join_audios(video_path: str, audio_tracks: list[dict[str, str]], prefix: str
         output_args = {
             'vcodec': 'copy',
             'acodec': 'copy',
-            'loglevel': 'error'
+            'loglevel': DEBUG_FFMPEG
         }
 
         # Combine inputs, map audio streams, and set output
-        process = (
+        output = (
             ffmpeg.output(
                 video_stream,
                 *audio_streams,
@@ -295,9 +321,17 @@ def join_audios(video_path: str, audio_tracks: list[dict[str, str]], prefix: str
                 '-shortest',
                 '-strict', 'experimental',
             )
-            .run(overwrite_output=True)
         )
 
+        # Overwrite output file if exists
+        output = ffmpeg.overwrite_output(output)
+
+        # Retrieve the command that will be executed
+        command = output.compile()
+        logging.info(f"Execute command: {command}")
+
+        # Execute the process
+        process = output.run()
         logging.info("[M3U8_Downloader] Merge completed successfully.")
 
         # Return
@@ -363,7 +397,7 @@ def transcode_with_subtitles(video: str, subtitles_list: list[dict[str, str]], o
         output_file = os.path.join(os.path.dirname(output_file), output_filename)
 
         # Configure ffmpeg output
-        output_ffmpeg = ffmpeg.output(
+        output = ffmpeg.output(
             input_video,
             *(input_audio,) if has_audio_stream(video) else (),     # If there is no audio stream
             *input_subtitles,
@@ -371,14 +405,18 @@ def transcode_with_subtitles(video: str, subtitles_list: list[dict[str, str]], o
             vcodec='copy',
             acodec='copy' if has_audio_stream(video) else (),       # If there is no audio stream
             **metadata,
-            loglevel='error'
+            loglevel=DEBUG_FFMPEG
         )
 
         # Overwrite output file if exists
-        output_ffmpeg = ffmpeg.overwrite_output(output_ffmpeg)
+        output = ffmpeg.overwrite_output(output)
+
+        # Retrieve the command that will be executed
+        command = output.compile()
+        logging.info(f"Execute command: {command}")
 
         # Run ffmpeg command
-        ffmpeg.run(output_ffmpeg, overwrite_output=True)
+        ffmpeg.run(output, overwrite_output=True)
 
         # Rename video from mkv -> mp4
         output_filename_mp4 = output_file.replace("mkv", "mp4")

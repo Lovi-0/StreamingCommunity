@@ -241,7 +241,7 @@ class M3U8_Segments:
             # Get ts url and create a filename based on index
             ts_url = self.segments[index]
             ts_filename = os.path.join(self.temp_folder, f"{index}.ts")
-            logging.info(f"Requesting: {ts_url}, saving to: {ts_filename}")
+            #logging.info(f"Requesting: {ts_url}, saving to: {ts_filename}")
 
             # If file already exists, skip download
             if os.path.exists(ts_filename):
@@ -715,6 +715,8 @@ class Downloader():
         # Sort files (1.ts, 2.ts, ...) based on their numbers
         ts_files = [f for f in os.listdir(full_path) if f.endswith(".ts")]
         ts_files.sort(key=Downloader.extract_number)
+        logging.info(f"Find {len(ts_files)} stream files to join")
+        logging.info(f"Using parameter: \n-c:v = {self.video_decoding} -c:a = {self.audio_decoding}])")
 
         # Check if there are enough .ts files to join (at least 10)
         if len(ts_files) < 10:

@@ -7,6 +7,36 @@ import json
 import hashlib
 import logging
 import re
+import zipfile
+
+
+# Costant
+special_chars_to_remove = [
+    '!', 
+    '@', 
+    '#', 
+    '$', 
+    '%', 
+    '^', 
+    '&', 
+    '*', 
+    '(', 
+    ')', 
+    '[', 
+    ']', 
+    '{', 
+    '}', 
+    '<', 
+    '|', 
+    '`',
+    '~', 
+    "'", 
+    '"', 
+    ';', 
+    ':', 
+    ',', 
+    '?'
+]
 
 
 def remove_folder(folder_path: str) -> None:
@@ -41,24 +71,24 @@ def remove_file(file_path: str) -> None:
             print(f"Error removing file '{file_path}': {e}")
 
 
-def remove_special_characters(filename) -> str:
+def remove_special_characters(input_string):
     """
-    Removes special characters from a filename to make it suitable for creating a filename in Windows.
-    
-    Args:
-        filename (str): The original filename containing special characters.
-    
-    Returns:
-        str: The cleaned filename without special characters.
-    """
+    Remove specified special characters from a string.
 
-    # Define the regex pattern to match special characters
-    pattern = r'[^\w\-_\. ]'
-    
-    # Replace special characters with an empty string
-    cleaned_filename = re.sub(pattern, '', filename)
-    
-    return cleaned_filename
+    Parameters:
+        input_string (str): The input string containing special characters.
+        special_chars (list): List of special characters to be removed.
+
+    Returns:
+        str: A new string with specified special characters removed.
+    """
+    # Compile regular expression pattern to match special characters
+    pattern = re.compile('[' + re.escape(''.join(special_chars_to_remove)) + ']')
+
+    # Use compiled pattern to replace special characters with an empty string
+    cleaned_string = pattern.sub('', input_string)
+
+    return cleaned_string
 
 
 def move_file_one_folder_up(file_path) -> None:
@@ -83,6 +113,22 @@ def move_file_one_folder_up(file_path) -> None:
 
     # Move the file
     os.rename(file_path, new_path)
+
+
+def decompress_file(downloaded_file_path: str, destination: str) -> None:
+    '''
+    Decompress one file.
+
+    Args:
+        downloaded_file_path (str): The path to the downloaded file.
+        destination (str): The directory where the file will be decompressed.
+    '''
+    try:
+        with zipfile.ZipFile(downloaded_file_path) as zip_file:
+            zip_file.extractall(destination)
+    except Exception as e:
+        logging.error(f"Error decompressing file: {e}")
+        raise
 
 
 def read_json(path: str):
