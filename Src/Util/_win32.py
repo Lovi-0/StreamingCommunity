@@ -1,6 +1,6 @@
 # 07.04.24
 
-
+# to do
 # run somehwere backup
 # add config to trace if ffmpeg is install, using config in local or temp
 
@@ -11,6 +11,7 @@ import logging
 # Winreg only work for windows
 if platform.system() == "Windows":
 
+    # Winreg only work for windows
     import winreg
 
     # Define Windows registry key for user environment variables

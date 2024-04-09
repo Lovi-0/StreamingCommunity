@@ -44,13 +44,14 @@ from .util import (
     M3U8_Decryption,
     M3U8_Ts_Files,
     M3U8_Parser,
+    M3U8_Codec,
     M3U8_UrlFix
 )
 
 
 # Config
-Download_audio = config_manager.get_bool('M3U8_OPTIONS', 'download_audio')
-Donwload_subtitles = config_manager.get_bool('M3U8_OPTIONS', 'download_subtitles')
+DOWNLOAD_AUDIO = config_manager.get_bool('M3U8_OPTIONS', 'download_audio')
+DOWNLOAD_SUBTITLES = config_manager.get_bool('M3U8_OPTIONS', 'download_subtitles')
 DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_OPTIONS', 'specific_list_audio')            
 DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_OPTIONS', 'specific_list_subtitles')
 TQDM_MAX_WORKER = config_manager.get_int('M3U8', 'tdqm_workers')
@@ -394,10 +395,10 @@ class M3U8_Segments:
         # Refresh progress bar
         progress_counter.refresh()
 
-    def join(self, output_filename: str, video_decoding: str = None, audio_decoding: str = None):
+    def join(self, output_filename: str):
         """
         Join all segments file to a mp4 file name
-        !! NOT USED
+        !! NOT USED IN THIS VERSION
         
         Parameters:
         - video_decoding(str): video decoding to use with ffmpeg for only video
@@ -437,9 +438,7 @@ class M3U8_Segments:
         # ADD IF 
         concatenate_and_save(
             file_list_path = file_list_path,
-            output_filename = output_filename,
-            video_decoding = video_decoding,
-            audio_decoding = audio_decoding 
+            output_filename = output_filename
         )
 
 
@@ -454,7 +453,6 @@ class Downloader():
         - m3u8_playlist (str, optional): URL to the main M3U8 playlist.
         - key (str, optional): Hexadecimal representation of the encryption key.
         """
-
 
         self.m3u8_playlist = m3u8_playlist
         self.m3u8_index = m3u8_index
@@ -471,15 +469,16 @@ class Downloader():
         if self.key != None:
             hex_data = convert_to_hex(self.key)
             console.log(f"[cyan]Key use [white]=> [red]{hex_data}")
+            logging.info(f"Key use: {self.key}")
 
         # Initialize temp base path
         self.base_path = os.path.join(str(self.output_filename).replace(".mp4", ""))
         self.video_segments_path = os.path.join(self.base_path, "tmp", "video")
         self.audio_segments_path = os.path.join(self.base_path, "tmp", "audio")
         self.subtitle_segments_path = os.path.join(self.base_path, "tmp", "subtitle")
+        logging.info(f"Output base path: {self.base_path}")
 
         # Create temp folder
-        logging.info("Create temp folder")
         os.makedirs(self.video_segments_path, exist_ok=True)
         os.makedirs(self.audio_segments_path, exist_ok=True)
         os.makedirs(self.subtitle_segments_path, exist_ok=True)
@@ -488,14 +487,10 @@ class Downloader():
         self.downloaded_audio = []
         self.downloaded_subtitle = []
         self.downloaded_video = []
-
-        # Default decoding
-        self.video_decoding = "avc1.640028"
-        self.audio_decoding = "mp4a.40.2"
  
     def __df_make_req__(self, url: str) -> str:
         """
-        Make a request to get text from the provided URL.
+        Make a request to get text from the provided URL to test if index or m3u8 work correcly.
 
         Parameters:
         - url (str): The URL to make the request to.
@@ -503,23 +498,30 @@ class Downloader():
         Returns:
         - str: The text content of the response.
         """
+
         try:
+
             # Send a GET request to the provided URL
             config_headers.get('index')['user-agent'] = get_headers()
             response = requests.get(url, headers=config_headers.get('index'))
 
+            # Check status response of request
+            logging.info(f"Test url: {url}")
+            response.raise_for_status()
+
             if response.ok:
                 return response.text
+            
             else:
-                logging.error(f"[df_make_req] Request to {url} failed with status code: {response.status_code}")
+                logging.error(f"Request to {url} failed with status code: {response.status_code}")
                 return None
 
         except requests.RequestException as req_err:
-            logging.error(f"[df_make_req] Error occurred during request: {req_err}")
+            logging.error(f"Error occurred during request: {req_err}")
             return None
 
         except Exception as e:
-            logging.error(f"[df_make_req] An unexpected error occurred: {e}")
+            logging.error(f"An unexpected error occurred: {e}")
             return None
         
     def manage_playlist(self, m3u8_playlist_text):
@@ -530,7 +532,7 @@ class Downloader():
             m3u8_playlist_text (str): The text content of the M3U8 playlist.
         """
 
-        global Download_audio, Donwload_subtitles
+        global DOWNLOAD_AUDIO, DOWNLOAD_SUBTITLES
 
         # Create an instance of the M3U8_Parser class
         parse_class_m3u8 = M3U8_Parser(DOWNLOAD_SPECIFIC_SUBTITLE)
@@ -547,7 +549,7 @@ class Downloader():
             console.log(f"[cyan]Find audios language: [red]{[obj_audio.get('language') for obj_audio in self.list_available_audio]}")
         else:
             console.log("[red]Cant find a list of audios")
-            Download_audio = False
+            DOWNLOAD_AUDIO = False
 
         # Collect available subtitles and default subtitle
         self.list_available_subtitles = parse_class_m3u8.get_subtitles()
@@ -558,7 +560,7 @@ class Downloader():
             console.log(f"[cyan]Find subtitles language: [red]{[obj_sub.get('language') for obj_sub in self.list_available_subtitles]}")
         else:
             console.log("[red]Cant find a list of audios")
-            Donwload_subtitles = False
+            DOWNLOAD_SUBTITLES = False
 
         # Collect best quality video
         m3u8_index_obj = parse_class_m3u8.get_best_quality()
@@ -566,7 +568,6 @@ class Downloader():
         # Get URI of the best quality and codecs parameters
         console.log(f"[cyan]Select resolution: [red]{m3u8_index_obj.get('width')}")
         m3u8_index = m3u8_index_obj.get('uri')
-        m3u8_index_decoding = m3u8_index_obj.get('codecs')
 
         # Fix URL if it is not complete with http:\\site_name.domain\...
         if "http" not in m3u8_index:
@@ -581,13 +582,12 @@ class Downloader():
                 logging.warning("[download_m3u8] Can't find a valid m3u8 index")
                 sys.exit(0)
 
-        # Collect best index, video decoding, and audio decoding
+        # Set m3u8_index
         self.m3u8_index = m3u8_index
 
-        # if is present in playlist
-        if m3u8_index_decoding != None:
-            self.video_decoding = m3u8_index_decoding.split(",")[0] 
-            self.audio_decoding = m3u8_index_decoding.split(",")[1]
+        # Get obj codec
+        self.codec: M3U8_Codec = parse_class_m3u8.codec
+        logging.info(f"Get coded: {self.codec}")
 
     def manage_subtitle(self):
         """
@@ -622,8 +622,8 @@ class Downloader():
                 'path': os.path.abspath(sub_full_path)
             })
 
-
             # If the subtitle file doesn't exist, download it
+            logging.info(f"Download uri subtitles: {obj_subtitle.get('uri')} => {sub_full_path}")
             response = requests.get(obj_subtitle.get('uri'))
             open(sub_full_path, "wb").write(response.content)
 
@@ -658,6 +658,7 @@ class Downloader():
             if not os.path.exists(full_path_audio):
 
                 # If the audio segment directory doesn't exist, download audio segments
+                logging.info(f"Download uri audio: {obj_audio.get('uri')} => {full_path_audio}")
                 audio_m3u8 = M3U8_Segments(obj_audio.get('uri'), full_path_audio, self.key)
                 console.log(f"[purple]Download audio segments [white]=> [red]{obj_audio.get('language')}.")
 
@@ -716,7 +717,6 @@ class Downloader():
         ts_files = [f for f in os.listdir(full_path) if f.endswith(".ts")]
         ts_files.sort(key=Downloader.extract_number)
         logging.info(f"Find {len(ts_files)} stream files to join")
-        logging.info(f"Using parameter: \n-c:v = {self.video_decoding} -c:a = {self.audio_decoding}])")
 
         # Check if there are enough .ts files to join (at least 10)
         if len(ts_files) < 10:
@@ -735,8 +735,9 @@ class Downloader():
             return concatenate_and_save(
                 file_list_path=file_list_path,
                 output_filename=out_file_name,
-                video_decoding=self.video_decoding,
-                audio_decoding=self.audio_decoding
+                v_codec=self.codec.video_codec,
+                a_codec=self.codec.audio_codec,
+                bandwidth=self.codec.bandwidth
             )
 
     def download_audios(self):
@@ -903,12 +904,12 @@ class Downloader():
             self.manage_playlist(m3u8_playlist_text)
 
             # Download subtitles
-            if Donwload_subtitles:
+            if DOWNLOAD_SUBTITLES:
                 logging.info("Download subtitles ...")
                 self.manage_subtitle()
 
             # Download segmenets of  audio tracks
-            if Download_audio:
+            if DOWNLOAD_AUDIO:
                 logging.info("Download audios ...")
                 self.manage_audio()
 

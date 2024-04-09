@@ -5,6 +5,7 @@ import os
 import json
 import logging
 import shutil
+import sys
 
 
 # External libraries
@@ -182,17 +183,19 @@ def add_subtitle(input_video_path: str, input_subtitle_path: str, output_video_p
     return output_video_path
 
 
-def concatenate_and_save(file_list_path: str, output_filename: str, video_decoding: str = None, audio_decoding: str = None, prefix: str = "segments", output_directory: str = None) -> str:
+def concatenate_and_save(file_list_path: str, output_filename: str, v_codec: str = None, a_codec: str = None, bandwidth: int = None, prefix: str = "segments", output_directory: str = None) -> str:
     """
     Concatenate input files and save the output with specified decoding parameters.
 
     Parameters:
     - file_list_path (str): Path to the file list containing the segments.
     - output_filename (str): Output filename for the concatenated video.
-    - video_decoding (str): Video decoding parameter (optional).
-    - audio_decoding (str): Audio decoding parameter (optional).
+    - v_codec (str): Video decoding parameter (optional).
+    - a_codec (str): Audio decoding parameter (optional).
+    - bandwidth (int): Bitrate for the output video (optional).
     - prefix (str): Prefix to add at the end of output file name (default is "segments").
     - output_directory (str): Directory to save the output file. If not provided, defaults to the current directory.
+    - codecs (str): Codecs for video and audio (optional).
 
     Returns:
     - output_file_path (str): Path to the saved output file.
@@ -208,8 +211,16 @@ def concatenate_and_save(file_list_path: str, output_filename: str, video_decodi
         output_args = {
             'c': 'copy',
             'loglevel': DEBUG_FFMPEG,
-            'y': None
+            'y': None,
         }
+
+        # Add BANDWIDTH and CODECS if provided
+        if bandwidth is not None:
+            output_args['b:v'] = str(bandwidth)
+        """if v_codec is not None:
+            output_args['vcodec'] = v_codec
+        if a_codec is not None:
+            output_args['acodec'] = a_codec"""
 
         # Set up the output file name by modifying the video file name
         output_file_name = os.path.splitext(output_filename)[0] + f"_{prefix}.mp4"

@@ -12,6 +12,58 @@ import requests
 from m3u8 import M3U8
 
 
+
+class M3U8_Codec():
+    """
+    Represents codec information for an M3U8 playlist.
+
+    Attributes:
+    - bandwidth (int): Bandwidth of the codec.
+    - resolution (str): Resolution of the codec.
+    - codecs (str): Codecs information in the format "avc1.xxxxxx,mp4a.xx".
+    - audio_codec (str): Audio codec extracted from the codecs information.
+    - video_codec (str): Video codec extracted from the codecs information.
+    """
+
+    def __init__(self, bandwidth, resolution, codecs):
+        """
+        Initializes the M3U8Codec object with the provided parameters.
+
+        Parameters:
+        - bandwidth (int): Bandwidth of the codec.
+        - resolution (str): Resolution of the codec.
+        - codecs (str): Codecs information in the format "avc1.xxxxxx,mp4a.xx".
+        """
+        self.bandwidth = bandwidth
+        self.resolution = resolution
+        self.codecs = codecs
+        self.audio_codec = None
+        self.video_codec = None
+        self.parse_codecs()
+
+    def parse_codecs(self):
+        """
+        Parses the codecs information to extract audio and video codecs.
+
+        Extracted codecs are set as attributes: audio_codec and video_codec.
+        """
+        # Split the codecs string by comma
+        codecs_list = self.codecs.split(',')
+
+        # Separate audio and video codecs
+        for codec in codecs_list:
+            if codec.startswith('avc'):
+                self.video_codec = codec
+            elif codec.startswith('mp4a'):
+                self.audio_codec = codec
+
+    def __str__(self):
+        """
+        Returns a string representation of the M3U8Codec object.
+        """
+        return f"BANDWIDTH={self.bandwidth},RESOLUTION={self.resolution},CODECS=\"{self.codecs}\""
+
+
 class M3U8_Parser:
     def __init__(self, DOWNLOAD_SPECIFIC_SUBTITLE = None):
         """
@@ -24,6 +76,7 @@ class M3U8_Parser:
         self.subtitle_playlist = []     # No vvt ma url a vvt
         self.subtitle = []              # Url a vvt
         self.audio_ts = []
+        self.codec: M3U8_Codec = None
         self.DOWNLOAD_SPECIFIC_SUBTITLE = DOWNLOAD_SPECIFIC_SUBTITLE
 
     def parse_data(self, m3u8_content: str) -> (None):
@@ -41,11 +94,19 @@ class M3U8_Parser:
 
             # Collect video info with url, resolution and codecs
             for playlist in m3u8_obj.playlists:
+
                 self.video_playlist.append({
                     "uri": playlist.uri, 
                     "width": playlist.stream_info.resolution, 
-                    "codecs": playlist.stream_info.codecs
-            })
+                })
+                
+                self.codec = M3U8_Codec(
+                    playlist.stream_info.bandwidth,
+                    playlist.stream_info.resolution,
+                    playlist.stream_info.codecs
+                )
+                logging.info(f"Parse: {playlist.stream_info}")
+                logging.info(f"Coded test: {self.codec.bandwidth}")
 
             # Collect info of encryption if present, method, uri and iv
             for key in m3u8_obj.keys:
@@ -92,7 +153,7 @@ class M3U8_Parser:
                     self.subtitle.append(segment.uri)
 
         except Exception as e:
-            logging.error(f"[M3U8_Parser] Error parsing M3U8 content: {e}")
+            logging.error(f"Error parsing M3U8 content: {e}")
 
     def get_resolution(self, uri: str) -> (int):
         """
@@ -134,8 +195,8 @@ class M3U8_Parser:
                 return sorted_uris[0]
             
             except:
-                logging.error("[M3U8_Parser] Error: Can't find M3U8 resolution by width...")
-                logging.info("[M3U8_Parser] Try searching in URI")
+                logging.error("Error: Can't find M3U8 resolution by width...")
+                logging.info("Try searching in URI")
 
                 # Sort the list of video playlist items based on the 'width' attribute if present,
                 # otherwise, use the resolution obtained from the 'uri' attribute as a fallback.
@@ -146,7 +207,7 @@ class M3U8_Parser:
                 return sorted_uris[0]
         else:
 
-            logging.info("[M3U8_Parser] No video playlists found.")
+            logging.info("No video playlists found.")
             return None
         
     def get_subtitles(self):
@@ -168,7 +229,7 @@ class M3U8_Parser:
 
                 # Get language name
                 name_language = sub_info.get("language")
-                logging.info(f"[M3U8_Parser] Find subtitle: {name_language}")
+                logging.info(f"Find subtitle: {name_language}")
 
                 # Check if there is custom subtitles to download
                 if len(self.DOWNLOAD_SPECIFIC_SUBTITLE) > 0:
@@ -178,7 +239,7 @@ class M3U8_Parser:
                         continue
 
                 # Make request to m3u8 subtitle to extract vtt
-                logging.info(f"[M3U8_Parser] Download subtitle: {name_language}")
+                logging.info(f"Download subtitle: {name_language}")
                 req_sub_content = requests.get(sub_info.get("uri"), headers={'user-agent': get_headers()})
 
                 try:
@@ -196,13 +257,13 @@ class M3U8_Parser:
                     })
 
                 except Exception as e:
-                    logging.error(f"[M3U8_Parser] Cant donwload: {name_language}, error: {e}")
+                    logging.error(f"Cant donwload: {name_language}, error: {e}")
 
             # Return
             return output
 
         else:
-            logging.info("[M3U8_Parser] No subtitle find")
+            logging.info("No subtitle find")
             return None
 
     def get_track_audios(self) -> list:
@@ -213,10 +274,10 @@ class M3U8_Parser:
             list: A list of dictionaries containing language and URI information for audio tracks, or None if no audio tracks are found.
         """
 
-        logging.info(f"[M3U8_Parser] Finding {len(self.audio_ts)} playlist(s) with audio.")
+        logging.info(f"Finding {len(self.audio_ts)} playlist(s) with audio.")
 
         if self.audio_ts:
-            logging.info("[M3U8_Parser] Getting list of available audio names")
+            logging.info("Getting list of available audio names")
             list_output = []
 
             # For all languages present in m3u8
@@ -232,7 +293,7 @@ class M3U8_Parser:
             return list_output
 
         else:
-            logging.info("[M3U8_Parser] No audio tracks found")
+            logging.info("No audio tracks found")
             return None
 
     def get_default_subtitle(self):
@@ -290,3 +351,4 @@ class M3U8_Parser:
 
         # Return the default audio track dictionary
         return dict_default_audio
+    
