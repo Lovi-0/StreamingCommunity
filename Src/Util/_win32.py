@@ -4,13 +4,20 @@
 # run somehwere backup
 # add config to trace if ffmpeg is install, using config in local or temp
 
-import winreg
+import platform
 import os
 import logging
 
+# Winreg only work for windows
+if platform.system() == "Windows":
 
-# Define Windows registry key for user environment variables
-env_keys = winreg.HKEY_CURRENT_USER, "Environment"
+    import winreg
+
+    # Define Windows registry key for user environment variables
+    env_keys = winreg.HKEY_CURRENT_USER, "Environment"
+
+else:
+    env_keys = None
 
 
 def get_env(name: str) -> str:
