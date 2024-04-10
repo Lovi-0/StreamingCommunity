@@ -587,7 +587,8 @@ class Downloader():
 
         # Get obj codec
         self.codec: M3U8_Codec = parse_class_m3u8.codec
-        logging.info(f"Get coded: {self.codec}")
+        logging.info(f"Get codeds: {self.codec}")
+        console.log(f"[cyan]Use codecs: [red]({self.codec.video_codec_name};{self.codec.audio_codec_name})")
 
     def manage_subtitle(self):
         """
@@ -735,8 +736,8 @@ class Downloader():
             return concatenate_and_save(
                 file_list_path=file_list_path,
                 output_filename=out_file_name,
-                v_codec=self.codec.video_codec,
-                a_codec=self.codec.audio_codec,
+                v_codec=self.codec.video_codec_name,
+                a_codec=self.codec.audio_codec_name,
                 bandwidth=self.codec.bandwidth
             )
 

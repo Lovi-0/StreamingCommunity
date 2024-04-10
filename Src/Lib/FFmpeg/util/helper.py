@@ -20,6 +20,7 @@ from Src.Util.config import config_manager
 # Variable
 DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
 DEBUG_FFMPEG = "debug" if DEBUG_MODE else "error"
+USE_CODECS = False
 
 
 
@@ -210,6 +211,7 @@ def concatenate_and_save(file_list_path: str, output_filename: str, v_codec: str
 
         output_args = {
             'c': 'copy',
+            'preset': 'ultrafast',
             'loglevel': DEBUG_FFMPEG,
             'y': None,
         }
@@ -217,10 +219,11 @@ def concatenate_and_save(file_list_path: str, output_filename: str, v_codec: str
         # Add BANDWIDTH and CODECS if provided
         if bandwidth is not None:
             output_args['b:v'] = str(bandwidth)
-        """if v_codec is not None:
-            output_args['vcodec'] = v_codec
-        if a_codec is not None:
-            output_args['acodec'] = a_codec"""
+        if USE_CODECS:
+            if v_codec is not None:
+                output_args['vcodec'] = v_codec
+            if a_codec is not None:
+                output_args['acodec'] = a_codec
 
         # Set up the output file name by modifying the video file name
         output_file_name = os.path.splitext(output_filename)[0] + f"_{prefix}.mp4"

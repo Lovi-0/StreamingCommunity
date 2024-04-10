@@ -12,6 +12,32 @@ import requests
 from m3u8 import M3U8
 
 
+# Costant
+CODEC_MAPPINGS = {
+    "video": {
+        "avc1": "libx264",
+        "avc2": "libx264",
+        "avc3": "libx264",
+        "avc4": "libx264",
+        "hev1": "libx265",
+        "hev2": "libx265",
+        "hvc1": "libx265",
+        "hvc2": "libx265",
+        "vp8": "libvpx",
+        "vp9": "libvpx-vp9",
+        "vp10": "libvpx-vp9"
+    },
+    "audio": {
+        "mp4a": "aac",
+        "mp3": "libmp3lame",
+        "ac-3": "ac3",
+        "ec-3": "eac3",
+        "opus": "libopus",
+        "vorbis": "libvorbis"
+    }
+}
+    
+
 
 class M3U8_Codec():
     """
@@ -39,9 +65,10 @@ class M3U8_Codec():
         self.codecs = codecs
         self.audio_codec = None
         self.video_codec = None
+        self.extract_codecs()
         self.parse_codecs()
 
-    def parse_codecs(self):
+    def extract_codecs(self):
         """
         Parses the codecs information to extract audio and video codecs.
 
@@ -56,6 +83,69 @@ class M3U8_Codec():
                 self.video_codec = codec
             elif codec.startswith('mp4a'):
                 self.audio_codec = codec
+
+    def convert_video_codec(self, video_codec_identifier) -> str:
+
+        """
+        Convert video codec identifier to codec name.
+
+        Parameters:
+        - video_codec_identifier (str): Identifier of the video codec.
+
+        Returns:
+        - str: Codec name corresponding to the identifier.
+        """
+
+        # Extract codec type from the identifier
+        codec_type = video_codec_identifier.split('.')[0]
+
+        # Retrieve codec mapping from the provided mappings or fallback to static mappings
+        video_codec_mapping = CODEC_MAPPINGS.get('video', {})
+        codec_name = video_codec_mapping.get(codec_type)
+
+        if codec_name:
+            return codec_name
+        
+        else:
+            logging.warning(f"No corresponding video codec found for {video_codec_identifier}. Using default codec libx264.")
+            return "libx264"    # Default
+        
+    def convert_audio_codec(self, audio_codec_identifier) -> str:
+
+        """
+        Convert audio codec identifier to codec name.
+
+        Parameters:
+        - audio_codec_identifier (str): Identifier of the audio codec.
+
+        Returns:
+        - str: Codec name corresponding to the identifier.
+        """
+
+        # Extract codec type from the identifier
+        codec_type = audio_codec_identifier.split('.')[0]
+
+        # Retrieve codec mapping from the provided mappings or fallback to static mappings
+        audio_codec_mapping = CODEC_MAPPINGS.get('audio', {})
+        codec_name = audio_codec_mapping.get(codec_type)
+
+        if codec_name:
+            return codec_name
+        
+        else:
+            logging.warning(f"No corresponding audio codec found for {audio_codec_identifier}. Using default codec aac.")
+            return "aac"        # Default
+        
+    def parse_codecs(self):
+        """
+        Parse video and audio codecs.
+
+        This method updates `video_codec_name` and `audio_codec_name` attributes.
+        """
+
+        self.video_codec_name = self.convert_video_codec(self.video_codec)
+        self.audio_codec_name = self.convert_audio_codec(self.audio_codec)
+        logging.info(f"CODECS={self.video_codec_name},{self.audio_codec_name}")
 
     def __str__(self):
         """
