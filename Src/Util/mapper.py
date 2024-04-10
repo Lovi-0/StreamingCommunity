@@ -15,9 +15,9 @@ def map_episode_title(tv_name: str, episode, number_season: int):
     Returns:
         str: The mapped episode title.
     """
-    global map_episode
-    map_episode = map_episode.replace("%(tv_name)", tv_name)
-    map_episode = map_episode.replace("%(season)", str(number_season).zfill(2))
-    map_episode = map_episode.replace("%(episode)", str(episode.number).zfill(2))
-    map_episode = map_episode.replace("%(episode_name)", episode.name)
-    return transliterate(map_episode)
+    map_episode_temp = map_episode
+    map_episode_temp = map_episode_temp.replace("%(tv_name)", tv_name)
+    map_episode_temp = map_episode_temp.replace("%(season)", str(number_season).zfill(2))
+    map_episode_temp = map_episode_temp.replace("%(episode)", str(episode.number).zfill(2))
+    map_episode_temp = map_episode_temp.replace("%(episode_name)", episode.name)
+    return transliterate(map_episode_temp)
