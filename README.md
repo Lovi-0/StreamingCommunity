@@ -109,6 +109,7 @@ You can change some behaviors by tweaking the configuration file.
         "specific_list_subtitles": [
             "eng"
         ],
+        "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
     }
 }
 ```
@@ -148,6 +149,7 @@ You can change some behaviors by tweaking the configuration file.
 | download_subtitles         | true          | Indicates whether subtitles should be downloaded or not.                                                                    | false                    |
 | specific_list_audio        | ["ita"]       | A list of specific audio languages to download.                                                                             | ["eng", "fra"]           |
 | specific_list_subtitles    | ["eng"]       | A list of specific subtitle languages to download.                                                                          | ["spa", "por"]           |
+|map_episode_name   |%(tv_name)_S%(season)E%(episode)_%(episode_name)| Mapping to choose the name of all episode of TV Show (see [Episode Name Usage](#Episode-name-usage)).
 
 > [!IMPORTANT]
 > If you're on **Windows** you'll need to use double black slashes. On Linux/MacOS, one slash is fine.
@@ -159,3 +161,11 @@ You can change some behaviors by tweaking the configuration file.
 
 ## Tutorial
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
+
+#### Episode name usage:
+You can choose different vars:
+* `%(tv_name)` : Is the name of TV Show
+* `%(season)` : Is the number of the season
+* `%(episode)` : Is the number of the episode
+* `%(episode_name)` : Is the name of the episode
+>NOTE: You don't need to add .mp4 at the end
