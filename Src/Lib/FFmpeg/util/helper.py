@@ -5,7 +5,6 @@ import os
 import json
 import logging
 import shutil
-import sys
 
 
 # External libraries
@@ -210,8 +209,8 @@ def concatenate_and_save(file_list_path: str, output_filename: str, v_codec: str
         }
 
         output_args = {
+            #'preset': 'ultrafast',
             'c': 'copy',
-            'preset': 'ultrafast',
             'loglevel': DEBUG_FFMPEG,
             'y': None,
         }
