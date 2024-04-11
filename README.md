@@ -69,50 +69,6 @@ python3 update.py
 
 You can change some behaviors by tweaking the configuration file.
 
-```json
-{
-    "DEFAULT": {
-        "debug": false,
-        "get_info": false,
-        "show_message": true,
-        "clean_console": true,
-        "get_moment_title": false,
-        "root_path": "videos",
-        "movies_folder_name": "Movies",
-        "series_folder_name": "Series",
-        "anime_folder_name": "Anime",
-        "not_close": false,
-        "swith_anime": false
-    },
-    "SITE": {
-        "streaming_site_name": "streamingcommunity",
-        "streaming_domain": "forum",
-        "anime_site_name": "animeunity",
-        "anime_domain": "to"
-    },
-    "M3U8": {
-        "tdqm_workers": 20,
-        "tqdm_progress_timeout": 10,
-        "minimum_ts_files_in_folder": 15,
-        "download_percentage": 1,
-        "requests_timeout": 5,
-        "enable_time_quit": false,
-        "tqdm_show_progress": false,
-        "cleanup_tmp_folder": true
-    },
-    "M3U8_OPTIONS": {
-        "download_audio": true,
-        "download_subtitles": true,
-        "specific_list_audio": [
-            "ita"
-        ],
-        "specific_list_subtitles": [
-            "eng"
-        ],
-        "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
-    }
-}
-```
 
 #### Options
 
@@ -140,6 +96,8 @@ You can change some behaviors by tweaking the configuration file.
 | minimum_ts_files_in_folder | 15            | The minimum number of .ts files expected in a folder.                                                                       | 10                       |
 | download_percentage        | 1             | The percentage of download completion required to consider the download complete.                                           | 0.95                     |
 | requests_timeout           | 5             | The timeout duration for HTTP requests in seconds.                                                                          | 10                       |
+| use_openssl                | false          | Indicates whether OpenSSL should be utilized for encryption during the conversion of TS files with key and IV.             | true                     |
+| use_codecs                 | false          | Specifies whether specific codecs (e.g., h264 for video, AAC for audio) should be used for converting TS files to MP4.      | true                     |
 | enable_time_quit           | false         | Whether to enable quitting the download after a certain time period.                                                        | true                     |
 | tqdm_show_progress         | false         | Whether to show progress during downloads or not.**May slow down your PC**                                                  | true                     |
 | cleanup_tmp_folder         | true          | Whether to clean up temporary folders after processing or not.                                                              | false                    |
@@ -160,9 +118,6 @@ You can change some behaviors by tweaking the configuration file.
 * Windows: `C:\\MyLibrary\\Folder` or `\\\\MyServer\\MyLibrary` (if you want to use a network folder).
 * Linux/MacOS: `Desktop/MyLibrary/Folder`
 
-## Tutorial
-For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
-
 #### Episode name usage:
 You can choose different vars:
 * `%(tv_name)` : Is the name of TV Show
@@ -170,3 +125,6 @@ You can choose different vars:
 * `%(episode)` : Is the number of the episode
 * `%(episode_name)` : Is the name of the episode
 >NOTE: You don't need to add .mp4 at the end
+
+## Tutorial
+For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
