@@ -1,9 +1,5 @@
 # 07.04.24
 
-# to do
-# run somehwere backup
-# add config to trace if ffmpeg is install, using config in local or temp
-
 import platform
 import os
 import logging
@@ -98,16 +94,23 @@ def backup_path():
     original_path = get_env("Path")
 
     try:
-        script_dir = os.path.dirname(__file__)
+
+        # Create backup dir
+        script_dir = os.path.join(os.path.expanduser("~"), "Backup")
+        os.makedirs(script_dir, exist_ok=True)
+
         backup_file = os.path.join(script_dir, "path_backup.txt")
 
-        with open(backup_file, "w") as f:
-            for path in original_path.split("\n"):
-                if len(path) > 3:
-                    f.write(f"{path}; \n")
+        # Check if backup file exist
+        if not os.path.exists(backup_file):
 
-        logging.info("Backup of PATH variable created.")
-        print("Backup of PATH variable created.")
+            with open(backup_file, "w") as f:
+                for path in original_path.split("\n"):
+                    if len(path) > 3:
+                        f.write(f"{path}; \n")
+
+            logging.info("Backup of PATH variable created.")
+            print("Backup of PATH variable created.")
 
     except Exception as e:
         logging.error(f"Failed to create backup of PATH variable: {e}")
