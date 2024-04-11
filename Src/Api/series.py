@@ -125,18 +125,14 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
     video_source.set_url_base_name(STREAM_SITE_NAME)
 
     # Download the episode
-    try:
-        obj_download = Downloader(
-            m3u8_playlist = video_source.get_playlist(),
-            key = video_source.get_key(),
-            output_filename = os.path.join(mp4_path, mp4_name)
-        )
+    obj_download = Downloader(
+        m3u8_playlist = video_source.get_playlist(),
+        key = video_source.get_key(),
+        output_filename = os.path.join(mp4_path, mp4_name)
+    )
 
-        obj_download.download_m3u8()
+    obj_download.download_m3u8()
 
-    except Exception as e:
-        logging.error(f"(donwload_video) Error downloading film: {e}")
-        pass
 
 
 def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: bool = False) -> None:

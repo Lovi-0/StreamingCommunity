@@ -69,46 +69,107 @@ python3 update.py
 
 You can change some behaviors by tweaking the configuration file.
 
+### Options (DEFAULT)
 
-#### Options
+* debug: Whether debugging information should be displayed or not.  
+  - Default Value: false  
 
-| Key                        | Default Value | Description                                                                                                                 | Value Example            |
-| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| DEFAULT                    |               | Contains default configuration options for users.                                                                           |                          |
-| debug                      | false         | Whether debugging information should be displayed or not.                                                                   | true                     |
-| get_info                   | false         | Whether additional information should be fetched or not with debug enable.                                                  | true                     |
-| show_message               | true          | Whether messages should be displayed to the user or not.                                                                    | false                    |
-| clean_console              | true          | Whether the console should be cleared before displaying new information or not.                                             | false                    |
-| get_moment_title           | false         | Whether to fetch the title of the moment or not.                                                                            | true                     |
-| root_path                  | videos        | Path where the script will add movies and TV series folders (see[Path Examples](#Path-examples)).                           | media/streamingcommunity |
-| movies_folder_name         | Movies        | The folder name where all the movies will be placed. Do not put a trailing slash.                                           | downloaded-movies        |
-| series_folder_name         | Series        | The folder name where all the TV series will be placed. Do not put a trailing slash.                                        | mytvseries               |
-| anime_folder_name          | Anime         | The folder name where all the anime will be placed. Do not put a trailing slash.                                            | myanime                  |
-| not_close                  | false         | Whether to keep the application running after completion or not.                                                            | true                     |
-| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| SITE                       |               | Contains site-specific configuration options.                                                                               |                          |
-| streaming_domain           | forum         | The domain of the streaming site.                                                                                           | express                  |
-| anime_domain               | to            | The domain of the anime site.                                                                                               | estate                   |
-| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| M3U8                       |               | Contains options specific to M3U8.                                                                                          |                          |
-| tdqm_workers               | 20            | The number of workers that will cooperate to download .ts files.**A high value may slow down your PC**                      | 40                       |
-| tqdm_progress_timeout      | 10            | The timeout duration for progress display updates in seconds after quit download.                                           | 5                        |
-| minimum_ts_files_in_folder | 15            | The minimum number of .ts files expected in a folder.                                                                       | 10                       |
-| download_percentage        | 1             | The percentage of download completion required to consider the download complete.                                           | 0.95                     |
-| requests_timeout           | 5             | The timeout duration for HTTP requests in seconds.                                                                          | 10                       |
-| use_openssl                | false          | Indicates whether OpenSSL should be utilized for encryption during the conversion of TS files with key and IV.             | true                     |
-| use_codecs                 | false          | Specifies whether specific codecs (e.g., h264 for video, AAC for audio) should be used for converting TS files to MP4.      | true                     |
-| enable_time_quit           | false         | Whether to enable quitting the download after a certain time period.                                                        | true                     |
-| tqdm_show_progress         | false         | Whether to show progress during downloads or not.**May slow down your PC**                                                  | true                     |
-| cleanup_tmp_folder         | true          | Whether to clean up temporary folders after processing or not.                                                              | false                    |
-| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| M3U8_OPTIONS               |               | Contains options specific to M3U8 file format.                                                                              |                          |
-| download_audio             | true          | Indicates whether audio files should be downloaded or not.                                                                  | false                    |
-| download_subtitles         | true          | Indicates whether subtitles should be downloaded or not.                                                                    | false                    |
-| merge_subtitles         | true          | Indicates if you want to merge subs in mp4 file or separate files .vtt| false                    |
-| specific_list_audio        | ["ita"]       | A list of specific audio languages to download.                                                                             | ["eng", "fra"]           |
-| specific_list_subtitles    | ["eng"]       | A list of specific subtitle languages to download.                                                                          | ["spa", "por"]           |
-|map_episode_name   |%(tv_name)_S%(season)E%(episode)_%(episode_name)| Mapping to choose the name of all episode of TV Show (see [Episode Name Usage](#Episode-name-usage)).
+* get_info: Whether additional information should be fetched or not with debug enabled.  
+  - Default Value: false  
+
+* show_message: Whether messages should be displayed to the user or not.  
+  - Default Value: true  
+
+* clean_console: Whether the console should be cleared before displaying new information or not.  
+  - Default Value: true  
+
+* get_moment_title: Whether to fetch the title of the moment or not.  
+  - Default Value: false  
+
+* root_path: Path where the script will add movies and TV series folders (see [Path Examples](#Path-examples)).  
+  - Default Value: media/streamingcommunity  
+  - Example Value: /path/to/root
+
+* movies_folder_name: The folder name where all the movies will be placed. Do not put a trailing slash.  
+  - Default Value: downloaded-movies  
+  - Example Value: Movies
+
+* series_folder_name: The folder name where all the TV series will be placed. Do not put a trailing slash.  
+  - Default Value: mytvseries  
+  - Example Value: Series
+
+* anime_folder_name: The folder name where all the anime will be placed. Do not put a trailing slash.  
+  - Default Value: myanime  
+  - Example Value: Anime
+
+* not_close: Whether to keep the application running after completion or not.  
+  - Default Value: false  
+
+### Options (SITE)
+
+* streaming_domain: The domain of the streaming site.  
+  - Default Value: forum  
+  - Example Value: express
+
+* anime_domain: The domain of the anime site.  
+  - Default Value: to  
+  - Example Value: estate
+
+### Options (M3U8)
+
+* tdqm_workers: The number of workers that will cooperate to download .ts files. **A high value may slow down your PC**  
+  - Default Value: 20  
+
+* tqdm_progress_timeout: The timeout duration for progress display updates in seconds after quit download.  
+  - Default Value: 10  
+
+* minimum_ts_files_in_folder: The minimum number of .ts files expected in a folder.  
+  - Default Value: 15  
+
+* download_percentage: The percentage of download completion required to consider the download complete.  
+  - Default Value: 1  
+  - Example Value: 0.95
+
+* requests_timeout: The timeout duration for HTTP requests in seconds.  
+  - Default Value: 5  
+
+* use_openssl: Indicates whether OpenSSL should be utilized for encryption during the conversion of TS files with key and IV.  
+  - Default Value: false  
+
+* use_codecs: Specifies whether specific codecs (e.g., h264 for video, AAC for audio) should be used for converting TS files to MP4. **May slow down your PC**  
+  - Default Value: false  
+
+* enable_time_quit: Whether to enable quitting the download after a certain time period.  
+  - Default Value: false  
+
+* tqdm_show_progress: Whether to show progress during downloads or not. **May slow down your PC**  
+  - Default Value: false  
+
+* cleanup_tmp_folder: Whether to clean up temporary folders after processing or not.  
+  - Default Value: true  
+
+### Options (M3U8_OPTIONS)
+
+* download_audio: Indicates whether audio files should be downloaded or not.  
+  - Default Value: true  
+
+* download_subtitles: Indicates whether subtitles should be downloaded or not.  
+  - Default Value: true  
+
+* merge_subtitles: Indicates if you want to merge subs in mp4 file or separate files .vtt  
+  - Default Value: true  
+
+* specific_list_audio: A list of specific audio languages to download.  
+  - Default Value: ["ita"]  
+  - Example Value: ["eng", "fra"]
+
+* specific_list_subtitles: A list of specific subtitle languages to download.  
+  - Default Value: ["eng"]  
+  - Example Value: ["spa", "por"]
+
+* map_episode_name: Mapping to choose the name of all episodes of TV Shows (see [Episode Name Usage](#Episode-name-usage)).  
+  - Default Value: %(tv_name)_S%(season)E%(episode)_%(episode_name)  
+  - Example Value: %(tv_name) [S%(season)] [E%(episode)] %(episode_name)
 
 > [!IMPORTANT]
 > If you're on **Windows** you'll need to use double black slashes. On Linux/MacOS, one slash is fine.

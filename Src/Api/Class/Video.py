@@ -5,7 +5,6 @@ import re
 import json
 import binascii
 import logging
-import sys
 from urllib.parse import urljoin, urlencode, quote
 
 
@@ -106,7 +105,7 @@ class VideoSource:
 
         except Exception as e:
             logging.error(f"Error collecting season info: {e}")
-            sys.exit(0)
+            raise
 
     def collect_title_season(self, number_season: int) -> None:
         """
@@ -132,7 +131,7 @@ class VideoSource:
 
         except Exception as e:
             logging.error(f"Error collecting title season info: {e}")
-            sys.exit(0)
+            raise
     
     def get_iframe(self, episode_id: str = None) -> None:
         """
@@ -164,7 +163,7 @@ class VideoSource:
 
         except Exception as e:
             logging.error(f"Error getting iframe source: {e}")
-            sys.exit(0)
+            raise
 
     def parse_script(self, script_text: str) -> None:
         """
@@ -189,7 +188,7 @@ class VideoSource:
 
         except Exception as e:
             logging.error(f"Error parsing script: {e}")
-            sys.exit(0)
+            raise
 
     def get_content(self) -> None:
         """
@@ -215,7 +214,7 @@ class VideoSource:
 
         except Exception as e:
             logging.error(f"Error getting content: {e}")
-            sys.exit(0)
+            raise
 
     def get_playlist(self) -> str:
         """
@@ -236,7 +235,7 @@ class VideoSource:
         
         except AttributeError as e:
             logging.error(f"Error getting playlist: {e}")
-            sys.exit(0)
+            raise
 
     def get_key(self) -> str:
         """
@@ -265,7 +264,7 @@ class VideoSource:
             
         except Exception as e:
             logging.error(f"Error getting key: {e}")
-            sys.exit(0)
+            raise
 
 class VideoSourceAnime(VideoSource):
     """

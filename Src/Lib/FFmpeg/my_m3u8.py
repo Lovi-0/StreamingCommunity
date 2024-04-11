@@ -1,7 +1,6 @@
 # 5.01.24 -> 7.01.24 -> 20.02.24 -> 29.03.24
 
 import os
-import sys
 import time
 import threading
 import logging
@@ -152,7 +151,7 @@ class M3U8_Segments:
 
         except requests.exceptions.RequestException as req_err:
             logging.error(f"[M3U8_Segments] Error occurred during request: {req_err}")
-            sys.exit(1)  # Exit with non-zero status to indicate an error
+            raise
 
         except Exception as e:
             logging.error(f"[M3U8_Segments] Error occurred: {e}")
@@ -426,7 +425,7 @@ class M3U8_Segments:
         # Check if there is file to json
         if len(ts_files) < MIN_TS_FILES_IN_FOLDER:
             logging.error(f"No .ts file to join in folder: {self.temp_folder}")
-            sys.exit(0)
+            raise
 
         # Save files sorted in a txt file with absolute path to fix problem with ( C:\\path (win))
         with open(file_list_path, 'w') as file_list:
@@ -581,7 +580,7 @@ class Downloader():
                 console.log(f"[cyan]Found m3u8 index [white]=> [red]{m3u8_index}")
             else:
                 logging.warning("[download_m3u8] Can't find a valid m3u8 index")
-                sys.exit(0)
+                raise
 
         # Set m3u8_index
         self.m3u8_index = m3u8_index
@@ -824,9 +823,9 @@ class Downloader():
 
         # Check if there are any downloaded subtitles
         if len(self.downloaded_subtitle) > 0:
+            console.log(f"[cyan]Add subtitles.")
+
             if MERGE_SUBTITLES:
-                # Log adding subtitles
-                console.log(f"[cyan]Add subtitles.")
 
                 # If no audio tracks were joined, use the original video path
                 if path_video_and_audio is None:
@@ -840,6 +839,7 @@ class Downloader():
                 )
             else:
                 console.log("[cyan]Moving subtitle out of tmp folder.")
+
                 for obj_sub in self.downloaded_subtitle:
                     try:
                         language = obj_sub.get('language').lower()
@@ -848,6 +848,7 @@ class Downloader():
                         language = (language.replace("forced-", "") + ".forced") if 'forced-' in language else language
                         sub_path = self.output_filename.replace(".mp4", f".{language}.vtt")
                         os.rename(obj_sub.get('path'), sub_path)
+                        
                     except Exception as e:
                         logging.error(f"Error moving subtitle: {e}. Skipping...")
                         continue

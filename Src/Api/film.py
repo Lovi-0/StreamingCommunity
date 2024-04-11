@@ -50,15 +50,10 @@ def download_film(id_film: str, title_name: str, domain: str):
     mp4_format = mp4_name + ".mp4"
 
     # Download the film using the m3u8 playlist, key, and output filename
-    try:
-        obj_download = Downloader(
-            m3u8_playlist = video_source.get_playlist(),
-            key = video_source.get_key(),
-            output_filename = os.path.join(ROOT_PATH, MOVIE_FOLDER, title_name, mp4_format)
-        )
+    obj_download = Downloader(
+        m3u8_playlist = video_source.get_playlist(),
+        key = video_source.get_key(),
+        output_filename = os.path.join(ROOT_PATH, MOVIE_FOLDER, title_name, mp4_format)
+    )
 
-        obj_download.download_m3u8()
-
-    except Exception as e:
-        logging.error(f"(download_film) Error downloading film: {e}")
-        pass
+    obj_download.download_m3u8()

@@ -1,6 +1,5 @@
 # 29.03.24
 
-import sys
 import logging
 from urllib.parse import urlparse, urljoin
 
@@ -34,7 +33,7 @@ class M3U8_UrlFix:
         # Check if m3u8 url playlist is present
         if self.url_playlist == None:
             logging.error("[M3U8_UrlFix] Cant generate full url, playlist not present")
-            sys.exit(0)
+            raise
 
         # Parse the playlist URL to extract the base URL components
         parsed_playlist_url = urlparse(self.url_playlist)
