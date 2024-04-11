@@ -19,7 +19,7 @@ from Src.Util.config import config_manager
 # Variable
 DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
 DEBUG_FFMPEG = "debug" if DEBUG_MODE else "error"
-USE_CODECS = False
+USE_CODECS = config_manager.get_bool("M3U8", "use_codecs")
 
 
 

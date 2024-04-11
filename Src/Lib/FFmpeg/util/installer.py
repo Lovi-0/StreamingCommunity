@@ -146,17 +146,20 @@ def move_ffmpeg_exe_to_top_level(install_dir: str) -> None:
         raise
 
 def add_install_dir_to_environment_path(install_dir: str) -> None:
-    '''
+    """
     Add the install directory to the environment PATH variable.
 
     Args:
         install_dir (str): The directory to be added to the environment PATH variable.
-    '''
+    """
 
     install_dir = os.path.abspath(os.path.join(install_dir, 'bin'))
     set_env_path(install_dir)
 
 def download_ffmpeg():
+    """
+    Main function to donwload ffmpeg and add to win path
+    """
         
     # Get FFMPEG download URL
     ffmpeg_url = get_ffmpeg_download_url()
@@ -189,13 +192,16 @@ def download_ffmpeg():
     logging.info(f'Adding {install_dir} to environment PATH variable')
     add_install_dir_to_environment_path(install_dir)
 
-def check_ffmpeg():
+def check_ffmpeg() -> bool:
     """
     Check if FFmpeg is installed and available on the system PATH.
 
     This function checks if FFmpeg is installed and available on the system PATH.
     If FFmpeg is found, it prints its version. If not found, it attempts to download
     FFmpeg and add it to the system PATH.
+
+    Returns:
+        bool: If ffmpeg is present or not
     """
 
     console.print("[green]Checking FFmpeg...")
@@ -208,6 +214,8 @@ def check_ffmpeg():
         # Get and print FFmpeg version
         if show_version:
             get_version()
+
+        return True
 
     except:
 
@@ -225,3 +233,5 @@ def check_ffmpeg():
             console.print("[red]Unable to download or add FFmpeg to the PATH.[/red]")
             console.print(f"Error: {e}")
             raise
+
+        return False
