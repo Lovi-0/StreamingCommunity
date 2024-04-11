@@ -548,7 +548,7 @@ class Downloader():
         if self.list_available_audio != None:
             console.log(f"[cyan]Find audios language: [red]{[obj_audio.get('language') for obj_audio in self.list_available_audio]}")
         else:
-            console.log("[red]Cant find a list of audios")
+            console.log("[red]Can't find a list of audios")
             DOWNLOAD_AUDIO = False
 
         # Collect available subtitles and default subtitle
@@ -559,7 +559,7 @@ class Downloader():
         if self.list_available_subtitles != None:
             console.log(f"[cyan]Find subtitles language: [red]{[obj_sub.get('language') for obj_sub in self.list_available_subtitles]}")
         else:
-            console.log("[red]Cant find a list of audios")
+            console.log("[red]Can't find a list of audios")
             DOWNLOAD_SUBTITLES = False
 
         # Collect best quality video
