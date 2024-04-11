@@ -127,7 +127,7 @@ def main():
     
     # If no media find
     else:
-        console.print("[red]Cant find a single element")
+        console.print("[red]Can't find a single element")
 
     # End
     console.print("\n[red]Done")
@@ -166,7 +166,7 @@ def main_switch():
 
     # If no media find
     else:
-        console.print("[red]Cant find a single element")
+        console.print("[red]Can't find a single element")
 
 
 if __name__ == '__main__':
