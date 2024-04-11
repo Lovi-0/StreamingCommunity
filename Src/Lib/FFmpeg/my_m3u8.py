@@ -54,6 +54,7 @@ DOWNLOAD_AUDIO = config_manager.get_bool('M3U8_OPTIONS', 'download_audio')
 DOWNLOAD_SUBTITLES = config_manager.get_bool('M3U8_OPTIONS', 'download_subtitles')
 DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_OPTIONS', 'specific_list_audio')            
 DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_OPTIONS', 'specific_list_subtitles')
+MERGE_SUBTITLES = config_manager.get_bool('M3U8_OPTIONS', 'merge_subtitles')
 TQDM_MAX_WORKER = config_manager.get_int('M3U8', 'tdqm_workers')
 TQDM_PROGRESS_TIMEOUT = config_manager.get_int('M3U8', 'tqdm_progress_timeout')
 COMPLETED_PERCENTAGE = config_manager.get_float('M3U8', 'download_percentage')
@@ -823,19 +824,33 @@ class Downloader():
 
         # Check if there are any downloaded subtitles
         if len(self.downloaded_subtitle) > 0:
-            # Log adding subtitles
-            console.log(f"[cyan]Add subtitles.")
+            if MERGE_SUBTITLES:
+                # Log adding subtitles
+                console.log(f"[cyan]Add subtitles.")
 
-            # If no audio tracks were joined, use the original video path
-            if path_video_and_audio is None:
-                path_video_and_audio = self.video_track_path
+                # If no audio tracks were joined, use the original video path
+                if path_video_and_audio is None:
+                    path_video_and_audio = self.video_track_path
 
-            # Transcode video with subtitles
-            path_join_subtitles = transcode_with_subtitles(
-                path_video_and_audio,
-                self.downloaded_subtitle,
-                os.path.join(self.base_path, "out.mkv")
-            )
+                # Transcode video with subtitles
+                path_join_subtitles = transcode_with_subtitles(
+                    path_video_and_audio,
+                    self.downloaded_subtitle,
+                    os.path.join(self.base_path, "out.mkv")
+                )
+            else:
+                console.log("[cyan]Moving subtitle out of tmp folder.")
+                for obj_sub in self.downloaded_subtitle:
+                    try:
+                        language = obj_sub.get('language').lower()
+
+                        # Modifica la stringa se contiene "forced-", altrimenti la converte in minuscolo
+                        language = (language.replace("forced-", "") + ".forced") if 'forced-' in language else language
+                        sub_path = self.output_filename.replace(".mp4", f".{language}.vtt")
+                        os.rename(obj_sub.get('path'), sub_path)
+                    except Exception as e:
+                        logging.error(f"Error moving subtitle: {e}. Skipping...")
+                        continue
 
         self.path_video_and_audio = path_video_and_audio
         self.path_join_subtitles = path_join_subtitles
