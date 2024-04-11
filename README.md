@@ -147,6 +147,7 @@ You can change some behaviors by tweaking the configuration file.
 | M3U8_OPTIONS               |               | Contains options specific to M3U8 file format.                                                                              |                          |
 | download_audio             | true          | Indicates whether audio files should be downloaded or not.                                                                  | false                    |
 | download_subtitles         | true          | Indicates whether subtitles should be downloaded or not.                                                                    | false                    |
+| merge_subtitles         | true          | Indicates if you want to merge subs in mp4 file or separate files .vtt| false                    |
 | specific_list_audio        | ["ita"]       | A list of specific audio languages to download.                                                                             | ["eng", "fra"]           |
 | specific_list_subtitles    | ["eng"]       | A list of specific subtitle languages to download.                                                                          | ["spa", "por"]           |
 |map_episode_name   |%(tv_name)_S%(season)E%(episode)_%(episode_name)| Mapping to choose the name of all episode of TV Show (see [Episode Name Usage](#Episode-name-usage)).

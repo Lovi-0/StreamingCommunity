@@ -34,6 +34,7 @@
     "M3U8_OPTIONS": {
         "download_audio": true,
         "download_subtitles": true,
+        "merge_subtitles": true,
         "specific_list_audio": [
             "ita"
         ],
