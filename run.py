@@ -181,9 +181,9 @@ if __name__ == '__main__':
     logger = Logger()
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Script with command line arguments')
-    parser.add_argument('-a', '--anime', action='store_true', help='Run main_switch()')
-    parser.add_argument('-f', '--film', action='store_true', help='Run main()')
+    parser = argparse.ArgumentParser(description='Script to download film and series from internet.')
+    parser.add_argument('-a', '--anime', action='store_true', help='Check into anime category')
+    parser.add_argument('-f', '--film', action='store_true', help='Check into film/tv series category')
     args = parser.parse_args()
 
     if args.anime:
