@@ -147,7 +147,7 @@ def test_site(domain: str) -> str:
     console.print(f"[cyan]Make request site to {site_url} [white]...")
 
     try:
-        response = requests.get(site_url, headers={'user-agent': get_headers()})
+        response = requests.get(site_url, headers={'user-agent': get_headers()}, timeout=4)
         console.print(f"[green]Request response [white]=> [red]{response.status_code} \n")
         response.raise_for_status()
 
@@ -159,7 +159,6 @@ def test_site(domain: str) -> str:
     except Exception as e:
         console.log("[red]Try again in 10 minutes.")
         logging.error(f"Error testing site: {e}, changing DOMAIN ...")
-        raise
 
 
 def get_version(text: str) -> str:
