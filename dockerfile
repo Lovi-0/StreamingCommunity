@@ -6,6 +6,8 @@ WORKDIR /app
 ENV TEMP /tmp
 RUN mkdir -p $TEMP
 
+RUN apt-get update && apt-get install -y ffmpeg
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["python", "run.py"]
