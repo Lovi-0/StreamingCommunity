@@ -143,8 +143,8 @@ def test_site(domain: str) -> str:
         str: The response text if successful, otherwise None.
     """
     
-    console.print("[cyan]Make request site [white]...")
     site_url = f"https://streamingcommunity.{domain}"
+    console.print(f"[cyan]Make request site to {site_url} [white]...")
 
     try:
         response = requests.get(site_url, headers={'user-agent': get_headers()})
