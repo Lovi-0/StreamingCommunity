@@ -173,16 +173,21 @@ if __name__ == '__main__':
 
     logger = Logger()
 
-    if not SWITCH_TO:
+    category = input("Insert category (0: Film/series, 1: Anime) : ")
+
+    if category == '0':
         if not CLOSE_CONSOLE:
             main()
         else:
             while 1:
                 main()
 
-    else:
+    elif category == '1':
         if not CLOSE_CONSOLE:
             main_switch()
         else:
             while 1:
                 main_switch()
+    else:
+        console.print("[red]Invalid category")
+        sys.exit(0)
