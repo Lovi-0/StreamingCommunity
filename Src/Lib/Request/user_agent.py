@@ -6,6 +6,7 @@ import os
 import random
 import threading
 import json
+import tempfile
 from typing import Dict, List
 
 # Internal utilities
@@ -47,33 +48,11 @@ def update_user_agents(browser_name: str, browser_user_agents: Dict[str, List[st
     browser_user_agents[browser_name] = get_browser_user_agents_online(browser_name)
 
 
-def create_temp_directory():
-    """
-    Create the TEMP directory if it doesn't exist.
-
-    If the TEMP environment variable doesn't exist, this function creates
-    the TEMP directory in the user's local AppData folder.
-
-    Returns:
-        str: The path to the TEMP directory.
-    """
-
-    # Get the TEMP directory from the environment variables
-    temp_dir = os.environ.get('TEMP')
-    
-    # If TEMP directory is not set, create it in the local AppData folder
-    if temp_dir is None:
-        temp_dir = os.path.join(os.path.expanduser("~"), "AppData", "Local", "Temp")
-        os.makedirs(temp_dir, exist_ok=True)
-
-    return temp_dir
-
-
 def create_or_update_user_agent_file() -> None:
     """
     Create or update the user agent file with browser user agents.
     """
-    user_agent_file = os.path.join(os.environ.get('TEMP'), 'fake_user_agent.json')
+    user_agent_file = os.path.join(tempfile.gettempdir(), 'fake_user_agent.json')
     
     if not os.path.exists(user_agent_file):
         browser_user_agents: Dict[str, List[str]] = {}
@@ -101,11 +80,8 @@ class UserAgentManager:
     """
     def __init__(self):
 
-        # Create temp directory if not exist
-        temp_dir = create_temp_directory()
-
         # Get path to temp file where save all user agents
-        self.user_agent_file = os.path.join(temp_dir, 'fake_user_agent.json')
+        self.user_agent_file = os.path.join(tempfile.gettempdir(), 'fake_user_agent.json')
 
         # If file dont exist, creaet it
         if not os.path.exists(self.user_agent_file):
