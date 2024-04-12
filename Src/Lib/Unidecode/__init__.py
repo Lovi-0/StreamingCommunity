@@ -58,6 +58,7 @@ def _get_ascii_representation(char: str) -> str:
     try:
         # Look up the character in the cache
         table = Cache[section]
+        
     except KeyError:
         try:
             # Import the module corresponding to the section
@@ -67,6 +68,7 @@ def _get_ascii_representation(char: str) -> str:
             spec = importlib.util.spec_from_file_location(module_name, module_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
+
         except ImportError:
             # If module import fails, set cache entry to None and return
             Cache[section] = None

@@ -741,9 +741,9 @@ class Downloader():
             return concatenate_and_save(
                 file_list_path=file_list_path,
                 output_filename=out_file_name,
-                v_codec=self.codec.video_codec_name,
-                a_codec=self.codec.audio_codec_name,
-                bandwidth=self.codec.bandwidth
+                v_codec=getattr(self.codec, 'video_codec_name', None),  # Return none if key dont exist
+                a_codec=getattr(self.codec, 'audio_codec_name', None),
+                bandwidth=getattr(self.codec, 'bandwidth', None)
             )
 
     def download_audios(self):
