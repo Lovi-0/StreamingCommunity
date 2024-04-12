@@ -197,7 +197,13 @@ docker build -t streaming-community-api .
 and to run it use 
 
 ```
-docker run -it -p 8000:8000 streaming-community-api 
+docker run -it -p 8000:8000 -v streaming-community-api
+```
+
+By default the videos will be saved in `/app/Video`, if you want to to save them in your machine instead of the container just run
+
+```
+docker run -it -p 8002:8000 -v /path/to/download:/app/Video streaming-community-api
 ```
 
 ## Tutorial
