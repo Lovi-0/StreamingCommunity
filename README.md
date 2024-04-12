@@ -200,7 +200,7 @@ and to run it use
 docker run -it -p 8000:8000 streaming-community-api
 ```
 
-By default the videos will be saved in `/app/Video`, if you want to to save them in your machine instead of the container just run
+By default the videos will be saved in `/app/Video` inside the container, if you want to to save them in your machine instead of the container just run
 
 ```
 docker run -it -p 8000:8000 -v /path/to/download:/app/Video streaming-community-api
