@@ -3,6 +3,7 @@
 import sys
 import logging
 import platform
+import argparse
 
 
 # Internal utilities
@@ -168,26 +169,34 @@ def main_switch():
     else:
         console.print("[red]Cant find a single element")
 
+def run_function(func, close_console=False):
+    if close_console:
+        while 1:
+            func()
+    else:
+        func()
+
 
 if __name__ == '__main__':
-
     logger = Logger()
 
-    category = input("Insert category (0: Film/series, 1: Anime) : ")
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Script with command line arguments')
+    parser.add_argument('-a', '--anime', action='store_true', help='Run main_switch()')
+    parser.add_argument('-f', '--film', action='store_true', help='Run main()')
+    args = parser.parse_args()
 
-    if category == '0':
-        if not CLOSE_CONSOLE:
-            main()
-        else:
-            while 1:
-                main()
-
-    elif category == '1':
-        if not CLOSE_CONSOLE:
-            main_switch()
-        else:
-            while 1:
-                main_switch()
+    if args.anime:
+        run_function(main_switch, CLOSE_CONSOLE)
+    elif args.film:
+        run_function(main, CLOSE_CONSOLE)
     else:
-        console.print("[red]Invalid category")
-        sys.exit(0)
+        # If no arguments are provided, ask the user to input the category
+        category = input("Insert category (0: Film/series, 1: Anime) : ")
+        if category == '0':
+            run_function(main, CLOSE_CONSOLE)
+        elif category == '1':
+            run_function(main_switch, CLOSE_CONSOLE)
+        else:
+            console.print("[red]Invalid category")
+            sys.exit(0)
