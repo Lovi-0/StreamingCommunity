@@ -588,7 +588,10 @@ class Downloader():
         # Get obj codec
         self.codec: M3U8_Codec = parse_class_m3u8.codec
         logging.info(f"Get codeds: {self.codec}")
-        console.log(f"[cyan]Find codecs: [red]({self.codec.video_codec_name};{self.codec.audio_codec_name})")
+        try:
+            console.log(f"[cyan]Find codecs: [red]({self.codec.video_codec_name};{self.codec.audio_codec_name})")
+        except Exception as e:
+            console.log(f"[red]Error find codecs: {e}")
 
     def manage_subtitle(self):
         """
