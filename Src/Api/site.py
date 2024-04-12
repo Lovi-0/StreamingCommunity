@@ -159,7 +159,6 @@ def test_site(domain: str) -> str:
     except Exception as e:
         console.log("[red]Try again in 10 minutes.")
         logging.error(f"Error testing site: {e}, changing DOMAIN ...")
-        raise
 
 
 def get_version(text: str) -> str:
@@ -183,7 +182,6 @@ def get_version(text: str) -> str:
     
     except Exception as e:
         logging.error(f"Error extracting version: {e}")
-        raise
 
 
 def get_version_and_domain() -> tuple[str, str]:
