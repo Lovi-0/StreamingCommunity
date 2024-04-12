@@ -4,6 +4,7 @@ import sys
 import logging
 import platform
 import argparse
+from typing import Callable
 
 
 # Internal utilities
@@ -91,9 +92,9 @@ def initialize():
                 temp_config_manager.add_variable('Requirements', 'ffmpeg', True)
 
 
-def main():
+def main_film_series():
     """
-    Main function of the application.
+    Main function of the application for film and series.
     """
 
     # Get site domain and version
@@ -134,9 +135,9 @@ def main():
     console.print("\n[red]Done")
 
 
-def main_switch():
+def main_anime():
     """
-    Main function for anime unity
+    Main function of the application for anime unity
     """
 
     # Get site domain and version
@@ -169,7 +170,15 @@ def main_switch():
     else:
         console.print("[red]Cant find a single element")
 
-def run_function(func, close_console=False):
+
+def run_function(func: Callable[..., None], close_console: bool = False) -> None:
+    """
+    Run a given function indefinitely or once, depending on the value of close_console.
+
+    Parameters:
+        func (Callable[..., None]): The function to run.
+        close_console (bool, optional): Whether to close the console after running the function once. Defaults to False.
+    """
     if close_console:
         while 1:
             func()
@@ -177,7 +186,9 @@ def run_function(func, close_console=False):
         func()
 
 
-if __name__ == '__main__':
+def main():
+
+    # Create instance of logger
     logger = Logger()
 
     # Parse command line arguments
@@ -187,16 +198,26 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.anime:
-        run_function(main_switch, CLOSE_CONSOLE)
+        run_function(main_anime, CLOSE_CONSOLE)
+
     elif args.film:
-        run_function(main, CLOSE_CONSOLE)
+        run_function(main_film_series, CLOSE_CONSOLE)
+
     else:
-        # If no arguments are provided, ask the user to input the category
-        category = input("Insert category (0: Film/series, 1: Anime) : ")
+
+        # If no arguments are provided, ask the user to input the category, if nothing insert return 0
+        category = msg.ask("[cyan]Insert category [white]([red]0[white]: [bold magenta]Film/Series[white], [red]1[white]: [bold magenta]Anime[white])[white]:[/cyan]", choices={"0": "", "1": ""}, default="0")
+
         if category == '0':
-            run_function(main, CLOSE_CONSOLE)
+            run_function(main_film_series, CLOSE_CONSOLE)
+
         elif category == '1':
-            run_function(main_switch, CLOSE_CONSOLE)
+            run_function(main_anime, CLOSE_CONSOLE)
+
         else:
-            console.print("[red]Invalid category")
+            console.print("[red]Invalid category, you need to insert 0 or 1.")
             sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()

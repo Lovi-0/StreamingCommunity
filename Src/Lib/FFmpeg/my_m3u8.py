@@ -566,7 +566,7 @@ class Downloader():
         m3u8_index_obj = parse_class_m3u8.get_best_quality()
 
         # Get URI of the best quality and codecs parameters
-        console.log(f"[cyan]Select resolution: [red]{m3u8_index_obj.get('width')}")
+        console.log(f"[cyan]Find resolution: [red]{m3u8_index_obj.get('width')}")
         m3u8_index = m3u8_index_obj.get('uri')
 
         # Fix URL if it is not complete with http:\\site_name.domain\...
@@ -588,7 +588,7 @@ class Downloader():
         # Get obj codec
         self.codec: M3U8_Codec = parse_class_m3u8.codec
         logging.info(f"Get codeds: {self.codec}")
-        console.log(f"[cyan]Use codecs: [red]({self.codec.video_codec_name};{self.codec.audio_codec_name})")
+        console.log(f"[cyan]Find codecs: [red]({self.codec.video_codec_name};{self.codec.audio_codec_name})")
 
     def manage_subtitle(self):
         """

@@ -149,7 +149,7 @@ def test_site(domain: str) -> str:
     try:
         response = requests.get(site_url, headers={'user-agent': get_headers()})
         console.print(f"[green]Request response [white]=> [red]{response.status_code} \n")
-        response.raise_for_status()  # Raise an error if request fails
+        response.raise_for_status()
 
         if response.ok:
             return response.text

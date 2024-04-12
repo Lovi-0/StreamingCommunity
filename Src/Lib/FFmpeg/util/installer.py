@@ -170,7 +170,7 @@ def download_ffmpeg():
     # Generate install directory path
     install_dir = os.path.join(INSTALL_DIR, 'FFMPEG')
 
-    console.print(f"[cyan]f'Making install directory: [red]{install_dir!r}")
+    console.print(f"[cyan]Making install directory: [red]{install_dir!r}")
     logging.info(f'Making install directory {install_dir!r}')
     os.makedirs(install_dir, exist_ok=True)
 
@@ -210,6 +210,7 @@ def check_ffmpeg() -> bool:
     console.print("[green]Checking FFmpeg...")
 
     try:
+
         # Try running the FFmpeg command to check if it exists
         subprocess.run(["ffmpeg", "-version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         console.print("[blue]FFmpeg is installed. \n")
@@ -235,6 +236,5 @@ def check_ffmpeg() -> bool:
             # If unable to download or add FFmpeg to the PATH
             console.print("[red]Unable to download or add FFmpeg to the PATH.[/red]")
             console.print(f"Error: {e}")
-            raise
 
-        return False
+    return False
