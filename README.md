@@ -15,7 +15,8 @@ You can chat, help improve this repo, or just hang around for some fun in the **
   * [Requirement](#requirement)
   * [Usage](#usage)
   * [Update](#update)
-* [USAGE AND OPTIONS](#options)
+* [CONFIGURATION](#Configuration)
+* [DOCKER](#docker)
 * [TUTORIAL](#tutorial)
 
 ## Requirement
@@ -186,6 +187,24 @@ You can choose different vars:
 * `%(episode)` : Is the number of the episode
 * `%(episode_name)` : Is the name of the episode
 >NOTE: You don't need to add .mp4 at the end
+
+## Docker
+You can run the script in a docker container, to build the image just run
+```
+docker build -t streaming-community-api .
+```
+
+and to run it use 
+
+```
+docker run -it -p 8000:8000 streaming-community-api
+```
+
+By default the videos will be saved in `/app/Video` inside the container, if you want to to save them in your machine instead of the container just run
+
+```
+docker run -it -p 8000:8000 -v /path/to/download:/app/Video streaming-community-api
+```
 
 ## Tutorial
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
