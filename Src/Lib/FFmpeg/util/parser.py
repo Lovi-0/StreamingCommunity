@@ -38,6 +38,35 @@ CODEC_MAPPINGS = {
 }
     
 
+def extract_resolution(uri: str) -> int:
+    """
+    Extracts the video resolution from the given URI.
+
+    Args:
+    - uri (str): The URI containing video information.
+
+    Returns:
+    - int: The video resolution if found, otherwise 0.
+    """
+
+    # Common video resolutions
+    resolutions = [
+        480, 
+        720, 
+        1080, 
+        2160, 
+        3840
+    ]
+
+
+    for resolution in resolutions:
+        if str(resolution) in uri:
+            return resolution
+        
+    # Default resolution return (not best)
+    logging.error("No resolution find")
+    return 0
+
 
 class M3U8_Codec():
     """
@@ -169,46 +198,99 @@ class M3U8_Parser:
         self.codec: M3U8_Codec = None
         self.DOWNLOAD_SPECIFIC_SUBTITLE = DOWNLOAD_SPECIFIC_SUBTITLE
 
-    def parse_data(self, m3u8_content: str) -> (None):
+    def parse_data(self, m3u8_content: str) -> None:
         """
         Extracts all information present in the provided M3U8 content.
 
         Args:
         - m3u8_content (str): The content of the M3U8 file.
         """
-
         try:
+            # Basic input validation
+            if not m3u8_content.strip():
+                logging.error("M3U8 content is empty or whitespace.")
+                return
 
             # Get obj of the m3u8 text content download, dictionary with video, audio, segments, subtitles
             m3u8_obj = M3U8(m3u8_content)
 
-            # Collect video info with url, resolution and codecs
+            self.parse_video_info(m3u8_obj)
+            self.parse_encryption_keys(m3u8_obj)
+            self.parse_subtitles_and_audio(m3u8_obj)
+            self.parse_segments(m3u8_obj)
+
+        except Exception as e:
+            logging.error(f"Error parsing M3U8 content: {e}")
+
+    def parse_video_info(self, m3u8_obj) -> None:
+        """
+        Extracts video information from the M3U8 object.
+
+        Args:
+        - m3u8_obj: The M3U8 object containing video playlists.
+        """
+
+        try:
             for playlist in m3u8_obj.playlists:
+
+                # Try to access the 'resolution' key in playlist.stream_info
+                try:
+                    resolution = playlist.stream_info.get('resolution')
+                except:
+                    # If the key 'resolution' does not exist, use extract_resolution
+                    resolution = extract_resolution(playlist.uri)
 
                 self.video_playlist.append({
                     "uri": playlist.uri, 
-                    "width": playlist.stream_info.resolution, 
+                    "width": resolution
                 })
-                
-                self.codec = M3U8_Codec(
-                    playlist.stream_info.bandwidth,
-                    playlist.stream_info.resolution,
-                    playlist.stream_info.codecs
-                )
-                logging.info(f"Parse: {playlist.stream_info}")
-                logging.info(f"Coded test: {self.codec.bandwidth}")
 
-            # Collect info of encryption if present, method, uri and iv
+                # Check if all key is present to create codec
+                if all(key in playlist.stream_info for key in ('bandwidth', 'resolution', 'codecs')):
+                    self.codec = M3U8_Codec(
+                        playlist.stream_info.get('bandwidth'),
+                        playlist.stream_info.get('resolution'),
+                        playlist.stream_info.get('codecs')
+                    )
+
+                # if not we cant create codec
+                else:
+                    self.codec = None
+
+                logging.info(f"Parse: {playlist.stream_info}")
+                if self.codec:
+                    logging.info(f"Coded test: {self.codec.bandwidth}")
+
+        except Exception as e:
+            logging.error(f"Error parsing video info: {e}")
+
+    def parse_encryption_keys(self, m3u8_obj) -> None:
+        """
+        Extracts encryption keys from the M3U8 object.
+
+        Args:
+        - m3u8_obj: The M3U8 object containing encryption keys.
+        """
+        try:
             for key in m3u8_obj.keys:
                 if key is not None:
-                    self.keys = ({
+                    self.keys = {
                         "method": key.method,
                         "uri": key.uri,
                         "iv": key.iv
-                    })
+                    }
 
-            # Collect info of subtitles, type, name, language and uri
-            # for audio and subtitles
+        except Exception as e:
+            logging.error(f"Error parsing encryption keys: {e}")
+
+    def parse_subtitles_and_audio(self, m3u8_obj) -> None:
+        """
+        Extracts subtitles and audio information from the M3U8 object.
+
+        Args:
+        - m3u8_obj: The M3U8 object containing subtitles and audio data.
+        """
+        try:
             for media in m3u8_obj.media:
                 if media.type == "SUBTITLES":
                     self.subtitle_playlist.append({
@@ -219,7 +301,6 @@ class M3U8_Parser:
                         "uri": media.uri
                     })
 
-
                 if media.type == "AUDIO":
                     self.audio_ts.append({
                         "type": media.type,
@@ -229,21 +310,25 @@ class M3U8_Parser:
                         "uri": media.uri
                     })
 
-            # Collect info about url of subtitles or segmenets
-            # m3u8 playlist
-            # m3u8 index
-            for segment in m3u8_obj.segments:
+        except Exception as e:
+            logging.error(f"Error parsing subtitles and audio: {e}")
 
-                # Collect uri of request to vtt
+    def parse_segments(self, m3u8_obj) -> None:
+        """
+        Extracts segment information from the M3U8 object.
+
+        Args:
+        - m3u8_obj: The M3U8 object containing segment data.
+        """
+        try:
+            for segment in m3u8_obj.segments:
                 if "vtt" not in segment.uri:
                     self.segments.append(segment.uri)
-
-                # Collect info of subtitle 
                 else:
                     self.subtitle.append(segment.uri)
 
         except Exception as e:
-            logging.error(f"Error parsing M3U8 content: {e}")
+            logging.error(f"Error parsing segments: {e}")
 
     def get_resolution(self, uri: str) -> (int):
         """

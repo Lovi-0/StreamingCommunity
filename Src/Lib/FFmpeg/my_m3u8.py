@@ -587,8 +587,13 @@ class Downloader():
 
         # Get obj codec
         self.codec: M3U8_Codec = parse_class_m3u8.codec
-        logging.info(f"Get codeds: {self.codec}")
-        console.log(f"[cyan]Find codecs: [red]({self.codec.video_codec_name};{self.codec.audio_codec_name})")
+
+        # If codec exist print log
+        if self.codec is not None:
+            logging.info(f"Get codeds: {self.codec}")
+            console.log(f"[cyan]Find codecs: [red]({self.codec.video_codec_name};{self.codec.audio_codec_name})")
+        else:
+            logging.info(f"Codec obj dont exist")
 
     def manage_subtitle(self):
         """
