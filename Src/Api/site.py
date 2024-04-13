@@ -50,7 +50,7 @@ def get_token(site_name: str, domain: str) -> dict:
     find_csrf_token = None
     
     # Parse the HTML response using BeautifulSoup
-    soup = BeautifulSoup(response.text, "lxml")
+    soup = BeautifulSoup(response.text, "html.parser")
     
     # Loop through all meta tags in the HTML response
     for html_meta in soup.find_all("meta"):
@@ -282,6 +282,34 @@ def update_domain_anime():
         config_manager.set_key('SITE', 'anime_domain', new_site_url.split(".")[-1])
 
 
+def get_real_title(record):
+    """
+    Get the real title from a record.
+
+    This function takes a record, which is assumed to be a dictionary representing a row of JSON data.
+    It looks for a title in the record, prioritizing English over Italian titles if available.
+    
+    Args:
+    - record (dict): A dictionary representing a row of JSON data.
+    
+    Returns:
+    - str: The title found in the record. If no title is found, returns None.
+
+    Example:
+    If `record` is {'title': 'Example Title', 'title_eng': 'English Title', 'title_it': 'Titolo Italiano'},
+    the function will return 'Example Title' since it's the first available title.
+    """
+
+    if record['title'] is not None:
+        return record['title']
+    
+    elif record['title_eng'] is not None:
+        return record['title_eng']
+    
+    else:
+        return record['title_it']
+
+
 def anime_search(title_search: str) -> int:
     """
     Function to perform an anime search using a provided title.
@@ -326,12 +354,11 @@ def anime_search(title_search: str) -> int:
     for record in response.json()['records']:
 
         # Rename keys for consistency
-        record['name'] = record.pop('title')  
+        record['name'] = get_real_title(record)
         record['last_air_date'] = record.pop('date')  
 
         # Add the record to media search manager if the name is not None
-        if record['name'] is not None:
-            media_search_manager.add_media(record)
+        media_search_manager.add_media(record)
 
     # Return the length of media search manager
     return media_search_manager.get_length()

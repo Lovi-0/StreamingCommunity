@@ -128,6 +128,52 @@ def print_duration_table(file_path: str) -> None:
         console.log(f"[cyan]Info [green]'{file_path}': [purple]{int(hours)}[red]h [purple]{int(minutes)}[red]m [purple]{int(seconds)}[red]s")
 
 
+def get_ts_resolution(ts_file_path):
+    """
+    Get the resolution of a TS (MPEG Transport Stream) file using ffprobe.
+
+    Args:
+    - ts_file_path (str): The file path to the TS file.
+
+    Returns:
+    - tuple: A tuple containing the width and height of the video stream in the TS file.
+             If resolution information is not available, returns (None, None).
+
+    Example:
+    If `ts_file_path` points to a TS file with video resolution 1920x1080,
+    the function will return (1920, 1080).
+    """
+
+    # Run ffprobe command to get video stream information
+    ffprobe_cmd = ['ffprobe', '-v', 'error', '-show_entries', 'stream=width,height', '-of', 'json', ts_file_path]
+
+    try:
+
+        # Execute ffprobe command and capture output
+        output = subprocess.check_output(ffprobe_cmd, stderr=subprocess.STDOUT)
+
+        # Decode JSON output
+        info = json.loads(output)
+
+        # Check if there are streams
+        if 'streams' in info:
+            for stream in info['streams']:
+
+                # Check if stream is video
+                if stream.get('codec_type') == 'video':
+
+                    # Extract width and height
+                    width = stream.get('width')
+                    height = stream.get('height')
+                    return width, height
+                
+    except subprocess.CalledProcessError as e:
+        logging.error("Error running ffprobe:", e)
+    
+    # If no resolution information found, return None
+    return None, None
+
+
 def add_subtitle(input_video_path: str, input_subtitle_path: str, output_video_path: str, subtitle_language: str = 'ita', prefix: str = "single_sub") -> str:
     """
     Convert a video with a single subtitle.

@@ -4,6 +4,7 @@ from .helper import (
     has_audio_stream,
     get_video_duration,
     format_duration,
+    get_ts_resolution,
     print_duration_table,
     add_subtitle,
     concatenate_and_save,
