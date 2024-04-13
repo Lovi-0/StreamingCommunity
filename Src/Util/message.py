@@ -25,7 +25,7 @@ def get_os_system():
     return os_system
 
 
-def start_message():
+def start_message(switch = False):
     """
     Display a start message.
 
@@ -45,6 +45,18 @@ def start_message():
 
     """
 
+    if switch:
+        msg = """
+        
+     _          _                            _ _         
+    / \   _ __ (_)_ __ ___   ___ _   _ _ __ (_) |_ _   _ 
+   / _ \ | '_ \| | '_ ` _ \ / _ \ | | | '_ \| | __| | | |
+  / ___ \| | | | | | | | | |  __/ |_| | | | | | |_| |_| |
+ /_/   \_\_| |_|_|_| |_| |_|\___|\__,_|_| |_|_|\__|\__, |
+                                                   |___/ 
+
+    """
+
     if CLEAN: 
         if get_os_system() == 'Windows':
             os.system("cls")
@@ -52,6 +64,7 @@ def start_message():
             os.system("clear")
     
     if SHOW:
+        
         console.print(f"[bold yellow]{msg}")
         console.print(f"[magenta]Created by: Ghost6446\n")
 

@@ -364,9 +364,13 @@ def anime_search(title_search: str) -> int:
     return media_search_manager.get_length()
 
 
-def get_select_title() -> MediaItem:
+def get_select_title(switch = False) -> MediaItem:
     """
     Display a selection of titles and prompt the user to choose one.
+
+    Args:
+        - switch (bool): switch from film to anime
+
 
     Returns:
         MediaItem: The selected media item.
@@ -396,7 +400,7 @@ def get_select_title() -> MediaItem:
         })
 
     # Run the table and handle user input
-    last_command = table_show_manager.run(force_int_input=True, max_int_input=len(media_search_manager.media_list))
+    last_command = table_show_manager.run(force_int_input=True, max_int_input=len(media_search_manager.media_list), switch=switch)
 
     # Handle user's quit command
     if last_command == "q":

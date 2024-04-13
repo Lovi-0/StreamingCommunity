@@ -37,6 +37,15 @@ CODEC_MAPPINGS = {
     }
 }
     
+RESOLUTIONS = [
+        (7680, 4320),
+        (3840, 2160),
+        (2560, 1440),
+        (1920, 1080),
+        (1280, 720),
+        (640, 480)
+    ]
+
 
 def extract_resolution(uri: str) -> int:
     """
@@ -49,23 +58,13 @@ def extract_resolution(uri: str) -> int:
     - int: The video resolution if found, otherwise 0.
     """
 
-    # Common video resolutions
-    resolutions = [
-        480, 
-        720, 
-        1080, 
-        2160, 
-        3840
-    ]
-
-
-    for resolution in resolutions:
-        if str(resolution) in uri:
+    for resolution in RESOLUTIONS:
+        if str(resolution[1]) in uri:
             return resolution
         
     # Default resolution return (not best)
-    logging.error("No resolution find")
-    return 0
+    logging.error("No resolution find with custom parsing.")
+    return -1
 
 
 class M3U8_Codec():
@@ -233,17 +232,23 @@ class M3U8_Parser:
         try:
             for playlist in m3u8_obj.playlists:
 
-                # Try to access the 'resolution' key in playlist.stream_info
+                # Direct access resolutions in m3u8 obj
                 try:
-                    resolution = playlist.stream_info.get('resolution')
-                except:
-                    # If the key 'resolution' does not exist, use extract_resolution
-                    resolution = extract_resolution(playlist.uri)
+                    self.video_playlist.append({
+                        "uri": playlist.uri, 
+                        "width": playlist.stream_info.get('resolution')
+                    })
 
-                self.video_playlist.append({
-                    "uri": playlist.uri, 
-                    "width": resolution
-                })
+                # Find resolutions in uri
+                except:
+                    self.video_playlist.append({
+                        "uri": playlist.uri, 
+                        "width": extract_resolution(playlist.uri)
+                    })    
+
+                    # Dont stop
+                    continue
+
 
                 # Check if all key is present to create codec
                 if all(key in playlist.stream_info for key in ('bandwidth', 'resolution', 'codecs')):

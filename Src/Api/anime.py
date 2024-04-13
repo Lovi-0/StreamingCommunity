@@ -149,7 +149,7 @@ class EpisodeDownloader:
         # Extract the ID of the selected episode
         episode_id = info_ep_select.get("id")
 
-        start_message()
+        start_message(True)
         console.print(f"[yellow]Download:  [red]{episode_id} \n")
 
         # Get the embed URL for the episode

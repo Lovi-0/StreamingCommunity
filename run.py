@@ -36,7 +36,7 @@ SWITCH_TO = config_manager.get_bool('DEFAULT', 'swith_anime')
 CLOSE_CONSOLE =  config_manager.get_bool('DEFAULT', 'not_close')
 
 
-def initialize():
+def initialize(switch = False):
     """
     Initialize the application.
     Checks Python version, removes temporary folder, and displays start message.
@@ -63,7 +63,7 @@ def initialize():
     # Removing temporary folder
     remove_folder("tmp")
     remove_file("debug.log")
-    start_message()
+    start_message(switch)
 
 
     # Attempting GitHub update
@@ -141,7 +141,7 @@ def main_anime():
     """
 
     # Get site domain and version
-    initialize()
+    initialize(True)
 
     # Make request to site to get content that corrsisponde to that string
     film_search = msg.ask("\n[cyan]Insert word to search in all site: ").strip()
@@ -150,7 +150,7 @@ def main_anime():
     if len_database != 0:
 
         # Select title from list
-        select_title = get_select_title()
+        select_title = get_select_title(True)
         
         # For series
         if select_title.type == 'TV':
