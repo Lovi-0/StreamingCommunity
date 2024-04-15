@@ -2,3 +2,8 @@
 tqdm
 rich
 unidecode
+ffmpeg-python
+pycryptodome
+m3u8
+lxml
+django==4.2.11
