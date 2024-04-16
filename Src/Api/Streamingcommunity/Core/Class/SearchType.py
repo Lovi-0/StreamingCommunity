@@ -41,6 +41,37 @@ class MediaItem:
     def __str__(self):
         return f"MediaItem(id={self.id}, slug='{self.slug}', name='{self.name}', type='{self.type}', score='{self.score}', sub_ita={self.sub_ita}, last_air_date='{self.last_air_date}', seasons_count={self.seasons_count}, images={self.images})"
 
+    @property
+    def to_dict(self) -> dict:
+        """
+        Convert the MediaItem to a dictionary.
+
+        Returns:
+            dict: The MediaItem as a dictionary.
+        """
+        return {
+            "id": self.id,
+            "slug": self.slug,
+            "name": self.name,
+            "type": self.type,
+            "score": self.score,
+            "sub_ita": self.sub_ita,
+            "last_air_date": self.last_air_date,
+            "seasons_count": self.seasons_count,
+            "images": [image.__dict__ for image in self.images],
+            "comment": self.comment
+        }
+
+    @property
+    def get_site_id(self) -> str:
+        """
+        Get the site ID of the media item.
+
+        Returns:
+            int: The site ID of the media item.
+        """
+        return f"{self.id}-{self.slug}"
+
 
 class MediaManager:
     def __init__(self):
