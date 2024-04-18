@@ -1,18 +1,19 @@
 import json
 
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from Src.Api import search, get_version_and_domain, download_film, anime_download_film
+from Src.Api.anime import EpisodeDownloader
 from Src.Api.site import media_search_manager, anime_search
 
 
 class SearchView(viewsets.ViewSet):
 
-    def get_queryset(self):
-        # Questa funzione viene chiamata prima di list e retrieve
-        self.search_query = self.request.query_params.get("search_terms")
-        self.type_search = self.request.query_params.get("type")
+    def list(self, request):
+        self.search_query = request.query_params.get("search_terms")
+        self.type_search = request.query_params.get("type")
 
         media_search_manager.media_list = []
         self.site_version, self.domain = get_version_and_domain()
@@ -22,11 +23,7 @@ class SearchView(viewsets.ViewSet):
         elif self.type_search == "anime":
             self.len_database = anime_search(self.search_query)
 
-        return media_search_manager.media_list
-
-    def list(self, request):
-        # Ottieni il queryset dalle impostazioni comuni
-        media_list = self.get_queryset()
+        media_list = media_search_manager.media_list
 
         if self.len_database != 0:
             data_to_return = []
@@ -36,6 +33,29 @@ class SearchView(viewsets.ViewSet):
                 data_to_return.append(media.to_dict)
 
             return Response({"media": data_to_return})
+
+        return Response({"error": "No media found with that search query"})
+
+    @action(detail=False, methods=['get'])
+    def get_episodes_info(self, request):
+        self.media_id = request.query_params.get("media_id")
+        self.media_slug = request.data.get("media_slug")
+        self.type_media = request.query_params.get("type_media")
+
+        self.site_version, self.domain = get_version_and_domain()
+
+        match self.type_media.upper():
+            case "TV":
+                pass
+            case "TV_ANIME":
+                episodes = []
+                episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
+                episoded_count = episodes_downloader.get_count_episodes()
+                for i in range(0, episoded_count - 210): # TODO: need to implement pagination, more than 5/6 episodes is slow
+                    print(f"Getting info for episode {i}")
+                    episode_info = episodes_downloader.get_info_episode(index_ep=i)
+                    episodes.append(episode_info)
+                return Response({"episodes_count": episodes})
 
         return Response({"error": "No media found with that search query"})
 
