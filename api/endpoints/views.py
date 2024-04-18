@@ -73,7 +73,7 @@ class SearchView(viewsets.ViewSet):
                         episode = video_source.obj_episode_manager.episodes[i_episode - 1]
                         episodes[i_season][i_episode] = episode.__dict__
 
-                return Response({"episodes_count": episodes})
+                return Response({"episodes": episodes})
             case "TV_ANIME":
                 episodes = []
                 episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
@@ -89,7 +89,7 @@ class SearchView(viewsets.ViewSet):
                         print(f"Getting info for episode {i}")
                         episode_info = episodes_downloader.get_info_episode(index_ep=i)
                         episodes.append(episode_info)
-                    return Response({"episodes_count": episodes})
+                    return Response({"episodes": episodes})
                 except Exception as e:
                     return Response({"error": "Error while getting episodes info", "message": str(e)})
 
@@ -107,7 +107,7 @@ class DownloadView(viewsets.ViewSet):
 
         response_dict = {"error": "No media found with that search query"}
 
-        if self.type_media == "FILM":
+        if self.type_media == "MOVIE":
             download_film(self.media_id, self.media_slug, self.domain)
             response_dict = {"message": "Download done, it is saved in Video folder inside project root"}
         elif self.type_media == "TV":
