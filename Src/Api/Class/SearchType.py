@@ -50,7 +50,7 @@ class MediaItem:
             "id": self.id,
             "slug": self.slug,
             "name": self.name,
-            "type": self.type,
+            "type": self.type.upper(),
             "score": self.score,
             "sub_ita": self.sub_ita,
             "last_air_date": self.last_air_date,
