@@ -35,17 +35,3 @@ class SearchView(viewsets.ViewSet):
             return Response({"media": data_to_return})
 
         return Response({"error": "No media found with that search query"})
-
-    def retrieve(self, request, pk=None):
-        # Ottieni il queryset dalle impostazioni comuni
-        media_list = self.get_queryset()
-
-        # FIXME: Non funziona perchè si aspetta un termine di ricerca da usare nel queryset,
-        #  implementare una ricerca per ID nell'api per permettere questo metodo
-
-        # Cerca il media in base allo site_id
-        media = next((m for m in media_list if m.get_site_id == pk), None)
-        if media:
-            return Response(media.to_dict)
-        else:
-            return Response({"error": "Media not found"}, status=404)
