@@ -102,6 +102,7 @@ class DownloadView(viewsets.ViewSet):
         self.media_id = request.data.get("media_id")
         self.media_slug = request.data.get("media_slug")
         self.type_media = request.data.get("type_media").upper()
+        self.episode_id = request.data.get("episode_id")
 
         self.site_version, self.domain = get_version_and_domain()
 
@@ -113,7 +114,9 @@ class DownloadView(viewsets.ViewSet):
         elif self.type_media == "TV":
             pass
         elif self.type_media == "TV_ANIME":
-            pass
+            # TODO test this
+            episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
+            episodes_downloader.download_episode(self.episode_id)
         elif self.type_media == "OVA":
             anime_download_film(
                 id_film=self.media_id,
