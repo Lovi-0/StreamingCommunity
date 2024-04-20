@@ -47,39 +47,39 @@ class SearchView(viewsets.ViewSet):
         self.type_media = request.query_params.get("type_media")
         self.page = self.request.query_params.get("page")
 
-        match self.type_media:
-            case "TV":
-                self.site_version, self.domain = get_version_and_domain()
+        try:
+            match self.type_media:
+                case "TV":
+                    self.site_version, self.domain = get_version_and_domain()
 
-                video_source = VideoSource()
-                video_source.set_url_base_name(STREAM_SITE_NAME)
-                video_source.set_version(self.site_version)
-                video_source.set_domain(self.domain)
-                video_source.set_series_name(self.media_slug)
-                video_source.set_media_id(self.media_id)
+                    video_source = VideoSource()
+                    video_source.set_url_base_name(STREAM_SITE_NAME)
+                    video_source.set_version(self.site_version)
+                    video_source.set_domain(self.domain)
+                    video_source.set_series_name(self.media_slug)
+                    video_source.set_media_id(self.media_id)
 
-                video_source.collect_info_seasons()
-                seasons_count = video_source.obj_title_manager.get_length()
+                    video_source.collect_info_seasons()
+                    seasons_count = video_source.obj_title_manager.get_length()
 
-                episodes = {}
-                for i_season in range(1, seasons_count + 1):
-                    video_source.obj_episode_manager.clear()
-                    video_source.collect_title_season(i_season)
-                    episodes_count = video_source.obj_episode_manager.get_length()
-                    episodes[i_season] = {}
-                    for i_episode in range(1, episodes_count + 1):
-                        episode = video_source.obj_episode_manager.episodes[
-                            i_episode - 1
-                        ]
-                        episodes[i_season][i_episode] = episode.__dict__
+                    episodes = {}
+                    for i_season in range(1, seasons_count + 1):
+                        video_source.obj_episode_manager.clear()
+                        video_source.collect_title_season(i_season)
+                        episodes_count = video_source.obj_episode_manager.get_length()
+                        episodes[i_season] = {}
+                        for i_episode in range(1, episodes_count + 1):
+                            episode = video_source.obj_episode_manager.episodes[
+                                i_episode - 1
+                            ]
+                            episodes[i_season][i_episode] = episode.__dict__
 
-                return Response({"episodes": episodes})
-            case "TV_ANIME":
-                episodes = []
-                episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
-                episoded_count = episodes_downloader.get_count_episodes()
-                items_per_page = 5
-                try:
+                    return Response({"episodes": episodes})
+                case "TV_ANIME":
+                    episodes = []
+                    episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
+                    episoded_count = episodes_downloader.get_count_episodes()
+                    items_per_page = 5
                     paginator = Paginator(range(episoded_count), items_per_page)
 
                     page_number = self.page if self.page else 1
@@ -90,13 +90,13 @@ class SearchView(viewsets.ViewSet):
                         episode_info["episode_id"] = i
                         episodes.append(episode_info)
                     return Response({"episodes": episodes})
-                except Exception as e:
-                    return Response(
-                        {
-                            "error": "Error while getting episodes info",
-                            "message": str(e),
-                        }
-                    )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Error while getting episodes info",
+                    "message": str(e),
+                }
+            )
 
         return Response({"error": "No media found with that search query"})
 
@@ -113,38 +113,42 @@ class DownloadView(viewsets.ViewSet):
 
         response_dict = {"error": "No media found with that search query"}
 
-        if self.type_media == "MOVIE":
-            download_film(self.media_id, self.media_slug, self.domain)
-            response_dict = {
-                "message": "Download done, it is saved in Video folder inside project root"
-            }
-        elif self.type_media == "TV":
-            video_source = VideoSource()
-            video_source.set_url_base_name(STREAM_SITE_NAME)
-            video_source.set_version(self.site_version)
-            video_source.set_domain(self.domain)
-            video_source.set_series_name(self.media_slug)
-            video_source.set_media_id(self.media_id)
+        try:
+            match self.type_media:
+                case "MOVIE":
+                    download_film(self.media_id, self.media_slug, self.domain)
+                case "TV":
+                    video_source = VideoSource()
+                    video_source.set_url_base_name(STREAM_SITE_NAME)
+                    video_source.set_version(self.site_version)
+                    video_source.set_domain(self.domain)
+                    video_source.set_series_name(self.media_slug)
+                    video_source.set_media_id(self.media_id)
 
-            video_source.collect_info_seasons()
-            video_source.obj_episode_manager.clear()
+                    video_source.collect_info_seasons()
+                    video_source.obj_episode_manager.clear()
 
-            video_source.collect_title_season(self.download_id)
-            episodes_count = video_source.obj_episode_manager.get_length()
-            for i_episode in range(1, episodes_count + 1):
-                donwload_video(self.media_slug, self.download_id, i_episode)
-                # FIXME - This is not working properly
+                    video_source.collect_title_season(self.download_id)
+                    episodes_count = video_source.obj_episode_manager.get_length()
+                    for i_episode in range(1, episodes_count + 1):
+                        donwload_video(self.media_slug, self.download_id, i_episode)
+                        # FIXME - This is not working properly
 
-        elif self.type_media == "TV_ANIME":
-            episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
-            episodes_downloader.download_episode(self.download_id)
+                case "TV_ANIME":
+                    episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
+                    episodes_downloader.download_episode(self.download_id)
+                case "OVA":
+                    anime_download_film(id_film=self.media_id, title_name=self.media_slug)
+                case _:
+                    raise Exception("Type media not supported")
+                
             response_dict = {
-                "message": "Download done, it is saved in Video folder inside project root"
-            }
-        elif self.type_media == "OVA":
-            anime_download_film(id_film=self.media_id, title_name=self.media_slug)
+                    "message": "Download done, it is saved in Video folder inside project root"
+                }
+        except Exception as e:
             response_dict = {
-                "message": "Download done, it is saved in Video folder inside project root"
-            }
+                    "error": "Error while downloading the media, please try again later",
+                    "message": str(e),
+                }
 
         return Response(response_dict)
