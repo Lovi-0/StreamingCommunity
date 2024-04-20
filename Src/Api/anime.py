@@ -98,7 +98,7 @@ class EpisodeDownloader:
             response.raise_for_status()
 
             # Extract episode information from the JSON response
-            return response.json()["episodes"][-1]
+            return response.json()["episodes"][0]
 
         except Exception as e:
             logging.error(
@@ -140,20 +140,13 @@ class EpisodeDownloader:
     def download_episode(self, index_select):
 
         # Get information about the selected episode
-        info_ep_select = self.get_info_episode(index_select)
-
-        if not info_ep_select:
-            logging.error("(EpisodeDownloader) Error getting episode information.")
-            return
-
-        # Extract the ID of the selected episode
-        episode_id = info_ep_select.get("id")
+        obj_episode = self.get_info_episode(index_select)
 
         start_message(True)
-        console.print(f"[yellow]Download:  [red]{episode_id} \n")
+        console.print(f"[yellow]Download:  [red]ep_{obj_episode.get('number')} \n")
 
         # Get the embed URL for the episode
-        embed_url = self.get_embed(episode_id)
+        embed_url = self.get_embed(obj_episode.get('id'))
 
         if not embed_url:
             logging.error("Error getting embed URL.")
