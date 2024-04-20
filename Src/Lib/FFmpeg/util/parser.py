@@ -63,7 +63,7 @@ def extract_resolution(uri: str) -> int:
             return resolution
         
     # Default resolution return (not best)
-    logging.error("No resolution find with custom parsing.")
+    logging.error("No resolution found with custom parsing.")
     return -1
 
 
@@ -443,7 +443,7 @@ class M3U8_Parser:
             return output
 
         else:
-            logging.info("No subtitle find")
+            logging.info("No subtitles found.")
             return None
 
     def get_track_audios(self) -> list:
@@ -473,7 +473,7 @@ class M3U8_Parser:
             return list_output
 
         else:
-            logging.info("No audio tracks found")
+            logging.info("No audio tracks found.")
             return None
 
     def get_default_subtitle(self):
