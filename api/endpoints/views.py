@@ -1,4 +1,5 @@
 import json
+import os
 
 from django.core.paginator import Paginator
 
@@ -9,8 +10,12 @@ from rest_framework.response import Response
 from Src.Api import search, get_version_and_domain, download_film, anime_download_film
 from Src.Api.anime import EpisodeDownloader
 from Src.Api.Class.Video import VideoSource
-from Src.Api.series import STREAM_SITE_NAME, donwload_video
+from Src.Api.film import ROOT_PATH
+from Src.Api.series import SERIES_FOLDER, STREAM_SITE_NAME, donwload_video
 from Src.Api.site import media_search_manager, anime_search
+from Src.Lib.FFmpeg.my_m3u8 import Downloader
+from Src.Util.mapper import map_episode_title
+from Src.Util.os import remove_special_characters
 
 
 class SearchView(viewsets.ViewSet):
@@ -131,8 +136,26 @@ class DownloadView(viewsets.ViewSet):
                     video_source.collect_title_season(self.download_id)
                     episodes_count = video_source.obj_episode_manager.get_length()
                     for i_episode in range(1, episodes_count + 1):
-                        donwload_video(self.media_slug, self.download_id, i_episode)
-                        # FIXME - This is not working properly
+                        episode_id = video_source.obj_episode_manager.episodes[i_episode - 1].id
+
+                        # Define filename and path for the downloaded video
+                        mp4_name = remove_special_characters(f"{map_episode_title(self.media_slug,video_source.obj_episode_manager.episodes[i_episode - 1],self.download_id)}.mp4")
+                        mp4_path = remove_special_characters(os.path.join(ROOT_PATH, SERIES_FOLDER, self.media_slug, f"S{self.download_id}"))
+                        os.makedirs(mp4_path, exist_ok=True)
+
+                        # Get iframe and content for the episode
+                        video_source.get_iframe(episode_id)
+                        video_source.get_content()
+                        video_source.set_url_base_name(STREAM_SITE_NAME)
+
+                        # Download the episode
+                        obj_download = Downloader(
+                            m3u8_playlist = video_source.get_playlist(),
+                            key = video_source.get_key(),
+                            output_filename = os.path.join(mp4_path, mp4_name)
+                        )
+
+                        obj_download.download_m3u8()
 
                 case "TV_ANIME":
                     episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
