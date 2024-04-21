@@ -146,12 +146,14 @@ def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: boo
         donwload_all (bool): Donwload all seasons episodes
     """
 
-    # Clean memory of all episodes
+    # Clean memory of all episodes and get the number of the season (some dont follow rule of [1,2,3,4,5] but [1,2,3,145,5,6,7]).
     video_source.obj_episode_manager.clear()
+    season_number = (video_source.obj_title_manager.titles[index_season_selected-1].number)
 
     # Start message and collect information about episodes
     start_message()
-    video_source.collect_title_season(index_season_selected)
+    
+    video_source.collect_title_season(season_number)
     episodes_count = video_source.obj_episode_manager.get_length()
 
     # Download all episodes wihtout ask

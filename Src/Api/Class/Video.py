@@ -118,7 +118,7 @@ class VideoSource:
 
             # Make a request to collect information about a specific season
             response = requests.get(f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', headers=self.headers)
-            response.raise_for_status()  # Raise exception for non-200 status codes
+            response.raise_for_status() 
 
             if response.ok:
 
