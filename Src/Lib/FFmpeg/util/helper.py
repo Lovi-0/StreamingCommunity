@@ -5,6 +5,7 @@ import os
 import json
 import logging
 import shutil
+from typing import Tuple, List, Dict
 
 
 # External libraries
@@ -92,7 +93,7 @@ def get_video_duration(file_path: str) -> (float):
         return None
 
 
-def format_duration(seconds: float) -> list[int, int, int]:
+def format_duration(seconds: float) -> Tuple[int, int, int]:
     """
     Format duration in seconds into hours, minutes, and seconds.
 
@@ -315,7 +316,7 @@ def concatenate_and_save(file_list_path: str, output_filename: str, v_codec: str
     return output_file_path
 
 
-def join_audios(video_path: str, audio_tracks: list[dict[str, str]], prefix: str = "merged") -> str:
+def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], prefix: str = "merged") -> str:
     """
     Join video with multiple audio tracks and sync them if there are matching segments.
 
@@ -401,7 +402,7 @@ def join_audios(video_path: str, audio_tracks: list[dict[str, str]], prefix: str
         return ""
 
 
-def transcode_with_subtitles(video: str, subtitles_list: list[dict[str, str]], output_file: str, prefix: str = "transcoded") -> str:
+def transcode_with_subtitles(video: str, subtitles_list: List[Dict[str, str]], output_file: str, prefix: str = "transcoded") -> str:
 
     """
     Transcode a video with subtitles.

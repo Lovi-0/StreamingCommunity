@@ -8,6 +8,7 @@ import hashlib
 import logging
 import re
 import zipfile
+from typing import List
 
 
 # Costant
@@ -223,7 +224,7 @@ def compute_sha1_hash(input_string: str) -> str:
     return hashed_string
 
 
-def decode_bytes(bytes_data: bytes, encodings_to_try: list[str] = None) -> str:
+def decode_bytes(bytes_data: bytes, encodings_to_try: List[str] = None) -> str:
     """
     Decode a byte sequence using a list of encodings and return the decoded string.
 

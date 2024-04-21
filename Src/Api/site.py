@@ -3,6 +3,7 @@
 import sys
 import json
 import logging
+from typing import Tuple
 
 
 # External libraries
@@ -185,7 +186,7 @@ def get_version(text: str) -> str:
         raise
 
 
-def get_version_and_domain() -> tuple[str, str]:
+def get_version_and_domain() -> Tuple[str, str]:
     """
     Retrieves the version and domain of a website.
 

@@ -1,6 +1,7 @@
 # 10.12.23 -> 31.01.24
 
 import sys
+import os
 import logging
 import platform
 import argparse
@@ -42,6 +43,10 @@ def initialize(switch = False):
     Checks Python version, removes temporary folder, and displays start message.
     """
 
+    # Set terminal size for win 7
+    if platform.system() == "Windows" and "7" in platform.version():
+        os.system('mode 120, 40')
+
     # Get system where script is run
     run_system = platform.system()
     
@@ -55,8 +60,8 @@ def initialize(switch = False):
         logging.getLogger('root').setLevel(logging.ERROR)
 
 
-    if sys.version_info < (3, 11):
-        console.log("Install python version > 3.11")
+    if sys.version_info < (3, 7):
+        console.log("Install python version > 3.7.16")
         sys.exit(0)
 
 

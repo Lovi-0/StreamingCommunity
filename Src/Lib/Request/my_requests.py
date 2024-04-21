@@ -9,7 +9,17 @@ import re
 import urllib.parse
 import urllib.request
 import urllib.error
-from typing import Dict, Optional, Union, Unpack
+from typing import Dict, Optional, Union
+
+try:
+    from typing import Unpack
+except ImportError:
+    # (Python <= 3.10),
+    try:
+        from typing_extensions import Unpack
+    except ImportError:
+        raise ImportError("Unable to import Unpack from typing or typing_extensions. "
+                          "Please make sure you have the necessary libraries installed.")
 
 
 # Constants

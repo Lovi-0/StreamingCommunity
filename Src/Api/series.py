@@ -3,6 +3,7 @@
 import os
 import sys
 import logging
+from typing import List
 
 
 # Internal utilities
@@ -30,7 +31,7 @@ table_show_manager = TVShowManager()
 
 
 # --> LOGIC
-def manage_selection(cmd_insert: str, max_count: int) -> list[int]:
+def manage_selection(cmd_insert: str, max_count: int) -> List[int]:
     """
     Manage user selection for seasons to download.
 
