@@ -110,27 +110,7 @@ def get_moment_titles(domain: str, version: str, prefix: str):
 
 
 def get_domain() -> str:
-    """
-    Fetches the domain from a Telegra.ph API response.
-
-    Returns:
-        str: The domain extracted from the API response.
-    """
-    console.print("[cyan]Make request api [white]...")
-
-    try:
-        response = requests.get("https://api.telegra.ph/getPage/Link-Aggiornato-StreamingCommunity-01-17", headers={'user-agent': get_headers()})
-        console.print(f"[green]Request response [white]=> [red]{response.status_code} \n")
-        response.raise_for_status()  # Raise an error if request fails
-
-        if response.ok:
-
-            domain = response.json()['result']['description'].split(".")[1]
-            return domain
-        
-    except Exception as e:
-        logging.error(f"Error fetching domain: {e}")
-        sys.exit(0)
+    pass
 
 
 def test_site(domain: str) -> str:

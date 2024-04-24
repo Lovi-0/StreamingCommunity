@@ -109,7 +109,7 @@ class TVShowManager:
                     key = Prompt.ask("[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]for a range of media")
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
-                    choices.append("")
+                    choices.extend(['q', ""])
 
                     key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
                 last_command = key
@@ -133,7 +133,7 @@ class TVShowManager:
                     key = Prompt.ask("[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]for a range of media")
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
-                    choices.append("")
+                    choices.extend(['q', ""])
 
                     key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
                 last_command = key
