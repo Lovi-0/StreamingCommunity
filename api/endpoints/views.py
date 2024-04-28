@@ -82,7 +82,9 @@ class SearchView(viewsets.ViewSet):
                     return Response({"episodes": episodes})
                 case "TV_ANIME":
                     episodes = []
-                    episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
+                    episodes_downloader = EpisodeDownloader(
+                        self.media_id, self.media_slug
+                    )
                     episoded_count = episodes_downloader.get_count_episodes()
                     items_per_page = 5
                     paginator = Paginator(range(episoded_count), items_per_page)
@@ -136,11 +138,22 @@ class DownloadView(viewsets.ViewSet):
                     video_source.collect_title_season(self.download_id)
                     episodes_count = video_source.obj_episode_manager.get_length()
                     for i_episode in range(1, episodes_count + 1):
-                        episode_id = video_source.obj_episode_manager.episodes[i_episode - 1].id
+                        episode_id = video_source.obj_episode_manager.episodes[
+                            i_episode - 1
+                        ].id
 
                         # Define filename and path for the downloaded video
-                        mp4_name = remove_special_characters(f"{map_episode_title(self.media_slug,video_source.obj_episode_manager.episodes[i_episode - 1],self.download_id)}.mp4")
-                        mp4_path = remove_special_characters(os.path.join(ROOT_PATH, SERIES_FOLDER, self.media_slug, f"S{self.download_id}"))
+                        mp4_name = remove_special_characters(
+                            f"{map_episode_title(self.media_slug,video_source.obj_episode_manager.episodes[i_episode - 1],self.download_id)}.mp4"
+                        )
+                        mp4_path = remove_special_characters(
+                            os.path.join(
+                                ROOT_PATH,
+                                SERIES_FOLDER,
+                                self.media_slug,
+                                f"S{self.download_id}",
+                            )
+                        )
                         os.makedirs(mp4_path, exist_ok=True)
 
                         # Get iframe and content for the episode
@@ -150,28 +163,32 @@ class DownloadView(viewsets.ViewSet):
 
                         # Download the episode
                         obj_download = Downloader(
-                            m3u8_playlist = video_source.get_playlist(),
-                            key = video_source.get_key(),
-                            output_filename = os.path.join(mp4_path, mp4_name)
+                            m3u8_playlist=video_source.get_playlist(),
+                            key=video_source.get_key(),
+                            output_filename=os.path.join(mp4_path, mp4_name),
                         )
 
                         obj_download.download_m3u8()
 
                 case "TV_ANIME":
-                    episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
+                    episodes_downloader = EpisodeDownloader(
+                        self.media_id, self.media_slug
+                    )
                     episodes_downloader.download_episode(self.download_id)
                 case "OVA":
-                    anime_download_film(id_film=self.media_id, title_name=self.media_slug)
+                    anime_download_film(
+                        id_film=self.media_id, title_name=self.media_slug
+                    )
                 case _:
                     raise Exception("Type media not supported")
-                
+
             response_dict = {
-                    "message": "Download done, it is saved in Video folder inside project root"
-                }
+                "message": "Download done, it is saved in Video folder inside project root"
+            }
         except Exception as e:
             response_dict = {
-                    "error": "Error while downloading the media, please try again later",
-                    "message": str(e),
-                }
+                "error": "Error while downloading the media, please try again later",
+                "message": str(e),
+            }
 
         return Response(response_dict)
