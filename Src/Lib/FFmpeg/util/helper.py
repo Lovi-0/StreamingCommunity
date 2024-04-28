@@ -24,20 +24,6 @@ USE_CODECS = config_manager.get_bool("M3U8", "use_codecs")
 
 
 
-"""
-DOC:
-
-The `'c': 'copy'` option in the `output_args` dictionary indicates that ffmpeg should perform stream copying for both the audio and video streams. 
-Stream copying means that the audio and video streams are copied directly from the input file(s) to the output file without any re-encoding. 
-This process preserves the original quality of the streams and is much faster than re-encoding.
-
-When using `'c': 'copy'`, ffmpeg simply copies the bitstream from the input file(s) to the output file without decoding or altering it. 
-This is useful when you want to quickly concatenate or merge multimedia files without any loss in quality or additional processing time. 
-It's particularly efficient when the input and output formats are compatible, and you don't need to make any modifications to the streams.
-"""
-
-
-
 def has_audio_stream(video_path: str) -> bool:
     """
     Check if the input video has an audio stream.
