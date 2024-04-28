@@ -25,18 +25,18 @@ def update():
 
     # Make the GitHub API requests and handle potential errors
     try:
-        repo_info = requests.get(f"https://api.github.com/repos/{repo_user}/{repo_name}").json()
-        release_info = requests.get(f"https://api.github.com/repos/{repo_user}/{repo_name}/releases").json()[0]
+        response_reposity = requests.get(f"https://api.github.com/repos/{repo_user}/{repo_name}").json()
+        response_releases = requests.get(f"https://api.github.com/repos/{repo_user}/{repo_name}/releases").json()
     except requests.RequestException as e:
         console.print(f"[red]Error accessing GitHub API: {e}")
         return
 
     # Get start of the reposity
-    stargazers_count = repo_info['stargazers_count']
+    stargazers_count = response_reposity['stargazers_count']
 
     # Find info about latest versione deploy and the donwload count 
-    last_version = release_info['name']
-    down_count = release_info['assets'][0]['download_count']
+    last_version = response_releases[0]['name']
+    down_count = response_releases[0]['assets'][0]['download_count']
 
     # Calculate percentual of start base on download count
     if down_count > 0 and stargazers_count > 0:

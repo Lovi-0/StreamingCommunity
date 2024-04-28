@@ -230,7 +230,7 @@ def add_subtitle(input_video_path: str, input_subtitle_path: str, output_video_p
     return output_video_path
 
 
-def concatenate_and_save(file_list_path: str, output_filename: str, v_codec: str = None, a_codec: str = None, bandwidth: int = None, prefix: str = "segments", output_directory: str = None) -> str:
+def concatenate_and_save(file_list_path: str, output_filename: str, v_codec: str = None, a_codec: str = None, bandwidth: int = None, prefix: str = "segments", output_directory: str = None):
     """
     Concatenate input files and save the output with specified decoding parameters.
 
@@ -249,70 +249,36 @@ def concatenate_and_save(file_list_path: str, output_filename: str, v_codec: str
     """
 
     try:
-        # Input and output arguments
-        input_args = {
-            'format': 'concat', 
-            'safe': 0
-        }
 
+        # Output arguments
         output_args = {
-            #'preset': 'ultrafast',
             'c': 'copy',
             'loglevel': DEBUG_FFMPEG,
-            'y': None,
         }
 
-        # Add BANDWIDTH and CODECS if provided
-        if bandwidth is not None:
-            output_args['b:v'] = str(bandwidth)
-        if USE_CODECS:
-            if v_codec is not None:
-                output_args['vcodec'] = v_codec
-            if a_codec is not None:
-                output_args['acodec'] = a_codec
-
         # Set up the output file name by modifying the video file name
-        output_file_name = os.path.splitext(output_filename)[0] + f"_{prefix}.mp4"
+        output_file_name = output_filename
+        output_file_path = os.path.join(output_directory, output_file_name) if output_directory else output_file_name
 
-        # Determine output directory
-        if output_directory:
-            output_file_path = os.path.join(output_directory, output_file_name)
-        else:
-            output_file_path = output_file_name
-
-        # Concatenate input files and output
+        # Concatenate input file list and output
         output = (
-            ffmpeg.input(
-                file_list_path, 
-                **input_args
-            )
-            .output(
-                output_file_path, 
-                **output_args
-            )
+            ffmpeg.input(file_list_path, safe=0, f='concat')
+            .output(output_file_path, **output_args)
         )
 
         # Overwrite output file if exists
         output = ffmpeg.overwrite_output(output)
 
-        # Retrieve the command that will be executed
-        command = output.compile()
-        logging.info(f"Execute command: {command}")
-
         # Execute the process
         process = output.run()
 
     except ffmpeg.Error as ffmpeg_error:
-
-        logging.error(f"Error saving MP4: {ffmpeg_error.stdout}")
+        logging.error(f"Error saving MP4: {ffmpeg_error.stderr.decode('utf-8')}")
         return ""
 
     # Remove the temporary file list and folder and completely remove tmp folder
-    logging.info("Cleanup...")
     os.remove(file_list_path)
     shutil.rmtree("tmp", ignore_errors=True)
-
-    # Return
     return output_file_path
 
 
