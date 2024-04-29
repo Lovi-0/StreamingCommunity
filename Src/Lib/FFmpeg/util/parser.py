@@ -5,10 +5,10 @@ import logging
 
 # Internal utilities
 from Src.Util.headers import get_headers
+from Src.Lib.Request import requests
 
 
 # External libraries
-import requests
 from m3u8 import M3U8
 
 

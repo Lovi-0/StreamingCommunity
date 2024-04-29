@@ -18,6 +18,7 @@ You can chat, help improve this repo, or just hang around for some fun in the **
 * [CONFIGURATION](#Configuration)
 * [DOCKER](#docker)
 * [TUTORIAL](#tutorial)
+* [TO DO](#to-do)
 
 ## Requirement
 
@@ -232,3 +233,7 @@ docker run -it -p 8000:8000 -v /path/to/download:/app/Video streaming-community-
 
 ## Tutorial
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
+
+## To do
+- Add a gui
+- Add a website api

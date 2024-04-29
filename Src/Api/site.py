@@ -7,15 +7,16 @@ from typing import Tuple
 
 
 # External libraries
-import requests
 from bs4 import BeautifulSoup
 
 
 # Internal utilities
 from Src.Util.table import TVShowManager
 from Src.Util.headers import get_headers
+from Src.Lib.Request import requests
 from Src.Util.console import console
 from Src.Util.config import config_manager
+from .Util import get_sc_domain
 from .Class import MediaManager, MediaItem
 
 
@@ -109,10 +110,6 @@ def get_moment_titles(domain: str, version: str, prefix: str):
         return None
 
 
-def get_domain() -> str:
-    pass
-
-
 def test_site(domain: str) -> str:
     """
     Tests the availability of a website.
@@ -180,7 +177,7 @@ def get_version_and_domain() -> Tuple[str, str]:
         response_test_site = test_site(config_domain)
 
         if response_test_site is None:
-            config_domain = get_domain()
+            config_domain = get_sc_domain('light')
             response_test_site = test_site(config_domain)
 
         if response_test_site:

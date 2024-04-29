@@ -14,7 +14,6 @@ warnings.filterwarnings("ignore", category=UserWarning, module="cryptography")
 
 
 # External libraries
-import requests
 from tqdm.rich import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -22,6 +21,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # Internal utilities
 from Src.Util.console import console
 from Src.Util.headers import get_headers
+from Src.Lib.Request import requests
 from Src.Util.config import config_manager
 from Src.Util.os import (
     remove_folder, 

@@ -4,13 +4,10 @@ import os
 import logging
 
 
-# External libraries
-import requests
-
-
 # Internal utilities
 from Src.Util.console import console, msg
 from Src.Util.config import config_manager
+from Src.Lib.Request import requests
 from Src.Lib.FFmpeg.my_m3u8 import Downloader
 from Src.Util.message import start_message
 from .Class import VideoSource

@@ -4,7 +4,7 @@ import logging
 
 
 # Internal utilities
-from Src.Lib.Request.user_agent import ua
+from Src.Lib.UserAgent import ua
 
 
 def get_headers() -> str:

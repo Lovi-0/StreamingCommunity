@@ -9,7 +9,8 @@ import re
 import urllib.parse
 import urllib.request
 import urllib.error
-from typing import Dict, Optional, Union
+
+from typing import Dict, Optional, Union, TypedDict, Any
 
 try:
     from typing import Unpack
@@ -22,9 +23,13 @@ except ImportError:
                           "Please make sure you have the necessary libraries installed.")
 
 
+# External library
+from bs4 import BeautifulSoup
+
+
 # Constants
-HTTP_TIMEOUT = 4
-HTTP_RETRIES = 2
+HTTP_TIMEOUT = 3
+HTTP_RETRIES = 1
 HTTP_DELAY = 1
 
 
@@ -95,9 +100,40 @@ class Response:
             raise RequestError(f"Request failed with status code {self.status_code}")
 
     def json(self):
-        """Return the response content as JSON if it is JSON."""
+        """
+        Return the response content as JSON if it is JSON.
+
+        Returns:
+            dict or list or None: A Python dictionary or list parsed from JSON if the response content is JSON, otherwise None.
+        """
         if self.is_json:
             return json.loads(self.text)
+        else:
+            return None
+        
+    def get_redirects(self):
+        """
+        Extracts unique site URLs from HTML <link> elements within the <head> section.
+
+        Returns:
+            list or None: A list of unique site URLs if found, otherwise None.
+        """
+
+        site_find = []
+
+        if self.text:
+            soup = BeautifulSoup(self.text, "html.parser")
+
+            for links in soup.find("head").find_all('link'):
+                if links is not None:
+                    parsed_url = urllib.parse.urlparse(links.get('href'))
+                    site = parsed_url.scheme + "://" + parsed_url.netloc
+
+                    if site not in site_find:
+                        site_find.append(site)
+
+        if site_find:
+            return site_find
         else:
             return None
 
@@ -116,6 +152,7 @@ class ManageRequests:
         auth: Optional[tuple] = None,
         proxy: Optional[str] = None,
         cookies: Optional[Dict[str, str]] = None,
+        json_data: Optional[Dict[str, Any]] = None,
         redirection_handling: bool = True,
     ):
         """
@@ -136,7 +173,7 @@ class ManageRequests:
         """
         self.url = url
         self.method = method
-        self.headers = headers or {'User-Agent': 'Mozilla/5.0'}
+        self.headers = headers or {}
         self.timeout = timeout
         self.retries = retries
         self.params = params
@@ -144,6 +181,7 @@ class ManageRequests:
         self.auth = auth
         self.proxy = proxy
         self.cookies = cookies
+        self.json_data = json_data
         self.redirection_handling = redirection_handling
 
     def add_header(self, key: str, value: str) -> None:
@@ -152,6 +190,7 @@ class ManageRequests:
 
     def send(self) -> Response:
         """Send the HTTP request."""
+
         start_time = time.time()
         self.attempt = 0
         redirect_url = None
@@ -160,24 +199,53 @@ class ManageRequests:
             try:
                 req = self._build_request()
                 response = self._perform_request(req)
+
                 return self._process_response(response, start_time, redirect_url)
+            
             except (urllib.error.URLError, urllib.error.HTTPError) as e:
                 self._handle_error(e)
-                attempt += 1
+                self.attempt += 1
 
     def _build_request(self) -> urllib.request.Request:
         """Build the urllib Request object."""
         headers = self.headers.copy()
+
         if self.params:
             url = self.url + '?' + urllib.parse.urlencode(self.params)
         else:
             url = self.url
+
         req = urllib.request.Request(url, headers=headers, method=self.method)
+
+        if self.json_data:
+            req.add_header('Content-Type', 'application/json')
+            req.body = json.dumps(self.json_data).encode('utf-8')
+        else:
+            req = urllib.request.Request(url, headers=headers, method=self.method)
+
         if self.auth:
             req.add_header('Authorization', 'Basic ' + base64.b64encode(f"{self.auth[0]}:{self.auth[1]}".encode()).decode())
+
         if self.cookies:
             cookie_str = '; '.join([f"{name}={value}" for name, value in self.cookies.items()])
             req.add_header('Cookie', cookie_str)
+
+        if self.headers:
+            for key, value in self.headers.items():
+                req.add_header(key, value)
+
+        # Add default user agent
+        if True:
+            there_is_agent = False
+
+            for key, value in self.headers.items():
+                if str(key).lower() == 'user-agent':
+                    there_is_agent = True
+
+            if not there_is_agent:
+                default_user_agent = 'Mozilla/5.0'
+                req.add_header('user-agent', default_user_agent)
+
         return req
 
     def _perform_request(self, req: urllib.request.Request) -> urllib.response.addinfourl:
@@ -186,26 +254,30 @@ class ManageRequests:
             proxy_handler = urllib.request.ProxyHandler({'http': self.proxy, 'https': self.proxy})
             opener = urllib.request.build_opener(proxy_handler)
             urllib.request.install_opener(opener)
+
         if not self.verify_ssl:
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
             response = urllib.request.urlopen(req, timeout=self.timeout, context=ssl_context)
+
         else:
             response = urllib.request.urlopen(req, timeout=self.timeout)
+
         return response
 
     def _process_response(self, response: urllib.response.addinfourl, start_time: float, redirect_url: Optional[str]) -> Response:
         """Process the HTTP response."""
         response_data = response.read()
         content_type = response.headers.get('Content-Type', '').lower()
-        is_response_api = "json" in content_type
+
         if self.redirection_handling and response.status in (301, 302, 303, 307, 308):
             location = response.headers.get('Location')
             logging.info(f"Redirecting to: {location}")
             redirect_url = location
             self.url = location
             return self.send()
+        
         return self._build_response(response, response_data, start_time, redirect_url, content_type)
 
     def _build_response(self, response: urllib.response.addinfourl, response_data: bytes, start_time: float, redirect_url: Optional[str], content_type: str) -> Response:
@@ -216,7 +288,7 @@ class ManageRequests:
 
         for cookie in response.headers.get_all('Set-Cookie', []):
             cookie_parts = cookie.split(';')
-            cookie_name, cookie_value = cookie_parts[0].split('=')
+            cookie_name, cookie_value = cookie_parts[0].split('=', 1)
             response_cookies[cookie_name.strip()] = cookie_value.strip()
 
         return Response(
@@ -234,9 +306,11 @@ class ManageRequests:
     def _handle_error(self, e: Union[urllib.error.URLError, urllib.error.HTTPError]) -> None:
         """Handle request error."""
         logging.error(f"Request failed for URL '{self.url}': {str(e)}")
+
         if self.attempt < self.retries:
             logging.info(f"Retrying request for URL '{self.url}' (attempt {self.attempt}/{self.retries})")
             time.sleep(HTTP_DELAY)
+
         else:
             logging.error(f"Maximum retries reached for URL '{self.url}'")
             raise RequestError(str(e))
@@ -251,9 +325,7 @@ class ValidateRequest:
             r'^(?:http|ftp)s?://'  # http:// or https://
             r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
             r'localhost|'  # localhost...
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or IP
-            r'(?::\d+)?'  # optional port
-            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', re.IGNORECASE)
         return re.match(url_regex, url) is not None
 
     @staticmethod
@@ -287,14 +359,14 @@ class SSLHandler:
         ssl_context.verify_mode = ssl.CERT_NONE
 
 
-class KwargsRequest():
-    """Class representing keyword arguments for a request."""
+class KwargsRequest(TypedDict, total = False):
     url: str
     headers: Optional[Dict[str, str]] = None
     timeout: float = HTTP_TIMEOUT
     retries: int = HTTP_RETRIES
     params: Optional[Dict[str, str]] = None
     cookies: Optional[Dict[str, str]] = None
+    json_data: Optional[Dict[str, Any]] = None
 
 
 class Request:
@@ -302,7 +374,7 @@ class Request:
     def __init__(self) -> None:
         pass
 
-    def get(self, url: str, **kwargs: Unpack[KwargsRequest]):
+    def get(self, url: str, **kwargs: Unpack[KwargsRequest])-> 'Response':
         """
         Send a GET request.
 
@@ -315,7 +387,7 @@ class Request:
         """
         return self._send_request(url, 'GET', **kwargs)
 
-    def post(self, url: str, **kwargs: Unpack[KwargsRequest]):
+    def post(self, url: str, **kwargs: Unpack[KwargsRequest]) -> 'Response':
         """
         Send a POST request.
 
@@ -327,36 +399,9 @@ class Request:
             Response: The response object.
         """
         return self._send_request(url, 'POST', **kwargs)
-
-    def put(self, url: str, **kwargs: Unpack[KwargsRequest]):
-        """
-        Send a PUT request.
-
-        Args:
-            url (str): The URL to which the request will be sent.
-            **kwargs: Additional keyword arguments for the request.
-
-        Returns:
-            Response: The response object.
-        """
-        return self._send_request(url, 'PUT', **kwargs)
-
-    def delete(self, url: str, **kwargs: Unpack[KwargsRequest]):
-        """
-        Send a DELETE request.
-
-        Args:
-            url (str): The URL to which the request will be sent.
-            **kwargs: Additional keyword arguments for the request.
-
-        Returns:
-            Response: The response object.
-        """
-        return self._send_request(url, 'DELETE', **kwargs)
-
-    def _send_request(self, url: str, method: str, **kwargs: Unpack[KwargsRequest]):
+    
+    def _send_request(self, url: str, method: str, **kwargs: Unpack[KwargsRequest]) -> 'Response':
         """Send an HTTP request."""
-        # Add validation checks for URL and headers
         if not ValidateRequest.validate_url(url):
             raise ValueError("Invalid URL format")
 
@@ -364,7 +409,6 @@ class Request:
             raise ValueError("Invalid header values")
 
         return ManageRequests(url, method, **kwargs).send()
-
-
+    
 # Out
-request = Request()
+requests: Request = Request()

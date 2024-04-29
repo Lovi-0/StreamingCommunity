@@ -7,10 +7,12 @@ import random
 import threading
 import json
 import tempfile
+
 from typing import Dict, List
 
+
 # Internal utilities
-from .my_requests import request
+from ..Request import requests
 
 
 def get_browser_user_agents_online(browser: str) -> List[str]:
@@ -28,7 +30,7 @@ def get_browser_user_agents_online(browser: str) -> List[str]:
     try:
 
         # Make request and find all user agents
-        html = request.get(url).text
+        html = requests.get(url).text
         browser_user_agents = re.findall(r"<a href=\'/.*?>(.+?)</a>", html, re.UNICODE)
         return [ua for ua in browser_user_agents if "more" not in ua.lower()]
     
@@ -103,4 +105,4 @@ class UserAgentManager:
 
 
 # Output
-ua = UserAgentManager()
+ua: UserAgentManager = UserAgentManager()

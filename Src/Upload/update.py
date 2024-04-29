@@ -1,13 +1,13 @@
 # 01.03.2023
 
 import os
-import requests
 import time
 
 
 # Internal utilities
 from .version import __version__
 from Src.Util.console import console
+from Src.Lib.Request import requests
 
 
 # Variable

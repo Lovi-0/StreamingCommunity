@@ -1,6 +1,5 @@
 # 01.03.24
 
-import requests
 import re
 import json
 import binascii
@@ -9,12 +8,12 @@ from urllib.parse import urljoin, urlencode, quote
 
 
 # External libraries
-import requests
 from bs4 import BeautifulSoup
 
 
 # Internal utilities
 from Src.Util.headers import get_headers
+from Src.Lib.Request import requests
 from .SeriesType import TitleManager
 from .EpisodeType import EpisodeManager
 from .WindowType import WindowVideo, WindowParameter
