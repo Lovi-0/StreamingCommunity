@@ -218,7 +218,7 @@ def search(title_search: str, domain: str) -> int:
     """
     
     # Send request to search for titles
-    req = requests.get(f"https://streamingcommunity.{domain}/api/search?q={title_search}", headers={'user-agent': get_headers()})
+    req = requests.get(f"https://streamingcommunity.{domain}/api/search?q={title_search.replace(" ", "+")}", headers={'user-agent': get_headers()})
 
     # Add found titles to media search manager
     for dict_title in req.json()['data']:
