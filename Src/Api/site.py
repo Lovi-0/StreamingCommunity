@@ -42,11 +42,8 @@ def get_token(site_name: str, domain: str) -> dict:
       The keys are 'XSRF_TOKEN', 'animeunity_session', and 'csrf_token'.
     """
 
-    # Create a session object to handle the HTTP request and response
-    session = requests.Session()
-
     # Send a GET request to the specified URL composed of the site name and domain
-    response = session.get(f"https://www.{site_name}.{domain}")
+    response = requests.get(f"https://www.{site_name}.{domain}")
 
     # Initialize variables to store CSRF token
     find_csrf_token = None
@@ -64,8 +61,8 @@ def get_token(site_name: str, domain: str) -> dict:
             find_csrf_token = html_meta.get('content')
 
     return {
-        'XSRF_TOKEN': session.cookies['XSRF-TOKEN'],
-        'animeunity_session': session.cookies['animeunity_session'],
+        'XSRF_TOKEN': response.cookies['XSRF-TOKEN'],
+        'animeunity_session': response.cookies['animeunity_session'],
         'csrf_token': find_csrf_token
     }
 
@@ -326,7 +323,7 @@ def anime_search(title_search: str) -> int:
     }
 
     # Send a POST request to the API endpoint for live search
-    response = requests.post(f'https://www.{url_site_name}.{url_domain}/livesearch', cookies=cookies, headers=headers, json=json_data)
+    response = requests.post(f'https://www.{url_site_name}.{url_domain}/livesearch', cookies=cookies, headers=headers, json_data=json_data)
 
     # Process each record returned in the response
     for record in response.json()['records']:

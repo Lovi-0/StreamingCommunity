@@ -1,4 +1,5 @@
 # 04.4.24
+# Note: verify_ssl need to be set to false for macOs
 
 import base64
 import json
