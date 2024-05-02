@@ -250,6 +250,7 @@ def concatenate_and_save(file_list_path: str, output_filename: str, v_codec: str
         output = (
             ffmpeg.input(file_list_path, safe=0, f='concat')
             .output(output_file_path, **output_args)
+            .global_args('-use_metadata_msgs')
         )
 
         # Overwrite output file if exists
