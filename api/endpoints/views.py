@@ -2,6 +2,7 @@ import json
 import os
 
 from django.core.paginator import Paginator
+from django.http import StreamingHttpResponse
 
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -50,7 +51,6 @@ class SearchView(viewsets.ViewSet):
         self.media_id = request.query_params.get("media_id")
         self.media_slug = request.data.get("media_slug")
         self.type_media = request.query_params.get("type_media")
-        self.page = self.request.query_params.get("page")
 
         try:
             match self.type_media:
@@ -81,22 +81,18 @@ class SearchView(viewsets.ViewSet):
 
                     return Response({"episodes": episodes})
                 case "TV_ANIME":
-                    episodes = []
-                    episodes_downloader = EpisodeDownloader(
-                        self.media_id, self.media_slug
-                    )
-                    episoded_count = episodes_downloader.get_count_episodes()
-                    items_per_page = 5
-                    paginator = Paginator(range(episoded_count), items_per_page)
+                    def stream_episodes():
+                        episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
+                        episoded_count = episodes_downloader.get_count_episodes()
 
-                    page_number = self.page if self.page else 1
-                    page_indices = paginator.page(page_number)
+                        for i in range(1, episoded_count+1):
+                            episode_info = episodes_downloader.get_info_episode(index_ep=i)
+                            episode_info["episode_id"] = i
+                            print(f"Getting episode {i} of {episoded_count} info...")
+                            yield f'data: {json.dumps(episode_info)}\n\n'
 
-                    for i in page_indices:
-                        episode_info = episodes_downloader.get_info_episode(index_ep=i)
-                        episode_info["episode_id"] = i
-                        episodes.append(episode_info)
-                    return Response({"episodes": episodes})
+                    response = StreamingHttpResponse(stream_episodes(), content_type='text/event-stream')
+                    return response
         except Exception as e:
             return Response(
                 {

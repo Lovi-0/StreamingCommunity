@@ -1,3 +1,38 @@
+<script setup lang="ts">
+import { useRoute } from 'vue-router'
+import type { EpisodeAnime, MediaItem } from "@/api/interfaces";
+import { onMounted, ref, onUnmounted } from "vue";
+import { getEpisodesInfo } from "@/api/api";
+
+const route = useRoute()
+
+const item: MediaItem = JSON.parse(<string>route.params.item)
+const imageUrl: string = <string>route.params.imageUrl
+const episodes = ref<EpisodeAnime[]>([])
+const loading = ref(false)
+
+onMounted(async () => {
+  if (item.type !== 'TV_ANIME' && item.type !== 'TV') {
+    return
+  }
+  loading.value = true
+  const response = await getEpisodesInfo(item.id, item.slug, item.type)
+  if (response && response.body) {
+    loading.value = false;
+    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+    while (true) {
+      const {value, done} = await reader.read();
+      if (done) {
+        break;
+      }
+      const episodesData:EpisodeAnime = JSON.parse(value.split("a:")[1].trim());
+      episodes.value.push(episodesData);
+    }
+  }
+
+})
+</script>
+
 <template>
   <div class="details-container">
     <div class="details-card">
@@ -11,22 +46,21 @@
           </div>
         </div>
       </div>
+      <div class="episodes-container">
+        <div v-if="!loading" v-for="episode in episodes" :key="episode.id" class="episode-item">
+          <div class="episode-title">{{ episode.number }} - {{ episode.file_name }}</div>
+        </div>
+        <div v-else>
+          <p>Loading...</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { useRoute } from 'vue-router'
-import type { MediaItem } from "@/api/interfaces";
-
-const route = useRoute()
-
-const item: MediaItem = JSON.parse(<string>route.params.item)
-const imageUrl: string = <string>route.params.imageUrl
-</script>
-
 <style scoped>
 .details-container {
+  padding-top: 10px;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
