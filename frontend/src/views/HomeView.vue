@@ -36,7 +36,7 @@ function searchTitle() {
   </div>
   <div class="card-container">
     <div v-for="result in searchResults" :key="result.id" class="card-item">
-      <Card :title="result.name" :media-type="selectedOption" />
+      <Card :item="result" :media-type="selectedOption" />
     </div>
   </div>
 </template>
