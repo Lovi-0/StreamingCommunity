@@ -25,9 +25,9 @@ class SearchView(viewsets.ViewSet):
         self.type_search = request.query_params.get("type")
 
         media_search_manager.media_list = []
-        self.site_version, self.domain = get_version_and_domain()
         self.len_database = 0
         if self.type_search == "film":
+            _, self.domain = get_version_and_domain()
             self.len_database = search(self.search_query, self.domain)
         elif self.type_search == "anime":
             self.len_database = anime_search(self.search_query)

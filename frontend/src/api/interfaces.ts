@@ -17,6 +17,7 @@ export interface MediaItem {
     seasons_count: number;
     images: Image[];
     comment: string;
+    plot: string;
 }
 
 export interface MediaItemResponse {
