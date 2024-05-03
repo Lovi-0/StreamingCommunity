@@ -5,6 +5,7 @@
         <img :src="imageUrl" :alt="item.name" class="details-image" />
         <div class="details-title-container">
           <h1 class="details-title">{{ item.name }}</h1>
+          <h3>★ {{ item.score }}</h3>
           <div class="details-description">
             <p>{{ item.plot }}</p>
           </div>
@@ -86,6 +87,7 @@ const imageUrl: string = <string>route.params.imageUrl
 }
 
 .details-description {
+  padding-top: 10px;
   line-height: 1.5;
 }
 </style>

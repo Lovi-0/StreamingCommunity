@@ -1,28 +1,32 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 
-const selectedOption = ref('film')
-
-const toggleOption = () => {
-  selectedOption.value = selectedOption.value === 'film' ? 'anime' : 'film'
-  emit('update:modelValue', selectedOption.value)
-}
+const props = defineProps({
+  modelValue: {
+    type: String,
+    required: true
+  }
+})
 
 const emit = defineEmits(['update:modelValue'])
+
+const isAnimeSelected = computed(() => props.modelValue === 'anime')
+
+const toggleOption = () => {
+  emit('update:modelValue', isAnimeSelected.value ? 'film' : 'anime')
+}
 </script>
 
 <template>
   <div class="switch-container">
     <span class="switch-label-left">Film</span>
     <label class="switch">
-      <input type="checkbox" :checked="selectedOption === 'anime'" @change="toggleOption">
+      <input type="checkbox" :checked="isAnimeSelected" @change="toggleOption">
       <span class="slider round"></span>
     </label>
     <span class="switch-label-right">Anime</span>
   </div>
 </template>
-
-<script setup lang="ts"></script>
 
 <style scoped>
 .switch-container {

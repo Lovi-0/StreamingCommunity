@@ -1,13 +1,31 @@
 <script setup lang="ts">
 import search from "@/api/api";
 import Toggle from "@/components/Toggle.vue";
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import type { MediaItem } from "@/api/interfaces";
 import Card from "@/components/Card.vue";
+import { onBeforeRouteLeave } from 'vue-router'
 
 const selectedOption = ref('film')
 const searchedTitle = ref('')
 const searchResults = ref<MediaItem[]>([])
+
+const storeSearchResults = () => {
+  localStorage.setItem('searchResults', JSON.stringify(searchResults.value))
+  localStorage.setItem('selectedOption', selectedOption.value)
+}
+
+const retrieveSearchResults = () => {
+  const storedResults = localStorage.getItem('searchResults')
+  if (storedResults) {
+    searchResults.value = JSON.parse(storedResults)
+    selectedOption.value = localStorage.getItem('selectedOption') || 'film'
+  }
+}
+
+watch(searchResults, storeSearchResults, { deep: true })
+
+retrieveSearchResults()
 
 function searchTitle() {
   search(searchedTitle.value, selectedOption.value).then((res) => {
@@ -15,6 +33,7 @@ function searchTitle() {
   }).catch((err) => {
     console.log(err)
   })
+  storeSearchResults()
 }
 </script>
 
@@ -101,7 +120,7 @@ function searchTitle() {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  padding: 100px 20px 20px;
+  padding: 100px 8% 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -113,6 +132,7 @@ function searchTitle() {
 @media (max-width: 768px) {
   .card-container {
     grid-template-columns: repeat(2, 1fr);
+    padding: 120px 12% 20px;
   }
 }
 
