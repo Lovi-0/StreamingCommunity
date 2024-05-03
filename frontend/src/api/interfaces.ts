@@ -23,3 +23,23 @@ export interface MediaItem {
 export interface MediaItemResponse {
     media: MediaItem[];
 }
+
+export interface EpisodeAnime {
+  id: number;
+  anime_id: number;
+  user_id: number | null;
+  number: string;
+  created_at: string;
+  link: string;
+  visite: number;
+  hidden: number;
+  public: number;
+  scws_id: number;
+  file_name: string;
+  tg_post: number;
+  episode_id: number;
+}
+
+export interface EpisodeAnimeResponse {
+  episodes: EpisodeAnime[];
+}
