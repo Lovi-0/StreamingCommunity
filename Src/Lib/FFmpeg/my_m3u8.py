@@ -149,10 +149,6 @@ class M3U8_Segments:
             self.parse_data(response.text)
             logging.info(f"[M3U8_Segments] Ts segments found: {len(self.segments)}")
 
-        except requests.exceptions.RequestException as req_err:
-            logging.error(f"[M3U8_Segments] Error occurred during request: {req_err}")
-            raise
-
         except Exception as e:
             logging.error(f"[M3U8_Segments] Error occurred: {e}")
 
@@ -214,10 +210,6 @@ class M3U8_Segments:
             else:
                 logging.warn(f"Skipping invalid URL: {ts_url}")
                 return None
-
-        except requests.exceptions.RequestException as req_err:
-            logging.warn(f"Error occurred during request to {ts_url}: {req_err}")
-            return None
 
         except Exception as e:
             logging.error(f"An unexpected error occurred: {e}")
