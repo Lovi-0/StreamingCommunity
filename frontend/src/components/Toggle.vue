@@ -1,12 +1,21 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 
+const selectedOption = ref('film')
+
+const toggleOption = () => {
+  selectedOption.value = selectedOption.value === 'film' ? 'anime' : 'film'
+  emit('update:modelValue', selectedOption.value)
+}
+
+const emit = defineEmits(['update:modelValue'])
 </script>
 
 <template>
   <div class="switch-container">
     <span class="switch-label-left">Film</span>
     <label class="switch">
-      <input type="checkbox">
+      <input type="checkbox" :checked="selectedOption === 'anime'" @change="toggleOption">
       <span class="slider round"></span>
     </label>
     <span class="switch-label-right">Anime</span>
@@ -50,7 +59,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: #42b883;
   -webkit-transition: .4s;
   transition: .4s;
 }
