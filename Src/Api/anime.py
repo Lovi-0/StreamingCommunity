@@ -55,7 +55,7 @@ class EpisodeDownloader:
 
         # For all seasons
         elif cmd_insert == "*":
-            list_season_select = list(range(1, max_count + 1))
+            list_season_select = list(range(0, max_count))
 
         # Return list of selected seasons
         return list_season_select
@@ -165,7 +165,7 @@ class EpisodeDownloader:
                         ANIME_FOLDER,
                         SERIES_FOLDER,
                         self.tv_name,
-                        f"{index_select}.mp4",
+                        f"{index_select + 1}.mp4",
                     ),
                 )
 
