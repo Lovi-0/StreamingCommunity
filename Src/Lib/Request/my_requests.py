@@ -209,43 +209,37 @@ class ManageRequests:
 
     def _build_request(self) -> urllib.request.Request:
         """Build the urllib Request object."""
+        
+        # Make a copy of headers to avoid modifying the original dictionary
         headers = self.headers.copy()
 
+        # Construct the URL with query parameters if present
         if self.params:
             url = self.url + '?' + urllib.parse.urlencode(self.params)
         else:
             url = self.url
 
+        # Create the initial Request object
         req = urllib.request.Request(url, headers=headers, method=self.method)
 
+        # Add JSON data if provided
         if self.json_data:
             req.add_header('Content-Type', 'application/json')
-            req.body = json.dumps(self.json_data).encode('utf-8')
-        else:
-            req = urllib.request.Request(url, headers=headers, method=self.method)
+            req.data = json.dumps(self.json_data).encode('utf-8')
 
+        # Add authorization header if provided
         if self.auth:
             req.add_header('Authorization', 'Basic ' + base64.b64encode(f"{self.auth[0]}:{self.auth[1]}".encode()).decode())
 
+        # Add cookies if provided
         if self.cookies:
             cookie_str = '; '.join([f"{name}={value}" for name, value in self.cookies.items()])
             req.add_header('Cookie', cookie_str)
 
-        if self.headers:
-            for key, value in self.headers.items():
-                req.add_header(key, value)
-
-        # Add default user agent
-        if True:
-            there_is_agent = False
-
-            for key, value in self.headers.items():
-                if str(key).lower() == 'user-agent':
-                    there_is_agent = True
-
-            if not there_is_agent:
-                default_user_agent = 'Mozilla/5.0'
-                req.add_header('user-agent', default_user_agent)
+        # Add default user agent if not already present
+        if 'user-agent' not in headers:
+            default_user_agent = 'Mozilla/5.0'
+            req.add_header('user-agent', default_user_agent)
 
         return req
 

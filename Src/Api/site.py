@@ -61,7 +61,6 @@ def get_token(site_name: str, domain: str) -> dict:
             find_csrf_token = html_meta.get('content')
 
     return {
-        'XSRF_TOKEN': response.cookies['XSRF-TOKEN'],
         'animeunity_session': response.cookies['animeunity_session'],
         'csrf_token': find_csrf_token
     }
