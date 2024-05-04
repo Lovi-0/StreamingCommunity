@@ -2,7 +2,7 @@
 import { useRoute } from 'vue-router'
 import type {Episode, MediaItem, Season, SeasonResponse} from "@/api/interfaces";
 import { onMounted, ref } from "vue";
-import { getEpisodesInfo } from "@/api/api";
+import {downloadFilm, getEpisodesInfo} from "@/api/api";
 
 const route = useRoute()
 
@@ -11,9 +11,10 @@ const imageUrl: string = <string>route.params.imageUrl
 const animeEpisodes = ref<Episode[]>([])
 const tvShowEpisodes = ref<any[]>([])
 const loading = ref(false)
+const selectingEpisodes = ref(false)
 
 onMounted(async () => {
-  if (['MOVIE', 'OVA'].includes(item.type)) {
+  if (['MOVIE', 'OVA', 'SPECIAL'].includes(item.type)) {
     return
   } else {
     loading.value = true;
@@ -46,6 +47,33 @@ onMounted(async () => {
     }
   }
 })
+
+const toggleEpisodeSelection = () => {
+  selectingEpisodes.value = !selectingEpisodes.value
+}
+
+const downloadItems = async () => {
+  try {
+    if (item.type === 'MOVIE') {
+      const res = await downloadFilm(item.id, item.slug, item.type)
+      if (res.error) {
+        throw new Error(res.error + ' - ' + res.message)
+      }
+      alertDownload()
+      return
+    }
+  } catch (error) {
+    alertDownload(error)
+  }
+}
+
+const alertDownload = (message?: any) => {
+  if (message) {
+    alert(message)
+    return;
+  }
+  alert('Il downlaod è iniziato, il file sarà disponibile tra qualche minuto nella cartella \'Video\' del progetto...')
+}
 </script>
 
 <template>
@@ -64,6 +92,14 @@ onMounted(async () => {
           </div>
           <h3 v-if="animeEpisodes.length > 0 && !loading">Numero episodi: {{ animeEpisodes[0].episode_total }}</h3>
           <h3 v-if="tvShowEpisodes.length > 0 && !loading">Numero stagioni: {{ tvShowEpisodes.length }}</h3>
+          <hr style="opacity: 0.2"/>
+          <div class="download-section">
+            <button :disabled="loading || selectingEpisodes" @click="downloadItems">Scarica {{['TV_ANIME', 'TV'].includes(item.type)? 'tutto' : ''}}</button>
+            <template v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)">
+              <button @click="toggleEpisodeSelection">{{selectingEpisodes ? 'Disattiva' : 'Attiva'}} selezione episodi</button>
+              <button>Download episodi</button>
+            </template>
+          </div>
         </div>
       </div>
 
@@ -86,6 +122,11 @@ onMounted(async () => {
               </div>
             </div>
           </div>
+      </div>
+
+      <!--MOVIES SECTION-->
+      <div v-else-if="!loading && ['MOVIE', 'OVA', 'SPECIAL'].includes(item.type)">
+        <p>Questo è un {{item.type}}</p>
       </div>
 
       <!--LOADING SECTION-->
@@ -126,7 +167,7 @@ h3 {
 }
 
 .details-image {
-  max-width: 300px;
+  width: 295px;
   margin-right: 2rem;
   border-radius: 0.5rem;
 }
@@ -203,6 +244,15 @@ h3 {
 .episode-title {
   font-size: 1.2rem;
   font-weight: bold;
+}
+
+.download-section {
+  margin-top: 1rem;
+  flex: fit-content;
+  flex-direction: row;
+  button {
+    margin-right: 5px;
+  }
 }
 
 @media (max-width: 768px) {

@@ -49,7 +49,7 @@ function searchTitle() {
       />
       <div class="toggle-button-container">
         <Toggle v-model="selectedOption" class="search-toggle"></Toggle>
-        <button @click="searchTitle" class="search-button">Cerca</button>
+        <button @click="searchTitle">Cerca</button>
       </div>
     </div>
   </div>
@@ -102,21 +102,6 @@ function searchTitle() {
 
 .search-toggle {
   margin: 0 8px;
-}
-
-.search-button {
-  background-color: #42b883;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.search-button:hover {
-  background-color: #3a9f74;
 }
 
 .card-container {
