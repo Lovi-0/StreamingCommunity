@@ -20,6 +20,14 @@ const navigateToDetails = () => {
 
 onMounted(async () => {
     imageUrl.value = "https://eapp.org/wp-content/uploads/2018/05/poster_placeholder.jpg";
+    if (props.item.images && props.item.images.length > 0) {
+      for (const image of props.item.images) {
+        if (image.type === "poster") {
+          imageUrl.value = "https://cdn.streamingcommunity.marketing/images/" + image.filename;
+          return;
+        }
+      }
+    }
     if (props.mediaType == "film") {
       try {
         const response = await axios.get(movieApiUrl + props.item.name);
