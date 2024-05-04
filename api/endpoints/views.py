@@ -179,7 +179,7 @@ class DownloadView(viewsets.ViewSet):
                         self.media_id, self.media_slug
                     )
                     episodes_downloader.download_episode(self.download_id)
-                case "OVA":
+                case "OVA" | "SPECIAL":
                     anime_download_film(
                         id_film=self.media_id, title_name=self.media_slug
                     )
@@ -191,7 +191,7 @@ class DownloadView(viewsets.ViewSet):
             }
         except Exception as e:
             response_dict = {
-                "error": "Error while downloading the media, please try again later",
+                "error": "Error while downloading the media",
                 "message": str(e),
             }
 
