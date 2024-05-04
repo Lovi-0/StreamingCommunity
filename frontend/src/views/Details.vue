@@ -1,32 +1,47 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import type { EpisodeAnime, MediaItem } from "@/api/interfaces";
-import { onMounted, ref, onUnmounted } from "vue";
+import type {Episode, MediaItem, Season, SeasonResponse} from "@/api/interfaces";
+import { onMounted, ref } from "vue";
 import { getEpisodesInfo } from "@/api/api";
 
 const route = useRoute()
 
 const item: MediaItem = JSON.parse(<string>route.params.item)
 const imageUrl: string = <string>route.params.imageUrl
-const episodes = ref<EpisodeAnime[]>([])
+const animeEpisodes = ref<Episode[]>([])
+const tvShowEpisodes = ref<any[]>([])
 const loading = ref(false)
 
 onMounted(async () => {
-  if (item.type !== 'TV_ANIME' && item.type !== 'TV') {
+  if (['MOVIE', 'OVA'].includes(item.type)) {
     return
-  }
-  loading.value = true
-  const response = await getEpisodesInfo(item.id, item.slug, item.type)
-  if (response && response.body) {
-    loading.value = false;
-    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
-    while (true) {
-      const {value, done} = await reader.read();
-      if (done) {
-        break;
+  } else {
+    loading.value = true;
+    const response = await getEpisodesInfo(item.id, item.slug, item.type)
+    if (response && response.body) {
+      loading.value = false;
+      const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+      while (true) {
+        const {value, done} = await reader.read();
+        if (done) {
+          break;
+        }
+        if (item.type === 'TV_ANIME') {
+          const episodesData:Episode = JSON.parse(value.trim());
+          animeEpisodes.value.push(episodesData);
+        } else {
+          const episodesData:SeasonResponse = JSON.parse(value.trim());
+          for (const seasonKey in episodesData.episodes) {
+            const season = episodesData.episodes[seasonKey];
+            const episodes:Episode[] = [];
+            for (const episodeKey in season) {
+              const episode:Episode = season[episodeKey];
+              episodes.push(episode);
+            }
+            tvShowEpisodes.value.push(episodes);
+          }
+        }
       }
-      const episodesData:EpisodeAnime = JSON.parse(value.split("a:")[1].trim());
-      episodes.value.push(episodesData);
     }
   }
 
@@ -36,29 +51,57 @@ onMounted(async () => {
 <template>
   <div class="details-container">
     <div class="details-card">
+
+      <!--HEADER SECTION-->
       <div class="details-header">
         <img :src="imageUrl" :alt="item.name" class="details-image" />
         <div class="details-title-container">
           <h1 class="details-title">{{ item.name }}</h1>
           <h3>★ {{ item.score }}</h3>
           <div class="details-description">
-            <p>{{ item.plot }}</p>
+            <p v-if="item.type == 'TV_ANIME'">{{ item.plot }}</p>
+            <p v-else-if="tvShowEpisodes.length > 0">{{ tvShowEpisodes[0][0].plot }}</p>
           </div>
+          <h3 v-if="animeEpisodes.length > 0 && !loading">Numero episodi: {{ animeEpisodes[0].episode_total }}</h3>
+          <h3 v-if="tvShowEpisodes.length > 0 && !loading">Numero stagioni: {{ tvShowEpisodes.length }}</h3>
         </div>
       </div>
-      <div class="episodes-container">
-        <div v-if="!loading" v-for="episode in episodes" :key="episode.id" class="episode-item">
-          <div class="episode-title">{{ episode.number }} - {{ episode.file_name }}</div>
-        </div>
-        <div v-else>
-          <p>Loading...</p>
-        </div>
+
+      <!--SERIES SECTION-->
+      <div v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)" :class="item.type == 'TV_ANIME' ? 'episodes-container' : 'season-container'">
+          <div v-if="animeEpisodes.length == 0 && tvShowEpisodes.length == 0">
+            <p>Non ci sono episodi...</p>
+          </div>
+          <div v-else-if="item.type == 'TV_ANIME'" v-for="episode in animeEpisodes" :key="episode.id" class="episode-item">
+            <div class="episode-title">Episodio {{ episode.number }}</div>
+          </div>
+          <div v-else-if="item.type == 'TV'" v-for="(season, index) in tvShowEpisodes" class="season-item">
+            <div class="season-title">Stagione {{ index + 1 }}</div>
+            <div class="episode-container">
+              <div v-for="episode in season" :key="episode.id" class="episode-item">
+                <div class="episode-title">
+                  Episodio {{ episode.number }} -
+                  {{episode.name.slice(0, 40) + (episode.name.length > 39 ? '...' : '')}}
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+
+      <!--LOADING SECTION-->
+      <div v-else-if="loading">
+        <p>Loading...</p>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+h3 {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+}
 .details-container {
   padding-top: 10px;
   justify-content: center;
@@ -113,15 +156,62 @@ onMounted(async () => {
   margin-bottom: 1rem;
 }
 
-.details-info {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.9rem;
-  color: #999;
+.details-description {
+  line-height: 1.5;
 }
 
-.details-description {
-  padding-top: 10px;
-  line-height: 1.5;
+.episodes-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.episode-item {
+  background-color: #333;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.season-item {
+  background-color: #2a2a2a;
+  padding: 1rem;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.season-item div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1rem;
+}
+
+.season-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding-bottom: 15px;
+}
+
+.episode-item:hover {
+  transform: translateY(-5px);
+}
+
+.episode-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .episodes-container {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .season-item div {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
 }
 </style>
