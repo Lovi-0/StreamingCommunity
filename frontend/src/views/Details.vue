@@ -24,6 +24,7 @@ onMounted(async () => {
       while (true) {
         const {value, done} = await reader.read();
         if (done) {
+          window.scrollTo(0, 0)
           break;
         }
         if (item.type === 'TV_ANIME') {
@@ -44,7 +45,6 @@ onMounted(async () => {
       }
     }
   }
-
 })
 </script>
 
