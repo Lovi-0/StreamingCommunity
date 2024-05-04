@@ -116,7 +116,7 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
     episode_id = video_source.obj_episode_manager.episodes[index_episode_selected - 1].id
 
     # Define filename and path for the downloaded video
-    mp4_name = remove_special_characters(f"{map_episode_title(tv_name,video_source.obj_episode_manager.episodes[index_episode_selected - 1],index_season_selected)}.mp4")
+    mp4_name = f"{transliterate(remove_special_characters(map_episode_title(tv_name,video_source.obj_episode_manager.episodes[index_episode_selected - 1],index_season_selected)))}.mp4"
     mp4_path = remove_special_characters(os.path.join(ROOT_PATH, SERIES_FOLDER, tv_name, f"S{index_season_selected}"))
     os.makedirs(mp4_path, exist_ok=True)
 

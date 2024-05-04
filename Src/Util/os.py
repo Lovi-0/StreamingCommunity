@@ -36,7 +36,8 @@ special_chars_to_remove = [
     ';', 
     ':', 
     ',', 
-    '?'
+    '?',
+    '.'
 ]
 
 
