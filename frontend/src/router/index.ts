@@ -19,7 +19,7 @@ const router = createRouter({
         try {
           item = JSON.parse(<string>route.params.item);
         } catch (error) {
-          item = {}; // or any default value you want to set
+          item = {}; // default value
         }
         return { item: item, imageUrl: route.params.imageUrl };
       },
