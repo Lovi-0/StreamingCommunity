@@ -55,44 +55,51 @@ class SearchView(viewsets.ViewSet):
         try:
             match self.type_media:
                 case "TV":
-                    self.site_version, self.domain = get_version_and_domain()
+                    def stream_episodes():
+                        self.site_version, self.domain = get_version_and_domain()
 
-                    video_source = VideoSource()
-                    video_source.set_url_base_name(STREAM_SITE_NAME)
-                    video_source.set_version(self.site_version)
-                    video_source.set_domain(self.domain)
-                    video_source.set_series_name(self.media_slug)
-                    video_source.set_media_id(self.media_id)
+                        video_source = VideoSource()
+                        video_source.set_url_base_name(STREAM_SITE_NAME)
+                        video_source.set_version(self.site_version)
+                        video_source.set_domain(self.domain)
+                        video_source.set_series_name(self.media_slug)
+                        video_source.set_media_id(self.media_id)
 
-                    video_source.collect_info_seasons()
-                    seasons_count = video_source.obj_title_manager.get_length()
+                        video_source.collect_info_seasons()
+                        seasons_count = video_source.obj_title_manager.get_length()
 
-                    episodes = {}
-                    for i_season in range(1, seasons_count + 1):
-                        video_source.obj_episode_manager.clear()
-                        video_source.collect_title_season(i_season)
-                        episodes_count = video_source.obj_episode_manager.get_length()
-                        episodes[i_season] = {}
-                        for i_episode in range(1, episodes_count + 1):
-                            episode = video_source.obj_episode_manager.episodes[
-                                i_episode - 1
-                            ]
-                            episodes[i_season][i_episode] = episode.__dict__
+                        episodes = {}
+                        for i_season in range(1, seasons_count + 1):
+                            video_source.obj_episode_manager.clear()
+                            video_source.collect_title_season(i_season)
+                            episodes_count = video_source.obj_episode_manager.get_length()
+                            episodes[i_season] = {}
+                            for i_episode in range(1, episodes_count + 1):
+                                episode = video_source.obj_episode_manager.episodes[
+                                    i_episode - 1
+                                    ]
+                                episodes[i_season][i_episode] = episode.__dict__
 
-                    return Response({"episodes": episodes})
+                        yield f'{json.dumps({"episodes": episodes})}\n\n'
+
+                    response = StreamingHttpResponse(stream_episodes(), content_type='text/event-stream')
+                    return response
+
                 case "TV_ANIME":
                     def stream_episodes():
                         episodes_downloader = EpisodeDownloader(self.media_id, self.media_slug)
                         episoded_count = episodes_downloader.get_count_episodes()
 
-                        for i in range(1, episoded_count+1):
+                        for i in range(1, episoded_count + 1):
                             episode_info = episodes_downloader.get_info_episode(index_ep=i)
                             episode_info["episode_id"] = i
+                            episode_info["episode_total"] = episoded_count
                             print(f"Getting episode {i} of {episoded_count} info...")
-                            yield f'data: {json.dumps(episode_info)}\n\n'
+                            yield f'{json.dumps(episode_info)}\n\n'
 
                     response = StreamingHttpResponse(stream_episodes(), content_type='text/event-stream')
                     return response
+
         except Exception as e:
             return Response(
                 {
@@ -112,7 +119,8 @@ class DownloadView(viewsets.ViewSet):
         self.type_media = request.data.get("type_media").upper()
         self.download_id = request.data.get("download_id")
 
-        self.site_version, self.domain = get_version_and_domain()
+        if self.type_media in ["TV", "MOVIE"]:
+            self.site_version, self.domain = get_version_and_domain()
 
         response_dict = {"error": "No media found with that search query"}
 

@@ -17,15 +17,12 @@ export default function search(query: string, type: string) : Promise<MediaItemR
 
 export async function getEpisodesInfo(mediaId: number, mediaSlug: string, mediaType: string): Promise<Response> {
     const url = `${BASE_URL}/search/get_episodes_info?media_id=${mediaId}&media_slug=${mediaSlug}&type_media=${mediaType}`;
-    if (mediaType === 'TV_ANIME') {
-        return await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'text/event-stream'
-            }
-        });
-    } else {
-        return Promise.resolve(new Response());
-    }
+    return await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'text/event-stream'
+        }
+    });
+
 
 }

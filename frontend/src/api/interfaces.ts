@@ -24,7 +24,7 @@ export interface MediaItemResponse {
     media: MediaItem[];
 }
 
-export interface EpisodeAnime {
+export interface Episode {
   id: number;
   anime_id: number;
   user_id: number | null;
@@ -38,8 +38,21 @@ export interface EpisodeAnime {
   file_name: string;
   tg_post: number;
   episode_id: number;
+  episode_total: number;
+  name: string; // TV Show exclusive
+  plot: string; // TV Show exclusive
+  duration: number; // TV Show exclusive
+  season_id: number; // TV Show exclusive
+  created_by: any; // TV Show exclusive
+  updated_at: string; // TV Show exclusive
 }
 
-export interface EpisodeAnimeResponse {
-  episodes: EpisodeAnime[];
+export interface Season {
+  [key: string]: {
+    [key: string]: Episode;
+  };
+}
+
+export interface SeasonResponse {
+  episodes: Season;
 }
