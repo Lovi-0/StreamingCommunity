@@ -1,7 +1,7 @@
 import axios from 'axios'
 import type {MediaItemResponse} from '@/api/interfaces'
 
-const BASE_URL = 'http://127.0.0.1:8000/api'
+const BASE_URL = 'http://localhost:8000/api'
 
 function get(url: string): Promise<any> {
   return axios.get(`${BASE_URL}${url}`)

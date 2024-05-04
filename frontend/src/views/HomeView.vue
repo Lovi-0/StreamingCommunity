@@ -45,18 +45,21 @@ function searchTitle() {
         @submit="searchTitle"
         class="search-input"
         type="text"
-        placeholder="Search for a title..."
+        placeholder="Cerca un titolo..."
       />
       <div class="toggle-button-container">
         <Toggle v-model="selectedOption" class="search-toggle"></Toggle>
-        <button @click="searchTitle" class="search-button">Search</button>
+        <button @click="searchTitle" class="search-button">Cerca</button>
       </div>
     </div>
   </div>
-  <div class="card-container">
+  <div v-if="searchResults && searchResults.length > 0" class="card-container">
     <div v-for="result in searchResults" :key="result.id" class="card-item">
       <Card :item="result" :media-type="selectedOption" />
     </div>
+  </div>
+  <div v-else>
+    <p style="text-align: center; margin-top: 100px;">Nessun risultato trovato</p>
   </div>
 </template>
 
