@@ -17,9 +17,11 @@ const storeSearchResults = () => {
 
 const retrieveSearchResults = () => {
   const storedResults = localStorage.getItem('searchResults')
-  if (storedResults) {
+  try {
+    if (!storedResults) return
     searchResults.value = JSON.parse(storedResults)
     selectedOption.value = localStorage.getItem('selectedOption') || 'film'
+  } catch (e) {
   }
 }
 
@@ -29,7 +31,7 @@ retrieveSearchResults()
 
 function searchTitle() {
   search(searchedTitle.value, selectedOption.value).then((res) => {
-    searchResults.value = res.media
+    searchResults.value = res.data.media
   }).catch((err) => {
     console.log(err)
   })
