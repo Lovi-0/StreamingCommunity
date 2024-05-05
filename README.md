@@ -14,7 +14,7 @@ You can chat, help improve this repo, or just hang around for some fun in the **
   * [Requirement](#requirement)
   * [Usage](#usage)
   * [Update](#update)
-  * [Win 7](#win-7)
+  * [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
 * [CONFIGURATION](#Configuration)
 * [DOCKER](#docker)
 * [TUTORIAL](#tutorial)
@@ -66,57 +66,6 @@ python update.py
 ```bash
 python3 update.py
 ```
-
-## Win 7
-
-Windows 7 does not enforce TLS 1.2 by default, which can lead to security issues. Follow these steps to ensure TLS 1.2 is enabled:
-
-1. **Update Internet Explorer**:
-  - Ensure Internet Explorer is updated to the latest version (11). 
-  ![Internet Explorer Update](./Src/Assets/win_7_install/explorer11.png)
-   
-2. **Enable TLS 1.1 and TLS 1.2**:
-  - Open Internet Options.
-  - Go to Advanced settings.
-  - Check "Use TLS 1.1" and "Use TLS 1.2".
-   
-  ![Internet Options](./Src/Assets/win_7_install/internet_option.png)
-   
-  > [!IMPORTANT]
-  > If Internet Explorer is not updated, these Registry values won't take effect. Also, ensure update "KB3140245" is installed.  
-  > Microsoft Knowledge Article: [KB3140245](https://support.microsoft.com/kb/3140245)
-
-3. **Update Windows**:
-  - Ensure all important updates, including up to the latest 2020 Cumulative updates, are installed. This ensures the OS Trusted Certificates Store is regularly updated by Microsoft servers.
-
-4. **Registry Configuration**:
-  - After installing all the latest Windows Updates, download and run the Microsoft Easy Fix tool linked in KB3140245 article ([download link](https://download.microsoft.com/download/0/6/5/0658B1A7-6D2E-474F-BC2C-D69E5B9E9A68/MicrosoftEasyFix51044.msi)).
-  - Alternatively, add the following values manually by copying and saving them as a `.reg` file:
-   
-```bash
-  Windows Registry Editor Version 5.00
-   
-  ; Make all protocols available
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp\]
-  DefaultSecureProtocols=DWORD:0xAA0
-   
-  ; Make all protocols available
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp\]
-  DefaultSecureProtocols=DWORD:0xAA0
-   
-  ; TLS 1.1
-  [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client]
-  DisabledByDefault=DWORD:0
-  Enabled=dword:1
-   
-  ; TLS 1.2
-  [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Client]
-  DisabledByDefault=DWORD:0
-  Enabled=dword:1
-```
-
-They should be added automatically by some .Net framework update, but in case the OS doesn't have them added already, you can put them manually, this will also improve compatibility with a lot of new .Net apps
-
 
 ## Configuration
 
