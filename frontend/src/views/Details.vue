@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import type {DownloadResponse, Episode, MediaItem, Season, SeasonResponse} from "@/api/interfaces";
+import type {Episode, MediaItem, SeasonResponse} from "@/api/interfaces";
 import { onMounted, ref } from "vue";
-import {downloadAnimeFilm, downloadAnimeSeries, downloadFilm, downloadTvSeries, getEpisodesInfo} from "@/api/api";
+import { getEpisodesInfo } from "@/api/api";
+import { alertDownload, handleMovieDownload, handleOVADownload, handleTVAnimeDownload, handleTVDownload } from "@/api/utils";
 
 const route = useRoute()
 
@@ -56,16 +57,16 @@ const downloadItems = async () => {
   try {
     switch (item.type) {
       case 'TV':
-        await handleTVDownload();
+        await handleTVDownload(tvShowEpisodes.value, item);
       case 'MOVIE':
-        await handleMovieDownload();
+        await handleMovieDownload(item);
         break;
       case 'TV_ANIME':
-        await handleTVAnimeDownload();
+        await handleTVAnimeDownload(animeEpisodes.value, item);
         break;
       case 'OVA':
       case 'SPECIAL':
-        await handleOVADownload();
+        await handleOVADownload(item);
         break;
       default:
         throw new Error('Tipo di media non supportato');
@@ -74,49 +75,6 @@ const downloadItems = async () => {
     alertDownload(error);
   }
 };
-
-const handleTVDownload = async () => {
-  alertDownload();
-  for (const season of tvShowEpisodes.value) {
-    const i = tvShowEpisodes.value.indexOf(season);
-    const res = (await downloadTvSeries(item.id, item.slug, i)).data;
-    handleDownloadError(res);
-  }
-};
-
-const handleMovieDownload = async () => {
-  alertDownload();
-  const res = (await downloadFilm(item.id, item.slug)).data;
-  handleDownloadError(res);
-};
-
-const handleTVAnimeDownload = async () => {
-  alertDownload();
-  for (const episode of animeEpisodes.value) {
-    const res = (await downloadAnimeSeries(item.id, item.slug, episode.episode_id)).data;
-    handleDownloadError(res);
-  }
-};
-
-const handleOVADownload = async () => {
-  alertDownload();
-  const res = (await downloadAnimeFilm(item.id, item.slug)).data;
-  handleDownloadError(res);
-};
-
-const handleDownloadError = (res: DownloadResponse) => {
-  if (res.error) {
-    throw new Error(`${res.error} - ${res.message}`);
-  }
-};
-
-const alertDownload = (message?: any) => {
-  if (message) {
-    alert(message)
-    return;
-  }
-  alert('Il downlaod è iniziato, il file sarà disponibile tra qualche minuto nella cartella \'Video\' del progetto...')
-}
 </script>
 
 <template>
@@ -139,9 +97,14 @@ const alertDownload = (message?: any) => {
 
           <!--DOWNLOAD SECTION-->
           <div class="download-section">
-            <button :disabled="loading || selectingEpisodes" @click="downloadItems">Scarica {{['TV_ANIME', 'TV'].includes(item.type)? 'tutto' : ''}}</button>
+            <button :disabled="loading || selectingEpisodes"
+                    @click.prevent="downloadItems">
+              Scarica {{['TV_ANIME', 'TV'].includes(item.type)? 'tutto' : ''}}
+            </button>
             <template v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)">
-              <button @click="toggleEpisodeSelection">{{selectingEpisodes ? 'Disattiva' : 'Attiva'}} selezione episodi</button>
+              <button @click="toggleEpisodeSelection">
+                {{selectingEpisodes ? 'Disattiva' : 'Attiva'}} selezione episodi
+              </button>
               <button>Download episodi</button>
             </template>
           </div>
@@ -149,11 +112,15 @@ const alertDownload = (message?: any) => {
       </div>
 
       <!--SERIES SECTION-->
-      <div v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)" :class="item.type == 'TV_ANIME' ? 'episodes-container' : 'season-container'">
+      <div v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)"
+           :class="item.type == 'TV_ANIME' ? 'episodes-container' : 'season-container'">
           <div v-if="animeEpisodes.length == 0 && tvShowEpisodes.length == 0">
             <p>Non ci sono episodi...</p>
           </div>
-          <div v-else-if="item.type == 'TV_ANIME'" v-for="episode in animeEpisodes" :key="episode.id" class="episode-item">
+          <div v-else-if="item.type == 'TV_ANIME'"
+               v-for="episode in animeEpisodes"
+               :key="episode.id"
+               class="episode-item">
             <div class="episode-title">Episodio {{ episode.number }}</div>
           </div>
           <div v-else-if="item.type == 'TV'" v-for="(season, index) in tvShowEpisodes" class="season-item">
