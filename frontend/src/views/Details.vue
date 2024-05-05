@@ -99,12 +99,14 @@ const alertDownload = (message?: any) => {
           <h1 class="details-title">{{ item.name }}</h1>
           <h3>★ {{ item.score }}</h3>
           <div class="details-description">
-            <p v-if="item.type == 'TV_ANIME'">{{ item.plot }}</p>
+            <p v-if="['TV_ANIME', 'OVA', 'SPECIAL'].includes(item.type)">{{ item.plot }}</p>
             <p v-else-if="tvShowEpisodes.length > 0">{{ tvShowEpisodes[0][0].plot }}</p>
           </div>
           <h3 v-if="animeEpisodes.length > 0 && !loading">Numero episodi: {{ animeEpisodes[0].episode_total }}</h3>
           <h3 v-if="tvShowEpisodes.length > 0 && !loading">Numero stagioni: {{ tvShowEpisodes.length }}</h3>
-          <hr style="opacity: 0.2"/>
+          <hr style="opacity: 0.2; margin-top: 10px"/>
+
+          <!--DOWNLOAD SECTION-->
           <div class="download-section">
             <button :disabled="loading || selectingEpisodes" @click="downloadItems">Scarica {{['TV_ANIME', 'TV'].includes(item.type)? 'tutto' : ''}}</button>
             <template v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)">
@@ -138,7 +140,7 @@ const alertDownload = (message?: any) => {
 
       <!--MOVIES SECTION-->
       <div v-else-if="!loading && ['MOVIE', 'OVA', 'SPECIAL'].includes(item.type)">
-        <p>Questo è un {{item.type}}</p>
+        <p>Questo è un {{item.type}} (QUESTO TESTO E' A SCOPO DI TEST)</p>
       </div>
 
       <!--LOADING SECTION-->
