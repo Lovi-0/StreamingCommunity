@@ -1,7 +1,6 @@
 import json
 import os
 
-from django.core.paginator import Paginator
 from django.http import StreamingHttpResponse
 
 from rest_framework import viewsets
@@ -12,7 +11,7 @@ from Src.Api import search, get_version_and_domain, download_film, anime_downloa
 from Src.Api.anime import EpisodeDownloader
 from Src.Api.Class.Video import VideoSource
 from Src.Api.film import ROOT_PATH
-from Src.Api.series import SERIES_FOLDER, STREAM_SITE_NAME, donwload_video
+from Src.Api.series import SERIES_FOLDER, STREAM_SITE_NAME
 from Src.Api.site import media_search_manager, anime_search
 from Src.Lib.FFmpeg.my_m3u8 import Downloader
 from Src.Util.mapper import map_episode_title
@@ -40,6 +39,8 @@ class SearchView(viewsets.ViewSet):
             for _, media in enumerate(media_list):
                 if self.type_search == "anime" and media.type == "TV":
                     media.type = "TV_ANIME"
+                if self.type_search == "anime" and media.type == "Movie":
+                    media.type = "OVA"
                 data_to_return.append(media.to_dict)
 
             return Response({"media": data_to_return})
