@@ -2,7 +2,7 @@
 import { useRoute } from 'vue-router'
 import type {DownloadResponse, Episode, MediaItem, Season, SeasonResponse} from "@/api/interfaces";
 import { onMounted, ref } from "vue";
-import {downloadAnimeFilm, downloadAnimeSeries, downloadFilm, getEpisodesInfo} from "@/api/api";
+import {downloadAnimeFilm, downloadAnimeSeries, downloadFilm, downloadTvSeries, getEpisodesInfo} from "@/api/api";
 
 const route = useRoute()
 
@@ -55,6 +55,8 @@ const toggleEpisodeSelection = () => {
 const downloadItems = async () => {
   try {
     switch (item.type) {
+      case 'TV':
+        await handleTVDownload();
       case 'MOVIE':
         await handleMovieDownload();
         break;
@@ -70,6 +72,15 @@ const downloadItems = async () => {
     }
   } catch (error) {
     alertDownload(error);
+  }
+};
+
+const handleTVDownload = async () => {
+  alertDownload();
+  for (const season of tvShowEpisodes.value) {
+    const i = tvShowEpisodes.value.indexOf(season);
+    const res = (await downloadTvSeries(item.id, item.slug, i)).data;
+    handleDownloadError(res);
   }
 };
 
