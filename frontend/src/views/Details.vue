@@ -2,7 +2,7 @@
 import { useRoute } from 'vue-router'
 import type {DownloadResponse, Episode, MediaItem, Season, SeasonResponse} from "@/api/interfaces";
 import { onMounted, ref } from "vue";
-import {downloadAnimeFilm, downloadFilm, getEpisodesInfo} from "@/api/api";
+import {downloadAnimeFilm, downloadAnimeSeries, downloadFilm, getEpisodesInfo} from "@/api/api";
 
 const route = useRoute()
 
@@ -54,28 +54,48 @@ const toggleEpisodeSelection = () => {
 
 const downloadItems = async () => {
   try {
-    let res: DownloadResponse;
     switch (item.type) {
       case 'MOVIE':
-        res = (await downloadFilm(item.id, item.slug)).data;
+        await handleMovieDownload();
+        break;
+      case 'TV_ANIME':
+        await handleTVAnimeDownload();
         break;
       case 'OVA':
       case 'SPECIAL':
-        res = (await downloadAnimeFilm(item.id, item.slug)).data;
+        await handleOVADownload();
         break;
       default:
         throw new Error('Tipo di media non supportato');
     }
-
-    console.log(res)
-
-    if (res.error) {
-      throw new Error(`${res.error} - ${res.message}`);
-    }
-
-    alertDownload();
   } catch (error) {
     alertDownload(error);
+  }
+};
+
+const handleMovieDownload = async () => {
+  alertDownload();
+  const res = (await downloadFilm(item.id, item.slug)).data;
+  handleDownloadError(res);
+};
+
+const handleTVAnimeDownload = async () => {
+  alertDownload();
+  for (const episode of animeEpisodes.value) {
+    const res = (await downloadAnimeSeries(item.id, item.slug, episode.episode_id)).data;
+    handleDownloadError(res);
+  }
+};
+
+const handleOVADownload = async () => {
+  alertDownload();
+  const res = (await downloadAnimeFilm(item.id, item.slug)).data;
+  handleDownloadError(res);
+};
+
+const handleDownloadError = (res: DownloadResponse) => {
+  if (res.error) {
+    throw new Error(`${res.error} - ${res.message}`);
   }
 };
 
