@@ -37,10 +37,11 @@ class SearchView(viewsets.ViewSet):
         if self.len_database != 0:
             data_to_return = []
             for _, media in enumerate(media_list):
-                if self.type_search == "anime" and media.type == "TV":
-                    media.type = "TV_ANIME"
-                if self.type_search == "anime" and media.type == "Movie":
-                    media.type = "OVA"
+                if self.type_search == "anime":
+                    if media.type == "TV":
+                        media.type = "TV_ANIME"
+                    if media.type == "Movie":
+                        media.type = "OVA"
                 data_to_return.append(media.to_dict)
 
             return Response({"media": data_to_return})
