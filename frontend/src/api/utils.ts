@@ -5,7 +5,7 @@ export const handleTVDownload = async (tvShowEpisodes: any[], item: MediaItem) =
   alertDownload();
   for (const season of tvShowEpisodes) {
     const i = tvShowEpisodes.indexOf(season);
-    const res = (await downloadTvSeries(item.id, item.slug, i)).data;
+    const res = (await downloadTvSeries(item.id, item.slug, i + 1)).data;
     handleDownloadError(res);
   }
 };
