@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import type {Episode, MediaItem, Season, SeasonResponse} from "@/api/interfaces";
+import type {DownloadResponse, Episode, MediaItem, Season, SeasonResponse} from "@/api/interfaces";
 import { onMounted, ref } from "vue";
-import {downloadFilm, getEpisodesInfo} from "@/api/api";
+import {downloadAnimeFilm, downloadFilm, getEpisodesInfo} from "@/api/api";
 
 const route = useRoute()
 
@@ -54,18 +54,30 @@ const toggleEpisodeSelection = () => {
 
 const downloadItems = async () => {
   try {
-    if (item.type === 'MOVIE') {
-      const res = await downloadFilm(item.id, item.slug, item.type)
-      if (res.error) {
-        throw new Error(res.error + ' - ' + res.message)
-      }
-      alertDownload()
-      return
+    let res: DownloadResponse;
+    switch (item.type) {
+      case 'MOVIE':
+        res = (await downloadFilm(item.id, item.slug)).data;
+        break;
+      case 'OVA':
+      case 'SPECIAL':
+        res = (await downloadAnimeFilm(item.id, item.slug)).data;
+        break;
+      default:
+        throw new Error('Tipo di media non supportato');
     }
+
+    console.log(res)
+
+    if (res.error) {
+      throw new Error(`${res.error} - ${res.message}`);
+    }
+
+    alertDownload();
   } catch (error) {
-    alertDownload(error)
+    alertDownload(error);
   }
-}
+};
 
 const alertDownload = (message?: any) => {
   if (message) {
