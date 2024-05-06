@@ -203,7 +203,7 @@ def download_series(tv_id: str, tv_name: str, version: str, domain: str) -> None
     seasons_count = video_source.obj_title_manager.get_length()
 
     # Prompt user for season selection and download episodes
-    console.print(f"\n[green]Season find: [red]{seasons_count}")
+    console.print(f"\n[green]Season found: [red]{seasons_count}")
     index_season_selected = str(msg.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]for a range of media"))
     list_season_select = manage_selection(index_season_selected, seasons_count)
 
