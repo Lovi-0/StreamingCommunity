@@ -203,7 +203,7 @@ def anime_download_series(tv_id: int, tv_name: str):
     episodes_downloader = EpisodeDownloader(tv_id, tv_name)
     episoded_count = episodes_downloader.get_count_episodes()
 
-    console.log(f"[cyan]Episodes find: [red]{episoded_count}")
+    console.log(f"[cyan]Episodes found: [red]{episoded_count}")
 
     # Prompt user to select an episode index
     last_command = msg.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]for a range of media")
