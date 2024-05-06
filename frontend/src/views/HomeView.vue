@@ -50,7 +50,7 @@ function searchTitle() {
         placeholder="Cerca un titolo..."
       />
       <div class="toggle-button-container">
-        <Toggle v-model="selectedOption" class="search-toggle"></Toggle>
+        <Toggle style="margin-right: 30px" v-model="selectedOption" class="search-toggle"></Toggle>
         <button @click="searchTitle">Cerca</button>
       </div>
     </div>
