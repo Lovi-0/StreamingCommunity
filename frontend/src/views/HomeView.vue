@@ -9,6 +9,7 @@ import { onBeforeRouteLeave } from 'vue-router'
 const selectedOption = ref('film')
 const searchedTitle = ref('')
 const searchResults = ref<MediaItem[]>([])
+const loading = ref(false)
 
 const storeSearchResults = () => {
   localStorage.setItem('searchResults', JSON.stringify(searchResults.value))
@@ -30,8 +31,10 @@ watch(searchResults, storeSearchResults, { deep: true })
 retrieveSearchResults()
 
 function searchTitle() {
+  loading.value = true
   search(searchedTitle.value, selectedOption.value).then((res) => {
     searchResults.value = res.data.media
+    loading.value = false
   }).catch((err) => {
     console.log(err)
   })
@@ -44,14 +47,17 @@ function searchTitle() {
     <div class="search-bar">
       <input
         v-model="searchedTitle"
-        @submit="searchTitle"
+        v-on:keyup.enter="() => searchTitle()"
         class="search-input"
         type="text"
         placeholder="Cerca un titolo..."
       />
       <div class="toggle-button-container">
         <Toggle style="margin-right: 30px" v-model="selectedOption" class="search-toggle"></Toggle>
-        <button @click="searchTitle">Cerca</button>
+        <button @click="searchTitle">
+          <span v-if="!loading">Cerca</span>
+          <span v-else class="loader"></span>
+        </button>
       </div>
     </div>
   </div>
@@ -117,6 +123,28 @@ function searchTitle() {
 
 .card-item {
   width: 250px;
+}
+
+.loader {
+    width: 12px;
+    height: 12px;
+    border: 1px solid #FFF;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    margin-left: 15px;
+    margin-right: 16px;
+    }
+
+    @keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @media (max-width: 768px) {
