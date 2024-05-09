@@ -4,12 +4,14 @@ import type {Episode, MediaItem, SeasonResponse} from "@/api/interfaces";
 import { onMounted, ref } from "vue";
 import { getEpisodesInfo } from "@/api/api";
 import { alertDownload, handleMovieDownload, handleOVADownload, handleTVAnimeDownload, handleTVDownload } from "@/api/utils";
+import {i} from "vite/dist/node/types.d-aGj9QkWt";
 
 const route = useRoute()
 
 const item: MediaItem = JSON.parse(<string>route.params.item)
 const imageUrl: string = <string>route.params.imageUrl
 const animeEpisodes = ref<Episode[]>([])
+const totalEpisodes = ref<number>(0)
 const tvShowEpisodes = ref<any[]>([])
 const loading = ref(false)
 const selectingEpisodes = ref(false)
@@ -32,6 +34,7 @@ onMounted(async () => {
         if (item.type === 'TV_ANIME') {
           const episodesData:Episode = JSON.parse(value.trim());
           animeEpisodes.value.push(episodesData);
+          totalEpisodes.value = episodesData.episode_total;
         } else {
           const episodesData:SeasonResponse = JSON.parse(value.trim());
           for (const seasonKey in episodesData.episodes) {
@@ -54,6 +57,7 @@ const toggleEpisodeSelection = () => {
 }
 
 const downloadItems = async () => {
+  console.log(item)
   try {
     switch (item.type) {
       case 'TV':
@@ -62,7 +66,7 @@ const downloadItems = async () => {
         await handleMovieDownload(item);
         break;
       case 'TV_ANIME':
-        await handleTVAnimeDownload(animeEpisodes.value, item);
+        await handleTVAnimeDownload(totalEpisodes.value, item);
         break;
       case 'OVA':
       case 'SPECIAL':
@@ -91,7 +95,7 @@ const downloadItems = async () => {
             <p v-if="['TV_ANIME', 'OVA', 'SPECIAL'].includes(item.type)">{{ item.plot }}</p>
             <p v-else-if="tvShowEpisodes.length > 0">{{ tvShowEpisodes[0][0].plot }}</p>
           </div>
-          <h3 v-if="animeEpisodes.length > 0 && !loading">Numero episodi: {{ animeEpisodes[0].episode_total }}</h3>
+          <h3 v-if="animeEpisodes.length > 0 && !loading">Numero episodi: {{ totalEpisodes }}</h3>
           <h3 v-if="tvShowEpisodes.length > 0 && !loading">Numero stagioni: {{ tvShowEpisodes.length }}</h3>
           <hr style="opacity: 0.2; margin-top: 10px"/>
 
