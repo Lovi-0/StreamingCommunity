@@ -44,4 +44,4 @@ async function downloadMedia(mediaId: number, mediaSlug: string, mediaType: stri
 export const downloadFilm = (mediaId: number, mediaSlug: string) => downloadMedia(mediaId, mediaSlug, 'MOVIE');
 export const downloadTvSeries = (mediaId: number, mediaSlug: string, downloadId: number) => downloadMedia(mediaId, mediaSlug, 'TV', downloadId);
 export const downloadAnimeFilm = (mediaId: number, mediaSlug: string) => downloadMedia(mediaId, mediaSlug, 'OVA');
-export const downloadAnimeSeries = (mediaId: number, mediaSlug: string, downloadId: number) => downloadMedia(mediaId, mediaSlug, 'OVA', downloadId);
+export const downloadAnimeSeries = (mediaId: number, mediaSlug: string, downloadId: number) => downloadMedia(mediaId, mediaSlug, 'TV_ANIME', downloadId);

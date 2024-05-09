@@ -16,10 +16,10 @@ export const handleMovieDownload = async (item: MediaItem) => {
   handleDownloadError(res);
 };
 
-export const handleTVAnimeDownload = async (animeEpisodes: Episode[], item: MediaItem) => {
+export const handleTVAnimeDownload = async (episodeCount: number, item: MediaItem) => {
   alertDownload();
-  for (const episode of animeEpisodes) {
-    const res = (await downloadAnimeSeries(item.id, item.slug, episode.episode_id)).data;
+  for (let i = 0; i < episodeCount; i++) {
+    const res = (await downloadAnimeSeries(item.id, item.slug, i)).data;
     handleDownloadError(res);
   }
 };
