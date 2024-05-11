@@ -64,5 +64,3 @@ venv.bak/
 # Other
 Video
 .idea/
-# kill_django.sh is a script to kill the Django server only for developement purposes
-kill_django.sh
