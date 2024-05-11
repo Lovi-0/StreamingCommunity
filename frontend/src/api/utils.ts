@@ -1,5 +1,5 @@
 import {downloadAnimeFilm, downloadAnimeSeries, downloadFilm, downloadTvSeries} from "@/api/api";
-import type {DownloadResponse, Episode, MediaItem} from "@/api/interfaces";
+import type {DownloadResponse, Episode, MediaItem, Season} from "@/api/interfaces";
 
 export const handleTVDownload = async (tvShowEpisodes: any[], item: MediaItem) => {
   alertDownload();
@@ -9,6 +9,15 @@ export const handleTVDownload = async (tvShowEpisodes: any[], item: MediaItem) =
     handleDownloadError(res);
   }
 };
+
+export const handleTVEpisodesDownload = async (episodes: Episode[], item: MediaItem) => {
+    alertDownload();
+    for (const episode of episodes) {
+        const i = episodes.indexOf(episode);
+        const res = (await downloadTvSeries(item.id, item.slug, episode.season_index + 1, i)).data;
+        handleDownloadError(res);
+    }
+}
 
 export const handleMovieDownload = async (item: MediaItem) => {
   alertDownload();

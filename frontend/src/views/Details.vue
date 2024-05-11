@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import type {Episode, MediaItem, SeasonResponse} from "@/api/interfaces";
+import type {Episode, MediaItem, Season, SeasonResponse} from "@/api/interfaces";
 import { onMounted, ref } from "vue";
 import { getEpisodesInfo } from "@/api/api";
 import {
@@ -9,7 +9,7 @@ import {
   handleOVADownload,
   handleTVAnimeDownload,
   handleTvAnimeEpisodesDownload,
-  handleTVDownload
+  handleTVDownload, handleTVEpisodesDownload
 } from "@/api/utils";
 
 const route = useRoute()
@@ -64,10 +64,13 @@ const toggleEpisodeSelection = () => {
   selectedEpisodes.value = []
 }
 
-const toggleEpisodeSelect = (episode: Episode) => {
+const toggleEpisodeSelect = (episode: Episode, seasonNumber?: number) => {
   if (selectedEpisodes.value.includes(episode)) {
     selectedEpisodes.value = selectedEpisodes.value.filter(e => e !== episode)
   } else {
+    if (seasonNumber) {
+      episode.season_index = seasonNumber
+    }
     selectedEpisodes.value.push(episode)
   }
 }
@@ -76,7 +79,7 @@ const downloadSelectedEpisodes = async () => {
   try {
     switch (item.type) {
       case 'TV':
-        // await handleTVDownload(selectedEpisodes.value, item);
+        await handleTVEpisodesDownload(selectedEpisodes.value, item);
       case 'TV_ANIME':
         await handleTvAnimeEpisodesDownload(selectedEpisodes.value, item);
         break;
@@ -167,10 +170,14 @@ const downloadAllItems = async () => {
           <div v-else-if="item.type == 'TV'" v-for="(season, index) in tvShowEpisodes" class="season-item">
             <div class="season-title">Stagione {{ index + 1 }}</div>
             <div class="episode-container">
-              <div v-for="episode in season" :key="episode.id" class="episode-item">
-                <div class="episode-title">
-                  Episodio {{ episode.number }} -
-                  {{episode.name.slice(0, 40) + (episode.name.length > 39 ? '...' : '')}}
+              <div v-for="episode in season" :key="episode.id">
+                <div class="episode-item"
+                     :style="{ backgroundColor: selectedEpisodes.includes(episode) ? '#42b883' : '#333' }"
+                     @click="selectingEpisodes ? toggleEpisodeSelect(episode, index) : null">
+                  <div class="episode-title">
+                    Episodio {{ episode.number }} -
+                    {{episode.name.slice(0, 40) + (episode.name.length > 39 ? '...' : '')}}
+                  </div>
                 </div>
               </div>
             </div>

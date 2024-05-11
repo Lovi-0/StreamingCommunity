@@ -45,6 +45,7 @@ export interface Episode {
   season_id: number; // TV Show exclusive
   created_by: any; // TV Show exclusive
   updated_at: string; // TV Show exclusive
+  season_index: number; // TV Show exclusive
 }
 
 export interface Season {
