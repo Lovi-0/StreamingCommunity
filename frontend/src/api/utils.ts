@@ -24,6 +24,15 @@ export const handleTVAnimeDownload = async (episodeCount: number, item: MediaIte
   }
 };
 
+export const handleTvAnimeEpisodesDownload = async (episodes: Episode[], item: MediaItem) => {
+    alertDownload();
+    for (const episode of episodes) {
+        const res = (await downloadAnimeSeries(item.id, item.slug, episode.episode_id)).data;
+        handleDownloadError(res);
+    }
+
+}
+
 export const handleOVADownload = async (item: MediaItem) => {
   alertDownload();
   const res = (await downloadAnimeFilm(item.id, item.slug)).data;
