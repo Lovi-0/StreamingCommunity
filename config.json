@@ -16,12 +16,12 @@
     },
     "SITE": {
         "streaming_site_name": "streamingcommunity",
-        "streaming_domain": "marketing",
+        "streaming_domain": "foo",
         "anime_site_name": "animeunity",
         "anime_domain": "to"
     },
     "M3U8": {
-        "tdqm_workers": 20,
+        "tdqm_workers": 4,
         "tqdm_progress_timeout": 10,
         "minimum_ts_files_in_folder": 15,
         "download_percentage": 1,
