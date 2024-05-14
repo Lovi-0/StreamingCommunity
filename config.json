@@ -21,7 +21,7 @@
         "anime_domain": "to"
     },
     "M3U8": {
-        "tdqm_workers": 4,
+        "tdqm_workers": 3,
         "tqdm_progress_timeout": 10,
         "minimum_ts_files_in_folder": 15,
         "download_percentage": 1,
