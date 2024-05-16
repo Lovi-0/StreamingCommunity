@@ -1,6 +1,7 @@
 # 3.12.23 -> 10.12.23
 
 import os
+import sys
 import logging
 
 
@@ -8,6 +9,7 @@ import logging
 from Src.Util.console import console
 from Src.Util.config import config_manager
 from Src.Lib.FFmpeg.my_m3u8 import Downloader
+from Src.Util.file_validation import can_create_file
 from Src.Util.message import start_message
 from .Class import VideoSource
 
@@ -48,6 +50,10 @@ def download_film(id_film: str, title_name: str, domain: str):
     # Define the filename and path for the downloaded film
     mp4_name = title_name.replace("-", "_")
     mp4_format = mp4_name + ".mp4"
+
+    if not can_create_file(mp4_format):
+        logging.error("Invalid mp4 name.")
+        sys.exit(0)
 
     # Download the film using the m3u8 playlist, key, and output filename
     obj_download = Downloader(

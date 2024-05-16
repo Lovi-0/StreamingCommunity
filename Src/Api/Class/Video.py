@@ -91,7 +91,7 @@ class VideoSource:
 
             # Make a request to collect information about seasons
             response = requests.get(f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", headers=self.headers)
-            response.raise_for_status()  # Raise exception for non-200 status codes
+            response.raise_for_status()
 
             if response.ok:
 
@@ -152,7 +152,7 @@ class VideoSource:
 
             # Make a request to get iframe source
             response = requests.get(f"https://{self.base_name}.{self.domain}/iframe/{self.media_id}", params=params)
-            response.raise_for_status()  # Raise exception for non-200 status codes
+            response.raise_for_status()
 
             if response.ok:
 
@@ -228,9 +228,9 @@ class VideoSource:
             query = urlencode(list(self.window_parameter.data.items()))
             base_url = f'https://vixcloud.co/playlist/{self.window_video.id}'
 
-            full_url = urljoin(base_url, '?' + query)
+            #full_url = urljoin(base_url, '?' + query)
 
-            return full_url
+            return base_url
         
         except AttributeError as e:
             logging.error(f"Error getting playlist: {e}")
@@ -245,15 +245,9 @@ class VideoSource:
         """
         try:
 
-            # Fix title for latin-1
-            title = quote(self.window_video.name)
-
-            # Set referer header for the request
-            self.headers['referer'] = f'https://vixcloud.co/embed/{self.window_video.id}?token={self.window_parameter.token}&title={title}&referer=1&expires={self.window_parameter.expires}&canPlayFHD=1'
-            
             # Make a request to get key content
             response = requests.get('https://vixcloud.co/storage/enc.key', headers=self.headers)
-            response.raise_for_status()  # Raise exception for non-200 status codes
+            response.raise_for_status()
 
             if response.ok:
 

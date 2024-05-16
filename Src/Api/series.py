@@ -13,6 +13,7 @@ from Src.Util.table import TVShowManager
 from Src.Util.message import start_message
 from Src.Util.os import remove_special_characters
 from Src.Lib.Unidecode import transliterate
+from Src.Util.file_validation import can_create_file
 from Src.Lib.FFmpeg.my_m3u8 import Downloader
 from Src.Util.mapper import map_episode_title
 from .Class import VideoSource
@@ -119,6 +120,10 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
     mp4_name = f"{transliterate(remove_special_characters(map_episode_title(tv_name,video_source.obj_episode_manager.episodes[index_episode_selected - 1],index_season_selected)))}.mp4"
     mp4_path = remove_special_characters(os.path.join(ROOT_PATH, SERIES_FOLDER, tv_name, f"S{index_season_selected}"))
     os.makedirs(mp4_path, exist_ok=True)
+
+    if not can_create_file(mp4_name):
+        logging.error("Invalid mp4 name.")
+        sys.exit(0)
 
     # Get iframe and content for the episode
     video_source.get_iframe(episode_id)
