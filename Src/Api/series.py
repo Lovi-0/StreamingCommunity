@@ -3,6 +3,7 @@
 import os
 import sys
 import logging
+from unidecode import unidecode as transliterate
 from typing import List
 
 
@@ -12,7 +13,6 @@ from Src.Util.config import config_manager
 from Src.Util.table import TVShowManager
 from Src.Util.message import start_message
 from Src.Util.os import remove_special_characters
-from Src.Lib.Unidecode import transliterate
 from Src.Util.file_validation import can_create_file
 from Src.Lib.FFmpeg.my_m3u8 import Downloader
 from Src.Util.mapper import map_episode_title

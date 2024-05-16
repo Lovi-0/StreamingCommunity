@@ -1,8 +1,9 @@
 # 10.04.24
 
+from unidecode import unidecode as transliterate
+
 
 # Internal utilities
-from Src.Lib.Unidecode import transliterate
 from Src.Util.config import config_manager
 from Src.Api.Class.EpisodeType import Episode
 
