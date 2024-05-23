@@ -1,8 +1,9 @@
 # 07.04.24
 
-import platform
 import os
+import platform
 import logging
+
 
 # Winreg only work for windows
 if platform.system() == "Windows":
@@ -22,11 +23,12 @@ def get_env(name: str) -> str:
     Retrieve the value of the specified environment variable from the Windows registry.
     
     Args:
-        name (str): The name of the environment variable to retrieve.
+        - name (str): The name of the environment variable to retrieve.
     
     Returns:
         str: The value of the specified environment variable.
     """
+    logging.info("Get enviroment key")
     try:
         with winreg.OpenKey(*env_keys, 0, winreg.KEY_READ) as key:
             return winreg.QueryValueEx(key, name)[0]
@@ -40,7 +42,7 @@ def set_env_path(dir: str) -> None:
     Add a directory to the user's PATH environment variable.
 
     Args:
-        dir (str): The directory to add to the PATH environment variable.
+        - dir (str): The directory to add to the PATH environment variable.
     """
     user_path = get_env("Path")
 
@@ -51,14 +53,12 @@ def set_env_path(dir: str) -> None:
             with winreg.OpenKey(*env_keys, 0, winreg.KEY_WRITE) as key:
                 winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, new_path)
             logging.info(f"Added {dir} to PATH.")
-            print("Path set successfully.")
 
         except Exception as e:
             logging.error(f"Failed to set PATH: {e}")
-            print("Failed to set PATH.")
 
     else:
-        print("Directory already exists in the Path.")
+        logging.info("Directory already exists in the Path for set new env path.")
 
 
 def remove_from_path(dir) -> None:
@@ -66,7 +66,7 @@ def remove_from_path(dir) -> None:
     Remove a directory from the user's PATH environment variable.
 
     Args:
-        dir (str): The directory to remove from the PATH environment variable.
+        - dir (str): The directory to remove from the PATH environment variable.
     """
     user_path = get_env("Path")
 
@@ -77,14 +77,12 @@ def remove_from_path(dir) -> None:
             with winreg.OpenKey(*env_keys, 0, winreg.KEY_WRITE) as key:
                 winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, new_path)
             logging.info(f"Removed {dir} from PATH.")
-            print("Directory removed from Path.")
 
         except Exception as e:
             logging.error(f"Failed to remove directory from PATH: {e}")
-            print("Failed to remove directory from Path.")
 
     else:
-        print("Directory does not exist in the Path.")
+        logging.info("Directory does not exist in the Path.")
 
 
 def backup_path():
@@ -100,6 +98,7 @@ def backup_path():
         os.makedirs(script_dir, exist_ok=True)
 
         backup_file = os.path.join(script_dir, "path_backup.txt")
+        logging.info(f"Crete file: {backup_file}")
 
         # Check if backup file exist
         if not os.path.exists(backup_file):
@@ -123,6 +122,7 @@ def restore_path():
     """
     try:
         backup_file = "path_backup.txt"
+        logging.info(f"Read file: {backup_file}")
 
         if os.path.isfile(backup_file):
             with open(backup_file, "r") as f:
@@ -131,12 +131,10 @@ def restore_path():
                     winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, new_path)
 
             logging.info("Restored original PATH variable.")
-            print("Restored original PATH variable.")
             os.remove(backup_file)
 
         else:
-            logging.warning("No backup file found.")
-            print("No backup file found.")
+            logging.error("No backup file found.")
+
     except Exception as e:
         logging.error(f"Failed to restore PATH variable: {e}")
-        print("Failed to restore PATH variable.")

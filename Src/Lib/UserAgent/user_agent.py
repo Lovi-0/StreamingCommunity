@@ -15,12 +15,13 @@ from typing import Dict, List
 from ..Request import requests
 
 
+
 def get_browser_user_agents_online(browser: str) -> List[str]:
     """
     Retrieve browser user agent strings from a website.
 
     Args:
-        browser (str): The name of the browser (e.g., 'chrome', 'firefox', 'safari').
+        - browser (str): The name of the browser (e.g., 'chrome', 'firefox', 'safari').
 
     Returns:
         List[str]: List of user agent strings for the specified browser.
@@ -44,8 +45,8 @@ def update_user_agents(browser_name: str, browser_user_agents: Dict[str, List[st
     Update browser user agents dictionary with new requests.
 
     Args:
-        browser_name (str): Name of the browser.
-        browser_user_agents (Dict[str, List[str]]): Dictionary to store browser user agents.
+        - browser_name (str): Name of the browser.
+        - browser_user_agents (Dict[str, List[str]]): Dictionary to store browser user agents.
     """
     browser_user_agents[browser_name] = get_browser_user_agents_online(browser_name)
 
@@ -55,6 +56,7 @@ def create_or_update_user_agent_file() -> None:
     Create or update the user agent file with browser user agents.
     """
     user_agent_file = os.path.join(tempfile.gettempdir(), 'fake_user_agent.json')
+    logging.info(f"Upload file: {user_agent_file}")
     
     if not os.path.exists(user_agent_file):
         browser_user_agents: Dict[str, List[str]] = {}
@@ -84,10 +86,12 @@ class UserAgentManager:
 
         # Get path to temp file where save all user agents
         self.user_agent_file = os.path.join(tempfile.gettempdir(), 'fake_user_agent.json')
+        logging.info(f"Check file: {self.user_agent_file}")
 
         # If file dont exist, creaet it
         if not os.path.exists(self.user_agent_file):
             create_or_update_user_agent_file()
+            logging.info(f"Create file: {self.user_agent_file}")
 
     def get_random_user_agent(self, browser: str) -> str:
         """

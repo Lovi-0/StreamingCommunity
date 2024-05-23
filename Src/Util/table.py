@@ -18,7 +18,7 @@ class TVShowManager:
         Initialize TVShowManager with provided column information.
 
         Args:
-            column_info (Dict[str, Dict[str, str]]): Dictionary containing column names, their colors, and justification.
+            - column_info (Dict[str, Dict[str, str]]): Dictionary containing column names, their colors, and justification.
         """
         self.console = Console()
         self.tv_shows: List[Dict[str, Any]] = []  # List to store TV show data as dictionaries
@@ -32,7 +32,7 @@ class TVShowManager:
         Set the end of the slice for displaying TV shows.
 
         Args:
-            new_slice (int): The new value for the slice end.
+            - new_slice (int): The new value for the slice end.
         """
         self.slice_end = new_slice
         self.step = new_slice
@@ -42,7 +42,7 @@ class TVShowManager:
         Add column information.
     
         Args:
-            column_info (Dict[str, Dict[str, str]]): Dictionary containing column names, their colors, and justification.
+            - column_info (Dict[str, Dict[str, str]]): Dictionary containing column names, their colors, and justification.
         """
         self.column_info = column_info
 
@@ -51,7 +51,7 @@ class TVShowManager:
         Add a TV show to the list of TV shows.
 
         Args:
-            tv_show (Dict[str, Any]): Dictionary containing TV show details.
+            - tv_show (Dict[str, Any]): Dictionary containing TV show details.
         """
         self.tv_shows.append(tv_show)
 
@@ -60,9 +60,9 @@ class TVShowManager:
         Display TV show data in a tabular format.
 
         Args:
-            data_slice (List[Dict[str, Any]]): List of dictionaries containing TV show details to display.
+            - data_slice (List[Dict[str, Any]]): List of dictionaries containing TV show details to display.
         """
-        table = Table(title=Text("Show Details", justify="center", style="bold magenta"), border_style="white")
+        table = Table(border_style="white")
 
         # Add columns dynamically based on provided column information
         for col_name, col_style in self.column_info.items():
@@ -90,7 +90,7 @@ class TVShowManager:
             - switch (bool): switch from film to anime
         
         Returns:
-            - str: Last command executed before breaking out of the loop.
+            str: Last command executed before breaking out of the loop.
         """
         total_items = len(self.tv_shows)
         last_command = ""  # Variable to store the last command executed
@@ -109,7 +109,7 @@ class TVShowManager:
                     key = Prompt.ask("[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]for a range of media")
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
-                    choices.extend(['q', ""])
+                    choices.extend(["q", ""])
 
                     key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
                 last_command = key
@@ -128,12 +128,11 @@ class TVShowManager:
 
             else:
                 self.console.print(f"\n\n[yellow][INFO] [red]You've reached the end. [green]Press [red]Enter [green]to restart, or [red]'q' [green]to quit.")
-
                 if not force_int_input:
                     key = Prompt.ask("[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]for a range of media")
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
-                    choices.extend(['q', ""])
+                    choices.extend(["q", ""])
 
                     key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
                 last_command = key
@@ -149,3 +148,6 @@ class TVShowManager:
                     break
             
         return last_command
+    
+    def clear(self):
+        self.tv_shows = []

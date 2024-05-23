@@ -1,15 +1,13 @@
-# 3.12.23 -> 19.07.24
+# 3.12.23
 
+import warnings
 import os
 import platform
 
 
-# External libraries
-from Src.Util.console import console
-
-
 # Internal utilities
-from .config import config_manager
+from Src.Util.console import console
+from Src.Util._jsonConfig import config_manager
 
 
 # Variable
@@ -17,22 +15,12 @@ CLEAN = config_manager.get_bool('DEFAULT', 'clean_console')
 SHOW = config_manager.get_bool('DEFAULT', 'show_message')
 
 
-def get_os_system():
-    """
-    This function returns the name of the operating system.
-    """
-    os_system = platform.system()
-    return os_system
-
-
 def start_message(switch = False):
     """
     Display a start message.
-
-    This function prints a formatted start message, including a title and creator information.
     """
 
-    msg = """
+    msg = '''
 
    _____ _                            _                _____                                      _ _         
   / ____| |                          (_)              / ____|                                    (_) |        
@@ -43,10 +31,10 @@ def start_message(switch = False):
                                                __/ |                                                     __/ |
                                               |___/                                                     |___/ 
 
-    """
+    '''
 
     if switch:
-        msg = """
+        msg = '''
         
      _          _                            _ _         
     / \   _ __ (_)_ __ ___   ___ _   _ _ __ (_) |_ _   _ 
@@ -55,10 +43,10 @@ def start_message(switch = False):
  /_/   \_\_| |_|_|_| |_| |_|\___|\__,_|_| |_|_|\__|\__, |
                                                    |___/ 
 
-    """
+    '''
 
     if CLEAN: 
-        if get_os_system() == 'Windows':
+        if platform.system() == 'Windows':
             os.system("cls")
         else:
             os.system("clear")

@@ -1,18 +1,16 @@
 {
     "DEFAULT": {
         "debug": false,
-        "log_file": "debug.txt",
+        "log_file": "app.log",
         "log_to_file": true,
-        "get_info": false,
         "show_message": true,
         "clean_console": true,
         "get_moment_title": false,
         "root_path": "Video",
-        "movies_folder_name": "Movies",
-        "series_folder_name": "Series",
-        "anime_folder_name": "Anime",
         "not_close": false,
-        "swith_anime": false
+        "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
+        "instagram_session": "",
+        "create_job_database": false
     },
     "SITE": {
         "streaming_site_name": "streamingcommunity",
@@ -21,37 +19,34 @@
         "anime_domain": "to"
     },
     "M3U8": {
-        "tdqm_workers": 3,
-        "tqdm_progress_timeout": 10,
-        "minimum_ts_files_in_folder": 15,
-        "download_percentage": 1,
-        "requests_timeout": 5,
-        "use_openssl": false,
-        "use_codecs": false,
+        "tdqm_workers": 20,
+        "delay_start_workers": 0,
+        "hide_request_error": false,
+        "requests_timeout": 10,
         "enable_time_quit": false,
-        "tqdm_show_progress": false,
-        "cleanup_tmp_folder": true
+        "tqdm_progress_timeout": 10,
+        "download_percentage": 0,
+        "tqdm_show_progress": true,
+        "save_m3u8_content": true,
+        "fake_proxy": true,
+        "fake_proxy_ip": ["162.19.255.78", "162.19.255.36", "162.19.255.224", "162.19.255.223", "162.19.254.244", "162.19.254.232", "162.19.254.230", "162.19.228.127", "162.19.228.105"],
+        "create_report": false
+    },
+    "M3U8_PARSER": {
+        "skip_empty_row_playlist": false,
+        "force_resolution": -1
     },
     "M3U8_OPTIONS": {
-        "download_audio": true,
-        "download_subtitles": true,
-        "merge_subtitles": true,
-        "specific_list_audio": [
-            "ita"
-        ],
-        "specific_list_subtitles": [
-            "eng"
-        ],
-        "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
-        "request": {
-            "index": {
-                "authority": "vixcloud.co",
-                "user-agent": ""
-            },
-            "segments": {
-                "Origin": "https://vixcloud.co",
-                "user-agent": ""
-            }
-        }
+        "use_codec": false,
+        "use_gpu": false,
+        "force_ts": false,
+        "default_preset": "ultrafast",
+        "cleanup_tmp_folder": true,
+        "specific_list_audio": ["ita"],
+        "specific_list_subtitles": ["eng"]
+    },
+    "M3U8_REQUESTS": {
+        "index": {"user-agent": ""},
+        "segments": {"user-agent": ""}
     }
 }

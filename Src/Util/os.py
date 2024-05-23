@@ -11,7 +11,7 @@ import zipfile
 from typing import List
 
 
-# Costant
+# Variable
 special_chars_to_remove = [
     '!', 
     '@', 
@@ -37,7 +37,8 @@ special_chars_to_remove = [
     ':', 
     ',', 
     '?',
-    '.'
+    "\\",
+    "/"
 ]
 
 
@@ -45,8 +46,8 @@ def remove_folder(folder_path: str) -> None:
     """
     Remove a folder if it exists.
 
-    Parameters:
-    - folder_path (str): The path to the folder to be removed.
+    Args:
+        - folder_path (str): The path to the folder to be removed.
     """
 
     if os.path.exists(folder_path):
@@ -60,13 +61,11 @@ def remove_file(file_path: str) -> None:
     """
     Remove a file if it exists
 
-    Parameters:
-    - file_path (str): The path to the file to be removed.
+    Args:
+        - file_path (str): The path to the file to be removed.
     """
     
     if os.path.exists(file_path):
-        time.sleep(1)
-
         try:
             os.remove(file_path)
         except OSError as e:
@@ -77,9 +76,9 @@ def remove_special_characters(input_string):
     """
     Remove specified special characters from a string.
 
-    Parameters:
-        input_string (str): The input string containing special characters.
-        special_chars (list): List of special characters to be removed.
+    Args:
+        - input_string (str): The input string containing special characters.
+        - special_chars (list): List of special characters to be removed.
 
     Returns:
         str: A new string with specified special characters removed.
@@ -98,7 +97,7 @@ def move_file_one_folder_up(file_path) -> None:
     Move a file one folder up from its current location.
 
     Args:
-        file_path (str): Path to the file to be moved.
+        - file_path (str): Path to the file to be moved.
     """
     
     # Get the directory of the file
@@ -117,14 +116,40 @@ def move_file_one_folder_up(file_path) -> None:
     os.rename(file_path, new_path)
 
 
+def delete_files_except_one(folder_path: str, keep_file: str) -> None:
+    """
+    Delete all files in a folder except for one specified file.
+
+    Args:
+        - folder_path (str): The path to the folder containing the files.
+        - keep_file (str): The filename to keep in the folder.
+    """
+
+    try:
+
+        # List all files in the folder
+        files_in_folder = os.listdir(folder_path)
+        
+        # Iterate over each file in the folder
+        for file_name in files_in_folder:
+            file_path = os.path.join(folder_path, file_name)
+            
+            # Check if the file is not the one to keep and is a regular file
+            if file_name != keep_file and os.path.isfile(file_path):
+                os.remove(file_path)  # Delete the file
+
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+
+
 def decompress_file(downloaded_file_path: str, destination: str) -> None:
-    '''
+    """
     Decompress one file.
 
     Args:
-        downloaded_file_path (str): The path to the downloaded file.
-        destination (str): The directory where the file will be decompressed.
-    '''
+        - downloaded_file_path (str): The path to the downloaded file.
+        - destination (str): The directory where the file will be decompressed.
+    """
     try:
         with zipfile.ZipFile(downloaded_file_path) as zip_file:
             zip_file.extractall(destination)
@@ -137,7 +162,7 @@ def read_json(path: str):
     """Reads JSON file and returns its content.
 
     Args:
-        path (str): The file path of the JSON file to read.
+        - path (str): The file path of the JSON file to read.
 
     Returns:
         variable: The content of the JSON file as a dictionary.
@@ -153,8 +178,8 @@ def save_json(json_obj, path: str) -> None:
     """Saves JSON object to the specified file path.
 
     Args:
-        json_obj (Dict[str, Any]): The JSON object to be saved.
-        path (str): The file path where the JSON object will be saved.
+        - json_obj (Dict[str, Any]): The JSON object to be saved.
+        - path (str): The file path where the JSON object will be saved.
     """
     
     with open(path, 'w') as file:
@@ -165,7 +190,7 @@ def clean_json(path: str) -> None:
     """Reads JSON data from the file, cleans it, and saves it back.
 
     Args:
-        path (str): The file path of the JSON file to clean.
+        - path (str): The file path of the JSON file to clean.
     """
 
     data = read_json(path)
@@ -190,7 +215,7 @@ def format_size(size_bytes: float) -> str:
     Format the size in bytes into a human-readable format.
 
     Args:
-        size_bytes (float): The size in bytes to be formatted.
+        - size_bytes (float): The size in bytes to be formatted.
 
     Returns:
         str: The formatted size.
@@ -213,10 +238,10 @@ def compute_sha1_hash(input_string: str) -> str:
     Computes the SHA-1 hash of the input string.
 
     Args:
-    input_string (str): The string to be hashed.
+        - input_string (str): The string to be hashed.
 
     Returns:
-    str: The SHA-1 hash of the input string.
+        str: The SHA-1 hash of the input string.
     """
     # Compute the SHA-1 hash
     hashed_string = hashlib.sha1(input_string.encode()).hexdigest()
@@ -230,8 +255,8 @@ def decode_bytes(bytes_data: bytes, encodings_to_try: List[str] = None) -> str:
     Decode a byte sequence using a list of encodings and return the decoded string.
 
     Args:
-        bytes_data (bytes): The byte sequence to decode.
-        encodings_to_try (List[str], optional): A list of encoding names to try for decoding.
+        - bytes_data (bytes): The byte sequence to decode.
+        - encodings_to_try (List[str], optional): A list of encoding names to try for decoding.
             If None, defaults to ['utf-8', 'latin-1', 'ascii'].
 
     Returns:
@@ -261,7 +286,7 @@ def convert_to_hex(bytes_data: bytes) -> str:
     Convert a byte sequence to its hexadecimal representation.
 
     Args:
-        bytes_data (bytes): The byte sequence to convert.
+        - bytes_data (bytes): The byte sequence to convert.
 
     Returns:
         str: The hexadecimal representation of the byte sequence.

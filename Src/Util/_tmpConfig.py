@@ -1,7 +1,8 @@
 # 11.04.24
 
-
 import os
+import sys
+import datetime
 import tempfile
 import configparser
 import logging
@@ -9,7 +10,7 @@ import json
 from typing import Union, List
 
 
-# Costant
+# Variable
 repo_name = "StreamingCommunity_api"
 config_file_name = f"{repo_name}_config.ini"
 
@@ -34,45 +35,80 @@ class ConfigManager:
     """
     Class to manage configuration settings using a config file.
     """
-    def __init__(self, config_file_name: str = config_file_name, defaults: dict = None):
+    def __init__(self, defaults: dict = None):
         """
         Initialize ConfigManager.
         
         Args:
-            config_file_name (str, optional): The name of the configuration file. Default is 'config.ini'.
-            defaults (dict, optional): A dictionary containing default values for variables. Default is None.
+            - defaults (dict, optional): A dictionary containing default values for variables. Default is None.
         """
         self.config_file_path = os.path.join(tempfile.gettempdir(), config_file_name)
+        logging.info(f"Read file: {self.config_file_path}")
+        self.defaults = defaults
         self.config = configparser.ConfigParser()
-        self.logger = logging.getLogger(__name__)
+        self._check_config_file()
 
-        # Create config file if it doesn't exist
-        if not os.path.exists(self.config_file_path):
-            with open(self.config_file_path, 'w') as config_file:
-                if defaults:
-                    for section, options in defaults.items():
-                        if not self.config.has_section(section):
-                            self.config.add_section(section)
-                        for key, value in options.items():
-                            self.config.set(section, key, str(value))
-                    self.config.write(config_file)
+    def _check_config_file(self):
+        """
+        Checks if the configuration file exists and contains all the default values.
+        """
+        if os.path.exists(self.config_file_path):
 
-        # Read existing config
-        self.config.read(self.config_file_path)
+            # If the configuration file exists, check if default values are present
+            self.config.read(self.config_file_path)
+            if self.defaults:
+                for section, options in self.defaults.items():
+                    if not self.config.has_section(section):
+
+                        # If section is missing, rewrite default values
+                        logging.info(f"Writing default values for section: {section}")
+                        self._write_defaults()
+                        return
+                    
+                    for key, value in options.items():
+                        if not self.config.has_option(section, key):
+
+                            # If key is missing, rewrite default values
+                            logging.info(f"Writing default value for key: {key} in section: {section}")
+                            self._write_defaults()
+                            return
+        else:
+            logging.info("Configuration file does not exist. Writing default values.")
+            self._write_defaults()
+
+    def _write_defaults(self):
+        """
+        Writes the default values to the configuration file.
+        """
+        with open(self.config_file_path, 'w') as config_file:
+            if self.defaults:
+                for section, options in self.defaults.items():
+
+                    if not self.config.has_section(section):
+                        self.config.add_section(section)
+
+                    for key, value in options.items():
+                        self.config.set(section, key, str(value))
+
+                self.config.write(config_file)
+                logging.info(f"Created config file: {self.config_file_path}")
+
 
     def _check_section_and_key(self, section: str, key: str) -> None:
         """
         Check if the given section and key exist in the configuration file.
         
         Args:
-            section (str): The section in the config file.
-            key (str): The key of the variable.
+            - section (str): The section in the config file.
+            - key (str): The key of the variable.
         
         Raises:
             ConfigError: If the section or key does not exist.
         """
+        logging.info(f"Check section: {section}, key: {key}")
         if not self.config.has_section(section):
             raise ConfigError(f"Section '{section}' does not exist in the configuration file.")
+        
         if not self.config.has_option(section, key):
             raise ConfigError(f"Key '{key}' does not exist in section '{section}'.")
 
@@ -81,9 +117,9 @@ class ConfigManager:
         Get the value of a variable from the config file as an integer.
         
         Args:
-            section (str): The section in the config file.
-            key (str): The key of the variable.
-            default (int, optional): Default value if the variable doesn't exist. Default is None.
+            - section (str): The section in the config file.
+            - key (str): The key of the variable.
+            - default (int, optional): Default value if the variable doesn't exist. Default is None.
         
         Returns:
             int or None: Value of the variable as an integer or default value.
@@ -99,9 +135,9 @@ class ConfigManager:
         Get the value of a variable from the config file as a string.
         
         Args:
-            section (str): The section in the config file.
-            key (str): The key of the variable.
-            default (str, optional): Default value if the variable doesn't exist. Default is None.
+            - section (str): The section in the config file.
+            - key (str): The key of the variable.
+            - default (str, optional): Default value if the variable doesn't exist. Default is None.
         
         Returns:
             str or None: Value of the variable as a string or default value.
@@ -117,9 +153,9 @@ class ConfigManager:
         Get the value of a variable from the config file as a boolean.
         
         Args:
-            section (str): The section in the config file.
-            key (str): The key of the variable.
-            default (bool, optional): Default value if the variable doesn't exist. Default is None.
+            - section (str): The section in the config file.
+            - key (str): The key of the variable.
+            - default (bool, optional): Default value if the variable doesn't exist. Default is None.
         
         Returns:
             bool or None: Value of the variable as a boolean or default value.
@@ -135,9 +171,9 @@ class ConfigManager:
         Get the value of a variable from the config file as a list.
         
         Args:
-            section (str): The section in the config file.
-            key (str): The key of the variable.
-            default (List, optional): Default value if the variable doesn't exist. Default is None.
+            - section (str): The section in the config file.
+            - key (str): The key of the variable.
+            - default (List, optional): Default value if the variable doesn't exist. Default is None.
         
         Returns:
             List or None: Value of the variable as a list or default value.
@@ -154,35 +190,28 @@ class ConfigManager:
         Add or update a variable in the config file.
         
         Args:
-            section (str): The section in the config file.
-            key (str): The key of the variable.
-            value (int, str, bool, List): The value of the variable.
+            - section (str): The section in the config file.
+            - key (str): The key of the variable.
+            - value (int, str, bool, List): The value of the variable.
         """
         if not self.config.has_section(section):
             self.config.add_section(section)
+
         self.config.set(section, key, str(value))
+
         with open(self.config_file_path, 'w') as config_file:
             self.config.write(config_file)
-        self.logger.info(f"Added or updated variable '{key}' in section '{section}'")
-
-    def reload_config(self) -> None:
-        """
-        Reload the configuration from the file.
-        """
-        self.config.clear()
-        self.config.read(self.config_file_path)
-        self.logger.info("Configuration file reloaded")
+            
+        logging.info(f"Added or updated variable '{key}' in section '{section}'")
 
 
 # Output
 defaults = {
-    'Requirements': {
-        'ffmpeg': False
-    },
-    'Backup' : {
-        'path': False
+    'Setting': {
+        'ffmpeg': False,                            # Ffmpeg is present
+        'path': False,                              # Backup path for win
+        'date' : str(datetime.date.today())         # Date time now
     }
 }
 
 temp_config_manager = ConfigManager(defaults=defaults)
-

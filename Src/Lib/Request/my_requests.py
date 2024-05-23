@@ -15,6 +15,7 @@ import urllib.error
 
 from typing import Dict, Optional, Union, Any
 
+
 try:
     from typing import Unpack, TypedDict
 except ImportError:
@@ -30,10 +31,11 @@ except ImportError:
 from bs4 import BeautifulSoup
 
 
-# Constants
-HTTP_TIMEOUT = 3
+# Default settings
+HTTP_TIMEOUT = 5
 HTTP_RETRIES = 1
 HTTP_DELAY = 1
+
 
 
 class RequestError(Exception):
@@ -44,8 +46,8 @@ class RequestError(Exception):
         Initialize a RequestError instance.
 
         Args:
-            message (str): The error message.
-            original_exception (Optional[Exception], optional): The original exception that occurred. Defaults to None.
+            - message (str): The error message.
+            - original_exception (Optional[Exception], optional): The original exception that occurred. Defaults to None.
         """
         super().__init__(message)
         self.original_exception = original_exception
@@ -58,8 +60,34 @@ class RequestError(Exception):
             return super().__str__()
 
 
+def parse_http_error(error_string: str):
+    """
+    Parse the HTTP error string to extract the error code and message.
+
+    Args:
+        - error_string (str): The error string from an HTTP response.
+
+    Returns:
+        dict: A dictionary with 'error_code' and 'message' if the string is parsed successfully, or None if parsing fails.
+    """
+
+    # Regular expression to match the error pattern
+    error_pattern = re.compile(r"HTTP Error (\d{3}): (.+)")
+
+    match = error_pattern.search(error_string)
+    if match:
+        error_code = match.group(1)
+        message = match.group(2)
+        return {'error_code': error_code, 'message': message}
+    else:
+        logging.error(f"Error string does not match expected format: {error_string}")
+        return None
+    
+
 class Response:
-    """Class representing an HTTP response."""
+    """
+    Class representing an HTTP response.
+    """
     def __init__(
         self,
         status: int,
@@ -76,15 +104,15 @@ class Response:
         Initialize a Response object.
 
         Args:
-            status (int): The HTTP status code of the response.
-            text (str): The response content as text.
-            is_json (bool, optional): Indicates if the response content is JSON. Defaults to False.
-            content (bytes, optional): The response content as bytes. Defaults to b"".
-            headers (Optional[Dict[str, str]], optional): The response headers. Defaults to None.
-            cookies (Optional[Dict[str, str]], optional): The cookies set in the response. Defaults to None.
-            redirect_url (Optional[str], optional): The URL if a redirection occurred. Defaults to None.
-            response_time (Optional[float], optional): The time taken to receive the response. Defaults to None.
-            timeout (Optional[float], optional): The request timeout. Defaults to None.
+            - status (int): The HTTP status code of the response.
+            - text (str): The response content as text.
+            - is_json (bool, optional): Indicates if the response content is JSON. Defaults to False.
+            - content (bytes, optional): The response content as bytes. Defaults to b"".
+            - headers (Optional[Dict[str, str]], optional): The response headers. Defaults to None.
+            - cookies (Optional[Dict[str, str]], optional): The cookies set in the response. Defaults to None.
+            - redirect_url (Optional[str], optional): The URL if a redirection occurred. Defaults to None.
+            - response_time (Optional[float], optional): The time taken to receive the response. Defaults to None.
+            - timeout (Optional[float], optional): The request timeout. Defaults to None.
         """
         self.status_code = status
         self.text = text
@@ -98,7 +126,9 @@ class Response:
         self.ok = 200 <= status < 300
 
     def raise_for_status(self):
-        """Raise an error if the response status code is not in the 2xx range."""
+        """
+        Raise an error if the response status code is not in the 2xx range.
+        """
         if not self.ok:
             raise RequestError(f"Request failed with status code {self.status_code}")
 
@@ -142,7 +172,9 @@ class Response:
 
 
 class ManageRequests:
-    """Class for managing HTTP requests."""
+    """
+    Class for managing HTTP requests.
+    """
     def __init__(
         self, 
         url: str, 
@@ -162,17 +194,17 @@ class ManageRequests:
         Initialize a ManageRequests object.
 
         Args:
-            url (str): The URL to which the request will be sent.
-            method (str, optional): The HTTP method to be used for the request. Defaults to 'GET'.
-            headers (Optional[Dict[str, str]], optional): The request headers. Defaults to None.
-            timeout (float, optional): The request timeout. Defaults to HTTP_TIMEOUT.
-            retries (int, optional): The number of retries in case of request failure. Defaults to HTTP_RETRIES.
-            params (Optional[Dict[str, str]], optional): The query parameters for the request. Defaults to None.
-            verify_ssl (bool, optional): Indicates whether SSL certificate verification should be performed. Defaults to True.
-            auth (Optional[tuple], optional): Tuple containing the username and password for basic authentication. Defaults to None.
-            proxy (Optional[str], optional): The proxy URL. Defaults to None.
-            cookies (Optional[Dict[str, str]], optional): The cookies to be included in the request. Defaults to None.
-            redirection_handling (bool, optional): Indicates whether redirections should be followed. Defaults to True.
+            - url (str): The URL to which the request will be sent.
+            - method (str, optional): The HTTP method to be used for the request. Defaults to 'GET'.
+            - headers (Optional[Dict[str, str]], optional): The request headers. Defaults to None.
+            - timeout (float, optional): The request timeout. Defaults to HTTP_TIMEOUT.
+            - retries (int, optional): The number of retries in case of request failure. Defaults to HTTP_RETRIES.
+            - params (Optional[Dict[str, str]], optional): The query parameters for the request. Defaults to None.
+            - verify_ssl (bool, optional): Indicates whether SSL certificate verification should be performed. Defaults to True.
+            - auth (Optional[tuple], optional): Tuple containing the username and password for basic authentication. Defaults to None.
+            - proxy (Optional[str], optional): The proxy URL. Defaults to None.
+            - cookies (Optional[Dict[str, str]], optional): The cookies to be included in the request. Defaults to None.
+            - redirection_handling (bool, optional): Indicates whether redirections should be followed. Defaults to True.
         """
         self.url = url
         self.method = method
@@ -188,7 +220,9 @@ class ManageRequests:
         self.redirection_handling = redirection_handling
 
     def add_header(self, key: str, value: str) -> None:
-        """Add a header to the request."""
+        """
+        Add a header to the request.
+        """
         self.headers[key] = value
 
     def send(self) -> Response:
@@ -339,7 +373,9 @@ class ManageRequests:
         """
         Handle request error.
         """
-        logging.error(f"Request failed for URL '{self.url}': {str(e)}")
+        logging.error(f"Request failed for URL '{self.url}': {parse_http_error(str(e))}")
+
+        print("=> ", e)
 
         if self.attempt < self.retries:
             logging.info(f"Retrying request for URL '{self.url}' (attempt {self.attempt}/{self.retries})")
@@ -351,10 +387,13 @@ class ManageRequests:
 
 
 class ValidateRequest:
-    """Class for validating request inputs."""
+    """
+    Class for validating request inputs.
+    """
     @staticmethod
     def validate_url(url: str) -> bool:
         """Validate URL format."""
+
         url_regex = re.compile(
             r'^(?:http|ftp)s?://'  # http:// or https://
             r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
@@ -365,6 +404,7 @@ class ValidateRequest:
     @staticmethod
     def validate_headers(headers: Dict[str, str]) -> bool:
         """Validate header values."""
+
         for key, value in headers.items():
             if not isinstance(key, str) or not isinstance(value, str):
                 return False
@@ -372,10 +412,13 @@ class ValidateRequest:
 
 
 class ValidateResponse:
-    """Class for validating response data."""
+    """
+    Class for validating response data.
+    """
     @staticmethod
     def is_valid_json(data: str) -> bool:
         """Check if response data is a valid JSON."""
+
         try:
             json.loads(data)
             return True
@@ -405,7 +448,9 @@ class KwargsRequest(TypedDict, total = False):
 
 
 class Request:
-    """Class for making HTTP requests."""
+    """
+    Class for making HTTP requests.
+    """
     def __init__(self) -> None:
         
         # Ensure SSL certificate is set up
@@ -444,7 +489,7 @@ class Request:
         Send a GET request.
 
         Args:
-            url (str): The URL to which the request will be sent.
+            - url (str): The URL to which the request will be sent.
             **kwargs: Additional keyword arguments for the request.
 
         Returns:
@@ -457,13 +502,26 @@ class Request:
         Send a POST request.
 
         Args:
-            url (str): The URL to which the request will be sent.
+            - url (str): The URL to which the request will be sent.
             **kwargs: Additional keyword arguments for the request.
 
         Returns:
             Response: The response object.
         """
         return self._send_request(url, 'POST', **kwargs)
+    
+    def head(self, url: str, **kwargs: Unpack[KwargsRequest]) -> 'Response':
+        """
+        Send a HEAD request.
+
+        Args:
+            - url (str): The URL to which the request will be sent.
+            **kwargs: Additional keyword arguments for the request.
+
+        Returns:
+            Response: The response object.
+        """
+        return self._send_request(url, 'HEAD', **kwargs)
     
     def _send_request(self, url: str, method: str, **kwargs: Unpack[KwargsRequest]) -> 'Response':
         """Send an HTTP request."""
@@ -475,5 +533,6 @@ class Request:
 
         return ManageRequests(url, method, **kwargs).send()
     
-# Out
+
+# Output
 requests: Request = Request()

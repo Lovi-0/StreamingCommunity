@@ -7,7 +7,7 @@ from zipfile import ZipFile
 
 
 # Internal utilities
-from Src.Util.config import config_manager
+from Src.Util._jsonConfig import config_manager
 
 
 # External libraries

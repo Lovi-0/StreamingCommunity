@@ -54,6 +54,6 @@ def update():
     console.print(f"[red]{repo_name} was downloaded [yellow]{down_count} [red]times, but only [yellow]{percentual_stars}% [red]of You(!!) have starred it.\n\
         [cyan]Help the repository grow today, by leaving a [yellow]star [cyan]and [yellow]sharing [cyan]it to others online!")
     
-    time.sleep(3)
+    time.sleep(1)
     print("\n")
 

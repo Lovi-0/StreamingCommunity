@@ -1,0 +1,13 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:4
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXT-X-KEY:METHOD=AES-128,URI="/storage/enc.key",IV=0x43A6D967D5C17290D98322F5C8F6660B
+#EXTINF:4,
+https://sc-u10-01.scws-content.net/hls/40/6/58/6585b748-cef6-4048-a9ab-c01b9366c3b9/video/720p/0000-0250.ts
+#EXTINF:4,
+https://sc-u10-01.scws-content.net/hls/40/6/58/6585b748-cef6-4048-a9ab-c01b9366c3b9/video/720p/0001-0250.ts
+#EXTINF:4,
+https://sc-u10-01.scws-content.net/hls/40/6/58/6585b748-cef6-4048-a9ab-c01b9366c3b9/video/720p/0002-0075.ts
+#EXTINF:4,
+#EXT-X-ENDLIST
