@@ -32,7 +32,7 @@ class VideoSource:
             'user-agent': get_headers()
         }
         self.is_series = False
-        self.base_name = config_manager.get('SITE', 'streaming_site_name')
+        self.base_name = "streamingcommunity"
 
     def setup(self, version: str = None, domain: str = None, media_id: int = None, series_name: str = None):
         """

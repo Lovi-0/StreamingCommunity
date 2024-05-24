@@ -73,12 +73,13 @@ def parse_http_error(error_string: str):
 
     # Regular expression to match the error pattern
     error_pattern = re.compile(r"HTTP Error (\d{3}): (.+)")
-
     match = error_pattern.search(error_string)
+
     if match:
         error_code = match.group(1)
         message = match.group(2)
         return {'error_code': error_code, 'message': message}
+    
     else:
         logging.error(f"Error string does not match expected format: {error_string}")
         return None
@@ -374,8 +375,6 @@ class ManageRequests:
         Handle request error.
         """
         logging.error(f"Request failed for URL '{self.url}': {parse_http_error(str(e))}")
-
-        print("=> ", e)
 
         if self.attempt < self.retries:
             logging.info(f"Retrying request for URL '{self.url}' (attempt {self.attempt}/{self.retries})")

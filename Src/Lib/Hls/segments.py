@@ -7,25 +7,19 @@ import queue
 import threading
 import signal
 import logging
-import warnings
 import binascii
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urljoin, urlparse, urlunparse
 
 
-
-# Disable specific warnings
-from tqdm import TqdmExperimentalWarning
-warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
-
-
 # External libraries
-from tqdm.rich import tqdm
+from tqdm import tqdm
 
 
 # Internal utilities
 from Src.Util.console import console
 from Src.Util.headers import get_headers
+from Src.Util.color import Colors
 from Src.Lib.Request.my_requests import requests
 from Src.Util._jsonConfig import config_manager
 from Src.Util.os import ( 
@@ -82,6 +76,8 @@ class M3U8_Segments:
         self.ctrl_c_detected = False                                # Global variable to track Ctrl+C detection
 
         os.makedirs(self.tmp_folder, exist_ok=True)                 # Create the temporary folder if it does not exist
+        self.list_speeds = []
+        self.average_over = int(TQDM_MAX_WORKER / 3)
 
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
@@ -210,19 +206,35 @@ class M3U8_Segments:
             if FAKE_PROXY:
                 ts_url = self.__gen_proxy__(ts_url, self.segments.index(ts_url)) 
 
+            # Make request and calculate time duration
+            start_time = time.time()
             response = requests.get(ts_url, headers=headers_segments, timeout=REQUESTS_TIMEOUT, verify_ssl=False)  # Send GET request for the segment
-
+            duration = time.time() - start_time
+            
             if response.ok:
 
                 # Get the content of the segment
                 segment_content = response.content
+                total_downloaded = len(response.content)
+
+                # Calculate mbps 
+                speed_mbps = (total_downloaded * 8) / (duration * 1_000_000)  * TQDM_MAX_WORKER
+                self.list_speeds.append(speed_mbps)
+
+                # Get average speed after (average_over)
+                if len(self.list_speeds) > self.average_over:
+                    self.list_speeds.pop(0)
+                average_speed = ( sum(self.list_speeds) / len(self.list_speeds) ) / 10 # MB/s
+                #print(f"{average_speed:.2f} MB/s")
+                #progress_counter.set_postfix_str(f"{average_speed:.2f} MB/s")
+
 
                 if TQDM_SHOW_PROGRESS:
                     self.downloaded_size += len(response.content)                                               # Update the downloaded size
                     self.class_ts_files_size.add_ts_file_size(len(response.content) * len(self.segments))       # Update the TS file size class
                     downloaded_size_str = format_size(self.downloaded_size)                                     # Format the downloaded size
                     estimate_total_size = self.class_ts_files_size.calculate_total_size()                       # Calculate the estimated total size
-                    progress_counter.set_description(f"[yellow]Downloading [white]({add_desc}[white]) [[green]{downloaded_size_str} [white]/ [green]{estimate_total_size}[white]]")
+                    progress_counter.set_postfix_str(f"{Colors.WHITE}[ {Colors.GREEN}{downloaded_size_str.split(' ')[0]} {Colors.WHITE}< {Colors.GREEN}{estimate_total_size.split(' ')[0]} {Colors.RED}MB {Colors.WHITE}| {Colors.CYAN}{average_speed:.2f} {Colors.RED}MB/s")
 
                 # Decrypt the segment content if decryption is needed
                 if self.decryption is not None:
@@ -239,7 +251,7 @@ class M3U8_Segments:
                 logging.warning(f"Failed to download segment: {ts_url}")
 
         except Exception as e:
-            logging.warning(f"Exception while downloading segment: {e}")
+            logging.error(f"Exception while downloading segment: {e}")
 
     def write_segments_to_file(self, stop_event: threading.Event):
         """
@@ -278,7 +290,15 @@ class M3U8_Segments:
             - add_desc (str): Additional description for the progress bar.
         """
         stop_event = threading.Event()  # Event to signal stopping
-        progress_bar = tqdm(desc=f"[yellow]Downloading [white]({add_desc}[white])", unit="MB", total=len(self.segments))
+
+        # bar_format="{desc}: {percentage:.0f}% | {bar} | {n_fmt}/{total_fmt} [ {elapsed}<{remaining}, {rate_fmt}{postfix} ]"
+        progress_bar = tqdm(
+            total=len(self.segments), 
+            unit='s',
+            ascii=' #',
+            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.0f}}% {Colors.MAGENTA}{{bar}} {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]",
+            dynamic_ncols=True
+        )
 
         def signal_handler(sig, frame):
             self.ctrl_c_detected = True  # Set global variable to indicate Ctrl+C detection

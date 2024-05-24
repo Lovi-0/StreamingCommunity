@@ -21,11 +21,8 @@ from .Core.Class.SearchType import MediaManager, MediaItem
 
 
 # Config
-GET_TITLES_OF_MOMENT = config_manager.get_bool('DEFAULT', 'get_moment_title')
-SC_SITE_NAME = config_manager.get('SITE', 'streaming_site_name')
-SC_DOMAIN_NOW = config_manager.get('SITE', 'streaming_domain')
-AU_SITE_NAME = config_manager.get('SITE', 'anime_site_name')
-AU_DOMAIN_NOW = config_manager.get('SITE', 'anime_domain')
+AU_SITE_NAME = "animeunity"
+AU_DOMAIN_NOW = config_manager.get('SITE', AU_SITE_NAME)
 
 
 # Variable
@@ -88,16 +85,17 @@ def update_domain():
         response.status_code
 
     # If the current site is inaccessible, try to obtain a new domain
-    except Exception as e:
+    except:
 
         # Get new domain
+        console.print("[red]\nExtract new DOMAIN from TLD list.")
         new_domain = extract_domain(method="light")
         console.log(f"[cyan]Extract new domain: [red]{new_domain}")
 
         if new_domain:
 
             # Update configuration with the new domain
-            config_manager.set_key('SITE', 'anime_domain', new_domain)
+            config_manager.set_key('SITE', AU_SITE_NAME, new_domain)
             config_manager.write_config()
 
         else:
@@ -144,9 +142,8 @@ def title_search(title: str) -> int:
     update_domain()
 
     # Get token and session value from configuration
-    url_site_name = config_manager.get('SITE', 'anime_site_name')  
-    url_domain = config_manager.get('SITE', 'anime_domain')  
-    data = get_token(url_site_name, url_domain)
+    url_domain = config_manager.get('SITE', AU_SITE_NAME)  
+    data = get_token(AU_SITE_NAME, url_domain)
 
     # Prepare cookies to be used in the request
     cookies = {
@@ -167,7 +164,7 @@ def title_search(title: str) -> int:
     }
 
     # Send a POST request to the API endpoint for live search
-    response = requests.post(f'https://www.{url_site_name}.{url_domain}/livesearch', cookies=cookies, headers=headers, json_data=json_data)
+    response = requests.post(f'https://www.{AU_SITE_NAME}.{url_domain}/livesearch', cookies=cookies, headers=headers, json_data=json_data)
 
     # Process each record returned in the response
     for record in response.json()['records']:

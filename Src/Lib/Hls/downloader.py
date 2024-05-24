@@ -10,6 +10,7 @@ from datetime import datetime
 from Src.Util.console import console, Panel
 from Src.Lib.Request.my_requests import requests
 from Src.Util.headers import get_headers
+from Src.Util.color import Colors
 from Src.Util._jsonConfig import config_manager
 from Src.Util.os import (
     remove_folder,
@@ -230,7 +231,7 @@ class Downloader():
             video_m3u8.get_info()
             
             # Download the video segments
-            video_m3u8.download_streams("[purple]video")
+            video_m3u8.download_streams(f"{Colors.MAGENTA}video")
 
         else:
             console.log("[cyan]Video [red]already exists.")
@@ -272,7 +273,7 @@ class Downloader():
                 audio_m3u8.get_info()
                 
                 # Download the audio segments
-                audio_m3u8.download_streams(f"[purple]audio [red]{obj_audio.get('language')}")
+                audio_m3u8.download_streams(f"{Colors.MAGENTA}audio {Colors.RED}{obj_audio.get('language')}")
 
             else:
                 console.log(f"[cyan]Audio [white]([green]{obj_audio.get('language')}[white]) [red]already exists.")

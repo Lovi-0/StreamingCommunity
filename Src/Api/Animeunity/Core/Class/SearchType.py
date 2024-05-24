@@ -8,8 +8,8 @@ from Src.Util._jsonConfig import config_manager
 
 
 # Config
-SC_SITE_NAME = config_manager.get('SITE', 'streaming_site_name')
-SC_DOMAIN_NOW = config_manager.get('SITE', 'streaming_domain')
+AU_SITE_NAME = "animeunity"
+AU_DOMAIN_NOW = config_manager.get('SITE', AU_SITE_NAME)
 
 
 
@@ -20,7 +20,7 @@ class Image:
         self.filename: str = data.get('filename')
         self.type: str = data.get('type')
         self.original_url_field: str = data.get('original_url_field')
-        self.url: str = f"https://cdn.{SC_SITE_NAME}.{SC_DOMAIN_NOW}/images/{self.filename}"
+        self.url: str = f"https://cdn.{AU_SITE_NAME}.{AU_DOMAIN_NOW}/images/{self.filename}"
 
     def __str__(self):
         return f"Image(imageable_id={self.imageable_id}, imageable_type='{self.imageable_type}', filename='{self.filename}', type='{self.type}', url='{self.url}')"

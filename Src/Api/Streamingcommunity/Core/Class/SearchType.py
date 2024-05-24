@@ -8,8 +8,8 @@ from Src.Util._jsonConfig import config_manager
 
 
 # Config
-SC_SITE_NAME = config_manager.get('SITE', 'streaming_site_name')
-SC_DOMAIN_NOW = config_manager.get('SITE', 'streaming_domain')
+SC_SITE_NAME = "streamingcommunity"
+SC_DOMAIN_NOW = config_manager.get('SITE', SC_SITE_NAME)
 
 
 

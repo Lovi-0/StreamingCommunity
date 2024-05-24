@@ -5,23 +5,18 @@
         "log_to_file": true,
         "show_message": true,
         "clean_console": true,
-        "get_moment_title": false,
         "root_path": "Video",
-        "not_close": false,
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
-        "instagram_session": "",
-        "create_job_database": false
+        "create_job_database": false,
+        "not_close": false
     },
     "SITE": {
-        "streaming_site_name": "streamingcommunity",
-        "streaming_domain": "foo",
-        "anime_site_name": "animeunity",
-        "anime_domain": "to"
+        "streamingcommunity": "foo",
+        "animeunity": "epic"
     },
     "M3U8": {
-        "tdqm_workers": 20,
+        "tdqm_workers": 30,
         "delay_start_workers": 0,
-        "hide_request_error": false,
         "requests_timeout": 10,
         "enable_time_quit": false,
         "tqdm_progress_timeout": 10,
@@ -29,7 +24,7 @@
         "tqdm_show_progress": true,
         "save_m3u8_content": true,
         "fake_proxy": true,
-        "fake_proxy_ip": ["162.19.255.78", "162.19.255.36", "162.19.255.224", "162.19.255.223", "162.19.254.244", "162.19.254.232", "162.19.254.230", "162.19.228.127", "162.19.228.105"],
+        "fake_proxy_ip": ["57.129.7.85", "57.129.7.188", "57.129.7.174", "57.129.4.77", "57.129.16.196", "57.129.16.156", "57.129.16.139", "57.129.16.135", "57.129.13.175", "57.129.13.157", "51.38.112.237", "51.195.107.7", "51.195.107.230"],
         "create_report": false
     },
     "M3U8_PARSER": {

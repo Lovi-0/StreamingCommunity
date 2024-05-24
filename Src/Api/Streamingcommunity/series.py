@@ -22,7 +22,8 @@ from .Core.Util import manage_selection, map_episode_title
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-STREAMING_FOLDER = config_manager.get('SITE', 'streaming_site_name')
+STREAMING_FOLDER = "streamingcommunity"
+SERIES_FOLDER = "Serie"
 
 
 # Variable
@@ -87,7 +88,7 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
 
     # Define filename and path for the downloaded video
     mp4_name = remove_special_characters(f"{map_episode_title(tv_name, obj_episode, index_season_selected)}.mp4")
-    mp4_path = os.path.join(ROOT_PATH, STREAMING_FOLDER, "Serie",  tv_name, f"S{index_season_selected}")
+    mp4_path = os.path.join(ROOT_PATH, STREAMING_FOLDER, SERIES_FOLDER,  tv_name, f"S{index_season_selected}")
     os.makedirs(mp4_path, exist_ok=True)
 
     if not can_create_file(mp4_name):

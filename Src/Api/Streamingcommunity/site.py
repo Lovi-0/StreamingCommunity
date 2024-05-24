@@ -26,11 +26,8 @@ from .Core.Class.SearchType import MediaManager, MediaItem
 
 
 # Config
-GET_TITLES_OF_MOMENT = config_manager.get_bool('DEFAULT', 'get_moment_title')
-SC_SITE_NAME = config_manager.get('SITE', 'streaming_site_name')
-SC_DOMAIN_NOW = config_manager.get('SITE', 'streaming_domain')
-AU_SITE_NAME = config_manager.get('SITE', 'anime_site_name')
-AU_DOMAIN_NOW = config_manager.get('SITE', 'anime_domain')
+SC_SITE_NAME = "streamingcommunity"
+SC_DOMAIN_NOW = config_manager.get('SITE', SC_SITE_NAME)
 
 
 # Variable
@@ -98,7 +95,7 @@ def get_version_and_domain(new_domain = None) -> Tuple[str, str]:
     
     # Get the current domain from the configuration
     if new_domain is None:
-        config_domain = config_manager.get('SITE', 'streaming_domain')
+        config_domain = config_manager.get('SITE', SC_SITE_NAME)
     else:
         config_domain = new_domain
 
@@ -113,26 +110,16 @@ def get_version_and_domain(new_domain = None) -> Tuple[str, str]:
         # Extract version from the response
         version, list_title_top_10 = get_version(response.text)
 
-        # Get titles in the moment
-        if GET_TITLES_OF_MOMENT:
-            console.print("[cyan]Scrape information (Top 10 titoli di oggi) [white]...")
-            table_top_10 = TVShowManager()
-            table_top_10.set_slice_end(10)
-            table_top_10.add_column({"Index": {'color': 'red'}, "Name": {'color': 'magenta'}, "Type": {'color': 'yellow'}})
-
-            for i, obj_title in enumerate(list_title_top_10):
-                table_top_10.add_tv_show({'Index': str(i), 'Name': obj_title.get('name'), 'Type': obj_title.get('type')})
-            table_top_10.display_data(table_top_10.tv_shows)
-
         return version, config_domain
 
-    except Exception as e:
+    except:
 
+        console.print("[red]\nExtract new DOMAIN from TLD list.")
         new_domain = extract_domain(method="light")
         console.log(f"[cyan]Extract new domain: [red]{new_domain}")
 
         # Update the domain in the configuration file
-        config_manager.set_key('SITE', 'streaming_domain', str(new_domain))
+        config_manager.set_key('SITE', SC_SITE_NAME, str(new_domain))
         config_manager.write_config()
 
         # Retry to get the version and domain

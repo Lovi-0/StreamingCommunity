@@ -21,7 +21,8 @@ from .Core.Vix_player.player import VideoSource
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-STREAMING_FOLDER = config_manager.get('SITE', 'streaming_site_name')
+STREAMING_FOLDER = config_manager.get('SITE', 'streamingcommunity')
+MOVIE_FOLDER = "Movie"
 
 
 # Variable
@@ -65,5 +66,5 @@ def download_film(id_film: str, title_name: str, domain: str):
     # Download the film using the m3u8 playlist, key, and output filename
     Downloader(
         m3u8_playlist = master_playlist,
-        output_filename = os.path.join(ROOT_PATH, STREAMING_FOLDER, "Movie", title_name, mp4_format)
+        output_filename = os.path.join(ROOT_PATH, STREAMING_FOLDER, MOVIE_FOLDER, title_name, mp4_format)
     ).start()

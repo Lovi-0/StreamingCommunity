@@ -30,8 +30,8 @@ class VideoSource:
             'user-agent': get_headers()
         }
         self.is_series = False
-        self.base_name = config_manager.get('SITE', 'anime_site_name')  
-        self.domain = config_manager.get('SITE', 'anime_domain')  
+        self.base_name = "animeunity"
+        self.domain = config_manager.get('SITE', self.base_name)  
 
     def setup(self, media_id: int = None, series_name: str = None):
         """
