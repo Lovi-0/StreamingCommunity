@@ -24,6 +24,7 @@ const selectingEpisodes = ref(false)
 const selectedEpisodes = ref<Episode[]>([])
 
 onMounted(async () => {
+  console.log(item)
   if (['MOVIE', 'OVA', 'SPECIAL'].includes(item.type)) {
     return
   } else {
@@ -127,8 +128,7 @@ const downloadAllItems = async () => {
           <h1 class="details-title">{{ item.name }}</h1>
           <h3>★ {{ item.score }}</h3>
           <div class="details-description">
-            <p v-if="['TV_ANIME', 'OVA', 'SPECIAL'].includes(item.type)">{{ item.plot }}</p>
-            <p v-else-if="tvShowEpisodes.length > 0">{{ tvShowEpisodes[0][0].plot }}</p>
+            <p>{{ item.plot }}</p>
           </div>
           <h3 v-if="animeEpisodes.length > 0 && !loading">Numero episodi: {{ totalEpisodes }}</h3>
           <h3 v-if="tvShowEpisodes.length > 0 && !loading">Numero stagioni: {{ tvShowEpisodes.length }}</h3>
@@ -167,7 +167,7 @@ const downloadAllItems = async () => {
              @click="selectingEpisodes ? toggleEpisodeSelect(episode) : null">
           <div class="episode-title">Episodio {{ episode.number }}</div>
         </div>
-          <div v-else-if="item.type == 'TV'" v-for="(season, index) in tvShowEpisodes" class="season-item">
+          <div v-else-if="item.type == 'TV'" v-for="(season, index) in tvShowEpisodes" v-bind:key="season.number" class="season-item">
             <div class="season-title">Stagione {{ index + 1 }}</div>
             <div class="episode-container">
               <div v-for="episode in season" :key="episode.id">

@@ -19,12 +19,12 @@ const toggleOption = () => {
 
 <template>
   <div class="switch-container">
-    <span class="switch-label-left">Film/Serie TV</span>
+    <span :style="{'color':isAnimeSelected ? '':'green', 'font-weight': isAnimeSelected ? '':'bold'}" class="switch-label-left">Film/Serie TV</span>
     <label class="switch">
       <input type="checkbox" :checked="isAnimeSelected" @change="toggleOption">
       <span class="slider round"></span>
     </label>
-    <span class="switch-label-right">Anime</span>
+    <span :style="{'color':isAnimeSelected ? 'green':'', 'font-weight': isAnimeSelected ? 'bold':''}" class="switch-label-right">Anime</span>
   </div>
 </template>
 

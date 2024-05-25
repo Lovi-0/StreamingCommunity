@@ -45,6 +45,21 @@ class Episode:
 
     def __str__(self):
         return f"Episode(id={self.id}, number={self.number}, name='{self.name}', plot='{self.plot}', duration={self.duration} sec)"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "number": self.number,
+            "name": self.name,
+            "plot": self.plot,
+            "duration": self.duration,
+            "scws_id": self.scws_id,
+            "season_id": self.season_id,
+            "created_by": self.created_by,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "images": [image.__dict__ for image in self.images]
+        }
 
 
 class EpisodeManager:
