@@ -7,15 +7,13 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from Src.Api import search, get_version_and_domain, download_film, anime_download_film
-from Src.Api.anime import EpisodeDownloader
-from Src.Api.Class.Video import VideoSource
-from Src.Api.film import ROOT_PATH
-from Src.Api.series import SERIES_FOLDER, STREAM_SITE_NAME
-from Src.Api.site import media_search_manager, anime_search
-from Src.Lib.FFmpeg.my_m3u8 import Downloader
-from Src.Util.mapper import map_episode_title
-from Src.Util.os import remove_special_characters
+from Src.Api.Animeunity import title_search as anime_search
+from Src.Api.Animeunity.Core.Vix_player.player import VideoSource as anime_source
+from Src.Api.Animeunity.site import media_search_manager as anime_media_manager
+
+from Src.Api.Streamingcommunity import title_search as sc_search, get_version_and_domain
+from Src.Api.Streamingcommunity.Core.Vix_player.player import VideoSource as film_video_source
+from Src.Api.Streamingcommunity.site import media_search_manager as film_media_manager
 
 
 class SearchView(viewsets.ViewSet):
@@ -24,15 +22,16 @@ class SearchView(viewsets.ViewSet):
         self.search_query = request.query_params.get("search_terms")
         self.type_search = request.query_params.get("type")
 
-        media_search_manager.media_list = []
+        media_manager = anime_media_manager if self.type_search == "anime" else film_media_manager
+        media_manager.media_list = []
         self.len_database = 0
         if self.type_search == "film":
             _, self.domain = get_version_and_domain()
-            self.len_database = search(self.search_query, self.domain)
+            self.len_database = sc_search(self.search_query, self.domain)
         elif self.type_search == "anime":
             self.len_database = anime_search(self.search_query)
 
-        media_list = media_search_manager.media_list
+        media_list = media_manager.media_list
 
         if self.len_database != 0:
             data_to_return = []
@@ -51,7 +50,7 @@ class SearchView(viewsets.ViewSet):
     @action(detail=False, methods=["get"])
     def get_episodes_info(self, request):
         self.media_id = request.query_params.get("media_id")
-        self.media_slug = request.data.get("media_slug")
+        self.media_slug = request.query_params.get("media_slug")
         self.type_media = request.query_params.get("type_media")
 
         try:
@@ -59,15 +58,15 @@ class SearchView(viewsets.ViewSet):
                 case "TV":
 
                     def stream_episodes():
-                        self.site_version, self.domain = get_version_and_domain()
+                        self.version, self.domain = get_version_and_domain()
 
-                        video_source = VideoSource()
-                        video_source.set_url_base_name(STREAM_SITE_NAME)
-                        video_source.set_version(self.site_version)
-                        video_source.set_domain(self.domain)
-                        video_source.set_series_name(self.media_slug)
-                        video_source.set_media_id(self.media_id)
-
+                        video_source = film_video_source()
+                        video_source.setup(
+                            version=self.version,
+                            domain=self.domain,
+                            media_id=self.media_id,
+                            series_name=self.media_slug
+                        )
                         video_source.collect_info_seasons()
                         seasons_count = video_source.obj_title_manager.get_length()
 
@@ -83,7 +82,7 @@ class SearchView(viewsets.ViewSet):
                                 episode = video_source.obj_episode_manager.episodes[
                                     i_episode - 1
                                 ]
-                                episodes[i_season][i_episode] = episode.__dict__
+                                episodes[i_season][i_episode] = episode.to_dict()
 
                         yield f'{json.dumps({"episodes": episodes})}\n\n'
 
@@ -93,17 +92,16 @@ class SearchView(viewsets.ViewSet):
                     return response
 
                 case "TV_ANIME":
-
                     def stream_episodes():
-                        episodes_downloader = EpisodeDownloader(
-                            self.media_id, self.media_slug
+                        video_source = anime_source()
+                        video_source.setup(
+                            media_id = self.media_id,
+                            series_name = self.media_slug
                         )
-                        episoded_count = episodes_downloader.get_count_episodes()
+                        episoded_count = video_source.get_count_episodes()
 
-                        for i in range(1, episoded_count + 1):
-                            episode_info = episodes_downloader.get_info_episode(
-                                index_ep=i
-                            )
+                        for i in range(0, episoded_count):
+                            episode_info = video_source.get_info_episode(i).to_dict()
                             episode_info["episode_id"] = i
                             episode_info["episode_total"] = episoded_count
                             print(f"Getting episode {i} of {episoded_count} info...")
@@ -125,6 +123,7 @@ class SearchView(viewsets.ViewSet):
         return Response({"error": "No media found with that search query"})
 
 
+'''
 class DownloadView(viewsets.ViewSet):
 
     def create(self, request):
@@ -211,3 +210,4 @@ class DownloadView(viewsets.ViewSet):
             }
 
         return Response(response_dict)
+'''

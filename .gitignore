@@ -42,6 +42,7 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+
 # Vue stuff:
 frontend/dist/
 frontend/node_modules/
@@ -64,3 +65,5 @@ venv.bak/
 # Other
 Video
 .idea/
+.vscode/
+.DS_Store
