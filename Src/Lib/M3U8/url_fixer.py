@@ -50,5 +50,3 @@ class M3U8_UrlFix:
 
         return full_url
     
-# Output
-m3u8_url_fix = M3U8_UrlFix()

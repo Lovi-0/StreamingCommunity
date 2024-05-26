@@ -31,10 +31,15 @@ except ImportError:
 from bs4 import BeautifulSoup
 
 
+# Internal utilities
+from Src.Util._jsonConfig import config_manager
+
+
 # Default settings
 HTTP_TIMEOUT = 5
 HTTP_RETRIES = 1
 HTTP_DELAY = 1
+HTTP_DISABLE_ERROR = config_manager.get_bool('M3U8_REQUESTS', 'disable_error')
 
 
 
@@ -325,7 +330,7 @@ class ManageRequests:
             response = urllib.request.urlopen(req, timeout=self.timeout, context=ssl_context)
 
         else:
-            response = urllib.request.urlopen(req, timeout=self.timeout)
+            response = urllib.request.urlopen(req, timeout=self.timeout, context=ssl.create_default_context())
 
         return response
 
@@ -374,7 +379,8 @@ class ManageRequests:
         """
         Handle request error.
         """
-        logging.error(f"Request failed for URL '{self.url}': {parse_http_error(str(e))}")
+        if not HTTP_DISABLE_ERROR:
+            logging.error(f"Request failed for URL '{self.url}': {parse_http_error(str(e))}")
 
         if self.attempt < self.retries:
             logging.info(f"Retrying request for URL '{self.url}' (attempt {self.attempt}/{self.retries})")

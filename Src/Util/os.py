@@ -1,13 +1,15 @@
 # 24.01.24
 
-import shutil
+import re
 import os
 import time
 import json
+import shutil
 import hashlib
 import logging
-import re
 import zipfile
+import platform
+
 from typing import List
 
 
@@ -41,6 +43,108 @@ special_chars_to_remove = [
     "/"
 ]
 
+
+def get_max_length_by_os(system: str) -> int:
+    """
+    Determines the maximum length for a base name based on the operating system.
+
+    Args:
+        system (str): The operating system name.
+
+    Returns:
+        int: The maximum length for the base name.
+    """
+    if system == 'windows':
+        return 255  # NTFS and other common Windows filesystems support 255 characters for filenames
+    elif system == 'darwin':  # macOS
+        return 255  # HFS+ and APFS support 255 characters for filenames
+    elif system == 'linux':
+        return 255  # Most Linux filesystems (e.g., ext4) support 255 characters for filenames
+    else:
+        raise ValueError(f"Unsupported operating system: {system}")
+
+def reduce_base_name(base_name: str) -> str:
+    """
+    Splits the file path into folder and base name, and reduces the base name based on the operating system.
+
+    Args:
+        base_name (str): The name of the file.
+
+    Returns:
+        str: The reduced base name.
+    """
+
+    
+    # Determine the operating system
+    system = platform.system().lower()
+    
+    # Get the maximum length for the base name based on the operating system
+    max_length = get_max_length_by_os(system)
+    
+    # Reduce the base name if necessary
+    if len(base_name) > max_length:
+        if system == 'windows':
+            # For Windows, truncate and add a suffix if needed
+            base_name = base_name[:max_length - 3] + '___'
+        elif system == 'darwin':  # macOS
+            # For macOS, truncate without adding suffix
+            base_name = base_name[:max_length]
+        elif system == 'linux':
+            # For Linux, truncate and add a numeric suffix if needed
+            base_name = base_name[:max_length - 2] + '___'
+    
+    return base_name
+
+
+def create_folder(folder_name: str) -> None:
+    """
+    Create a directory if it does not exist, and log the result.
+
+    Args:
+        folder_name (str): The path of the directory to be created.
+
+    """
+    try:
+
+        logging.info(f"Try create folder: {folder_name}")
+        os.makedirs(folder_name, exist_ok=True)
+        
+        if os.path.exists(folder_name) and os.path.isdir(folder_name):
+            logging.info(f"Directory successfully created or already exists: {folder_name}")
+        else:
+            logging.error(f"Failed to create directory: {folder_name}")
+
+    except OSError as e:
+        logging.error(f"OS error occurred while creating the directory {folder_name}: {e}")
+        raise
+    
+    except Exception as e:
+        logging.error(f"An unexpected error occurred while creating the directory {folder_name}: {e}")
+        raise
+
+def check_file_existence(file_path):
+    """
+    Check if a file exists at the given file path.
+
+    Args:
+        file_path (str): The path to the file.
+
+    Returns:
+        bool: True if the file exists, False otherwise.
+    """
+    try:
+        logging.info(f"Check if file exists: {file_path}")
+        if os.path.exists(file_path):
+            logging.info(f"The file '{file_path}' exists.")
+            return True
+        
+        else:
+            logging.warning(f"The file '{file_path}' does not exist.")
+            return False
+        
+    except Exception as e:
+        logging.error(f"An error occurred while checking file existence: {e}")
+        return False
 
 def remove_folder(folder_path: str) -> None:
     """

@@ -65,17 +65,13 @@ You can change some behaviors by tweaking the configuration file.
   - Example Value: %(tv_name) [S%(season)] [E%(episode)] %(episode_name)
 
 
-### Options (M3U8)
+### Options (M3U8_DOWNLOAD)
 
 * tdqm_workers: The number of workers that will cooperate to download .ts files. **A high value may slow down your PC**
   - Default Value: 20
 
 * tqdm_show_progress: Whether to show progress during downloads or not.
   - Default Value: true
-
-* save_m3u8_content: Enabling this feature saves various playlists and indexes in the temporary folder during the download process, ensuring all necessary files are retained for playback or further processing.
-  - Default Value: true
-
 
 * fake_proxy: Speed up download for streaming film and series. **Dont work for anime, need to set to FALSE**
   - Default Value: true
@@ -84,7 +80,7 @@ You can change some behaviors by tweaking the configuration file.
   - Default Value: false
 
 
-### Options (M3U8_OPTIONS)
+### Options (M3U8_FILTER)
 
 * cleanup_tmp_folder: Upon final conversion, this option ensures the removal of all unformatted audio, video tracks, and subtitles from the temporary folder, thereby maintaining cleanliness and efficiency.
   - Default Value: true

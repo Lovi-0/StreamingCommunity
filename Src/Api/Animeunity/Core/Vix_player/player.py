@@ -56,14 +56,11 @@ class VideoSource:
 
         try:
             
-            # Make a request to collect information about preview of the title
             response = requests.post(f"https://{self.base_name}.{self.domain}/api/titles/preview/{self.media_id}", headers = self.headers)
             response.raise_for_status()
 
-            if response.ok:
-
-                # Collect all info about preview
-                self.obj_preview = PreviewManager(response.json())
+            # Collect all info about preview
+            self.obj_preview = PreviewManager(response.json())
 
         except Exception as e:
             logging.error(f"Error collecting preview info: {e}")
@@ -78,7 +75,6 @@ class VideoSource:
         """
         try:
 
-            # Fetch episode count from API endpoint
             response = requests.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/")
             response.raise_for_status()
 
@@ -101,13 +97,11 @@ class VideoSource:
         """
         try:
 
-            # Define parameters for API request
             params = {
                 "start_range": index_ep, 
                 "end_range": index_ep + 1
             }
 
-            # Fetch episode information from API endpoint
             response = requests.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/{index_ep}", params = params)
             response.raise_for_status()
 
@@ -131,7 +125,6 @@ class VideoSource:
         """
         try:
 
-            # Fetch embed URL from API endpoint
             response = requests.get(f"https://www.{self.base_name}.{self.domain}/embed-url/{episode_id}")
             response.raise_for_status()
 

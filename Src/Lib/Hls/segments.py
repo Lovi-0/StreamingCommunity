@@ -22,31 +22,24 @@ from Src.Util.headers import get_headers
 from Src.Util.color import Colors
 from Src.Lib.Request.my_requests import requests
 from Src.Util._jsonConfig import config_manager
-from Src.Util.os import ( 
-    format_size
-)
-
 
 # Logic class
 from ..M3U8 import (
     M3U8_Decryption,
-    M3U8_Ts_Files,
+    M3U8_Ts_Estimator,
     M3U8_Parser,
-    m3u8_url_fix
+    M3U8_UrlFix
 )
 
 
 # Config
-TQDM_MAX_WORKER = config_manager.get_int('M3U8', 'tdqm_workers')
-DELAY_START_WORKER = config_manager.get_float('M3U8', 'delay_start_workers')
-TQDM_PROGRESS_TIMEOUT = config_manager.get_int('M3U8', 'tqdm_progress_timeout')
-REQUESTS_TIMEOUT = config_manager.get_int('M3U8', 'requests_timeout')
-ENABLE_TIME_TIMEOUT = config_manager.get_bool('M3U8', 'enable_time_quit')
-TQDM_SHOW_PROGRESS = config_manager.get_bool('M3U8', 'tqdm_show_progress')
-LIMIT_DONWLOAD_PERCENTAGE = config_manager.get_float('M3U8', 'download_percentage')
-SAVE_M3U8_FILE = config_manager.get_float('M3U8', 'save_m3u8_content')
-FAKE_PROXY = config_manager.get_float('M3U8', 'fake_proxy')
-FAKE_PROXY_IP = config_manager.get_list('M3U8', 'fake_proxy_ip')
+TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
+TQDM_SHOW_PROGRESS = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_show_progress')
+FAKE_PROXY = config_manager.get_float('M3U8_DOWNLOAD', 'fake_proxy')
+FAKE_PROXY_IP = config_manager.get_list('M3U8_DOWNLOAD', 'fake_proxy_ip')
+REQUEST_TIMEOUT = config_manager.get_int('M3U8_REQUESTS', 'timeout')
+REQUEST_VERIFY_SSL = config_manager.get_bool('M3U8_REQUESTS', 'verify_ssl')
+REQUEST_DISABLE_ERROR = config_manager.get_bool('M3U8_REQUESTS', 'disable_error')
 
 
 # Variable
@@ -66,9 +59,7 @@ class M3U8_Segments:
         """
         self.url = url
         self.tmp_folder = tmp_folder
-        self.downloaded_size = 0
         self.decryption: M3U8_Decryption = None                     # Initialize decryption as None
-        self.class_ts_files_size = M3U8_Ts_Files()                  # Initialize the TS files size class
         self.segment_queue = queue.PriorityQueue()                  # Priority queue to maintain the order of segments
         self.current_index = 0                                      # Index of the current segment to be written
         self.tmp_file_path = os.path.join(self.tmp_folder, "0.ts")  # Path to the temporary file
@@ -76,8 +67,8 @@ class M3U8_Segments:
         self.ctrl_c_detected = False                                # Global variable to track Ctrl+C detection
 
         os.makedirs(self.tmp_folder, exist_ok=True)                 # Create the temporary folder if it does not exist
-        self.list_speeds = []
-        self.average_over = int(TQDM_MAX_WORKER / 3)
+        self.class_ts_estimator = M3U8_Ts_Estimator(TQDM_MAX_WORKER) 
+        self.class_url_fixer = M3U8_UrlFix(url)
 
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
@@ -143,6 +134,27 @@ class M3U8_Segments:
         # Store the segment information parsed from the playlist
         self.segments = m3u8_parser.segments
 
+        # Fix URL if it is incomplete (missing 'http')
+        for i in range(len(self.segments)):
+            segment_url = self.segments[i]
+
+            if "http" not in segment_url:
+                self.segments[i] = self.class_url_fixer.generate_full_url(segment_url)
+                logging.info(f"Generated new URL: {self.segments[i]}, from: {segment_url}")
+
+        # Change IP address of server
+        if FAKE_PROXY:
+            for i in range(len(self.segments)):
+                segment_url = self.segments[i]
+
+                self.segments[i] = self.__gen_proxy__(segment_url, self.segments.index(segment_url)) 
+
+        # Save new playlist of segment
+        path_m3u8_file = os.path.join(self.tmp_folder, "playlist_fix.m3u8")
+        with open(path_m3u8_file, "w") as file:
+            for item in self.segments:
+                file.write(f"{item}\n")
+
     def get_info(self) -> None:
         """
         Makes a request to the index M3U8 file to get information about segments.
@@ -154,9 +166,8 @@ class M3U8_Segments:
         response.raise_for_status()  # Raise an exception for HTTP errors
 
         # Save the M3U8 file to the temporary folder
-        if SAVE_M3U8_FILE:
-            path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
-            open(path_m3u8_file, "w+").write(response.text) 
+        path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
+        open(path_m3u8_file, "w+").write(response.text) 
 
         # Parse the text from the M3U8 index file
         self.parse_data(response.text)  
@@ -176,9 +187,39 @@ class M3U8_Segments:
 
         # Parse the original URL and replace the hostname with the new IP address
         parsed_url = urlparse(url)._replace(netloc=new_ip_address)  
+
         return urlunparse(parsed_url)
 
-    def make_requests_stream(self, ts_url: str, index: int, stop_event: threading.Event, progress_counter: tqdm, add_desc: str) -> None:
+    def update_progress_bar(self, segment_content: bytes, duration: float, progress_counter: tqdm) -> None:
+        """
+        Updates the progress bar with information about the TS segment download.
+
+        Args:
+            segment_content (bytes): The content of the downloaded TS segment.
+            duration (float): The duration of the segment download in seconds.
+            progress_counter (tqdm): The tqdm object representing the progress bar.
+        """
+        if TQDM_SHOW_PROGRESS:
+            total_downloaded = len(segment_content)
+
+            # Add the size of the downloaded segment to the estimator
+            self.class_ts_estimator.add_ts_file(total_downloaded * len(self.segments), total_downloaded, duration)
+                    
+            # Get downloaded size and total estimated size
+            downloaded_file_size_str = self.class_ts_estimator.get_downloaded_size().split(' ')[0]                                    
+            file_total_size = self.class_ts_estimator.calculate_total_size()
+            number_file_total_size = file_total_size.split(' ')[0]
+            units_file_total_size = file_total_size.split(' ')[1]
+
+            average_internet_speed = self.class_ts_estimator.get_average_speed()
+
+            # Update the progress bar's postfix
+            progress_counter.set_postfix_str(
+                f"{Colors.WHITE}[ {Colors.GREEN}{downloaded_file_size_str} {Colors.WHITE}< {Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
+                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed:.2f} {Colors.RED}MB/s"
+            )
+
+    def make_requests_stream(self, ts_url: str, index: int, stop_event: threading.Event, progress_bar: tqdm) -> None:
         """
         Downloads a TS segment and adds it to the segment queue.
 
@@ -186,72 +227,47 @@ class M3U8_Segments:
             - ts_url (str): The URL of the TS segment.
             - index (int): The index of the segment.
             - stop_event (threading.Event): Event to signal the stop of downloading.
-            - progress_counter (tqdm): Progress counter for tracking download progress.
+            - progress_bar (tqdm): Progress counter for tracking download progress.
             - add_desc (str): Additional description for the progress bar.
         """
 
         if stop_event.is_set():
             return  # Exit if the stop event is set
-        
-        headers_segments['user-agent'] = get_headers()
 
-        # Fix URL if it is incomplete (missing 'http')
-        if "http" not in ts_url:
-            ts_url = m3u8_url_fix.generate_full_url(ts_url)
-            logging.info(f"Generated new URL: {ts_url}")
+        # Generate new user agent
+        headers_segments['user-agent'] = get_headers()
 
         try:
 
-            # Change IP address if FAKE_PROXY is enabled
-            if FAKE_PROXY:
-                ts_url = self.__gen_proxy__(ts_url, self.segments.index(ts_url)) 
-
             # Make request and calculate time duration
             start_time = time.time()
-            response = requests.get(ts_url, headers=headers_segments, timeout=REQUESTS_TIMEOUT, verify_ssl=False)  # Send GET request for the segment
+            response = requests.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, verify_ssl=REQUEST_VERIFY_SSL)
             duration = time.time() - start_time
             
             if response.ok:
 
                 # Get the content of the segment
                 segment_content = response.content
-                total_downloaded = len(response.content)
-
-                # Calculate mbps 
-                speed_mbps = (total_downloaded * 8) / (duration * 1_000_000)  * TQDM_MAX_WORKER
-                self.list_speeds.append(speed_mbps)
-
-                # Get average speed after (average_over)
-                if len(self.list_speeds) > self.average_over:
-                    self.list_speeds.pop(0)
-                average_speed = ( sum(self.list_speeds) / len(self.list_speeds) ) / 10 # MB/s
-                #print(f"{average_speed:.2f} MB/s")
-                #progress_counter.set_postfix_str(f"{average_speed:.2f} MB/s")
-
-
-                if TQDM_SHOW_PROGRESS:
-                    self.downloaded_size += len(response.content)                                               # Update the downloaded size
-                    self.class_ts_files_size.add_ts_file_size(len(response.content) * len(self.segments))       # Update the TS file size class
-                    downloaded_size_str = format_size(self.downloaded_size)                                     # Format the downloaded size
-                    estimate_total_size = self.class_ts_files_size.calculate_total_size()                       # Calculate the estimated total size
-                    progress_counter.set_postfix_str(f"{Colors.WHITE}[ {Colors.GREEN}{downloaded_size_str.split(' ')[0]} {Colors.WHITE}< {Colors.GREEN}{estimate_total_size.split(' ')[0]} {Colors.RED}MB {Colors.WHITE}| {Colors.CYAN}{average_speed:.2f} {Colors.RED}MB/s")
+                self.update_progress_bar(segment_content, duration, progress_bar)
 
                 # Decrypt the segment content if decryption is needed
                 if self.decryption is not None:
                     segment_content = self.decryption.decrypt(segment_content)
 
                 with self.condition:
-                    
                     self.segment_queue.put((index, segment_content))    # Add the segment to the queue
                     self.condition.notify()                             # Notify the writer thread that a new segment is available
 
-                progress_counter.update(1)  # Update the progress counter
-
             else:
-                logging.warning(f"Failed to download segment: {ts_url}")
+                if not REQUEST_DISABLE_ERROR:
+                    logging.error(f"Failed to download segment: {ts_url}")
 
         except Exception as e:
-            logging.error(f"Exception while downloading segment: {e}")
+            if not REQUEST_DISABLE_ERROR:
+                logging.error(f"Exception while downloading segment: {e}")
+
+        # Update bar
+        progress_bar.update(1)
 
     def write_segments_to_file(self, stop_event: threading.Event):
         """
@@ -265,7 +281,10 @@ class M3U8_Segments:
             while not stop_event.is_set() or not self.segment_queue.empty():
                 with self.condition:
                     while self.segment_queue.empty() and not stop_event.is_set():
-                        self.condition.wait()   # Wait until a new segment is available or stop_event is set
+                        self.condition.wait(timeout=1)   # Wait until a new segment is available or stop_event is set
+
+                    if stop_event.is_set():
+                        break
 
                     if not self.segment_queue.empty():
 
@@ -280,7 +299,7 @@ class M3U8_Segments:
 
                         else:
                             self.segment_queue.put((index, segment_content))    # Requeue the segment if it is not the next to be written
-                            self.condition.notify()                             # Notify that a segment has been requeued                        # Notify that a segment has been requeued
+                            self.condition.notify()                             # Notify that a segment has been requeued
 
     def download_streams(self, add_desc):
         """
@@ -316,21 +335,8 @@ class M3U8_Segments:
             writer_thread = threading.Thread(target=self.write_segments_to_file, args=(stop_event,))
             writer_thread.start()
 
-            # Start progress monitor thread
-            progress_thread = threading.Thread(target=self.timer, args=(progress_bar, stop_event))
-            progress_thread.start()
-
             # Delay the start of each worker
             for index, segment_url in enumerate(self.segments):
-                time.sleep(DELAY_START_WORKER)
-
-                # da 0.0 a 100.00
-                if int(LIMIT_DONWLOAD_PERCENTAGE) != 0:
-                    score_percentage = (progress_bar.n / progress_bar.total) * 100
-                    if score_percentage>= LIMIT_DONWLOAD_PERCENTAGE:
-                        #progress_bar.refresh()
-                        break
-
 
                 # Check for Ctrl+C before starting each download task
                 time.sleep(0.025)
@@ -345,7 +351,7 @@ class M3U8_Segments:
                     break
 
                 # Submit the download task to the executor
-                executor.submit(self.make_requests_stream, segment_url, index, stop_event, progress_bar, add_desc)
+                executor.submit(self.make_requests_stream, segment_url, index, stop_event, progress_bar)
 
             # Wait for all segments to be downloaded
             executor.shutdown(wait=True)
@@ -353,51 +359,3 @@ class M3U8_Segments:
             with self.condition:
                 self.condition.notify_all()     # Wake up the writer thread if it's waiting
             writer_thread.join()                # Wait for the writer thread to finish
-
-    def timer(self, progress_counter: tqdm, quit_event: threading.Event):
-            """
-            Function to monitor progress and quit if no progress is made within a certain time
-            
-            Args:
-                - progress_counter (tqdm): The progress counter object.
-                - quit_event (threading.Event): The event to signal when to quit.
-            """
-
-            # If timer is disabled, return immediately without starting it, to reduce cpu use
-            if not ENABLE_TIME_TIMEOUT:
-                return
-
-            start_time = time.time()
-            last_count = 0
-
-            # Loop until quit event is set
-            while not quit_event.is_set():
-                current_count = progress_counter.n
-
-                # Update start time when progress is made
-                if current_count != last_count:
-                    start_time = time.time() 
-                    last_count = current_count
-
-                # Calculate elapsed time
-                elapsed_time = time.time() - start_time
-
-                # Check if elapsed time exceeds progress timeout
-                if elapsed_time > TQDM_PROGRESS_TIMEOUT:
-                    console.log(f"[red]No progress for {TQDM_PROGRESS_TIMEOUT} seconds. Stopping.")
-
-                    # Set quit event to break the loop
-                    quit_event.set()
-                    break
-                
-                # Calculate remaining time until timeout
-                remaining_time = max(0, TQDM_PROGRESS_TIMEOUT - elapsed_time)
-
-                # Determine sleep interval dynamically based on remaining time
-                sleep_interval = min(1, remaining_time)
-
-                # Wait for the calculated sleep interval
-                time.sleep(sleep_interval)
-
-            # Refresh progress bar
-            #progress_counter.refresh()

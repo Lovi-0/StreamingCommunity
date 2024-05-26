@@ -85,8 +85,10 @@ def can_create_file(file_path):
     try:
         with open(file_path, 'w') as file:
             pass
+        
         os.remove(file_path)  # Cleanup if the file was created
         return True
+    
     except OSError as e:
         if e.errno in (errno.EACCES, errno.ENOENT, errno.EEXIST, errno.ENOTDIR):
             return False

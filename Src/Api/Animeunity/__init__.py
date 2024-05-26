@@ -17,7 +17,7 @@ def main_anime():
     if len_database != 0:
 
         # Select title from list
-        select_title = get_select_title(True)
+        select_title = get_select_title()
         
         if select_title.type == 'TV':
             donwload_series(

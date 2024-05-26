@@ -58,8 +58,6 @@ def get_version(text: str) -> tuple[str, list]:
         version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
         sliders = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['props']['sliders']
 
-        title_trending = sliders[0]
-        title_lates = sliders[1]
         title_top_10 = sliders[2]
 
         # Collect info about only top 10 title
@@ -149,12 +147,11 @@ def title_search(title_search: str, domain: str) -> int:
     return media_search_manager.get_length()
 
 
-def get_select_title(switch: bool = False, type_filter: list = None) -> MediaItem:
+def get_select_title(type_filter: list = None) -> MediaItem:
     """
     Display a selection of titles and prompt the user to choose one.
 
     Args:
-        - switch (bool): switch from film to anime
         - type_filter (list): A list of media types to filter. Can include 'film', 'tv', 'ova'. Ex. ['tv', 'film']
 
     Returns:
@@ -191,7 +188,7 @@ def get_select_title(switch: bool = False, type_filter: list = None) -> MediaIte
         })
 
     # Run the table and handle user input
-    last_command = table_show_manager.run(force_int_input=True, max_int_input=len(media_search_manager.media_list), switch=switch)
+    last_command = table_show_manager.run(force_int_input=True, max_int_input=len(media_search_manager.media_list))
     table_show_manager.clear()
 
     # Handle user's quit command
@@ -220,4 +217,3 @@ def manager_clear():
     # Clear list of data
     media_search_manager.clear()
     table_show_manager.clear()
-

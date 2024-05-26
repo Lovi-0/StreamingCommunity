@@ -1,23 +1,29 @@
 # 5.01.24
 
 import os
+import sys
 import logging
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
 
 
 # Internal utilities
-from Src.Util.console import console, Panel
 from Src.Lib.Request.my_requests import requests
 from Src.Util.headers import get_headers
-from Src.Util.color import Colors
 from Src.Util._jsonConfig import config_manager
+from Src.Util.console import console, Panel
+from Src.Util.color import Colors
 from Src.Util.os import (
     remove_folder,
     delete_files_except_one,
     compute_sha1_hash,
-    format_size
+    format_size,
+    create_folder, 
+    reduce_base_name, 
+    remove_special_characters
 )
+from Src.Lib.Unidecode import transliterate
+from Src.Util.file_validator import can_create_file
 
 
 # Logic class
@@ -30,23 +36,23 @@ from ..FFmpeg import (
 from ..M3U8 import (
     M3U8_Parser,
     M3U8_Codec,
-    m3u8_url_fix
+    M3U8_UrlFix
 )
 from .segments import M3U8_Segments
 from ..E_Table import report_table
 
 
 # Config
-DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_OPTIONS', 'specific_list_audio')            
-DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_OPTIONS', 'specific_list_subtitles')
-REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_OPTIONS', 'cleanup_tmp_folder')
+DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_FILTER', 'specific_list_audio')            
+DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_FILTER', 'specific_list_subtitles')
+REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_FILTER', 'cleanup_tmp_folder')
+FORCE_TS = config_manager.get_dict('M3U8_FILTER', 'force_ts')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
-CREATE_REPORT = config_manager.get_bool('M3U8', 'create_report')
+CREATE_REPORT = config_manager.get_bool('M3U8_DOWNLOAD', 'create_report')
 
 
 # Variable
 headers_index = config_manager.get_dict('M3U8_REQUESTS', 'index')
-FORCE_TS = config_manager.get_dict('M3U8_OPTIONS', 'force_ts')
 
     
 class Downloader():
@@ -71,6 +77,17 @@ class Downloader():
                 self.output_filename = os.path.join("missing", compute_sha1_hash(m3u8_playlist))
             else:
                 self.output_filename = os.path.join("missing", compute_sha1_hash(m3u8_index))
+
+        else:
+            folder, base_name = os.path.split(self.output_filename)                             # Split file_folder output
+            base_name = reduce_base_name(remove_special_characters(transliterate(base_name)))   # Remove special char
+            create_folder(folder)                                                               # Create folder and check if exist
+            if not can_create_file(base_name):                                                  # Check if folder file name can be create
+                logging.error("Invalid mp4 name.")
+                sys.exit(0)
+
+            self.output_filename = os.path.join(folder, base_name)
+
         logging.info(f"Output filename: {self.output_filename}")
 
         # Initialize temp base path
@@ -93,6 +110,9 @@ class Downloader():
         # Path converted ts files
         self.path_video_audio = None
         self.path_video_subtitle = None
+
+        # Class
+        self.m3u8_url_fixer = M3U8_UrlFix()
  
     def __df_make_req__(self, url: str) -> str:
         """
@@ -112,18 +132,15 @@ class Downloader():
             headers_index['user-agent'] = get_headers()
             response = requests.get(url, headers=headers_index)
 
-            # Check status response of request
-            response.raise_for_status()
-
             if response.ok:
                 return response.text
             
             else:
-                logging.error(f"Request to {url} failed with status code: {response.status_code}")
+                logging.error(f"Test request to {url} failed with status code: {response.status_code}")
                 return None
 
         except Exception as e:
-            logging.error(f"An unexpected error occurred: {e}")
+            logging.error(f"An unexpected error occurred with test request: {e}")
             return None
         
     def __manage_playlist__(self, m3u8_playlist_text):
@@ -188,7 +205,7 @@ class Downloader():
         if "http" not in self.m3u8_index:
 
             # Generate full URL
-            self.m3u8_index = m3u8_url_fix.generate_full_url(self.m3u8_index)
+            self.m3u8_index = self.m3u8_url_fixer.generate_full_url(self.m3u8_index)
             logging.info(f"Generate index url: {self.m3u8_index}")
 
             # Check if a valid HTTPS URL is obtained
@@ -457,11 +474,11 @@ class Downloader():
             logging.info("Download from PLAYLIST")
 
             # Fetch the M3U8 playlist content
-            if not len(str(self.m3u8_playlist).split("\n")) > 2:
+            if not len(str(self.m3u8_playlist).split("\n")) > 2:    # Is a single link
                 m3u8_playlist_text = self.__df_make_req__(self.m3u8_playlist)
 
                 # Add full URL of the M3U8 playlist to fix next .ts without https if necessary
-                m3u8_url_fix.set_playlist(self.m3u8_playlist) # !!!!!!!!!!!!!!!!!! to fix for playlist with text
+                self.m3u8_url_fixer.set_playlist(self.m3u8_playlist) # !!!!!!!!!!!!!!!!!! to fix for playlist with text
 
             else:
                 logging.warning("M3U8 master url not set.") # TO DO
@@ -506,7 +523,7 @@ class Downloader():
             logging.info("Download from INDEX")
 
             # Add full URL of the M3U8 playlist to fix next .ts without https if necessary
-            m3u8_url_fix.set_playlist(self.m3u8_index)
+            self.m3u8_url_fixer.set_playlist(self.m3u8_index)
 
             # Start all download ...
             self.__donwload_video__()

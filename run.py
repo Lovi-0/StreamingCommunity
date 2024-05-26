@@ -5,6 +5,7 @@ import os
 import platform
 import argparse
 import logging
+
 from typing import Callable
 
 
@@ -18,15 +19,16 @@ from Src.Lib.FFmpeg import check_ffmpeg
 from Src.Util.logger import Logger
 
 # Internal api
-from Src.Api.Streamingcommunity import main_film_series
-from Src.Api.Animeunity import main_anime
+from Src.Api.Streamingcommunity import main_film_series as streamingcommunity_film_serie
+from Src.Api.Animeunity import main_anime as streamingcommunity_anime
+from Src.Api.Altadefinizione import main_film as altadefinizione_film
 
 
 # Config
 CLOSE_CONSOLE = config_manager.get_bool('DEFAULT', 'not_close')
 
 
-def initialize(switch = False):
+def initialize():
     """
     Initialize the application.
     Checks Python version, removes temporary folder, and displays start message.
@@ -44,7 +46,7 @@ def initialize(switch = False):
 
 
     # Removing temporary folder
-    start_message(switch)
+    start_message()
 
 
     # Attempting GitHub update
@@ -88,36 +90,56 @@ def run_function(func: Callable[..., None], close_console: bool = False) -> None
 
 
 def main():
-
+    
     log_not = Logger()
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Script to download film and series from internet.')
-    parser.add_argument('-a', '--anime', action='store_true', help='Check into anime category')
-    parser.add_argument('-f', '--film', action='store_true', help='Check into film/tv series category')
+    parser = argparse.ArgumentParser(description='Script to download film and series from the internet.')
+    parser.add_argument('-sa', '--streaming_anime', action='store_true', help='Check into anime category')
+    parser.add_argument('-sf', '--streaming_film', action='store_true', help='Check into film/tv series category')
+    parser.add_argument('-af', '--altadefinizione_film', action='store_true', help='Check into film/tv series category')
     args = parser.parse_args()
 
-    if args.anime:
-        run_function(main_anime, CLOSE_CONSOLE)
+    # Mapping command-line arguments to functions
+    arg_to_function = {
+        'streaming_anime': streamingcommunity_anime,
+        'streaming_film': streamingcommunity_film_serie,
+        'altadefinizione_film': altadefinizione_film,
+    }
 
-    elif args.film:
-        run_function(main_film_series, CLOSE_CONSOLE)
+    # Check which argument is provided and run the corresponding function
+    for arg, func in arg_to_function.items():
+        if getattr(args, arg):
+            run_function(func, CLOSE_CONSOLE)
+            return
 
+    # Mapping user input to functions
+    input_to_function = {
+        '0': streamingcommunity_film_serie,
+        '1': streamingcommunity_anime,
+        '2': altadefinizione_film,
+    }
+
+    # Create dynamic prompt message and choices
+    choices = list(input_to_function.keys())
+    choice_labels = {
+        '0': "Film/Series",
+        '1': "Anime",
+        '2': "Altadefinizione"
+    }
+    prompt_message = "[cyan]Insert category [white](" + ", ".join(
+        f"[red]{key}[white]: [bold magenta]{label}[white]" for key, label in choice_labels.items()
+    ) + ")[white]:[/cyan]"
+
+    # Ask the user for input
+    category = msg.ask(prompt_message, choices=choices, default="0")
+
+    # Run the corresponding function based on user input
+    if category in input_to_function:
+        run_function(input_to_function[category], CLOSE_CONSOLE)
     else:
-
-        # If no arguments are provided, ask the user to input the category, if nothing insert return 0
-        category = msg.ask("[cyan]Insert category [white]([red]0[white]: [bold magenta]Film/Series[white], [red]1[white]: [bold magenta]Anime[white])[white]:[/cyan]", choices={"0": "", "1": ""}, default="0")
-
-        if category == '0':
-            run_function(main_film_series, CLOSE_CONSOLE)
-
-        elif category == '1':
-            run_function(main_anime, CLOSE_CONSOLE)
-
-        else:
-            console.print("[red]Invalid category, you need to insert 0 or 1.")
-            sys.exit(0)
-
+        console.print("[red]Invalid category, you need to insert 0, 1, or 2.")
+        sys.exit(0)
 
 if __name__ == '__main__':
     main()

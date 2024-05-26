@@ -16,6 +16,7 @@ except: pass
 
 
 # Internal utilities
+from Src.Util.os import check_file_existence
 from Src.Util._jsonConfig import config_manager
 from .util import has_audio_stream
 from .capture import capture_ffmpeg_real_time
@@ -24,10 +25,9 @@ from .capture import capture_ffmpeg_real_time
 # Variable
 DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
 DEBUG_FFMPEG = "debug" if DEBUG_MODE else "error"
-terminate_flag = threading.Event()
-USE_CODECS = config_manager.get_bool("M3U8_OPTIONS", "use_codec")
-USE_GPU = config_manager.get_bool("M3U8_OPTIONS", "use_gpu")
-FFMPEG_DEFAULT_PRESET = config_manager.get("M3U8_OPTIONS", "default_preset")
+USE_CODECS = config_manager.get_bool("M3U8_FILTER", "use_codec")
+USE_GPU = config_manager.get_bool("M3U8_FILTER", "use_gpu")
+FFMPEG_DEFAULT_PRESET = config_manager.get("M3U8_FILTER", "default_preset")
 
 
 
@@ -271,6 +271,9 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
         - force_ts (bool): Force video path to be mpegts as input.
     """
 
+    if not check_file_existence(video_path):
+        sys.exit(0)
+
     # Start command
     ffmpeg_cmd = ['ffmpeg']
 
@@ -324,12 +327,18 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
         - preset (str): The preset for encoding. Defaults to 'ultrafast'.
     """
 
+    if not check_file_existence(video_path):
+        sys.exit(0)
+
     # Start command
     ffmpeg_cmd = ['ffmpeg', '-i', video_path]
 
     # Add audio track
     for i, audio_track in enumerate(audio_tracks):
         ffmpeg_cmd.extend(['-i',  audio_track.get('path')])
+
+        if not check_file_existence(audio_track.get('path')):
+            sys.exit(0)
 
     # Add output args
     if USE_CODECS:
@@ -348,7 +357,7 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
         capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join audio")
         print()
 
-def join_subtitle(video: str, subtitles_list: List[Dict[str, str]], output_file: str):
+def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], output_file: str):
     """
     Joins subtitles with a video file using FFmpeg.
     
@@ -359,9 +368,13 @@ def join_subtitle(video: str, subtitles_list: List[Dict[str, str]], output_file:
         - output_file (str): The path to save the output file.
     """
 
+    if not check_file_existence(video_path):
+        sys.exit(0)
+
+
     # Start command
     added_subtitle_names = set()    # Remove subtitle with same name
-    ffmpeg_cmd = ["ffmpeg", "-i", video]
+    ffmpeg_cmd = ["ffmpeg", "-i", video_path]
 
     # Add subtitle with language
     for idx, subtitle in enumerate(subtitles_list):
@@ -374,6 +387,9 @@ def join_subtitle(video: str, subtitles_list: List[Dict[str, str]], output_file:
         ffmpeg_cmd += ["-i", subtitle['path']]
         ffmpeg_cmd += ["-map", "0:v", "-map", "0:a", "-map", f"{idx + 1}:s"]
         ffmpeg_cmd += ["-metadata:s:s:{}".format(idx), "title={}".format(subtitle['name'])]
+
+        if not check_file_existence(subtitle['path']):
+            sys.exit(0)
 
     # Add output args
     if USE_CODECS:

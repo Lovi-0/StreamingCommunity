@@ -80,14 +80,13 @@ class TVShowManager:
 
         self.console.print(table)  # Use self.console.print instead of print
 
-    def run(self, force_int_input: bool = False, max_int_input: int = 0, switch: bool = False) -> str:
+    def run(self, force_int_input: bool = False, max_int_input: int = 0) -> str:
         """
         Run the TV show manager application.
 
         Args:
             - force_int_input(bool): If True, only accept integer inputs from 0 to max_int_input
             - max_int_input (int): range of row to show
-            - switch (bool): switch from film to anime
         
         Returns:
             str: Last command executed before breaking out of the loop.
@@ -96,7 +95,7 @@ class TVShowManager:
         last_command = ""  # Variable to store the last command executed
 
         while True:
-            start_message(switch)
+            start_message()
 
             # Display table
             self.display_data(self.tv_shows[self.slice_start:self.slice_end])

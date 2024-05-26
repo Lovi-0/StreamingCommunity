@@ -15,7 +15,7 @@ CLEAN = config_manager.get_bool('DEFAULT', 'clean_console')
 SHOW = config_manager.get_bool('DEFAULT', 'show_message')
 
 
-def start_message(switch = False):
+def start_message():
     """
     Display a start message.
     """
@@ -33,18 +33,6 @@ def start_message(switch = False):
 
     '''
 
-    if switch:
-        msg = '''
-        
-     _          _                            _ _         
-    / \   _ __ (_)_ __ ___   ___ _   _ _ __ (_) |_ _   _ 
-   / _ \ | '_ \| | '_ ` _ \ / _ \ | | | '_ \| | __| | | |
-  / ___ \| | | | | | | | | |  __/ |_| | | | | | |_| |_| |
- /_/   \_\_| |_|_|_| |_| |_|\___|\__,_|_| |_|_|\__|\__, |
-                                                   |___/ 
-
-    '''
-
     if CLEAN: 
         if platform.system() == 'Windows':
             os.system("cls")
@@ -52,7 +40,6 @@ def start_message(switch = False):
             os.system("clear")
     
     if SHOW:
-        
         console.print(f"[bold yellow]{msg}")
         console.print(f"[magenta]Created by: Ghost6446\n")
 

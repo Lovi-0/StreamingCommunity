@@ -3,8 +3,8 @@
         "debug": false,
         "log_file": "app.log",
         "log_to_file": true,
-        "show_message": true,
-        "clean_console": true,
+        "show_message": false,
+        "clean_console": false,
         "root_path": "Video",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
         "create_job_database": false,
@@ -12,26 +12,17 @@
     },
     "SITE": {
         "streamingcommunity": "foo",
-        "animeunity": "epic"
+        "animeunity": "to",
+        "altadefinizione": "food"
     },
-    "M3U8": {
+    "M3U8_DOWNLOAD": {
         "tdqm_workers": 30,
-        "delay_start_workers": 0,
-        "requests_timeout": 10,
-        "enable_time_quit": false,
-        "tqdm_progress_timeout": 10,
-        "download_percentage": 0,
         "tqdm_show_progress": true,
-        "save_m3u8_content": true,
-        "fake_proxy": true,
-        "fake_proxy_ip": ["57.129.7.85", "57.129.7.188", "57.129.7.174", "57.129.4.77", "57.129.16.196", "57.129.16.156", "57.129.16.139", "57.129.16.135", "57.129.13.175", "57.129.13.157", "51.38.112.237", "51.195.107.7", "51.195.107.230"],
+        "fake_proxy": false,
+        "fake_proxy_ip": ["57.129.7.85","57.129.7.188","57.129.7.174","57.129.4.77","57.129.16.196","57.129.16.156","57.129.16.139","57.129.16.135","57.129.13.175","57.129.13.157","51.38.112.237","51.195.107.7","51.195.107.230"],
         "create_report": false
     },
-    "M3U8_PARSER": {
-        "skip_empty_row_playlist": false,
-        "force_resolution": -1
-    },
-    "M3U8_OPTIONS": {
+    "M3U8_FILTER": {
         "use_codec": false,
         "use_gpu": false,
         "force_ts": false,
@@ -41,7 +32,14 @@
         "specific_list_subtitles": ["eng"]
     },
     "M3U8_REQUESTS": {
+        "disable_error": false,
+        "timeout": 10,
+        "verify_ssl": false,
         "index": {"user-agent": ""},
         "segments": {"user-agent": ""}
+    },
+    "M3U8_PARSER": {
+        "skip_empty_row_playlist": false,
+        "force_resolution": -1
     }
 }

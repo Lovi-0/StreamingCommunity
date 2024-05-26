@@ -11,7 +11,7 @@ from Src.Util._jsonConfig import config_manager
 
 
 # Variable
-CREATE_REPORT = config_manager.get_bool('M3U8', 'create_report')
+CREATE_REPORT = config_manager.get_bool('M3U8_DOWNLOAD', 'create_report')
 CREATE_JOB_DB = config_manager.get_bool('DEFAULT', 'create_job_database')
 
 

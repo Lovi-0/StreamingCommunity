@@ -49,16 +49,17 @@ def download_episode(index_select: int):
     video_source.parse_script(embed_url)
 
     # Create output path
-    out_path = None
+    mp4_path = None
+    mp4_name = f"{index_select}.mp4"
     if video_source.is_series:
-        out_path = os.path.join(ROOT_PATH, ANIME_FOLDER, SERIES_FOLDER, video_source.series_name, f"{index_select+1}.mp4")
+        mp4_path = os.path.join(ROOT_PATH, ANIME_FOLDER, SERIES_FOLDER, video_source.series_name)
     else:
-        out_path = os.path.join(ROOT_PATH, ANIME_FOLDER, MOVIE_FOLDER, video_source.series_name, f"{index_select}.mp4")
-    
+        mp4_path = os.path.join(ROOT_PATH, ANIME_FOLDER, MOVIE_FOLDER, video_source.series_name)
+
     # Crete downloader
     obj_download = Downloader(
         m3u8_playlist = video_source.get_playlist(),
-        output_filename = out_path
+        output_filename = os.path.join(mp4_path, mp4_name)
     )
 
     # Start downloading

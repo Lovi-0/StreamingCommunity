@@ -181,12 +181,11 @@ def title_search(title: str) -> int:
 
 
 
-def get_select_title(switch: bool = False, type_filter: list = None) -> MediaItem:
+def get_select_title(type_filter: list = None) -> MediaItem:
     """
     Display a selection of titles and prompt the user to choose one.
 
     Args:
-        - switch (bool): switch from film to anime
         - type_filter (list): A list of media types to filter. Can include 'film', 'tv', 'ova'. Ex. ['tv', 'film']
 
     Returns:
@@ -223,7 +222,7 @@ def get_select_title(switch: bool = False, type_filter: list = None) -> MediaIte
         })
 
     # Run the table and handle user input
-    last_command = table_show_manager.run(force_int_input=True, max_int_input=len(media_search_manager.media_list), switch=switch)
+    last_command = table_show_manager.run(force_int_input=True, max_int_input=len(media_search_manager.media_list))
     table_show_manager.clear()
 
     # Handle user's quit command

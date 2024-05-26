@@ -61,14 +61,11 @@ class VideoSource:
 
         try:
             
-            # Make a request to collect information about preview of the title
             response = requests.post(f"https://{self.base_name}.{self.domain}/api/titles/preview/{self.media_id}", headers = self.headers)
             response.raise_for_status()
 
-            if response.ok:
-
-                # Collect all info about preview
-                self.obj_preview = PreviewManager(response.json())
+            # Collect all info about preview
+            self.obj_preview = PreviewManager(response.json())
 
         except Exception as e:
             logging.error(f"Error collecting preview info: {e}")
@@ -78,6 +75,7 @@ class VideoSource:
         """
         Collect information about seasons.
         """
+
         self.headers = {
             'user-agent': get_headers(),
             'x-inertia': 'true', 
@@ -86,18 +84,15 @@ class VideoSource:
 
         try:
 
-            # Make a request to collect information about seasons
             response = requests.get(f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", headers = self.headers)
             response.raise_for_status()
 
-            if response.ok:
-
-                # Extract JSON response if available
-                json_response = response.json().get('props', {}).get('title', {}).get('seasons', [])
+            # Extract JSON response if available
+            json_response = response.json().get('props', {}).get('title', {}).get('seasons', [])
                 
-                # Iterate over JSON data and add titles to the manager
-                for dict_season in json_response:
-                    self.obj_title_manager.add_title(dict_season)
+            # Iterate over JSON data and add titles to the manager
+            for dict_season in json_response:
+                self.obj_title_manager.add_title(dict_season)
 
         except Exception as e:
             logging.error(f"Error collecting season info: {e}")
@@ -116,14 +111,12 @@ class VideoSource:
             response = requests.get(f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', headers = self.headers)
             response.raise_for_status()
 
-            if response.ok:
-
-                # Extract JSON response if available
-                json_response = response.json().get('props', {}).get('loadedSeason', {}).get('episodes', [])
+            # Extract JSON response if available
+            json_response = response.json().get('props', {}).get('loadedSeason', {}).get('episodes', [])
                 
-                # Iterate over JSON data and add episodes to the manager
-                for dict_episode in json_response:
-                    self.obj_episode_manager.add_episode(dict_episode)
+            # Iterate over JSON data and add episodes to the manager
+            for dict_episode in json_response:
+                self.obj_episode_manager.add_episode(dict_episode)
 
         except Exception as e:
             logging.error(f"Error collecting title season info: {e}")
@@ -150,11 +143,9 @@ class VideoSource:
             response = requests.get(f"https://{self.base_name}.{self.domain}/iframe/{self.media_id}", params = params)
             response.raise_for_status()
 
-            if response.ok:
-
-                # Parse response with BeautifulSoup to get iframe source
-                soup = BeautifulSoup(response.text, "html.parser")
-                self.iframe_src: str = soup.find("iframe").get("src")
+            # Parse response with BeautifulSoup to get iframe source
+            soup = BeautifulSoup(response.text, "html.parser")
+            self.iframe_src: str = soup.find("iframe").get("src")
 
         except Exception as e:
             logging.error(f"Error getting iframe source: {e}")
