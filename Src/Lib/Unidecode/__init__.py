@@ -1,5 +1,7 @@
 # 16.05.24
 
+from unidecode import unidecode
+
 
 # Internal utilities
 from .alphabet import alpha_mappings
@@ -31,5 +33,5 @@ all_mappings = {
 
 def transliterate(text):
     translated_text = ''.join(all_mappings.get(c, c) for c in text)
-    return translated_text
-
+    transliterated_text = unidecode(translated_text)
+    return transliterated_text

@@ -18,9 +18,7 @@ from .Core.Util import manage_selection
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-ANIME_FOLDER = "animeunity"
-SERIES_FOLDER= "Serie"
-MOVIE_FOLDER = "Movie"
+from .costant import ANIME_FOLDER, SERIES_FOLDER, MOVIE_FOLDER
 
 
 # Variable

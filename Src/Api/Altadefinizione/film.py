@@ -18,8 +18,7 @@ from .Core.Player.supervideo import VideoSource
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-STREAMING_FOLDER = "altadefinizione"
-MOVIE_FOLDER = "Movie"
+from .costant import STREAMING_FOLDER, MOVIE_FOLDER
 
 
 # Variable

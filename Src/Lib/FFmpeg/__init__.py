@@ -3,7 +3,7 @@
 from .command import (
     join_video,
     join_audios,
-    join_subtitle
+    join_subtitle,
 )
 from .util import print_duration_table
 from .installer import check_ffmpeg

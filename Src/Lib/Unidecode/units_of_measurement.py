@@ -13,6 +13,4 @@ units_of_measurement_mapping = {
     'mm³': 'cubic millimeters',
     'km²': 'square kilometers',
     'km³': 'cubic kilometers',
-    'ha': 'hectares',
-    'ha': 'hectares',
 }

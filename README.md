@@ -73,9 +73,6 @@ You can change some behaviors by tweaking the configuration file.
 * tqdm_show_progress: Whether to show progress during downloads or not.
   - Default Value: true
 
-* fake_proxy: Speed up download for streaming film and series. **Dont work for anime, need to set to FALSE, only streamingcommunity**
-  - Default Value: false
-
 * create_report: When enabled, this option saves the name of the series or movie being downloaded along with the date and file size in a CSV file, providing a log of downloaded content.
   - Default Value: false
 

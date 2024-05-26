@@ -18,14 +18,11 @@
     "M3U8_DOWNLOAD": {
         "tdqm_workers": 30,
         "tqdm_show_progress": true,
-        "fake_proxy": false,
-        "fake_proxy_ip": ["57.129.7.85","57.129.7.188","57.129.7.174","57.129.4.77","57.129.16.196","57.129.16.156","57.129.16.139","57.129.16.135","57.129.13.175","57.129.13.157","51.38.112.237","51.195.107.7","51.195.107.230"],
         "create_report": false
     },
     "M3U8_FILTER": {
         "use_codec": false,
         "use_gpu": false,
-        "force_ts": false,
         "default_preset": "ultrafast",
         "cleanup_tmp_folder": true,
         "specific_list_audio": ["ita"],

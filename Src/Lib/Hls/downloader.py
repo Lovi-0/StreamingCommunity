@@ -46,7 +46,6 @@ from ..E_Table import report_table
 DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_FILTER', 'specific_list_audio')            
 DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_FILTER', 'specific_list_subtitles')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_FILTER', 'cleanup_tmp_folder')
-FORCE_TS = config_manager.get_dict('M3U8_FILTER', 'force_ts')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
 CREATE_REPORT = config_manager.get_bool('M3U8_DOWNLOAD', 'create_report')
 
@@ -80,13 +79,14 @@ class Downloader():
 
         else:
             folder, base_name = os.path.split(self.output_filename)                             # Split file_folder output
-            base_name = reduce_base_name(remove_special_characters(transliterate(base_name)))   # Remove special char
+            base_name = reduce_base_name(remove_special_characters(base_name))   # Remove special char
             create_folder(folder)                                                               # Create folder and check if exist
             if not can_create_file(base_name):                                                  # Check if folder file name can be create
                 logging.error("Invalid mp4 name.")
                 sys.exit(0)
 
             self.output_filename = os.path.join(folder, base_name)
+            self.output_filename = transliterate(self.output_filename)
 
         logging.info(f"Output filename: {self.output_filename}")
 
@@ -222,12 +222,15 @@ class Downloader():
         if self.codec is not None:
             console.log(f"[cyan]Find codec [white]=> ([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white], [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white], [green]'b'[white]: [yellow]{self.codec.bandwidth})")
 
-    def __donwload_video__(self):
+    def __donwload_video__(self, server_ip: list = None):
         """
         Downloads and manages video segments.
 
         This method downloads video segments if necessary and updates
         the list of downloaded video segments.
+
+        Args:
+            - server_ip (list): A list of IP addresses to use in requests.
         """
 
         # Construct full path for the video segment directory
@@ -243,6 +246,7 @@ class Downloader():
 
             # Create an instance of M3U8_Segments to handle video segments
             video_m3u8 = M3U8_Segments(self.m3u8_index, full_path_video)
+            video_m3u8.add_server_ip(server_ip)
 
             # Get information about the video segments
             video_m3u8.get_info()
@@ -253,12 +257,15 @@ class Downloader():
         else:
             console.log("[cyan]Video [red]already exists.")
 
-    def __donwload_audio__(self):
+    def __donwload_audio__(self, server_ip: list = None):
         """
         Downloads and manages audio segments.
 
         This method iterates over available audio tracks, downloads them if necessary, and updates
         the list of downloaded audio tracks.
+
+        Args:
+            - server_ip (list): A list of IP addresses to use in requests.
         """
 
         # Iterate over each available audio track
@@ -285,6 +292,7 @@ class Downloader():
 
                 # If the audio segment directory doesn't exist, download audio segments
                 audio_m3u8 = M3U8_Segments(obj_audio.get('uri'), full_path_audio)
+                audio_m3u8.add_server_ip(server_ip)
 
                 # Get information about the audio segments
                 audio_m3u8.get_info()
@@ -361,7 +369,7 @@ class Downloader():
             for future in futures:
                 future.result()
 
-    def __join_video__(self, force_ts = False, vcodec = 'copy') -> str:
+    def __join_video__(self, vcodec = 'copy') -> str:
         """
         Join downloaded video segments into a single video file.
 
@@ -378,7 +386,6 @@ class Downloader():
             join_video(
                 video_path = self.downloaded_video[0].get('path'),
                 out_path = path_join_video,
-                force_ts = force_ts,
                 vcodec = vcodec
             )
 
@@ -459,9 +466,12 @@ class Downloader():
         else:
             logging.info("Video file converted already exist.")
 
-    def start(self) -> None:
+    def start(self, server_ip: list = None) -> None:
         """
         Start the process of fetching, downloading, joining, and cleaning up the video.
+
+        Args:
+            - server_ip (list): A list of IP addresses to use in requests.
         """
 
         # Check if file already exist
@@ -492,8 +502,8 @@ class Downloader():
             self.__manage_playlist__(m3u8_playlist_text)
 
             # Start all download ...
-            self.__donwload_video__()
-            self.__donwload_audio__()
+            self.__donwload_video__(server_ip)
+            self.__donwload_audio__(server_ip)
             self.__download_subtitle__()
 
             # Check file to convert
@@ -529,10 +539,7 @@ class Downloader():
             self.__donwload_video__()
 
             # Convert video
-            if FORCE_TS:
-                converted_out_path = self.__join_video__(force_ts=True, vcodec="libx264")
-            else:
-                converted_out_path = self.__join_video__()
+            converted_out_path = self.__join_video__()
 
             # Clean all tmp file
             self.__clean__(converted_out_path)

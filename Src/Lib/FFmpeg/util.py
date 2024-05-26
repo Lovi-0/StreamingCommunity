@@ -105,3 +105,66 @@ def print_duration_table(file_path: str) -> None:
     if video_duration is not None:
         hours, minutes, seconds = format_duration(video_duration)
         console.log(f"[cyan]Duration for [white]([green]{os.path.basename(file_path)}[white]): [yellow]{int(hours)}[red]h [yellow]{int(minutes)}[red]m [yellow]{int(seconds)}[red]s")
+
+
+def get_ffprobe_info(file_path):
+    """
+    Get format and codec information for a media file using ffprobe.
+
+    Args:
+        file_path (str): Path to the media file.
+
+    Returns:
+        dict: A dictionary containing the format name and a list of codec names.
+    """
+    try:
+        result = subprocess.run(
+            ['ffprobe', '-v', 'error', '-show_format', '-show_streams', '-print_format', 'json', file_path],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True
+        )
+        output = result.stdout
+        info = json.loads(output)
+        
+        format_name = info['format']['format_name'] if 'format' in info else None
+        codec_names = [stream['codec_name'] for stream in info['streams']] if 'streams' in info else []
+        
+        return {
+            'format_name': format_name,
+            'codec_names': codec_names
+        }
+    
+    except subprocess.CalledProcessError as e:
+        logging.error(f"ffprobe failed for file {file_path}: {e}")
+        return None
+    
+    except json.JSONDecodeError as e:
+        logging.error(f"Failed to parse JSON output from ffprobe for file {file_path}: {e}")
+        return None
+
+def is_png_format_or_codec(file_info):
+    """
+    Check if the format is 'png_pipe' or if any codec is 'png'.
+
+    Args:
+        file_info (dict): The dictionary containing file information.
+
+    Returns:
+        bool: True if the format is 'png_pipe' or any codec is 'png', otherwise False.
+    """
+    if not file_info:
+        return False
+    return file_info['format_name'] == 'png_pipe' or 'png' in file_info['codec_names']
+
+def need_to_force_to_ts(file_path):
+    """
+    Get if a file to TS format if it is in PNG format or contains a PNG codec.
+
+    Args:
+        file_path (str): Path to the input media file.
+    """
+    logging.info(f"Processing file: {file_path}")
+    file_info = get_ffprobe_info(file_path)
+
+    if is_png_format_or_codec(file_info):
+       return True
+    return False

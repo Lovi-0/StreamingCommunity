@@ -20,8 +20,7 @@ from .Core.Util import manage_selection, map_episode_title
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-STREAMING_FOLDER = "streamingcommunity"
-SERIES_FOLDER = "Serie"
+from .costant import STREAMING_FOLDER, SERIES_FOLDER, SERVER_IP
 
 
 # Variable
@@ -97,7 +96,7 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
     Downloader(
         m3u8_playlist = master_playlist,
         output_filename = os.path.join(mp4_path, mp4_name)
-    ).start()
+    ).start(SERVER_IP)
 
 
 def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: bool = False) -> None:

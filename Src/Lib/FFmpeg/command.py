@@ -16,9 +16,9 @@ except: pass
 
 
 # Internal utilities
-from Src.Util.os import check_file_existence
 from Src.Util._jsonConfig import config_manager
-from .util import has_audio_stream
+from Src.Util.os import check_file_existence
+from .util import has_audio_stream, need_to_force_to_ts
 from .capture import capture_ffmpeg_real_time
 
 
@@ -257,7 +257,7 @@ def __transcode_with_subtitles(video: str, subtitles_list: List[Dict[str, str]],
 
 
 # --> v 1.1 (new)
-def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str = None, bitrate: str = None, force_ts = False):
+def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str = None, bitrate: str = None):
     
     """
     Joins single ts video file to mp4
@@ -281,8 +281,9 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
     ffmpeg_cmd.extend(['-hwaccel', 'cuda', '-hwaccel_output_format', 'cuda'])
 
     # Add mpegts to force to detect input file as ts file
-    if force_ts:
+    if need_to_force_to_ts(video_path):
         ffmpeg_cmd.extend(['-f', 'mpegts'])
+        vcodec = "libx264"
 
     # Insert input video path
     ffmpeg_cmd.extend(['-i', video_path])

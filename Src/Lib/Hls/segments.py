@@ -35,8 +35,6 @@ from ..M3U8 import (
 # Config
 TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
 TQDM_SHOW_PROGRESS = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_show_progress')
-FAKE_PROXY = config_manager.get_float('M3U8_DOWNLOAD', 'fake_proxy')
-FAKE_PROXY_IP = config_manager.get_list('M3U8_DOWNLOAD', 'fake_proxy_ip')
 REQUEST_TIMEOUT = config_manager.get_int('M3U8_REQUESTS', 'timeout')
 REQUEST_VERIFY_SSL = config_manager.get_bool('M3U8_REQUESTS', 'verify_ssl')
 REQUEST_DISABLE_ERROR = config_manager.get_bool('M3U8_REQUESTS', 'disable_error')
@@ -67,8 +65,20 @@ class M3U8_Segments:
         self.ctrl_c_detected = False                                # Global variable to track Ctrl+C detection
 
         os.makedirs(self.tmp_folder, exist_ok=True)                 # Create the temporary folder if it does not exist
-        self.class_ts_estimator = M3U8_Ts_Estimator(TQDM_MAX_WORKER) 
+        self.class_ts_estimator = M3U8_Ts_Estimator(TQDM_MAX_WORKER, 0) 
         self.class_url_fixer = M3U8_UrlFix(url)
+        self.fake_proxy = False
+
+    def add_server_ip(self, list_ip):
+        """
+        Add server IP addresses 
+
+        Args:
+            list_ip (list): A list of IP addresses to be added.
+        """
+        if list_ip is not None:
+            self.fake_proxy = True
+            self.fake_proxy_ip = list_ip
 
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
@@ -143,7 +153,7 @@ class M3U8_Segments:
                 logging.info(f"Generated new URL: {self.segments[i]}, from: {segment_url}")
 
         # Change IP address of server
-        if FAKE_PROXY:
+        if self.fake_proxy:
             for i in range(len(self.segments)):
                 segment_url = self.segments[i]
 
@@ -154,6 +164,9 @@ class M3U8_Segments:
         with open(path_m3u8_file, "w") as file:
             for item in self.segments:
                 file.write(f"{item}\n")
+
+        # Update segments for estimator
+        self.class_ts_estimator.total_segments = len(self.segments)
 
     def get_info(self) -> None:
         """
@@ -183,41 +196,12 @@ class M3U8_Segments:
         Returns:
             str: The modified URL with the new IP address.
         """
-        new_ip_address = FAKE_PROXY_IP[url_index % len(FAKE_PROXY_IP)]
+        new_ip_address = self.fake_proxy_ip[url_index % len(self.fake_proxy_ip)]
 
         # Parse the original URL and replace the hostname with the new IP address
         parsed_url = urlparse(url)._replace(netloc=new_ip_address)  
 
         return urlunparse(parsed_url)
-
-    def update_progress_bar(self, segment_content: bytes, duration: float, progress_counter: tqdm) -> None:
-        """
-        Updates the progress bar with information about the TS segment download.
-
-        Args:
-            segment_content (bytes): The content of the downloaded TS segment.
-            duration (float): The duration of the segment download in seconds.
-            progress_counter (tqdm): The tqdm object representing the progress bar.
-        """
-        if TQDM_SHOW_PROGRESS:
-            total_downloaded = len(segment_content)
-
-            # Add the size of the downloaded segment to the estimator
-            self.class_ts_estimator.add_ts_file(total_downloaded * len(self.segments), total_downloaded, duration)
-                    
-            # Get downloaded size and total estimated size
-            downloaded_file_size_str = self.class_ts_estimator.get_downloaded_size().split(' ')[0]                                    
-            file_total_size = self.class_ts_estimator.calculate_total_size()
-            number_file_total_size = file_total_size.split(' ')[0]
-            units_file_total_size = file_total_size.split(' ')[1]
-
-            average_internet_speed = self.class_ts_estimator.get_average_speed()
-
-            # Update the progress bar's postfix
-            progress_counter.set_postfix_str(
-                f"{Colors.WHITE}[ {Colors.GREEN}{downloaded_file_size_str} {Colors.WHITE}< {Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
-                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed:.2f} {Colors.RED}MB/s"
-            )
 
     def make_requests_stream(self, ts_url: str, index: int, stop_event: threading.Event, progress_bar: tqdm) -> None:
         """
@@ -248,7 +232,8 @@ class M3U8_Segments:
 
                 # Get the content of the segment
                 segment_content = response.content
-                self.update_progress_bar(segment_content, duration, progress_bar)
+                if TQDM_SHOW_PROGRESS:
+                    self.class_ts_estimator.update_progress_bar(segment_content, duration, progress_bar)
 
                 # Decrypt the segment content if decryption is needed
                 if self.decryption is not None:
@@ -315,8 +300,9 @@ class M3U8_Segments:
             total=len(self.segments), 
             unit='s',
             ascii=' #',
-            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.0f}}% {Colors.MAGENTA}{{bar}} {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]",
-            dynamic_ncols=True
+            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]",
+            dynamic_ncols=True,
+            mininterval=0.01
         )
 
         def signal_handler(sig, frame):
@@ -342,7 +328,7 @@ class M3U8_Segments:
                 time.sleep(0.025)
 
                 if self.ctrl_c_detected:
-                    console.log("[red]1. Ctrl+C detected. Stopping further downloads.")
+                    console.log("[red]Ctrl+C detected. Stopping further downloads.")
 
                     stop_event.set()
                     with self.condition:
