@@ -141,6 +141,7 @@ def get_ffprobe_info(file_path):
         logging.error(f"Failed to parse JSON output from ffprobe for file {file_path}: {e}")
         return None
 
+
 def is_png_format_or_codec(file_info):
     """
     Check if the format is 'png_pipe' or if any codec is 'png'.
@@ -155,6 +156,7 @@ def is_png_format_or_codec(file_info):
         return False
     return file_info['format_name'] == 'png_pipe' or 'png' in file_info['codec_names']
 
+
 def need_to_force_to_ts(file_path):
     """
     Get if a file to TS format if it is in PNG format or contains a PNG codec.
@@ -168,3 +170,43 @@ def need_to_force_to_ts(file_path):
     if is_png_format_or_codec(file_info):
        return True
     return False
+
+
+def check_ffmpeg_input(input_file):
+    """
+    Check if an input file can be processed by FFmpeg.
+
+    Args:
+        input_file (str): Path to the input file.
+    
+    Returns:
+        bool: True if the input file is valid and can be processed by FFmpeg, False otherwise.
+    """
+    command = [
+        'ffmpeg', '-v', 'error', '-i', input_file, '-f', 'null', '-'
+    ]
+    logging.info(f"FFmpeg command check: {command}")
+
+    try:
+        # Run the FFmpeg command and capture output
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        # Check the exit status
+        if result.returncode != 0:
+            logging.error("FFmpeg encountered an error with the input file:")
+            logging.error(result.stderr.decode('utf-8'))
+            return False
+        
+        # Optionally, you can analyze the output to check for specific errors
+        stderr_output = result.stderr.decode('utf-8')
+        if 'error' in stderr_output.lower():
+            logging.error("FFmpeg reported an error in the input file:")
+            logging.error(stderr_output)
+            return False
+
+        logging.info(f"Input file is valid: {input_file}")
+        return True
+
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {e}")
+        return False

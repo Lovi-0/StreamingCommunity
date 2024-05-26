@@ -24,6 +24,7 @@
         "use_codec": false,
         "use_gpu": false,
         "default_preset": "ultrafast",
+        "check_output_conversion": false,
         "cleanup_tmp_folder": true,
         "specific_list_audio": ["ita"],
         "specific_list_subtitles": ["eng"]

@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 import logging
 import shutil
 import threading
@@ -18,7 +19,7 @@ except: pass
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
 from Src.Util.os import check_file_existence
-from .util import has_audio_stream, need_to_force_to_ts
+from .util import has_audio_stream, need_to_force_to_ts, check_ffmpeg_input
 from .capture import capture_ffmpeg_real_time
 
 
@@ -28,6 +29,7 @@ DEBUG_FFMPEG = "debug" if DEBUG_MODE else "error"
 USE_CODECS = config_manager.get_bool("M3U8_FILTER", "use_codec")
 USE_GPU = config_manager.get_bool("M3U8_FILTER", "use_gpu")
 FFMPEG_DEFAULT_PRESET = config_manager.get("M3U8_FILTER", "default_preset")
+CHECK_OUTPUT_CONVERSION = config_manager.get_bool("M3U8_FILTER", "check_output_conversion")
 
 
 
@@ -306,12 +308,18 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
     ffmpeg_cmd += [out_path, "-y"]
     logging.info(f"FFmpeg command: {ffmpeg_cmd}")
 
-    # --> Run
+    # Run join
     if DEBUG_MODE:
         subprocess.run(ffmpeg_cmd, check=True)
     else:
         capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join video")
         print()
+
+    # Check file
+    if CHECK_OUTPUT_CONVERSION:
+        time.sleep(0.5)
+        check_ffmpeg_input(out_path)
+
 
 def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: str, vcodec: str = 'copy', acodec: str = 'aac', bitrate: str = '192k'):
     """
@@ -351,14 +359,21 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
     ffmpeg_cmd += [out_path, "-y"]
     logging.info(f"FFmpeg command: {ffmpeg_cmd}")
 
-    # --> Run
+    # Run join
     if DEBUG_MODE:
         subprocess.run(ffmpeg_cmd, check=True)
     else:
         capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join audio")
         print()
 
-def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], output_file: str):
+
+    # Check file
+    if CHECK_OUTPUT_CONVERSION:
+        time.sleep(0.5)
+        check_ffmpeg_input(out_path)
+
+
+def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_path: str):
     """
     Joins subtitles with a video file using FFmpeg.
     
@@ -366,7 +381,7 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], output_
         - video (str): The path to the video file.
         - subtitles_list (list[dict[str, str]]): A list of dictionaries containing information about subtitles.
             Each dictionary should contain the 'path' key with the path to the subtitle file and the 'name' key with the name of the subtitle.
-        - output_file (str): The path to save the output file.
+        - out_path (str): The path to save the output file.
     """
 
     if not check_file_existence(video_path):
@@ -399,12 +414,17 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], output_
         ffmpeg_cmd.extend(['-c', 'copy', '-c:s', 'mov_text'])
 
     # Overwrite
-    ffmpeg_cmd += [output_file, "-y"]
+    ffmpeg_cmd += [out_path, "-y"]
     logging.info(f"FFmpeg command: {ffmpeg_cmd}")
 
-    # --> Run
+    # Run join
     if DEBUG_MODE:
         subprocess.run(ffmpeg_cmd, check=True)
     else:
         capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join subtitle")
         print()
+
+    # Check file
+    if CHECK_OUTPUT_CONVERSION:
+        time.sleep(0.5)
+        check_ffmpeg_input(out_path)

@@ -22,7 +22,6 @@ from Src.Util.os import (
     reduce_base_name, 
     remove_special_characters
 )
-from Src.Lib.Unidecode import transliterate
 from Src.Util.file_validator import can_create_file
 
 
@@ -40,6 +39,10 @@ from ..M3U8 import (
 )
 from .segments import M3U8_Segments
 from ..E_Table import report_table
+
+
+# External library
+from unidecode import unidecode as transliterate
 
 
 # Config
@@ -448,6 +451,12 @@ class Downloader():
         Args:
             - out_path (str): Path of the output file.
         """
+
+        # Check if file to rename exist
+        logging.info(f"Check if end file converted exist: {out_path}")
+        if not os.path.exists(out_path):
+            logging.info("Video file converted not exist.")
+            sys.exit(0)
 
         # Rename the output file to the desired output filename if not exist
         if not os.path.exists(self.output_filename):

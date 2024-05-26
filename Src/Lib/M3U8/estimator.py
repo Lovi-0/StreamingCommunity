@@ -1,5 +1,7 @@
 # 20.02.24
 
+import logging
+
 from collections import deque
 
 
@@ -34,10 +36,14 @@ class M3U8_Ts_Estimator:
         Add a file size to the list of file sizes.
 
         Args:
-            - size (float): The size of the ts file to be added.
+            - size (int): The size of the ts file to be added.
             - size_download (int): Single size of the ts file.
             - duration (float): Time to download segment file.
         """
+        if size <= 0 or size_download <= 0 or duration <= 0:
+            logging.error("Invalid input values: size=%d, size_download=%d, duration=%f", size, size_download, duration)
+            return
+
         self.ts_file_sizes.append(size)
         self.now_downloaded_size += size_download
 
@@ -45,8 +51,14 @@ class M3U8_Ts_Estimator:
         if len(self.smoothed_speeds) <= 3:
             size_download = size_download / self.tqdm_workers
 
-        # Calculate mbps 
-        speed_mbps = (size_download * 8) / (duration * 1_000_000)  * self.tqdm_workers
+        try:
+            # Calculate mbps 
+            speed_mbps = (size_download * 8) / (duration * 1_000_000) * self.tqdm_workers
+
+        except ZeroDivisionError as e:
+            logging.error("Division by zero error while calculating speed: %s", e)
+            return
+
         self.list_speeds.append(speed_mbps)
 
         # Calculate moving average
@@ -62,17 +74,25 @@ class M3U8_Ts_Estimator:
         Calculate the total size of the files.
 
         Returns:
-            float: The mean size of the files in a human-readable format.
+            str: The mean size of the files in a human-readable format.
         """
+        try:
+            if len(self.ts_file_sizes) == 0:
+                raise ValueError("No file sizes available to calculate total size.")
 
-        if len(self.ts_file_sizes) == 0:
-            return 0
+            total_size = sum(self.ts_file_sizes)
+            mean_size = total_size / len(self.ts_file_sizes)
 
-        total_size = sum(self.ts_file_sizes)
-        mean_size = total_size / len(self.ts_file_sizes)
-
-        # Return format mean
-        return format_size(mean_size)
+            # Return formatted mean size
+            return format_size(mean_size)
+        
+        except ZeroDivisionError as e:
+            logging.error("Division by zero error occurred: %s", e)
+            return "0B"
+        
+        except Exception as e:
+            logging.error("An unexpected error occurred: %s", e)
+            return "Error"
     
     def get_average_speed(self) -> float:
         """

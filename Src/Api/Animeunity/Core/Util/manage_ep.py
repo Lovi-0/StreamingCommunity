@@ -7,7 +7,6 @@ from typing import List
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
-from Src.Lib.Unidecode import transliterate
 
 
 # Logic class
@@ -70,7 +69,6 @@ def map_episode_title(tv_name: str, episode: Episode, number_season: int):
 
     # Additional fix
     map_episode_temp = map_episode_temp.replace(".", "_")
-    map_episode_temp = transliterate(map_episode_temp)
 
     logging.info(f"Map episode string return: {map_episode_temp}")
     return map_episode_temp

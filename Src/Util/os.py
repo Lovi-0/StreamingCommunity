@@ -325,6 +325,9 @@ def format_size(size_bytes: float) -> str:
         str: The formatted size.
     """
 
+    if size_bytes <= 0:
+        return "0B"
+
     units = ['B', 'KB', 'MB', 'GB', 'TB']
     unit_index = 0
 

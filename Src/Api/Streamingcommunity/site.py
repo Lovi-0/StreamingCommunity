@@ -17,7 +17,6 @@ from Src.Lib.Request import requests
 from Src.Util.headers import get_headers
 from Src.Util.console import console
 from Src.Util._jsonConfig import config_manager
-from Src.Lib.Unidecode import transliterate
 
 
 # Logic class
@@ -137,7 +136,7 @@ def title_search(title_search: str, domain: str) -> int:
     """
     
     # Send request to search for titles ( replace à to a and space to "+" )
-    response = requests.get(f"https://{SC_SITE_NAME}.{domain}/api/search?q={transliterate(title_search).replace(' ', '+')}", headers={'user-agent': get_headers()})
+    response = requests.get(f"https://{SC_SITE_NAME}.{domain}/api/search?q={title_search.replace(' ', '+')}", headers={'user-agent': get_headers()})
 
     # Add found titles to media search manager
     for dict_title in response.json()['data']:
