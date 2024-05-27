@@ -275,6 +275,7 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
     """
 
     if not check_file_existence(video_path):
+        logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
     # Start command
@@ -340,6 +341,7 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
     """
 
     if not check_file_existence(video_path):
+        logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
     # Start command
@@ -389,6 +391,7 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
     """
 
     if not check_file_existence(video_path):
+        logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
 

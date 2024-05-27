@@ -3,8 +3,6 @@
 import csv
 import logging
 
-from typing import List
-
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
