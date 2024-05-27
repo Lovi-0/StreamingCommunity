@@ -460,9 +460,11 @@ class Downloader():
 
         # Rename the output file to the desired output filename if not exist
         if not os.path.exists(self.output_filename):
+
+            # Rename file converted to original set in init
             os.rename(out_path, self.output_filename)
 
-            print("\n")
+            # Print size of the file
             console.print(Panel(f"[bold green]Download completed![/bold green]\nFile size: [bold]{format_size(os.path.getsize(self.output_filename))}[/bold]", title=f"{os.path.basename(self.output_filename.replace('.mp4', ''))}", border_style="green"))
 
             # Delete all files except the output file

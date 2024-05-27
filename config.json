@@ -7,13 +7,7 @@
         "clean_console": true,
         "root_path": "Video",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
-        "create_job_database": false,
         "not_close": false
-    },
-    "SITE": {
-        "streamingcommunity": "foo",
-        "animeunity": "to",
-        "altadefinizione": "food"
     },
     "M3U8_DOWNLOAD": {
         "tdqm_workers": 30,
@@ -39,5 +33,10 @@
     "M3U8_PARSER": {
         "skip_empty_row_playlist": false,
         "force_resolution": -1
+    },
+    "SITE": {
+        "streamingcommunity": "foo",
+        "animeunity": "to",
+        "altadefinizione": "food"
     }
 }

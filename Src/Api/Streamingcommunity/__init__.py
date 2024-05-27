@@ -53,6 +53,3 @@ def main_film_series():
     # If no media find
     else:
         console.print("[red]Cant find a single element")
-
-    # End
-    console.print("\n[red]Done")

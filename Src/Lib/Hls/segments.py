@@ -302,6 +302,7 @@ class M3U8_Segments:
             ascii=' #',
             bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]",
             dynamic_ncols=True,
+            ncols=80,
             mininterval=0.01
         )
 

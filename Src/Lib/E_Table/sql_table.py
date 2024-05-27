@@ -10,7 +10,6 @@ from Src.Util._jsonConfig import config_manager
 
 # Variable
 CREATE_REPORT = config_manager.get_bool('M3U8_DOWNLOAD', 'create_report')
-CREATE_JOB_DB = config_manager.get_bool('DEFAULT', 'create_job_database')
 
 
 class SimpleDBManager:
@@ -211,11 +210,3 @@ if CREATE_REPORT:
     report_table.save_database()
 else:
     report_table = None
-
-
-if CREATE_JOB_DB:
-    job_database = SimpleDBManager("Job_database.csv", ["Id", "Name", "Season_n"])
-    job_database.load_database()
-    job_database.save_database()
-else:
-    job_database = None

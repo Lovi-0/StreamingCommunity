@@ -34,5 +34,3 @@ def main_film():
             url=select_title.url
         )
 
-    # End
-    console.print("\n[red]Done")
