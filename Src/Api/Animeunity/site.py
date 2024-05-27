@@ -6,6 +6,7 @@ import logging
 
 # External libraries
 from bs4 import BeautifulSoup
+from unidecode import unidecode
 
 
 # Internal utilities
@@ -160,7 +161,7 @@ def title_search(title: str) -> int:
 
     # Prepare JSON data to be sent in the request
     json_data = {
-        'title': title  # Use the provided title for the search
+        'title': unidecode(title)  # Use the provided title for the search
     }
 
     # Send a POST request to the API endpoint for live search

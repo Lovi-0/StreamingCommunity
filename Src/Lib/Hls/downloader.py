@@ -7,6 +7,10 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 
+# External library
+from unidecode import unidecode
+
+
 # Internal utilities
 from Src.Lib.Request.my_requests import requests
 from Src.Util.headers import get_headers
@@ -39,10 +43,6 @@ from ..M3U8 import (
 )
 from .segments import M3U8_Segments
 from ..E_Table import report_table
-
-
-# External library
-from unidecode import unidecode as transliterate
 
 
 # Config
@@ -89,7 +89,7 @@ class Downloader():
                 sys.exit(0)
 
             self.output_filename = os.path.join(folder, base_name)
-            self.output_filename = transliterate(self.output_filename)
+            self.output_filename = unidecode(self.output_filename)
 
         logging.info(f"Output filename: {self.output_filename}")
 

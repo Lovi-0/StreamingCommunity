@@ -19,6 +19,7 @@ except: pass
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
 from Src.Util.os import check_file_existence
+from Src.Util.console import console
 from .util import has_audio_stream, need_to_force_to_ts, check_ffmpeg_input
 from .capture import capture_ffmpeg_real_time
 
@@ -284,6 +285,7 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
 
     # Add mpegts to force to detect input file as ts file
     if need_to_force_to_ts(video_path):
+        console.log("[red]Force input file to 'mpegts'.")
         ffmpeg_cmd.extend(['-f', 'mpegts'])
         vcodec = "libx264"
 
@@ -317,6 +319,7 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
 
     # Check file
     if CHECK_OUTPUT_CONVERSION:
+        console.log("[red]Check output ffmpeg")
         time.sleep(0.5)
         check_ffmpeg_input(out_path)
 
@@ -369,6 +372,7 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
 
     # Check file
     if CHECK_OUTPUT_CONVERSION:
+        console.log("[red]Check output ffmpeg")
         time.sleep(0.5)
         check_ffmpeg_input(out_path)
 
@@ -426,5 +430,6 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
 
     # Check file
     if CHECK_OUTPUT_CONVERSION:
+        console.log("[red]Check output ffmpeg")
         time.sleep(0.5)
         check_ffmpeg_input(out_path)
