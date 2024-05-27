@@ -30,18 +30,15 @@ export async function getEpisodesInfo(mediaId: number, mediaSlug: string, mediaT
   });
 }
 
-async function downloadMedia(mediaId: number, mediaSlug: string, mediaType: string, downloadId?: number): Promise<AxiosResponse<DownloadResponse>> {
+async function downloadMedia(mediaId: number, mediaSlug: string, mediaType: string): Promise<AxiosResponse<DownloadResponse>> {
   const url = `/download/`;
   const data = {
     media_id: mediaId,
     media_slug: mediaSlug,
     type_media: mediaType,
-    download_id: downloadId,
   };
   return post(url, data);
 }
 
 export const downloadFilm = (mediaId: number, mediaSlug: string) => downloadMedia(mediaId, mediaSlug, 'MOVIE');
-export const downloadTvSeries = (mediaId: number, mediaSlug: string, downloadId: number) => downloadMedia(mediaId, mediaSlug, 'TV', downloadId);
 export const downloadAnimeFilm = (mediaId: number, mediaSlug: string) => downloadMedia(mediaId, mediaSlug, 'OVA');
-export const downloadAnimeSeries = (mediaId: number, mediaSlug: string, downloadId: number) => downloadMedia(mediaId, mediaSlug, 'TV_ANIME', downloadId);
