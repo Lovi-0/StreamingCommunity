@@ -57,8 +57,3 @@ export interface Season {
 export interface SeasonResponse {
   episodes: Season;
 }
-
-export interface DownloadResponse {
-    error: string;
-    message: string;
-}

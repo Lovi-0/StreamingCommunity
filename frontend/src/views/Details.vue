@@ -1,42 +1,23 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import type {Episode, MediaItem, SeasonResponse} from "@/api/interfaces";
-import { onBeforeMount, onMounted, ref } from "vue";
-import { getEpisodesInfo, getPreview } from "@/api/api";
-import {
-  alertDownload,
-  handleMovieDownload,
-  handleOVADownload,
-  handleTVAnimeDownload,
-  handleTvAnimeEpisodesDownload,
-  handleTVDownload, handleTVEpisodesDownload
-} from "@/api/utils";
+import type {Episode, MediaItem, Season, SeasonResponse} from "@/api/interfaces";
+import { onMounted, ref } from "vue";
+import {downloadFilm, getEpisodesInfo} from "@/api/api";
 
 const route = useRoute()
 
 const item: MediaItem = JSON.parse(<string>route.params.item)
 const imageUrl: string = <string>route.params.imageUrl
 const animeEpisodes = ref<Episode[]>([])
-const totalEpisodes = ref<number>(0)
 const tvShowEpisodes = ref<any[]>([])
 const loading = ref(false)
 const selectingEpisodes = ref(false)
-const selectedEpisodes = ref<Episode[]>([])
-const previewItem = ref<MediaItem>(item)
-
-onBeforeMount(async () => {
-  const res = await getPreview(item.id, item.slug, item.type)
-  if (res && res.data) {
-    previewItem.plot = res.data.plot
-  }
-})
 
 onMounted(async () => {
-  loading.value = true;
   if (['MOVIE', 'OVA', 'SPECIAL'].includes(item.type)) {
-    loading.value = false;
     return
   } else {
+    loading.value = true;
     const response = await getEpisodesInfo(item.id, item.slug, item.type)
     if (response && response.body) {
       loading.value = false;
@@ -50,7 +31,6 @@ onMounted(async () => {
         if (item.type === 'TV_ANIME') {
           const episodesData:Episode = JSON.parse(value.trim());
           animeEpisodes.value.push(episodesData);
-          totalEpisodes.value = episodesData.episode_total;
         } else {
           const episodesData:SeasonResponse = JSON.parse(value.trim());
           for (const seasonKey in episodesData.episodes) {
@@ -70,59 +50,30 @@ onMounted(async () => {
 
 const toggleEpisodeSelection = () => {
   selectingEpisodes.value = !selectingEpisodes.value
-  selectedEpisodes.value = []
 }
 
-const toggleEpisodeSelect = (episode: Episode, seasonNumber?: number) => {
-  if (selectedEpisodes.value.includes(episode)) {
-    selectedEpisodes.value = selectedEpisodes.value.filter(e => e !== episode)
-  } else {
-    if (seasonNumber) {
-      episode.season_index = seasonNumber
+const downloadItems = async () => {
+  try {
+    if (item.type === 'MOVIE') {
+      const res = await downloadFilm(item.id, item.slug, item.type)
+      if (res.error) {
+        throw new Error(res.error + ' - ' + res.message)
+      }
+      alertDownload()
+      return
     }
-    selectedEpisodes.value.push(episode)
+  } catch (error) {
+    alertDownload(error)
   }
 }
 
-const downloadSelectedEpisodes = async () => {
-  try {
-    switch (item.type) {
-      case 'TV':
-        await handleTVEpisodesDownload(selectedEpisodes.value, item);
-      case 'TV_ANIME':
-        await handleTvAnimeEpisodesDownload(selectedEpisodes.value, item);
-        break;
-      default:
-        throw new Error('Tipo di media non supportato');
-    }
-    toggleEpisodeSelection();
-  } catch (error) {
-    alertDownload(error);
+const alertDownload = (message?: any) => {
+  if (message) {
+    alert(message)
+    return;
   }
-};
-
-const downloadAllItems = async () => {
-  try {
-    switch (item.type) {
-      case 'TV':
-        await handleTVDownload(tvShowEpisodes.value, item);
-      case 'MOVIE':
-        await handleMovieDownload(item);
-        break;
-      case 'TV_ANIME':
-        await handleTVAnimeDownload(totalEpisodes.value, item);
-        break;
-      case 'OVA':
-      case 'SPECIAL':
-        await handleOVADownload(item);
-        break;
-      default:
-        throw new Error('Tipo di media non supportato');
-    }
-  } catch (error) {
-    alertDownload(error);
-  }
-};
+  alert('Il downlaod è iniziato, il file sarà disponibile tra qualche minuto nella cartella \'Video\' del progetto...')
+}
 </script>
 
 <template>
@@ -136,56 +87,37 @@ const downloadAllItems = async () => {
           <h1 class="details-title">{{ item.name }}</h1>
           <h3>★ {{ item.score }}</h3>
           <div class="details-description">
-            <p>{{ item.plot }}</p>
+            <p v-if="item.type == 'TV_ANIME'">{{ item.plot }}</p>
+            <p v-else-if="tvShowEpisodes.length > 0">{{ tvShowEpisodes[0][0].plot }}</p>
           </div>
-          <h3 v-if="animeEpisodes.length > 0 && !loading">Numero episodi: {{ totalEpisodes }}</h3>
+          <h3 v-if="animeEpisodes.length > 0 && !loading">Numero episodi: {{ animeEpisodes[0].episode_total }}</h3>
           <h3 v-if="tvShowEpisodes.length > 0 && !loading">Numero stagioni: {{ tvShowEpisodes.length }}</h3>
-          <hr style="opacity: 0.2; margin-top: 10px"/>
-
-          <!--DOWNLOAD SECTION-->
+          <hr style="opacity: 0.2"/>
           <div class="download-section">
-            <button :disabled="loading || selectingEpisodes"
-                    @click.prevent="downloadAllItems">
-              Scarica {{['TV_ANIME', 'TV'].includes(item.type)? 'tutto' : ''}}
-            </button>
+            <button :disabled="loading || selectingEpisodes" @click="downloadItems">Scarica {{['TV_ANIME', 'TV'].includes(item.type)? 'tutto' : ''}}</button>
             <template v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)">
-              <button @click="toggleEpisodeSelection">
-                {{selectingEpisodes ? 'Disattiva' : 'Attiva'}} selezione episodi
-              </button>
-              <button :disabled="selectedEpisodes.length == 0"
-                      @click="downloadSelectedEpisodes">
-                Download episodi selezionati
-              </button>
+              <button @click="toggleEpisodeSelection">{{selectingEpisodes ? 'Disattiva' : 'Attiva'}} selezione episodi</button>
+              <button>Download episodi</button>
             </template>
           </div>
         </div>
       </div>
 
       <!--SERIES SECTION-->
-      <div v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)"
-           :class="item.type == 'TV_ANIME' ? 'episodes-container' : 'season-container'">
+      <div v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)" :class="item.type == 'TV_ANIME' ? 'episodes-container' : 'season-container'">
           <div v-if="animeEpisodes.length == 0 && tvShowEpisodes.length == 0">
             <p>Non ci sono episodi...</p>
           </div>
-          <div v-else-if="item.type == 'TV_ANIME'"
-             v-for="episode in animeEpisodes"
-             :key="episode.id"
-             class="episode-item"
-             :style="{ backgroundColor: selectedEpisodes.includes(episode) ? '#42b883' : '#333' }"
-             @click="selectingEpisodes ? toggleEpisodeSelect(episode) : null">
-          <div class="episode-title">Episodio {{ episode.number }}</div>
-        </div>
-          <div v-else-if="item.type == 'TV'" v-for="(season, index) in tvShowEpisodes" v-bind:key="season.number" class="season-item">
+          <div v-else-if="item.type == 'TV_ANIME'" v-for="episode in animeEpisodes" :key="episode.id" class="episode-item">
+            <div class="episode-title">Episodio {{ episode.number }}</div>
+          </div>
+          <div v-else-if="item.type == 'TV'" v-for="(season, index) in tvShowEpisodes" class="season-item">
             <div class="season-title">Stagione {{ index + 1 }}</div>
             <div class="episode-container">
-              <div v-for="episode in season" :key="episode.id">
-                <div class="episode-item"
-                     :style="{ backgroundColor: selectedEpisodes.includes(episode) ? '#42b883' : '#333' }"
-                     @click="selectingEpisodes ? toggleEpisodeSelect(episode, index) : null">
-                  <div class="episode-title">
-                    Episodio {{ episode.number }} -
-                    {{episode.name.slice(0, 40) + (episode.name.length > 39 ? '...' : '')}}
-                  </div>
+              <div v-for="episode in season" :key="episode.id" class="episode-item">
+                <div class="episode-title">
+                  Episodio {{ episode.number }} -
+                  {{episode.name.slice(0, 40) + (episode.name.length > 39 ? '...' : '')}}
                 </div>
               </div>
             </div>
@@ -194,7 +126,7 @@ const downloadAllItems = async () => {
 
       <!--MOVIES SECTION-->
       <div v-else-if="!loading && ['MOVIE', 'OVA', 'SPECIAL'].includes(item.type)">
-        <p>Questo è un {{item.type}} (QUESTO TESTO E' A SCOPO DI TEST)</p>
+        <p>Questo è un {{item.type}}</p>
       </div>
 
       <!--LOADING SECTION-->
