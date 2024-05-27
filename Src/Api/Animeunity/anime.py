@@ -37,7 +37,7 @@ def download_episode(index_select: int):
     # Get information about the selected episode
     obj_episode = video_source.get_info_episode(index_select)
 
-    start_message(True)
+    start_message()
     console.print(f"[yellow]Download:  [red]EP_{obj_episode.number} \n")
 
     # Get the embed URL for the episode
@@ -48,7 +48,7 @@ def download_episode(index_select: int):
 
     # Create output path
     mp4_path = None
-    mp4_name = f"{index_select}.mp4"
+    mp4_name = f"{index_select + 1}.mp4"
     if video_source.is_series:
         mp4_path = os.path.join(ROOT_PATH, ANIME_FOLDER, SERIES_FOLDER, video_source.series_name)
     else:
