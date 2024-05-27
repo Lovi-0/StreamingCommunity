@@ -77,20 +77,6 @@ You can change some behaviors by tweaking the configuration file.
 </details>
 
 <details>
-  <summary><strong>SITE</strong></summary>
-
-  * **streamingcommunity**: Configuration value for streamingcommunity site.
-    - **Default Value**: `foo`
-
-  * **animeunity**: Configuration value for animeunity site.
-    - **Default Value**: `to`
-
-  * **altadefinizione**: Configuration value for altadefinizione site.
-    - **Default Value**: `food`
-
-</details>
-
-<details>
   <summary><strong>M3U8_DOWNLOAD</strong></summary>
 
   * **tdqm_workers**: The number of workers that will cooperate to download .ts files. **A high value may slow down your PC**
