@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import type {Episode, MediaItem, Season, SeasonResponse} from "@/api/interfaces";
-import { onMounted, ref } from "vue";
-import { getEpisodesInfo } from "@/api/api";
+import type {Episode, MediaItem, SeasonResponse} from "@/api/interfaces";
+import { onBeforeMount, onMounted, ref } from "vue";
+import { getEpisodesInfo, getPreview } from "@/api/api";
 import {
   alertDownload,
   handleMovieDownload,
@@ -22,13 +22,21 @@ const tvShowEpisodes = ref<any[]>([])
 const loading = ref(false)
 const selectingEpisodes = ref(false)
 const selectedEpisodes = ref<Episode[]>([])
+const previewItem = ref<MediaItem>(item)
+
+onBeforeMount(async () => {
+  const res = await getPreview(item.id, item.slug, item.type)
+  if (res && res.data) {
+    previewItem.plot = res.data.plot
+  }
+})
 
 onMounted(async () => {
-  console.log(item)
+  loading.value = true;
   if (['MOVIE', 'OVA', 'SPECIAL'].includes(item.type)) {
+    loading.value = false;
     return
   } else {
-    loading.value = true;
     const response = await getEpisodesInfo(item.id, item.slug, item.type)
     if (response && response.body) {
       loading.value = false;

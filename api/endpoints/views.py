@@ -121,6 +121,34 @@ class SearchView(viewsets.ViewSet):
             )
 
         return Response({"error": "No media found with that search query"})
+    
+    @action(detail=False, methods=["get"])
+    def get_preview(self, request):
+        self.media_id = request.query_params.get("media_id")
+        self.media_slug = request.query_params.get("media_slug")
+        self.type_media = request.query_params.get("type_media")
+
+        try:
+            if self.type_media in  ["TV", "MOVIE"]:
+                version, domain = get_version_and_domain()
+                video_source = film_video_source()
+                video_source.setup(media_id=self.media_id, version=version, domain=domain, series_name=self.media_slug)
+                video_source.get_preview()
+                return Response(video_source.obj_preview.to_dict())
+            if self.type_media in  ["TV_ANIME", "OVA", "SPECIAL"]:
+                video_source = anime_source()
+                video_source.setup(media_id=self.media_id, series_name=self.media_slug)
+                video_source.get_preview()
+                return Response(video_source.obj_preview.to_dict())
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Error while getting preview info",
+                    "message": str(e),
+                }
+            )
+
+        return Response({"error": "No media found with that search query"})
 
 
 '''
