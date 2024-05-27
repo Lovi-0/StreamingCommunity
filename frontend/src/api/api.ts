@@ -37,6 +37,15 @@ export async function getEpisodesInfo(
   });
 }
 
+export async function getPreview(
+  mediaId: number,
+  mediaSlug: string,
+  mediaType: string
+): Promise<AxiosResponse<any>> {
+  const url = `/search/get_preview?media_id=${mediaId}&media_slug=${mediaSlug}&type_media=${mediaType}`;
+  return get(url);
+}
+
 async function downloadMedia(
   mediaId: number,
   mediaSlug: string,
