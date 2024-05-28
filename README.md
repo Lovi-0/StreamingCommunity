@@ -23,6 +23,7 @@ Make sure you have the following prerequisites installed on your system:
 
 * [python](https://www.python.org/downloads/) > 3.8
 * [ffmpeg](https://www.gyan.dev/ffmpeg/builds/)
+* [opnessl](https://www.openssl.org) or [pycryptodome](https://pypi.org/project/pycryptodome/)
 
 ## Installation
 
@@ -52,38 +53,94 @@ python3 run.py
 
 You can change some behaviors by tweaking the configuration file.
 
-### Options (DEFAULT)
+<details>
+  <summary><strong>DEFAULT</strong></summary>
 
-* root_path: Path where the script will add movies and TV series folders (see [Path Examples](#Path-examples)).
-  - Default Value: media/streamingcommunity
+  * **debug**: Enables or disables debug mode.
+    - **Default Value**: `false`
 
-* not_close: This option, when activated, prevents the script from closing after its initial execution, allowing it to restart automatically after completing the first run.
-  - Default Value: false
+  * **log_file**: The file where logs will be written.
+    - **Default Value**: `app.log`
 
-* map_episode_name: Mapping to choose the name of all episodes of TV Shows (see [Episode Name Usage](#Episode-name-usage)).
-  - Default Value: %(episode_name)
-  - Example Value: %(tv_name) [S%(season)] [E%(episode)] %(episode_name)
+  * **clean_console**: Clears the console before the script runs.
+    - **Default Value**: `true`
 
+  * **root_path**: Path where the script will add movies and TV series folders (see [Path Examples](#Path-examples)).
+    - **Default Value**: `Video`
 
-### Options (M3U8_DOWNLOAD)
+  * **map_episode_name**: Mapping to choose the name of all episodes of TV Shows (see [Episode Name Usage](#Episode-name-usage)).
+    - **Default Value**: `%(tv_name)_S%(season)E%(episode)_%(episode_name)`
 
-* tdqm_workers: The number of workers that will cooperate to download .ts files. **A high value may slow down your PC**
-  - Default Value: 20
+  * **not_close**: When activated, prevents the script from closing after its initial execution, allowing it to restart automatically after completing the first run.
+    - **Default Value**: `false`
 
-* tqdm_show_progress: Whether to show progress during downloads or not.
-  - Default Value: true
+</details>
 
-* create_report: When enabled, this option saves the name of the series or movie being downloaded along with the date and file size in a CSV file, providing a log of downloaded content.
-  - Default Value: false
+<details>
+  <summary><strong>M3U8_DOWNLOAD</strong></summary>
 
+  * **tdqm_workers**: The number of workers that will cooperate to download .ts files. **A high value may slow down your PC**
+    - **Default Value**: `30`
 
-### Options (M3U8_FILTER)
+  * **tqdm_show_progress**: Whether to show progress during downloads or not.
+    - **Default Value**: `true`
 
-* cleanup_tmp_folder: Upon final conversion, this option ensures the removal of all unformatted audio, video tracks, and subtitles from the temporary folder, thereby maintaining cleanliness and efficiency.
-  - Default Value: true
+  * **create_report**: When enabled, saves the name of the series or movie being downloaded along with the date and file size in a CSV file, providing a log of downloaded content.
+    - **Default Value**: `false`
 
-* specific_list_audio: A list of specific audio languages to download.
-  - Example Value: ['ara', 'baq', 'cat', 'chi', 'cze', 'dan', 'dut', 'eng', 'fil', 'fin', 'forced-ita', 'fre', 'ger', 'glg', 'gre', 'heb', 'hin', 'hun', 'ind', 'ita', 'jpn', 'kan', 'kor', 'mal', 'may', 'nob', 'nor', 'pol', 'por', 'rum', 'rus', 'spa', 'swe', 'tam', 'tel', 'tha', 'tur', 'ukr', 'vie']
+</details>
+
+<details>
+  <summary><strong>M3U8_FILTER</strong></summary>
+
+  * **use_codec**: Whether to use a specific codec for processing.
+    - **Default Value**: `false`
+
+  * **use_gpu**: Whether to use GPU acceleration.
+    - **Default Value**: `false`
+
+  * **default_preset**: The default preset for ffmpeg conversion.
+    - **Default Value**: `ultrafast`
+
+  * **check_output_conversion**: Verify if the conversion run by ffmpeg is free from corruption.
+    - **Default Value**: `false`
+
+  * **cleanup_tmp_folder**: Upon final conversion, ensures the removal of all unformatted audio, video tracks, and subtitles from the temporary folder, thereby maintaining cleanliness and efficiency.
+    - **Default Value**: `true`
+
+  * **specific_list_audio**: A list of specific audio languages to download.
+    - **Example Value**: `['ara', 'baq', 'cat', 'chi', 'cze', 'dan', 'dut', 'eng', 'fil', 'fin', 'forced-ita', 'fre', 'ger', 'glg', 'gre', 'heb', 'hin', 'hun', 'ind', 'ita', 'jpn', 'kan', 'kor', 'mal', 'may', 'nob', 'nor', 'pol', 'por', 'rum', 'rus', 'spa', 'swe', 'tam', 'tel', 'tha', 'tur', 'ukr', 'vie']`
+
+  * **specific_list_subtitles**: A list of specific subtitle languages to download.
+    - **Example Value**: `['eng']`
+
+</details>
+
+<details>
+  <summary><strong>M3U8_REQUESTS</strong></summary>
+
+  * **disable_error**: Whether to disable error messages.
+    - **Default Value**: `false`
+
+  * **timeout**: The timeout value for requests.
+    - **Default Value**: `10`
+
+  * **verify_ssl**: Whether to verify SSL certificates.
+    - **Default Value**: `false`
+
+</details>
+
+<details>
+  <summary><strong>M3U8_PARSER</strong></summary>
+
+  * **skip_empty_row_playlist**: Whether to skip empty rows in the playlist m3u8.
+    - **Default Value**: `false`
+
+  * **force_resolution**: Forces the use of a specific resolution. `-1` means no forced resolution.
+    - **Default Value**: `-1`
+    - **Example Value**: `1080`
+
+</details>
 
 
 > [!IMPORTANT]

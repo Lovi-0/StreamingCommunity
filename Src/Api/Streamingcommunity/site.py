@@ -9,6 +9,7 @@ from typing import Tuple
 
 # External libraries
 from bs4 import BeautifulSoup
+from unidecode import unidecode
 
 
 # Internal utilities
@@ -136,7 +137,7 @@ def title_search(title_search: str, domain: str) -> int:
     """
     
     # Send request to search for titles ( replace à to a and space to "+" )
-    response = requests.get(f"https://{SC_SITE_NAME}.{domain}/api/search?q={title_search.replace(' ', '+')}", headers={'user-agent': get_headers()})
+    response = requests.get(f"https://{SC_SITE_NAME}.{domain}/api/search?q={unidecode(title_search.replace(' ', '+'))}", headers={'user-agent': get_headers()})
 
     # Add found titles to media search manager
     for dict_title in response.json()['data']:

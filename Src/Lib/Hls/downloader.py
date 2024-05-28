@@ -7,6 +7,10 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 
+# External library
+from unidecode import unidecode
+
+
 # Internal utilities
 from Src.Lib.Request.my_requests import requests
 from Src.Util.headers import get_headers
@@ -39,10 +43,6 @@ from ..M3U8 import (
 )
 from .segments import M3U8_Segments
 from ..E_Table import report_table
-
-
-# External library
-from unidecode import unidecode as transliterate
 
 
 # Config
@@ -89,7 +89,7 @@ class Downloader():
                 sys.exit(0)
 
             self.output_filename = os.path.join(folder, base_name)
-            self.output_filename = transliterate(self.output_filename)
+            self.output_filename = unidecode(self.output_filename)
 
         logging.info(f"Output filename: {self.output_filename}")
 
@@ -460,9 +460,11 @@ class Downloader():
 
         # Rename the output file to the desired output filename if not exist
         if not os.path.exists(self.output_filename):
+
+            # Rename file converted to original set in init
             os.rename(out_path, self.output_filename)
 
-            print("\n")
+            # Print size of the file
             console.print(Panel(f"[bold green]Download completed![/bold green]\nFile size: [bold]{format_size(os.path.getsize(self.output_filename))}[/bold]", title=f"{os.path.basename(self.output_filename.replace('.mp4', ''))}", border_style="green"))
 
             # Delete all files except the output file

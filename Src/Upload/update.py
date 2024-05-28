@@ -31,29 +31,33 @@ def update():
         console.print(f"[red]Error accessing GitHub API: {e}")
         return
 
-    # Get start of the reposity
-    stargazers_count = response_reposity['stargazers_count']
+    # Get stargazers count from the repository
+    stargazers_count = response_reposity.get('stargazers_count', 0)
 
-    # Find info about latest versione deploy and the donwload count 
-    last_version = response_releases[0]['name']
-    down_count = response_releases[0]['assets'][0]['download_count']
+    # Calculate total download count from all releases
+    total_download_count = sum(asset['download_count'] for release in response_releases for asset in release.get('assets', []))
 
-    # Calculate percentual of start base on download count
-    if down_count > 0 and stargazers_count > 0:
-        percentual_stars = round(stargazers_count / down_count * 100, 2)
+    # Get latest version name
+    if response_releases:
+        last_version = response_releases[0].get('name', 'Unknown')
+    else:
+        last_version = 'Unknown'
+
+    # Calculate percentual of stars based on download count
+    if total_download_count > 0 and stargazers_count > 0:
+        percentual_stars = round(stargazers_count / total_download_count * 100, 2)
     else:
         percentual_stars = 0
 
     # Check installed version
     if __version__ != last_version:
-        console.print(f"[red]Version: [yellow]{last_version}")
+        console.print(f"[red]New version available: [yellow]{last_version}")
     else:
-        console.print(f"[red]Everything up to date")
+        console.print(f"[green]Everything is up to date")
 
-    print("\n")
-    console.print(f"[red]{repo_name} was downloaded [yellow]{down_count} [red]times, but only [yellow]{percentual_stars}% [red]of You(!!) have starred it.\n\
-        [cyan]Help the repository grow today, by leaving a [yellow]star [cyan]and [yellow]sharing [cyan]it to others online!")
+    console.print("\n")
+    console.print(f"[red]{repo_name} has been downloaded [yellow]{total_download_count} [red]times, but only [yellow]{percentual_stars}% [red]of users have starred it.\n\
+        [cyan]Help the repository grow today by leaving a [yellow]star [cyan]and [yellow]sharing [cyan]it with others online!")
     
     time.sleep(1)
-    print("\n")
-
+    console.print("\n")
