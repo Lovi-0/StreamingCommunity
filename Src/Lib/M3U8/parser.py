@@ -8,7 +8,7 @@ from .lib_parser import load
 
 
 # External libraries
-from Src.Lib.Request.my_requests import requests
+from Src.Lib.Request import requests
 
 
 # Costant
@@ -254,7 +254,14 @@ class M3U8_Audio:
         Returns:
             list: List of dictionaries containing 'name', 'language', and 'uri' for all audio in the list.
         """
-        return [{'name': audio['name'], 'language': audio['language'], 'uri': audio['uri']} for audio in self.audio_playlist]
+        audios_list = [{'name': audio['name'], 'language': audio['language'], 'uri': audio['uri']} for audio in self.audio_playlist]
+        unique_audios_dict = {}
+
+        # Remove duplicate
+        for audio in audios_list:
+            unique_audios_dict[audio['language']] = audio
+        
+        return list(unique_audios_dict.values())
 
     def get_default_uri(self):
         """
@@ -308,7 +315,14 @@ class M3U8_Subtitle:
         Returns:
             list: List of dictionaries containing 'name' and 'uri' for all subtitles in the list.
         """
-        return [{'name': subtitle['name'], 'language': subtitle['language'], 'uri': subtitle['uri']} for subtitle in self.subtitle_playlist]
+        subtitles_list = [{'name': subtitle['name'], 'language': subtitle['language'], 'uri': subtitle['uri']} for subtitle in self.subtitle_playlist]
+        unique_subtitles_dict = {}
+
+        # Remove duplicate
+        for subtitle in subtitles_list:
+            unique_subtitles_dict[subtitle['language']] = subtitle
+        
+        return list(unique_subtitles_dict.values())
 
     def get_default_uri(self):
         """

@@ -27,10 +27,10 @@ from .capture import capture_ffmpeg_real_time
 # Variable
 DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
 DEBUG_FFMPEG = "debug" if DEBUG_MODE else "error"
-USE_CODECS = config_manager.get_bool("M3U8_FILTER", "use_codec")
-USE_GPU = config_manager.get_bool("M3U8_FILTER", "use_gpu")
-FFMPEG_DEFAULT_PRESET = config_manager.get("M3U8_FILTER", "default_preset")
-CHECK_OUTPUT_CONVERSION = config_manager.get_bool("M3U8_FILTER", "check_output_conversion")
+USE_CODECS = config_manager.get_bool("M3U8_CONVERSION", "use_codec")
+USE_GPU = config_manager.get_bool("M3U8_CONVERSION", "use_gpu")
+FFMPEG_DEFAULT_PRESET = config_manager.get("M3U8_CONVERSION", "default_preset")
+CHECK_OUTPUT_CONVERSION = config_manager.get_bool("M3U8_CONVERSION", "check_output_after_ffmpeg")
 
 
 
@@ -278,6 +278,7 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
         logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
+
     # Start command
     ffmpeg_cmd = ['ffmpeg']
 
@@ -289,6 +290,7 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
         console.log("[red]Force input file to 'mpegts'.")
         ffmpeg_cmd.extend(['-f', 'mpegts'])
         vcodec = "libx264"
+
 
     # Insert input video path
     ffmpeg_cmd.extend(['-i', video_path])
@@ -307,6 +309,7 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
     else:
         ffmpeg_cmd.extend(['-preset', 'fast'])
 
+
     # Overwrite
     ffmpeg_cmd += [out_path, "-y"]
     logging.info(f"FFmpeg command: {ffmpeg_cmd}")
@@ -318,14 +321,20 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
         capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join video")
         print()
 
+
     # Check file
     if CHECK_OUTPUT_CONVERSION:
         console.log("[red]Check output ffmpeg")
         time.sleep(0.5)
         check_ffmpeg_input(out_path)
 
+    time.sleep(0.5)
+    if not check_file_existence(out_path):
+        logging.error("Missing output video for ffmpeg conversion video.")
+        sys.exit(0)
 
-def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: str, vcodec: str = 'copy', acodec: str = 'aac', bitrate: str = '192k'):
+
+def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: str):
     """
     Joins audio tracks with a video file using FFmpeg.
     
@@ -334,29 +343,36 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
         - audio_tracks (list[dict[str, str]]): A list of dictionaries containing information about audio tracks.
             Each dictionary should contain the 'path' key with the path to the audio file.
         - out_path (str): The path to save the output file.
-        - vcodec (str): The video codec to use. Defaults to 'copy'.
-        - acodec (str): The audio codec to use. Defaults to 'aac'.
-        - bitrate (str): The bitrate for the audio stream. Defaults to '192k'.
-        - preset (str): The preset for encoding. Defaults to 'ultrafast'.
     """
 
     if not check_file_existence(video_path):
         logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
+
     # Start command
     ffmpeg_cmd = ['ffmpeg', '-i', video_path]
 
-    # Add audio track
+    # Add audio tracks as input
     for i, audio_track in enumerate(audio_tracks):
-        ffmpeg_cmd.extend(['-i',  audio_track.get('path')])
+        if check_file_existence(audio_track.get('path')):
+            ffmpeg_cmd.extend(['-i', audio_track.get('path')])
+        else:
+            logging.error(f"Skip audio join: {audio_track.get('path')} dont exist")
 
-        if not check_file_existence(audio_track.get('path')):
-            sys.exit(0)
+
+    # Map the video and audio streams
+    ffmpeg_cmd.append('-map')
+    ffmpeg_cmd.append('0:v')            # Map video stream from the first input (video_path)
+    
+    for i in range(1, len(audio_tracks) + 1):
+        ffmpeg_cmd.append('-map')
+        ffmpeg_cmd.append(f'{i}:a')     # Map audio streams from subsequent inputs
+
 
     # Add output args
     if USE_CODECS:
-        ffmpeg_cmd.extend(['-c:v', vcodec, '-c:a', acodec, '-b:a', str(bitrate), '-preset', FFMPEG_DEFAULT_PRESET])
+        ffmpeg_cmd.extend(['-c:v', 'copy', '-c:a', 'copy'])
     else:
         ffmpeg_cmd.extend(['-c', 'copy'])
 
@@ -378,6 +394,11 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
         time.sleep(0.5)
         check_ffmpeg_input(out_path)
 
+    time.sleep(0.5)
+    if not check_file_existence(out_path):
+        logging.error("Missing output video for ffmpeg conversion audio.")
+        sys.exit(0)
+
 
 def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_path: str):
     """
@@ -394,25 +415,23 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
         logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
-
     # Start command
-    added_subtitle_names = set()    # Remove subtitle with same name
     ffmpeg_cmd = ["ffmpeg", "-i", video_path]
 
-    # Add subtitle with language
+    # Add subtitle input files first
+    for subtitle in subtitles_list:
+        if check_file_existence(subtitle.get('path')):
+            ffmpeg_cmd += ["-i", subtitle['path']]
+        else:
+            logging.error(f"Skip subtitle join: {subtitle.get('path')} doesn't exist")
+
+    # Add maps for video and audio streams
+    ffmpeg_cmd += ["-map", "0:v", "-map", "0:a"]
+
+    # Add subtitle maps and metadata
     for idx, subtitle in enumerate(subtitles_list):
-
-        if subtitle['name'] in added_subtitle_names:
-            continue
-    
-        added_subtitle_names.add(subtitle['name'])
-
-        ffmpeg_cmd += ["-i", subtitle['path']]
-        ffmpeg_cmd += ["-map", "0:v", "-map", "0:a", "-map", f"{idx + 1}:s"]
+        ffmpeg_cmd += ["-map", f"{idx + 1}:s"]
         ffmpeg_cmd += ["-metadata:s:s:{}".format(idx), "title={}".format(subtitle['name'])]
-
-        if not check_file_existence(subtitle['path']):
-            sys.exit(0)
 
     # Add output args
     if USE_CODECS:
@@ -430,9 +449,15 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
     else:
         capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join subtitle")
         print()
+        
 
     # Check file
     if CHECK_OUTPUT_CONVERSION:
         console.log("[red]Check output ffmpeg")
         time.sleep(0.5)
         check_ffmpeg_input(out_path)
+
+    time.sleep(0.5)
+    if not check_file_existence(out_path):
+        logging.error("Missing output video for ffmpeg conversion subtitle.")
+        sys.exit(0)

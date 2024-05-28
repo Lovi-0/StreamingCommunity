@@ -7,12 +7,9 @@ from urllib.parse import quote_plus, urlparse, parse_qs
 from typing import Generator, Optional
 
 
-# External library
-from bs4 import BeautifulSoup
-
-
-# Internal utilities
+# External libraries
 from Src.Lib.Request import requests
+from bs4 import BeautifulSoup
 
 
 def filter_result(link: str) -> Optional[str]:

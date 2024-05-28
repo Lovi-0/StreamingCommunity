@@ -7,12 +7,12 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 
-# External library
+# External libraries
+from Src.Lib.Request import requests
 from unidecode import unidecode
 
 
 # Internal utilities
-from Src.Lib.Request.my_requests import requests
 from Src.Util.headers import get_headers
 from Src.Util._jsonConfig import config_manager
 from Src.Util.console import console, Panel
@@ -24,9 +24,9 @@ from Src.Util.os import (
     format_size,
     create_folder, 
     reduce_base_name, 
-    remove_special_characters
+    remove_special_characters,
+    can_create_file
 )
-from Src.Util.file_validator import can_create_file
 
 
 # Logic class
@@ -46,15 +46,19 @@ from ..E_Table import report_table
 
 
 # Config
-DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_FILTER', 'specific_list_audio')            
-DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_FILTER', 'specific_list_subtitles')
-REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_FILTER', 'cleanup_tmp_folder')
+DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_DOWNLOAD', 'specific_list_audio')            
+DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_DOWNLOAD', 'specific_list_subtitles')
+DOWNLOAD_VIDEO = config_manager.get_bool('M3U8_DOWNLOAD', 'download_video')
+DOWNLOAD_AUDIO = config_manager.get_bool('M3U8_DOWNLOAD', 'download_audio')
+DOWNLOAD_SUB = config_manager.get_bool('M3U8_DOWNLOAD', 'download_sub')
+REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_DOWNLOAD', 'cleanup_tmp_folder')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
 CREATE_REPORT = config_manager.get_bool('M3U8_DOWNLOAD', 'create_report')
 
 
 # Variable
-headers_index = config_manager.get_dict('M3U8_REQUESTS', 'index')
+headers_index = config_manager.get_dict('REQUESTS', 'index')
+
 
     
 class Downloader():
@@ -454,8 +458,8 @@ class Downloader():
 
         # Check if file to rename exist
         logging.info(f"Check if end file converted exist: {out_path}")
-        if not os.path.exists(out_path):
-            logging.info("Video file converted not exist.")
+        if out_path is None or not os.path.isfile(out_path):
+            logging.error("Video file converted not exist.")
             sys.exit(0)
 
         # Rename the output file to the desired output filename if not exist
@@ -513,12 +517,16 @@ class Downloader():
             self.__manage_playlist__(m3u8_playlist_text)
 
             # Start all download ...
-            self.__donwload_video__(server_ip)
-            self.__donwload_audio__(server_ip)
-            self.__download_subtitle__()
+            if DOWNLOAD_VIDEO:
+                self.__donwload_video__(server_ip)
+            if DOWNLOAD_AUDIO:
+                self.__donwload_audio__(server_ip)
+            if DOWNLOAD_SUB:
+                self.__download_subtitle__()
 
             # Check file to convert
             converted_out_path = None
+            there_is_video: bool = (len(self.downloaded_video) > 0)
             there_is_audio: bool = (len(self.downloaded_audio) > 0)
             there_is_subtitle: bool = (len(self.downloaded_subtitle) > 0)
             console.log(f"[cyan]Conversion [white]=> ([green]Audio: [yellow]{there_is_audio}[white], [green]Subtitle: [yellow]{there_is_subtitle}[white])")
@@ -529,7 +537,8 @@ class Downloader():
 
             # Join only video ( audio is present in the same ts files )
             else:
-                converted_out_path = self.__join_video__()
+                if there_is_video:
+                    converted_out_path = self.__join_video__()
 
             # Join subtitle
             if there_is_subtitle:

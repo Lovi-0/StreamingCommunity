@@ -7,6 +7,9 @@ import time
 # Internal utilities
 from .version import __version__
 from Src.Util.console import console
+
+
+# External library
 from Src.Lib.Request import requests
 
 
@@ -53,7 +56,7 @@ def update():
     if __version__ != last_version:
         console.print(f"[red]New version available: [yellow]{last_version}")
     else:
-        console.print(f"[green]Everything is up to date")
+        console.print(f"[red]Everything is up to date")
 
     console.print("\n")
     console.print(f"[red]{repo_name} has been downloaded [yellow]{total_download_count} [red]times, but only [yellow]{percentual_stars}% [red]of users have starred it.\n\

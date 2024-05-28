@@ -6,13 +6,12 @@ from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
 
 
 # External libraries
+from Src.Lib.Request import requests
 from bs4 import BeautifulSoup
 
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Lib.Request.my_requests import requests
-from Src.Util._jsonConfig import config_manager
 from Src.Util.console import console, Panel
 
 
@@ -61,7 +60,7 @@ class VideoSource:
 
         try:
             
-            response = requests.post(f"https://{self.base_name}.{self.domain}/api/titles/preview/{self.media_id}", headers = self.headers)
+            response = requests.post(f"https://{self.base_name}.{self.domain}/api/titles/preview/{self.media_id}", headers=self.headers)
             response.raise_for_status()
 
             # Collect all info about preview
@@ -84,7 +83,7 @@ class VideoSource:
 
         try:
 
-            response = requests.get(f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", headers = self.headers)
+            response = requests.get(f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", headers=self.headers)
             response.raise_for_status()
 
             # Extract JSON response if available
@@ -108,7 +107,7 @@ class VideoSource:
         try:
 
             # Make a request to collect information about a specific season
-            response = requests.get(f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', headers = self.headers)
+            response = requests.get(f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', headers=self.headers)
             response.raise_for_status()
 
             # Extract JSON response if available
@@ -140,12 +139,12 @@ class VideoSource:
         try:
 
             # Make a request to get iframe source
-            response = requests.get(f"https://{self.base_name}.{self.domain}/iframe/{self.media_id}", params = params)
+            response = requests.get(f"https://{self.base_name}.{self.domain}/iframe/{self.media_id}", params=params)
             response.raise_for_status()
 
             # Parse response with BeautifulSoup to get iframe source
             soup = BeautifulSoup(response.text, "html.parser")
-            self.iframe_src: str = soup.find("iframe").get("src")
+            self.iframe_src = soup.find("iframe").get("src")
 
         except Exception as e:
             logging.error(f"Error getting iframe source: {e}")
@@ -182,7 +181,7 @@ class VideoSource:
 
                 # Make a request to get content
                 try:
-                    response = requests.get(self.iframe_src, headers = self.headers)
+                    response = requests.get(self.iframe_src, headers=self.headers)
                     response.raise_for_status()
 
                 except:

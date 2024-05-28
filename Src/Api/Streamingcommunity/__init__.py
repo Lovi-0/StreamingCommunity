@@ -25,7 +25,7 @@ def main_film_series():
     site_version, domain = get_version_and_domain()
 
     # Make request to site to get content that corrsisponde to that string
-    film_search = msg.ask("\n[purple]Insert word to search in all site: ").strip()
+    film_search = msg.ask("\n[purple]Insert word to search in all site").strip()
     len_database = title_search(film_search, domain)
 
     if len_database != 0:

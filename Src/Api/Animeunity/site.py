@@ -5,13 +5,13 @@ import logging
 
 
 # External libraries
+from Src.Lib.Request import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 
 
 # Internal utilities
 from Src.Util.table import TVShowManager
-from Src.Lib.Request import requests
 from Src.Util.console import console
 from Src.Util._jsonConfig import config_manager
 
@@ -46,6 +46,7 @@ def get_token(site_name: str, domain: str) -> dict:
 
     # Send a GET request to the specified URL composed of the site name and domain
     response = requests.get(f"https://www.{site_name}.{domain}")
+    response.raise_for_status()
 
     # Initialize variables to store CSRF token
     find_csrf_token = None
@@ -166,6 +167,7 @@ def title_search(title: str) -> int:
 
     # Send a POST request to the API endpoint for live search
     response = requests.post(f'https://www.{AU_SITE_NAME}.{url_domain}/livesearch', cookies=cookies, headers=headers, json_data=json_data)
+    response.raise_for_status()
 
     # Process each record returned in the response
     for record in response.json()['records']:

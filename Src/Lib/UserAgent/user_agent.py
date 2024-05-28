@@ -11,8 +11,8 @@ import tempfile
 from typing import Dict, List
 
 
-# Internal utilities
-from ..Request import requests
+# Internal libraries
+from Src.Lib.Request import requests
 
 
 

@@ -36,10 +36,10 @@ from Src.Util._jsonConfig import config_manager
 
 
 # Default settings
-HTTP_TIMEOUT = 5
-HTTP_RETRIES = 1
+HTTP_TIMEOUT = config_manager.get_int('REQUESTS', 'timeout')
+HTTP_RETRIES = config_manager.get_int('REQUESTS', 'max_retry')
 HTTP_DELAY = 1
-HTTP_DISABLE_ERROR = config_manager.get_bool('M3U8_REQUESTS', 'disable_error')
+HTTP_DISABLE_ERROR = config_manager.get_bool('REQUESTS', 'disable_error')
 
 
 
@@ -383,7 +383,7 @@ class ManageRequests:
             logging.error(f"Request failed for URL '{self.url}': {parse_http_error(str(e))}")
 
         if self.attempt < self.retries:
-            logging.info(f"Retrying request for URL '{self.url}' (attempt {self.attempt}/{self.retries})")
+            logging.error(f"Retry request for URL '{self.url}' (attempt {self.attempt}/{self.retries})")
             time.sleep(HTTP_DELAY)
 
         else:

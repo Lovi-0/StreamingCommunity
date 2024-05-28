@@ -13,6 +13,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 
 
 # External libraries
+from Src.Lib.Request import requests
 from tqdm import tqdm
 
 
@@ -20,7 +21,6 @@ from tqdm import tqdm
 from Src.Util.console import console
 from Src.Util.headers import get_headers
 from Src.Util.color import Colors
-from Src.Lib.Request.my_requests import requests
 from Src.Util._jsonConfig import config_manager
 
 # Logic class
@@ -34,15 +34,14 @@ from ..M3U8 import (
 
 # Config
 TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
-TQDM_SHOW_PROGRESS = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_show_progress')
-REQUEST_TIMEOUT = config_manager.get_int('M3U8_REQUESTS', 'timeout')
-REQUEST_VERIFY_SSL = config_manager.get_bool('M3U8_REQUESTS', 'verify_ssl')
-REQUEST_DISABLE_ERROR = config_manager.get_bool('M3U8_REQUESTS', 'disable_error')
+TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
+REQUEST_VERIFY_SSL = config_manager.get_bool('REQUESTS', 'verify_ssl')
+REQUEST_DISABLE_ERROR = config_manager.get_bool('REQUESTS', 'disable_error')
 
 
 # Variable
-headers_index = config_manager.get_dict('M3U8_REQUESTS', 'index')
-headers_segments = config_manager.get_dict('M3U8_REQUESTS', 'segments')
+headers_index = config_manager.get_dict('REQUESTS', 'index')
+headers_segments = config_manager.get_dict('REQUESTS', 'segments')
 
 
 
@@ -225,15 +224,16 @@ class M3U8_Segments:
 
             # Make request and calculate time duration
             start_time = time.time()
-            response = requests.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, verify_ssl=REQUEST_VERIFY_SSL)
+            response = requests.get(ts_url, headers=headers_segments, verify_ssl=REQUEST_VERIFY_SSL)
             duration = time.time() - start_time
             
             if response.ok:
 
                 # Get the content of the segment
                 segment_content = response.content
-                if TQDM_SHOW_PROGRESS:
-                    self.class_ts_estimator.update_progress_bar(segment_content, duration, progress_bar)
+
+                # Update bar
+                self.class_ts_estimator.update_progress_bar(segment_content, duration, progress_bar)
 
                 # Decrypt the segment content if decryption is needed
                 if self.decryption is not None:
@@ -295,12 +295,16 @@ class M3U8_Segments:
         """
         stop_event = threading.Event()  # Event to signal stopping
 
-        # bar_format="{desc}: {percentage:.0f}% | {bar} | {n_fmt}/{total_fmt} [ {elapsed}<{remaining}, {rate_fmt}{postfix} ]"
+        if TQDM_USE_LARGE_BAR:
+            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
+        else:
+            bar_format=f"{Colors.YELLOW}Proc{Colors.WHITE}: {Colors.RED}{{percentage:.2f}}% {Colors.WHITE}| {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
+            
         progress_bar = tqdm(
             total=len(self.segments), 
             unit='s',
             ascii=' #',
-            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]",
+            bar_format=bar_format,
             dynamic_ncols=True,
             ncols=80,
             mininterval=0.01
@@ -326,7 +330,7 @@ class M3U8_Segments:
             for index, segment_url in enumerate(self.segments):
 
                 # Check for Ctrl+C before starting each download task
-                time.sleep(0.025)
+                time.sleep(0.03)
 
                 if self.ctrl_c_detected:
                     console.log("[red]Ctrl+C detected. Stopping further downloads.")

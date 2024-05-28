@@ -9,14 +9,13 @@ import subprocess
 
 
 # External libraries
+from Src.Lib.Request import requests
 from bs4 import BeautifulSoup
 
 
 # Internal utilities
-from Src.Util.console import console
-from Src.Lib.Request import requests
 from Src.Util.headers import get_headers
-from Src.Util.node_jjs import run_node_script
+from Src.Util.os import run_node_script
 
 
 class VideoSource:

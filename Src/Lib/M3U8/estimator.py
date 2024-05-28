@@ -12,6 +12,12 @@ from tqdm import tqdm
 # Internal utilities
 from Src.Util.color import Colors
 from Src.Util.os import format_size
+from Src.Util._jsonConfig import config_manager
+
+
+
+# Variable
+TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 
 
 class M3U8_Ts_Estimator:
@@ -127,16 +133,25 @@ class M3U8_Ts_Estimator:
         self.add_ts_file(total_downloaded * self.total_segments, total_downloaded, duration)
                     
         # Get downloaded size and total estimated size
-        downloaded_file_size_str = self.get_downloaded_size().split(' ')[0]                                    
+        downloaded_file_size_str = self.get_downloaded_size()                                 
         file_total_size = self.calculate_total_size()
 
         # Fix parameter for prefix
+        number_file_downloaded = downloaded_file_size_str.split(' ')[0]
         number_file_total_size = file_total_size.split(' ')[0]
+        units_file_downloaded = downloaded_file_size_str.split(' ')[1]
         units_file_total_size = file_total_size.split(' ')[1]
         average_internet_speed = self.get_average_speed()
 
         # Update the progress bar's postfix
-        progress_counter.set_postfix_str(
-            f"{Colors.WHITE}[ {Colors.GREEN}{downloaded_file_size_str} {Colors.WHITE}< {Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
-            f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed:.2f} {Colors.RED}MB/s"
-        )
+        if TQDM_USE_LARGE_BAR:
+            progress_counter.set_postfix_str(
+                f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded} {Colors.WHITE}< {Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
+                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed:.2f} {Colors.RED}MB/s"
+            )
+
+        else:
+            progress_counter.set_postfix_str(
+                f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded}{Colors.RED} {units_file_downloaded} "
+                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed:.2f} {Colors.RED}MB/s"
+            )
