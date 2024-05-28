@@ -3,8 +3,8 @@
         "debug": false,
         "log_file": "app.log",
         "log_to_file": true,
-        "show_message": false,
-        "clean_console": false,
+        "show_message": true,
+        "clean_console": true,
         "root_path": "Video",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
         "not_close": false
