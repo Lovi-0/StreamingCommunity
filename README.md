@@ -62,8 +62,14 @@ You can change some behaviors by tweaking the configuration file.
   * **log_file**: The file where logs will be written.
     - **Default Value**: `app.log`
 
-  * **clean_console**: Clears the console before the script runs.
+  * **log_to_file**: Whether to log messages to a file.
     - **Default Value**: `true`
+
+  * **show_message**: Whether to show messages.
+    - **Default Value**: `false`
+
+  * **clean_console**: Clears the console before the script runs.
+    - **Default Value**: `false`
 
   * **root_path**: Path where the script will add movies and TV series folders (see [Path Examples](#Path-examples)).
     - **Default Value**: `Video`
@@ -77,47 +83,7 @@ You can change some behaviors by tweaking the configuration file.
 </details>
 
 <details>
-  <summary><strong>M3U8_DOWNLOAD</strong></summary>
-
-  * **tdqm_workers**: The number of workers that will cooperate to download .ts files. **A high value may slow down your PC**
-    - **Default Value**: `30`
-
-  * **tqdm_show_progress**: Whether to show progress during downloads or not.
-    - **Default Value**: `true`
-
-  * **create_report**: When enabled, saves the name of the series or movie being downloaded along with the date and file size in a CSV file, providing a log of downloaded content.
-    - **Default Value**: `false`
-
-</details>
-
-<details>
-  <summary><strong>M3U8_FILTER</strong></summary>
-
-  * **use_codec**: Whether to use a specific codec for processing.
-    - **Default Value**: `false`
-
-  * **use_gpu**: Whether to use GPU acceleration.
-    - **Default Value**: `false`
-
-  * **default_preset**: The default preset for ffmpeg conversion.
-    - **Default Value**: `ultrafast`
-
-  * **check_output_conversion**: Verify if the conversion run by ffmpeg is free from corruption.
-    - **Default Value**: `false`
-
-  * **cleanup_tmp_folder**: Upon final conversion, ensures the removal of all unformatted audio, video tracks, and subtitles from the temporary folder, thereby maintaining cleanliness and efficiency.
-    - **Default Value**: `true`
-
-  * **specific_list_audio**: A list of specific audio languages to download.
-    - **Example Value**: `['ara', 'baq', 'cat', 'chi', 'cze', 'dan', 'dut', 'eng', 'fil', 'fin', 'forced-ita', 'fre', 'ger', 'glg', 'gre', 'heb', 'hin', 'hun', 'ind', 'ita', 'jpn', 'kan', 'kor', 'mal', 'may', 'nob', 'nor', 'pol', 'por', 'rum', 'rus', 'spa', 'swe', 'tam', 'tel', 'tha', 'tur', 'ukr', 'vie']`
-
-  * **specific_list_subtitles**: A list of specific subtitle languages to download.
-    - **Example Value**: `['eng']`
-
-</details>
-
-<details>
-  <summary><strong>M3U8_REQUESTS</strong></summary>
+  <summary><strong>REQUESTS</strong></summary>
 
   * **disable_error**: Whether to disable error messages.
     - **Default Value**: `false`
@@ -125,7 +91,62 @@ You can change some behaviors by tweaking the configuration file.
   * **timeout**: The timeout value for requests.
     - **Default Value**: `10`
 
+  * **max_retry**: Maximum number of retries for requests.
+    - **Default Value**: `3`
+
   * **verify_ssl**: Whether to verify SSL certificates.
+    - **Default Value**: `false`
+
+</details>
+
+<details>
+  <summary><strong>M3U8_DOWNLOAD</strong></summary>
+
+  * **tdqm_workers**: The number of workers that will cooperate to download .ts files. **A high value may slow down your PC**
+    - **Default Value**: `30`
+
+  * **tqdm_use_large_bar**: Whether to use large progress bars during downloads (Downloading %desc: %percentage:.2f %bar %elapsed < %remaining %postfix
+    - **Default Value**: `true`
+    - **Example Value**: `false` with Proc: %percentage:.2f %remaining %postfix
+
+  * **download_video**: Whether to download video streams.
+    - **Default Value**: `true`
+
+  * **download_audio**: Whether to download audio streams.
+    - **Default Value**: `true`
+
+  * **download_sub**: Whether to download subtitle streams.
+    - **Default Value**: `true`
+
+  * **specific_list_audio**: A list of specific audio languages to download.
+    - **Example Value**: `['ita']`
+
+  * **specific_list_subtitles**: A list of specific subtitle languages to download.
+    - **Example Value**: `['ara', 'baq', 'cat', 'chi', 'cze', 'dan', 'dut', 'eng', 'fil', 'fin', 'forced-ita', 'fre', 'ger', 'glg', 'gre', 'heb', 'hin', 'hun', 'ind', 'ita', 'jpn', 'kan', 'kor', 'mal', 'may', 'nob', 'nor', 'pol', 'por', 'rum', 'rus', 'spa', 'swe', 'tam', 'tel', 'tha', 'tur', 'ukr', 'vie']`
+
+  * **cleanup_tmp_folder**: Upon final conversion, ensures the removal of all unformatted audio, video tracks, and subtitles from the temporary folder, thereby maintaining cleanliness and efficiency.
+    - **Default Value**: `false`
+
+  * **create_report**: When enabled, saves the name of the series or movie being downloaded along with the date and file size in a CSV file, providing a log of downloaded content.
+    - **Default Value**: `false`
+
+</details>
+
+<details>
+  <summary><strong>M3U8_CONVERSION</strong></summary>
+
+  * **use_codec**: Whether to use a specific codec for processing.
+    - **Default Value**: `false`
+    - **Example Value**: `libx264`
+
+  * **use_gpu**: Whether to use GPU acceleration.
+    - **Default Value**: `false`
+
+  * **default_preset**: The default preset for ffmpeg conversion.
+    - **Default Value**: `ultrafast`
+    - **Example Value**: `slow`
+
+  * **check_output_after_ffmpeg**: Verify if the conversion run by ffmpeg is free from corruption.
     - **Default Value**: `false`
 
 </details>
@@ -141,7 +162,6 @@ You can change some behaviors by tweaking the configuration file.
     - **Example Value**: `1080`
 
 </details>
-
 
 > [!IMPORTANT]
 > If you're on **Windows** you'll need to use double black slashes. On Linux/MacOS, one slash is fine.
