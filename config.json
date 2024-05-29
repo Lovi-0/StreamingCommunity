@@ -25,7 +25,7 @@
         "download_sub": true,
         "specific_list_audio": ["ita"],
         "specific_list_subtitles": ["eng"],
-        "cleanup_tmp_folder": false,
+        "cleanup_tmp_folder": true,
         "create_report": false
     },
     "M3U8_CONVERSION": {
