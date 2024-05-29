@@ -206,7 +206,7 @@ class Downloader():
         logging.info(f"M3U8 index select: {self.m3u8_index}, with resolution: {video_res}")
 
         # Get URI of the best quality and codecs parameters
-        console.log(f"[cyan]Find resolution [white]=> [red]{list_available_resolution}")
+        console.log(f"[cyan]Find resolution [white]=> [red]{sorted(list_available_resolution, reverse=True)}")
 
         # Fix URL if it is not complete with http:\\site_name.domain\...
         if "http" not in self.m3u8_index:

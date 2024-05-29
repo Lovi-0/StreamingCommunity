@@ -434,8 +434,7 @@ class M3U8_Parser:
                     return resolution
             
         # Default resolution return (not best)
-        logging.error("No resolution found with custom parsing.")
-        logging.warning("Try set remove duplicate line to TRUE.")
+        logging.warning("No resolution found with custom parsing.")
         return (0, 0)
 
     def __parse_video_info__(self, m3u8_obj) -> None:
@@ -449,6 +448,15 @@ class M3U8_Parser:
         try:
             for playlist in m3u8_obj.playlists:
 
+                there_is_codec = not M3U8_Parser.extract_resolution(playlist.uri) == (0,0)
+
+                if there_is_codec:
+                    self.codec = M3U8_Codec(
+                        playlist.stream_info.bandwidth,
+                        None,
+                        playlist.stream_info.codecs
+                        )
+
                 # Direct access resolutions in m3u8 obj
                 if playlist.stream_info.resolution is not None:
 
@@ -456,6 +464,9 @@ class M3U8_Parser:
                         "uri": playlist.uri, 
                         "resolution": playlist.stream_info.resolution
                     })
+
+                    if there_is_codec:
+                        self.codec.resolution = playlist.stream_info.resolution
                 
                 # Find resolutions in uri
                 else:
@@ -465,18 +476,10 @@ class M3U8_Parser:
                         "resolution": M3U8_Parser.extract_resolution(playlist.uri)
                     })    
 
-                    # Dont stop
-                    continue
+                    if there_is_codec:
+                        self.codec.resolution = M3U8_Parser.extract_resolution(playlist.uri)
 
-                # Check if all key is present to create codec
-                try:
-                    self.codec = M3U8_Codec(
-                        playlist.stream_info.bandwidth,
-                        playlist.stream_info.resolution,
-                        playlist.stream_info.codecs
-                    )
-                except:
-                    logging.error(f"Error parsing codec: {e}")
+                    continue
 
         except Exception as e:
             logging.error(f"Error parsing video info: {e}")

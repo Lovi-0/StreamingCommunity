@@ -13,9 +13,13 @@ You can chat, help improve this repo, or just hang around for some fun in the **
 * [INSTALLATION](#installation)
   * [Requirement](#requirement)
   * [Usage](#usage)
+  * [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
+  * [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux) 
 * [CONFIGURATION](#Configuration)
 * [DOCKER](#docker)
 * [TUTORIAL](#tutorial)
+* [TO DO](#to-do)
+
 
 ## Requirement
 
@@ -48,6 +52,7 @@ python run.py
 ```bash
 python3 run.py
 ```
+
 
 ## Configuration
 
@@ -164,7 +169,7 @@ You can change some behaviors by tweaking the configuration file.
 </details>
 
 > [!IMPORTANT]
-> If you're on **Windows** you'll need to use double black slashes. On Linux/MacOS, one slash is fine.
+> If you're on **Windows** you'll need to use double back slash. On Linux/MacOS, one slash is fine.
 
 #### Path examples:
 
@@ -205,3 +210,9 @@ docker run -it -p 8000:8000 -v /path/to/download:/app/Video streaming-community-
 ## Tutorial
 
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
+
+
+## To do
+- GUI
+- Website api
+- Add other site

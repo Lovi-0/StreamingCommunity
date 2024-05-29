@@ -175,11 +175,12 @@ class M3U8_Segments:
 
         # Send a GET request to retrieve the index M3U8 file
         response = requests.get(self.url, headers=headers_index)
-        response.raise_for_status()  # Raise an exception for HTTP errors
+        response.raise_for_status()
 
         # Save the M3U8 file to the temporary folder
-        path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
-        open(path_m3u8_file, "w+").write(response.text) 
+        if response.ok:
+            path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
+            open(path_m3u8_file, "w+").write(response.text) 
 
         # Parse the text from the M3U8 index file
         self.parse_data(response.text)  
