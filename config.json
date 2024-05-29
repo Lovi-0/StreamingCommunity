@@ -23,6 +23,7 @@
         "download_video": true,
         "download_audio": true,
         "download_sub": true,
+        "merge_subs": true,
         "specific_list_audio": ["ita"],
         "specific_list_subtitles": ["eng"],
         "cleanup_tmp_folder": true,
