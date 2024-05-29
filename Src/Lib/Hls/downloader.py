@@ -51,6 +51,7 @@ DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_DOWNLOAD', 'specific_
 DOWNLOAD_VIDEO = config_manager.get_bool('M3U8_DOWNLOAD', 'download_video')
 DOWNLOAD_AUDIO = config_manager.get_bool('M3U8_DOWNLOAD', 'download_audio')
 DOWNLOAD_SUB = config_manager.get_bool('M3U8_DOWNLOAD', 'download_sub')
+MERGE_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_subs')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_DOWNLOAD', 'cleanup_tmp_folder')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
 CREATE_REPORT = config_manager.get_bool('M3U8_DOWNLOAD', 'create_report')
@@ -341,10 +342,11 @@ class Downloader():
             futures = []
 
             for obj_subtitle in self.list_available_subtitles:
-
-                # Check if the language should be downloaded based on configuration
-                if obj_subtitle.get('language') not in DOWNLOAD_SPECIFIC_SUBTITLE:
-                    continue
+                
+                if len(DOWNLOAD_SPECIFIC_SUBTITLE) > 0:
+                    # Check if the language should be downloaded based on configuration
+                    if obj_subtitle.get('language') not in DOWNLOAD_SPECIFIC_SUBTITLE:
+                        continue
                 
                 sub_language = obj_subtitle.get('language')
                 sub_full_path = os.path.join(self.subtitle_segments_path, sub_language + ".vtt")
@@ -353,6 +355,7 @@ class Downloader():
                 # Add the subtitle to the list of downloaded subtitles
                 self.downloaded_subtitle.append({
                     'name': obj_subtitle.get('name').split(" ")[0],
+                    'language': obj_subtitle.get('language'),
                     'path': sub_full_path
                 })
                 
@@ -542,8 +545,27 @@ class Downloader():
 
             # Join subtitle
             if there_is_subtitle:
-                if converted_out_path is not None:
-                    converted_out_path = self.__join_video_subtitles__(converted_out_path)
+                if MERGE_SUBTITLE:
+                    if converted_out_path is not None:
+                        converted_out_path = self.__join_video_subtitles__(converted_out_path)
+                else:
+                    for obj_sub in self.downloaded_subtitle:
+                        language = obj_sub.get('language')
+                        path = obj_sub.get('path')
+                        forced = 'forced' in language
+
+                        if forced:
+                            language = language.replace("forced-", "")
+                            new_path = self.output_filename.replace(".mp4", f".{language}.forced.vtt")
+                        else:
+                            new_path = self.output_filename.replace(".mp4", f".{language}.vtt")
+                        
+                        try:
+                            os.rename(path, new_path)
+                            logging.info(f"Subtitle moved to {new_path}")
+                        except Exception as e:
+                            logging.error(f"Failed to move subtitle {path} to {new_path}: {e}")
+                                        
 
             # Clean all tmp file
             self.__clean__(converted_out_path)
