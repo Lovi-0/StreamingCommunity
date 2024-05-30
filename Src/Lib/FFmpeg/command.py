@@ -5,7 +5,6 @@ import sys
 import time
 import logging
 import shutil
-import threading
 import subprocess
 
 from typing import List, Dict
@@ -18,19 +17,23 @@ except: pass
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
-from Src.Util.os import check_file_existence
+from Src.Util.os import check_file_existence, suppress_output
 from Src.Util.console import console
 from .util import has_audio_stream, need_to_force_to_ts, check_ffmpeg_input
 from .capture import capture_ffmpeg_real_time
 
 
-# Variable
+# Config
 DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
 DEBUG_FFMPEG = "debug" if DEBUG_MODE else "error"
 USE_CODECS = config_manager.get_bool("M3U8_CONVERSION", "use_codec")
 USE_GPU = config_manager.get_bool("M3U8_CONVERSION", "use_gpu")
 FFMPEG_DEFAULT_PRESET = config_manager.get("M3U8_CONVERSION", "default_preset")
 CHECK_OUTPUT_CONVERSION = config_manager.get_bool("M3U8_CONVERSION", "check_output_after_ffmpeg")
+
+
+# Variable
+TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 
 
 
@@ -314,15 +317,25 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
     ffmpeg_cmd += [out_path, "-y"]
     logging.info(f"FFmpeg command: {ffmpeg_cmd}")
 
+
     # Run join
     if DEBUG_MODE:
         subprocess.run(ffmpeg_cmd, check=True)
     else:
-        capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join video")
-        print()
+
+        if TQDM_USE_LARGE_BAR:
+            capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join video")
+            print()
+
+        else:
+            console.log(f"[purple]FFmpeg [white][[cyan]Join video[white]] ...")
+            with suppress_output():
+                capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join video")
+                print()
 
 
-    # Check file
+
+    # Check file output
     if CHECK_OUTPUT_CONVERSION:
         console.log("[red]Check output ffmpeg")
         time.sleep(0.5)
@@ -380,15 +393,24 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
     ffmpeg_cmd += [out_path, "-y"]
     logging.info(f"FFmpeg command: {ffmpeg_cmd}")
 
+
     # Run join
     if DEBUG_MODE:
         subprocess.run(ffmpeg_cmd, check=True)
     else:
-        capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join audio")
-        print()
+
+        if TQDM_USE_LARGE_BAR:
+            capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join audio")
+            print()
+
+        else:
+            console.log(f"[purple]FFmpeg [white][[cyan]Join audio[white]] ...")
+            with suppress_output():
+                capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join audio")
+                print()
 
 
-    # Check file
+    # Check file output
     if CHECK_OUTPUT_CONVERSION:
         console.log("[red]Check output ffmpeg")
         time.sleep(0.5)
@@ -443,15 +465,24 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
     ffmpeg_cmd += [out_path, "-y"]
     logging.info(f"FFmpeg command: {ffmpeg_cmd}")
 
+
     # Run join
     if DEBUG_MODE:
         subprocess.run(ffmpeg_cmd, check=True)
     else:
-        capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join subtitle")
-        print()
-        
 
-    # Check file
+        if TQDM_USE_LARGE_BAR:
+            capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join subtitle")
+            print()
+
+        else:
+            console.log(f"[purple]FFmpeg [white][[cyan]Join subtitle[white]] ...")
+            with suppress_output():
+                capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join subtitle")
+                print()
+
+        
+    # Check file output
     if CHECK_OUTPUT_CONVERSION:
         console.log("[red]Check output ffmpeg")
         time.sleep(0.5)

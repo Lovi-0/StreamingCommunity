@@ -1,6 +1,7 @@
 # 24.01.24
 
 import re
+import io
 import os
 import sys
 import ssl
@@ -14,6 +15,7 @@ import zipfile
 import platform
 import importlib
 import subprocess
+import contextlib
 import importlib.metadata
 
 from typing import List
@@ -25,6 +27,7 @@ import unicodedata
 
 # Internal utilities
 from .console import console
+
 
 
 
@@ -100,6 +103,14 @@ def remove_special_characters(input_string):
     cleaned_string = pattern.sub('', input_string)
 
     return cleaned_string
+
+
+
+# --> OS MANAGE OUTPUT
+@contextlib.contextmanager
+def suppress_output():
+    with contextlib.redirect_stdout(io.StringIO()):
+        yield
 
 
 

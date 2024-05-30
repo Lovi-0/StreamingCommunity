@@ -1,7 +1,7 @@
 # 20.02.24
 
+import threading
 import logging
-
 from collections import deque
 
 
@@ -21,7 +21,7 @@ TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar
 
 
 class M3U8_Ts_Estimator:
-    def __init__(self, workers: int, total_segments: int):
+    def __init__(self, total_segments: int):
         """
         Initialize the TSFileSizeCalculator object.
 
@@ -31,11 +31,11 @@ class M3U8_Ts_Estimator:
         """
         self.ts_file_sizes = []
         self.now_downloaded_size = 0
-        self.average_over = 5
+        self.average_over = 6
         self.list_speeds = deque(maxlen=self.average_over)
         self.smoothed_speeds = []
-        self.tqdm_workers = workers
         self.total_segments = total_segments
+        self.lock = threading.Lock()
 
     def add_ts_file(self, size: int, size_download: int, duration: float):
         """
@@ -50,30 +50,26 @@ class M3U8_Ts_Estimator:
             logging.error("Invalid input values: size=%d, size_download=%d, duration=%f", size, size_download, duration)
             return
 
-        self.ts_file_sizes.append(size)
-        self.now_downloaded_size += size_download
-
-        # Only for the start
-        if len(self.smoothed_speeds) <= 3:
-            size_download = size_download / self.tqdm_workers
-
+        # Calculate speed outside of the lock
         try:
-            # Calculate mbps 
-            speed_mbps = (size_download * 8) / (duration * 1_000_000) * self.tqdm_workers
-
+            speed_mbps = (size_download * 16) / (duration * 1_000_000)
         except ZeroDivisionError as e:
             logging.error("Division by zero error while calculating speed: %s", e)
             return
 
-        self.list_speeds.append(speed_mbps)
+        # Only update shared data within the lock
+        with self.lock:
+            self.ts_file_sizes.append(size)
+            self.now_downloaded_size += size_download
+            self.list_speeds.append(speed_mbps)
 
-        # Calculate moving average
-        smoothed_speed = sum(self.list_speeds) / len(self.list_speeds)
-        self.smoothed_speeds.append(smoothed_speed)
+            # Calculate moving average
+            smoothed_speed = sum(self.list_speeds) / len(self.list_speeds)
+            self.smoothed_speeds.append(smoothed_speed)
 
-        # Update smooth speeds
-        if len(self.smoothed_speeds) > self.average_over:
-            self.smoothed_speeds.pop(0)
+            # Update smooth speeds
+            if len(self.smoothed_speeds) > self.average_over:
+                self.smoothed_speeds.pop(0)
 
     def calculate_total_size(self) -> str:
         """
@@ -107,7 +103,7 @@ class M3U8_Ts_Estimator:
         Returns:
             float: The average speed in megabytes per second (MB/s).
         """
-        return (sum(self.smoothed_speeds) / len(self.smoothed_speeds)) / 10  # MB/s
+        return ((sum(self.smoothed_speeds) / len(self.smoothed_speeds)) / 8 ) * 10  # MB/s
     
     def get_downloaded_size(self) -> str:
         """

@@ -64,7 +64,7 @@ class M3U8_Segments:
         self.ctrl_c_detected = False                                # Global variable to track Ctrl+C detection
 
         os.makedirs(self.tmp_folder, exist_ok=True)                 # Create the temporary folder if it does not exist
-        self.class_ts_estimator = M3U8_Ts_Estimator(TQDM_MAX_WORKER, 0) 
+        self.class_ts_estimator = M3U8_Ts_Estimator(0) 
         self.class_url_fixer = M3U8_UrlFix(url)
         self.fake_proxy = False
 
@@ -304,7 +304,7 @@ class M3U8_Segments:
         progress_bar = tqdm(
             total=len(self.segments), 
             unit='s',
-            ascii=' #',
+            ascii='░▒█',
             bar_format=bar_format,
             dynamic_ncols=True,
             ncols=80,

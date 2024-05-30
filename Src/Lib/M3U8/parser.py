@@ -52,17 +52,15 @@ class M3U8_Codec:
     Represents codec information for an M3U8 playlist.
     """
 
-    def __init__(self, bandwidth, resolution, codecs):
+    def __init__(self, bandwidth, codecs):
         """
         Initializes the M3U8Codec object with the provided parameters.
 
         Args:
             - bandwidth (int): Bandwidth of the codec.
-            - resolution (str): Resolution of the codec.
             - codecs (str): Codecs information in the format "avc1.xxxxxx,mp4a.xx".
         """
         self.bandwidth = bandwidth
-        self.resolution = resolution
         self.codecs = codecs
         self.audio_codec = None
         self.video_codec = None
@@ -76,7 +74,10 @@ class M3U8_Codec:
         """
         
         # Split the codecs string by comma
-        codecs_list = self.codecs.split(',')
+        try:
+            codecs_list = self.codecs.split(',')
+        except Exception as e:
+            logging.error(f"Cant split codec list: {self.codecs} with error {e}")
 
         # Separate audio and video codecs
         for codec in codecs_list:
@@ -448,14 +449,14 @@ class M3U8_Parser:
         try:
             for playlist in m3u8_obj.playlists:
 
-                there_is_codec = not M3U8_Parser.extract_resolution(playlist.uri) == (0,0)
+                there_is_codec = not playlist.stream_info.codecs is None
+                logging.info(f"There is coded: {there_is_codec}")
 
                 if there_is_codec:
                     self.codec = M3U8_Codec(
                         playlist.stream_info.bandwidth,
-                        None,
                         playlist.stream_info.codecs
-                        )
+                    )
 
                 # Direct access resolutions in m3u8 obj
                 if playlist.stream_info.resolution is not None:

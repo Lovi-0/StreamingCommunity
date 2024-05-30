@@ -50,7 +50,8 @@ DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_DOWNLOAD', 'specific_lis
 DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_DOWNLOAD', 'specific_list_subtitles')
 DOWNLOAD_VIDEO = config_manager.get_bool('M3U8_DOWNLOAD', 'download_video')
 DOWNLOAD_AUDIO = config_manager.get_bool('M3U8_DOWNLOAD', 'download_audio')
-DOWNLOAD_SUB = config_manager.get_bool('M3U8_DOWNLOAD', 'download_sub')
+MERGE_AUDIO = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_audio')
+DOWNLOAD_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'download_sub')
 MERGE_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_subs')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_DOWNLOAD', 'cleanup_tmp_folder')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
@@ -472,7 +473,7 @@ class Downloader():
             os.rename(out_path, self.output_filename)
 
             # Print size of the file
-            console.print(Panel(f"[bold green]Download completed![/bold green]\nFile size: [bold]{format_size(os.path.getsize(self.output_filename))}[/bold]", title=f"{os.path.basename(self.output_filename.replace('.mp4', ''))}", border_style="green"))
+            console.print(Panel(f"[bold green]Download completed![/bold green]\nFile size: [bold red]{format_size(os.path.getsize(self.output_filename))}[/bold red]", title=f"{os.path.basename(self.output_filename.replace('.mp4', ''))}", border_style="green"))
 
             # Delete all files except the output file
             delete_files_except_one(self.base_path, os.path.basename(self.output_filename))
@@ -519,13 +520,15 @@ class Downloader():
             # Collect information about the playlist
             self.__manage_playlist__(m3u8_playlist_text)
 
+
             # Start all download ...
             if DOWNLOAD_VIDEO:
                 self.__donwload_video__(server_ip)
             if DOWNLOAD_AUDIO:
                 self.__donwload_audio__(server_ip)
-            if DOWNLOAD_SUB:
+            if DOWNLOAD_SUBTITLE:
                 self.__download_subtitle__()
+
 
             # Check file to convert
             converted_out_path = None
@@ -534,38 +537,72 @@ class Downloader():
             there_is_subtitle: bool = (len(self.downloaded_subtitle) > 0)
             console.log(f"[cyan]Conversion [white]=> ([green]Audio: [yellow]{there_is_audio}[white], [green]Subtitle: [yellow]{there_is_subtitle}[white])")
 
+
             # Join audio and video
             if there_is_audio:
-                converted_out_path = self.__join_video_audio__()
+                if MERGE_AUDIO:
+                    converted_out_path = self.__join_video_audio__()
+
+                else:
+                    for obj_audio in self.downloaded_audio:
+                        language = obj_audio.get('language')
+                        path = obj_audio.get('path')
+
+                        # Set the new path for regular audio
+                        new_path = self.output_filename.replace(".mp4", f"_{language}.mp4")
+
+                        try:
+                            # Rename the audio file to the new path
+                            os.rename(path, new_path)
+                            logging.info(f"Audio moved to {new_path}")
+                        
+                        except Exception as e:
+                            logging.error(f"Failed to move audio {path} to {new_path}: {e}")
+
+
+                    # Convert video
+                    if there_is_video:
+                        converted_out_path = self.__join_video__()
+
 
             # Join only video ( audio is present in the same ts files )
             else:
                 if there_is_video:
                     converted_out_path = self.__join_video__()
 
+
             # Join subtitle
             if there_is_subtitle:
                 if MERGE_SUBTITLE:
                     if converted_out_path is not None:
                         converted_out_path = self.__join_video_subtitles__(converted_out_path)
+
                 else:
                     for obj_sub in self.downloaded_subtitle:
                         language = obj_sub.get('language')
                         path = obj_sub.get('path')
                         forced = 'forced' in language
 
+                        # Check if the language includes "forced"
+                        forced = 'forced' in language
+
+                        # Remove "forced-" from the language if present and set the new path with "forced"
                         if forced:
                             language = language.replace("forced-", "")
                             new_path = self.output_filename.replace(".mp4", f".{language}.forced.vtt")
                         else:
+
+                            # Set the new path for regular languages
                             new_path = self.output_filename.replace(".mp4", f".{language}.vtt")
                         
                         try:
+                            # Rename the subtitle file to the new path
                             os.rename(path, new_path)
                             logging.info(f"Subtitle moved to {new_path}")
+                        
                         except Exception as e:
                             logging.error(f"Failed to move subtitle {path} to {new_path}: {e}")
-                                        
+
 
             # Clean all tmp file
             self.__clean__(converted_out_path)
