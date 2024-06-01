@@ -220,7 +220,6 @@ class M3U8_Segments:
 
         # Generate new user agent
         headers_segments['user-agent'] = get_headers()
-        logging.info(f"Make request to get segmenet: [{index} - {len(self.segments)}]")
 
         try:
 
@@ -228,6 +227,7 @@ class M3U8_Segments:
             start_time = time.time()
             response = requests.get(ts_url, headers=headers_segments, verify=REQUEST_VERIFY_SSL, timeout=30)
             duration = time.time() - start_time
+            logging.info(f"Make request to get segmenet: [{index} - {len(self.segments)}] in: {duration}, len data: {len(response.content)}")
             
             if response.ok:
 
