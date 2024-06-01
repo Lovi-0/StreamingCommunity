@@ -7,11 +7,13 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+
 from Src.Api.Animeunity.anime import donwload_film
 from Src.Api.Animeunity.anime import download_episode as donwload_anime_episode
 from Src.Api.Animeunity import title_search as anime_search
 from Src.Api.Animeunity.Core.Vix_player.player import VideoSource as anime_source
 from Src.Api.Animeunity.site import media_search_manager as anime_media_manager
+
 
 from Src.Api.Streamingcommunity.film import download_film
 from Src.Api.Streamingcommunity.series import donwload_episode as download_tv_episode
@@ -204,6 +206,7 @@ class DownloadView(viewsets.ViewSet):
                     donwload_film(
                         id_film=self.media_id, 
                         title_name=self.media_slug
+
                     )
                 case _:
                     raise Exception("Type media not supported")
@@ -218,4 +221,3 @@ class DownloadView(viewsets.ViewSet):
             }
 
         return Response(response_dict)
-
