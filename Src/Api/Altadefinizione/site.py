@@ -6,13 +6,13 @@ import logging
 
 
 # External libraries
+from Src.Lib.Request import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 
 
 # Internal utilities
 from Src.Util.table import TVShowManager
-from Src.Lib.Request import requests
 from Src.Util.console import console
 from Src.Util._jsonConfig import config_manager
 
@@ -45,6 +45,7 @@ def title_search(title_search: str) -> int:
     
     # Send request to search for titles
     response = requests.get(f"https://{AD_SITE_NAME}.{AD_DOMAIN_NOW}/page/1/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3")
+    response.raise_for_status()
 
     # Create soup and find table
     soup = BeautifulSoup(response.text, "html.parser")

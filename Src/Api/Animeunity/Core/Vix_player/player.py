@@ -5,12 +5,12 @@ from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
 
 
 # External libraries
+from Src.Lib.Request import requests
 from bs4 import BeautifulSoup
 
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Lib.Request.my_requests import requests
 from Src.Util._jsonConfig import config_manager
 
 

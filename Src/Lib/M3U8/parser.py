@@ -8,7 +8,7 @@ from .lib_parser import load
 
 
 # External libraries
-from Src.Lib.Request.my_requests import requests
+from Src.Lib.Request import requests
 
 
 # Costant
@@ -52,17 +52,15 @@ class M3U8_Codec:
     Represents codec information for an M3U8 playlist.
     """
 
-    def __init__(self, bandwidth, resolution, codecs):
+    def __init__(self, bandwidth, codecs):
         """
         Initializes the M3U8Codec object with the provided parameters.
 
         Args:
             - bandwidth (int): Bandwidth of the codec.
-            - resolution (str): Resolution of the codec.
             - codecs (str): Codecs information in the format "avc1.xxxxxx,mp4a.xx".
         """
         self.bandwidth = bandwidth
-        self.resolution = resolution
         self.codecs = codecs
         self.audio_codec = None
         self.video_codec = None
@@ -76,7 +74,10 @@ class M3U8_Codec:
         """
         
         # Split the codecs string by comma
-        codecs_list = self.codecs.split(',')
+        try:
+            codecs_list = self.codecs.split(',')
+        except Exception as e:
+            logging.error(f"Cant split codec list: {self.codecs} with error {e}")
 
         # Separate audio and video codecs
         for codec in codecs_list:
@@ -254,7 +255,14 @@ class M3U8_Audio:
         Returns:
             list: List of dictionaries containing 'name', 'language', and 'uri' for all audio in the list.
         """
-        return [{'name': audio['name'], 'language': audio['language'], 'uri': audio['uri']} for audio in self.audio_playlist]
+        audios_list = [{'name': audio['name'], 'language': audio['language'], 'uri': audio['uri']} for audio in self.audio_playlist]
+        unique_audios_dict = {}
+
+        # Remove duplicate
+        for audio in audios_list:
+            unique_audios_dict[audio['language']] = audio
+        
+        return list(unique_audios_dict.values())
 
     def get_default_uri(self):
         """
@@ -308,7 +316,14 @@ class M3U8_Subtitle:
         Returns:
             list: List of dictionaries containing 'name' and 'uri' for all subtitles in the list.
         """
-        return [{'name': subtitle['name'], 'language': subtitle['language'], 'uri': subtitle['uri']} for subtitle in self.subtitle_playlist]
+        subtitles_list = [{'name': subtitle['name'], 'language': subtitle['language'], 'uri': subtitle['uri']} for subtitle in self.subtitle_playlist]
+        unique_subtitles_dict = {}
+
+        # Remove duplicate
+        for subtitle in subtitles_list:
+            unique_subtitles_dict[subtitle['language']] = subtitle
+        
+        return list(unique_subtitles_dict.values())
 
     def get_default_uri(self):
         """
@@ -420,8 +435,7 @@ class M3U8_Parser:
                     return resolution
             
         # Default resolution return (not best)
-        logging.error("No resolution found with custom parsing.")
-        logging.warning("Try set remove duplicate line to TRUE.")
+        logging.warning("No resolution found with custom parsing.")
         return (0, 0)
 
     def __parse_video_info__(self, m3u8_obj) -> None:
@@ -435,6 +449,15 @@ class M3U8_Parser:
         try:
             for playlist in m3u8_obj.playlists:
 
+                there_is_codec = not playlist.stream_info.codecs is None
+                logging.info(f"There is coded: {there_is_codec}")
+
+                if there_is_codec:
+                    self.codec = M3U8_Codec(
+                        playlist.stream_info.bandwidth,
+                        playlist.stream_info.codecs
+                    )
+
                 # Direct access resolutions in m3u8 obj
                 if playlist.stream_info.resolution is not None:
 
@@ -442,6 +465,9 @@ class M3U8_Parser:
                         "uri": playlist.uri, 
                         "resolution": playlist.stream_info.resolution
                     })
+
+                    if there_is_codec:
+                        self.codec.resolution = playlist.stream_info.resolution
                 
                 # Find resolutions in uri
                 else:
@@ -451,18 +477,10 @@ class M3U8_Parser:
                         "resolution": M3U8_Parser.extract_resolution(playlist.uri)
                     })    
 
-                    # Dont stop
-                    continue
+                    if there_is_codec:
+                        self.codec.resolution = M3U8_Parser.extract_resolution(playlist.uri)
 
-                # Check if all key is present to create codec
-                try:
-                    self.codec = M3U8_Codec(
-                        playlist.stream_info.bandwidth,
-                        playlist.stream_info.resolution,
-                        playlist.stream_info.codecs
-                    )
-                except:
-                    logging.error(f"Error parsing codec: {e}")
+                    continue
 
         except Exception as e:
             logging.error(f"Error parsing video info: {e}")

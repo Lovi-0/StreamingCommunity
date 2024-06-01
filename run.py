@@ -4,7 +4,6 @@ import sys
 import os
 import platform
 import argparse
-import logging
 
 from typing import Callable
 
@@ -13,9 +12,8 @@ from typing import Callable
 from Src.Util.message import start_message
 from Src.Util.console import console, msg
 from Src.Util._jsonConfig import config_manager
-from Src.Util._tmpConfig import temp_config_manager
 from Src.Upload.update import update as git_update
-from Src.Lib.FFmpeg import check_ffmpeg
+from Src.Util.os import get_system_summary
 from Src.Util.logger import Logger
 
 
@@ -51,25 +49,10 @@ def initialize():
 
 
     # Attempting GitHub update
-    try:
+    """try:
         git_update()
     except Exception as e:
-        console.print(f"[blue]Req github [white]=> [red]Failed: {e}")
-
-
-    # Check if tmp config ffmpeg is present
-    if not temp_config_manager.get_bool('Setting', 'ffmpeg'):
-        output_ffmpeg = check_ffmpeg()
-
-        # If ffmpeg is present is win systems change config
-        if output_ffmpeg:
-            temp_config_manager.add_variable('Setting', 'ffmpeg', True)
-        
-        else:
-            logging.error("FFmpeg not exist")
-
-    else:
-        logging.info("FFmpeg exist")
+        console.print(f"[blue]Req github [white]=> [red]Failed: {e}")"""
 
 
 def run_function(func: Callable[..., None], close_console: bool = False) -> None:
@@ -93,6 +76,7 @@ def run_function(func: Callable[..., None], close_console: bool = False) -> None
 def main():
     
     log_not = Logger()
+    get_system_summary()
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Script to download film and series from the internet.')
@@ -141,6 +125,7 @@ def main():
     else:
         console.print("[red]Invalid category, you need to insert 0, 1, or 2.")
         sys.exit(0)
+
 
 if __name__ == '__main__':
     main()

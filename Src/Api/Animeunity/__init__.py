@@ -11,7 +11,7 @@ from .anime import donwload_film, donwload_series
 def main_anime():
 
     # Make request to site to get content that corrsisponde to that string
-    string_to_search = msg.ask("\n[purple]Insert word to search in all site: ").strip()
+    string_to_search = msg.ask("\n[purple]Insert word to search in all site").strip()
     len_database = title_search(string_to_search)
 
     if len_database != 0:

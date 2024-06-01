@@ -60,8 +60,8 @@ def capture_output(process: subprocess.Popen, description: str) -> None:
                         time_now = datetime.now().strftime('%H:%M:%S')
 
                         # Construct the progress string with formatted output information
-                        progress_string = (f"[blue][{time_now}][purple] FFmpeg [white][{description}]: "
-                                           f"[white]([green]'speed': [yellow]{data.get('speed', 'N/A')}[white], "
+                        progress_string = (f"[blue][{time_now}][purple] FFmpeg [white][{description}[white]]: "
+                                           f"([green]'speed': [yellow]{data.get('speed', 'N/A')}[white], "
                                            f"[green]'size': [yellow]{format_size(byte_size)}[white])")
                         max_length = max(max_length, len(progress_string))
 

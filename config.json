@@ -9,26 +9,32 @@
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
         "not_close": false
     },
+    "REQUESTS": {
+        "disable_error": false,
+        "timeout": 10,
+        "max_retry": 3,
+        "verify_ssl": false,
+        "index": {"user-agent": ""},
+        "segments": { "user-agent": ""}
+    },
     "M3U8_DOWNLOAD": {
         "tdqm_workers": 30,
-        "tqdm_show_progress": true,
+        "tqdm_use_large_bar": true,
+        "download_video": true,
+        "download_audio": true,
+        "merge_audio": true,
+        "specific_list_audio": ["ita"],
+        "download_sub": true,
+        "merge_subs": true,
+        "specific_list_subtitles": ["eng", "spa"],
+        "cleanup_tmp_folder": true,
         "create_report": false
     },
-    "M3U8_FILTER": {
+    "M3U8_CONVERSION": {
         "use_codec": false,
         "use_gpu": false,
         "default_preset": "ultrafast",
-        "check_output_conversion": false,
-        "cleanup_tmp_folder": true,
-        "specific_list_audio": ["ita"],
-        "specific_list_subtitles": ["eng"]
-    },
-    "M3U8_REQUESTS": {
-        "disable_error": false,
-        "timeout": 10,
-        "verify_ssl": false,
-        "index": {"user-agent": ""},
-        "segments": {"user-agent": ""}
+        "check_output_after_ffmpeg": false
     },
     "M3U8_PARSER": {
         "skip_empty_row_playlist": false,

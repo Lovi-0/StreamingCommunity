@@ -20,7 +20,7 @@ def start_message():
     Display a start message.
     """
 
-    msg = '''
+    msg = r'''
 
    _____ _                            _                _____                                      _ _         
   / ____| |                          (_)              / ____|                                    (_) |        

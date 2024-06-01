@@ -6,4 +6,3 @@ from .command import (
     join_subtitle,
 )
 from .util import print_duration_table
-from .installer import check_ffmpeg
