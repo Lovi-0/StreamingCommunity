@@ -26,37 +26,40 @@ video_source = VideoSource()
 
 
 
-def download_episode(index_select: int):
+def download_episode(index_select: int, custom_video_source: VideoSource = None):
     """
     Downloads the selected episode.
 
     Args:
         - index_select (int): Index of the episode to download.
     """
+    
+    active_video_source = custom_video_source if custom_video_source is not None else video_source
+    
 
     # Get information about the selected episode
-    obj_episode = video_source.get_info_episode(index_select)
+    obj_episode = active_video_source.get_info_episode(index_select)
 
     start_message()
     console.print(f"[yellow]Download:  [red]EP_{obj_episode.number} \n")
 
     # Get the embed URL for the episode
-    embed_url = video_source.get_embed(obj_episode.id)
+    embed_url = active_video_source.get_embed(obj_episode.id)
 
     # Parse parameter in embed text
-    video_source.parse_script(embed_url)
+    active_video_source.parse_script(embed_url)
 
     # Create output path
     mp4_path = None
     mp4_name = f"{index_select + 1}.mp4"
-    if video_source.is_series:
-        mp4_path = os.path.join(ROOT_PATH, ANIME_FOLDER, SERIES_FOLDER, video_source.series_name)
+    if active_video_source.is_series:
+        mp4_path = os.path.join(ROOT_PATH, ANIME_FOLDER, SERIES_FOLDER, active_video_source.series_name)
     else:
-        mp4_path = os.path.join(ROOT_PATH, ANIME_FOLDER, MOVIE_FOLDER, video_source.series_name)
+        mp4_path = os.path.join(ROOT_PATH, ANIME_FOLDER, MOVIE_FOLDER, active_video_source.series_name)
 
     # Crete downloader
     obj_download = Downloader(
-        m3u8_playlist = video_source.get_playlist(),
+        m3u8_playlist = active_video_source.get_playlist(),
         output_filename = os.path.join(mp4_path, mp4_name)
     )
 

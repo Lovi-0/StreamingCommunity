@@ -66,7 +66,7 @@ def display_episodes_list() -> str:
     return last_command
 
 
-def donwload_video(tv_name: str, index_season_selected: int, index_episode_selected: int) -> None:
+def donwload_video(tv_name: str, index_season_selected: int, index_episode_selected: int, custom_video_source: VideoSource = None) -> None:
     """
     Download a single episode video.
 
@@ -76,10 +76,12 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
         - index_episode_selected (int): Index of the selected episode.
     """
 
+    active_video_source = custom_video_source if custom_video_source is not None else video_source
+
     start_message()
 
     # Get info about episode
-    obj_episode = video_source.obj_episode_manager.episodes[index_episode_selected - 1]
+    obj_episode = active_video_source.obj_episode_manager.episodes[index_episode_selected - 1]
     console.print(f"[yellow]Download: [red]{index_season_selected}:{index_episode_selected} {obj_episode.name}")
     print()
 
@@ -88,9 +90,9 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
     mp4_path = os.path.join(ROOT_PATH, STREAMING_FOLDER, SERIES_FOLDER,  tv_name, f"S{index_season_selected}")
 
     # Retrieve scws and if available master playlist
-    video_source.get_iframe(obj_episode.id)
-    video_source.get_content()
-    master_playlist = video_source.get_playlist()
+    active_video_source.get_iframe(obj_episode.id)
+    active_video_source.get_content()
+    master_playlist = active_video_source.get_playlist()
     
     # Download the episode
     Downloader(
@@ -99,7 +101,7 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
     ).start(SERVER_IP)
 
 
-def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: bool = False) -> None:
+def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: bool = False, custom_video_source: VideoSource = None) -> None:
     """
     Download all episodes of a season.
 
@@ -109,19 +111,21 @@ def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: boo
         - donwload_all (bool): Donwload all seasons episodes
     """
 
+    active_video_source = custom_video_source if custom_video_source is not None else video_source
+
     # Clean memory of all episodes and get the number of the season (some dont follow rule of [1,2,3,4,5] but [1,2,3,145,5,6,7]).
-    video_source.obj_episode_manager.clear()
-    season_number = (video_source.obj_title_manager.titles[index_season_selected-1].number)
+    active_video_source.obj_episode_manager.clear()
+    season_number = (active_video_source.obj_title_manager.titles[index_season_selected-1].number)
 
     # Start message and collect information about episodes
     start_message()
-    video_source.collect_title_season(season_number)
-    episodes_count = video_source.obj_episode_manager.get_length()
+    active_video_source.collect_title_season(season_number)
+    episodes_count = active_video_source.obj_episode_manager.get_length()
 
     # Download all episodes wihtout ask
     if donwload_all:
         for i_episode in range(1, episodes_count+1):
-            donwload_video(tv_name, index_season_selected, i_episode)
+            donwload_video(tv_name, index_season_selected, i_episode, active_video_source)
 
         console.print(f"\n[red]Download [yellow]season: [red]{index_season_selected}.")
 
@@ -134,12 +138,12 @@ def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: boo
 
         # Download selected episodes
         if len(list_episode_select) == 1 and last_command != "*":
-            donwload_video(tv_name, index_season_selected, list_episode_select[0])
+            donwload_video(tv_name, index_season_selected, list_episode_select[0],active_video_source)
 
         # Download all other episodes selecter
         else:
             for i_episode in list_episode_select:
-                donwload_video(tv_name, index_season_selected, i_episode)
+                donwload_video(tv_name, index_season_selected, i_episode, active_video_source)
 
 
 def download_series(tv_id: str, tv_name: str, version: str, domain: str) -> None:
