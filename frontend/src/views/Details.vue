@@ -148,7 +148,7 @@ const downloadAllItems = async () => {
                     @click.prevent="downloadAllItems">
               Scarica {{['TV_ANIME', 'TV'].includes(item.type)? 'tutto' : ''}}
             </button>
-            <template v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)">
+            <!--<template v-if="!loading && ['TV_ANIME', 'TV'].includes(item.type)">
               <button @click="toggleEpisodeSelection">
                 {{selectingEpisodes ? 'Disattiva' : 'Attiva'}} selezione episodi
               </button>
@@ -156,7 +156,7 @@ const downloadAllItems = async () => {
                       @click="downloadSelectedEpisodes">
                 Download episodi selezionati
               </button>
-            </template>
+            </template>-->
           </div>
         </div>
       </div>
@@ -194,7 +194,7 @@ const downloadAllItems = async () => {
 
       <!--MOVIES SECTION-->
       <div v-else-if="!loading && ['MOVIE', 'OVA', 'SPECIAL'].includes(item.type)">
-        <p>Questo è un {{item.type}} (QUESTO TESTO E' A SCOPO DI TEST)</p>
+        <!-- WILL BE POPULATED WITH HYPOTETICAL MOVIES CONTENT -->
       </div>
 
       <!--LOADING SECTION-->

@@ -7,10 +7,16 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+
+from Src.Api.Animeunity.anime import donwload_film
+from Src.Api.Animeunity.anime import download_episode as donwload_anime_episode
 from Src.Api.Animeunity import title_search as anime_search
 from Src.Api.Animeunity.Core.Vix_player.player import VideoSource as anime_source
 from Src.Api.Animeunity.site import media_search_manager as anime_media_manager
 
+
+from Src.Api.Streamingcommunity.film import download_film
+from Src.Api.Streamingcommunity.series import donwload_episode as download_tv_episode
 from Src.Api.Streamingcommunity import title_search as sc_search, get_version_and_domain
 from Src.Api.Streamingcommunity.Core.Vix_player.player import VideoSource as film_video_source
 from Src.Api.Streamingcommunity.site import media_search_manager as film_media_manager
@@ -151,7 +157,7 @@ class SearchView(viewsets.ViewSet):
         return Response({"error": "No media found with that search query"})
 
 
-'''
+
 class DownloadView(viewsets.ViewSet):
 
     def create(self, request):
@@ -171,59 +177,36 @@ class DownloadView(viewsets.ViewSet):
                 case "MOVIE":
                     download_film(self.media_id, self.media_slug, self.domain)
                 case "TV":
-                    video_source = VideoSource()
-                    video_source.set_url_base_name(STREAM_SITE_NAME)
-                    video_source.set_version(self.site_version)
-                    video_source.set_domain(self.domain)
-                    video_source.set_series_name(self.media_slug)
-                    video_source.set_media_id(self.media_id)
+                    video_source = film_video_source()
+                    video_source.setup(
+                        version = self.site_version,
+                        domain = self.domain,
+                        media_id = self.media_id,
+                        series_name = self.media_slug
+                    )
 
                     video_source.collect_info_seasons()
                     video_source.obj_episode_manager.clear()
 
-                    video_source.collect_title_season(self.download_id)
-                    episodes_count = video_source.obj_episode_manager.get_length()
-                    for i_episode in range(1, episodes_count + 1):
-                        episode_id = video_source.obj_episode_manager.episodes[
-                            i_episode - 1
-                        ].id
+                    seasons_count = video_source.obj_title_manager.get_length()
 
-                        # Define filename and path for the downloaded video
-                        mp4_name = remove_special_characters(
-                            f"{map_episode_title(self.media_slug,video_source.obj_episode_manager.episodes[i_episode - 1],self.download_id)}.mp4"
-                        )
-                        mp4_path = remove_special_characters(
-                            os.path.join(
-                                ROOT_PATH,
-                                SERIES_FOLDER,
-                                self.media_slug,
-                                f"S{self.download_id}",
-                            )
-                        )
-                        os.makedirs(mp4_path, exist_ok=True)
-
-                        # Get iframe and content for the episode
-                        video_source.get_iframe(episode_id)
-                        video_source.get_content()
-                        video_source.set_url_base_name(STREAM_SITE_NAME)
-
-                        # Download the episode
-                        obj_download = Downloader(
-                            m3u8_playlist=video_source.get_playlist(),
-                            key=video_source.get_key(),
-                            output_filename=os.path.join(mp4_path, mp4_name),
-                        )
-
-                        obj_download.download_m3u8()
+                    for i_season in range(1, seasons_count + 1):
+                        download_tv_episode(self.media_slug, i_season, True, video_source)
 
                 case "TV_ANIME":
-                    episodes_downloader = EpisodeDownloader(
-                        self.media_id, self.media_slug
+                    video_source = anime_source()
+                    video_source.setup(
+                        media_id = self.media_id,
+                        series_name = self.media_slug
                     )
-                    episodes_downloader.download_episode(self.download_id)
+                    episoded_count = video_source.get_count_episodes()
+                    for i in range(episoded_count):
+                        donwload_anime_episode(i, video_source)
                 case "OVA" | "SPECIAL":
-                    anime_download_film(
-                        id_film=self.media_id, title_name=self.media_slug
+                    donwload_film(
+                        id_film=self.media_id, 
+                        title_name=self.media_slug
+
                     )
                 case _:
                     raise Exception("Type media not supported")
@@ -238,4 +221,3 @@ class DownloadView(viewsets.ViewSet):
             }
 
         return Response(response_dict)
-'''

@@ -319,7 +319,11 @@ class M3U8_Segments:
                 self.condition.notify_all()     # Wake up the writer thread if it's waiting
 
         # Register the signal handler for Ctrl+C
-        signal.signal(signal.SIGINT, signal_handler)
+        try:
+            signal.signal(signal.SIGINT, signal_handler)
+        except Exception as e:
+            logging.error(f"Failed to register signal handler: {e}")
+            logging.error("Ctrl+C detection may not work.")
 
         with ThreadPoolExecutor(max_workers=TQDM_MAX_WORKER) as executor:
 
