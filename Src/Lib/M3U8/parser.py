@@ -48,10 +48,6 @@ RESOLUTIONS = [
 
 
 class M3U8_Codec:
-    """
-    Represents codec information for an M3U8 playlist.
-    """
-
     def __init__(self, bandwidth, codecs):
         """
         Initializes the M3U8Codec object with the provided parameters.
@@ -64,20 +60,23 @@ class M3U8_Codec:
         self.codecs = codecs
         self.audio_codec = None
         self.video_codec = None
+        self.video_codec_name = None
+        self.audio_codec_name = None
         self.extract_codecs()
         self.parse_codecs()
+        self.calculate_bitrates()
 
     def extract_codecs(self):
         """
         Parses the codecs information to extract audio and video codecs.
         Extracted codecs are set as attributes: audio_codec and video_codec.
         """
-        
-        # Split the codecs string by comma
         try:
+            # Split the codecs string by comma
             codecs_list = self.codecs.split(',')
         except Exception as e:
-            logging.error(f"Cant split codec list: {self.codecs} with error {e}")
+            logging.error(f"Can't split codec list: {self.codecs} with error {e}")
+            return
 
         # Separate audio and video codecs
         for codec in codecs_list:
@@ -87,7 +86,6 @@ class M3U8_Codec:
                 self.audio_codec = codec
 
     def convert_video_codec(self, video_codec_identifier) -> str:
-
         """
         Convert video codec identifier to codec name.
 
@@ -97,6 +95,9 @@ class M3U8_Codec:
         Returns:
             str: Codec name corresponding to the identifier.
         """
+        if not video_codec_identifier:
+            logging.warning("No video codec identifier provided. Using default codec libx264.")
+            return "libx264"  # Default
 
         # Extract codec type from the identifier
         codec_type = video_codec_identifier.split('.')[0]
@@ -107,13 +108,11 @@ class M3U8_Codec:
 
         if codec_name:
             return codec_name
-        
         else:
             logging.warning(f"No corresponding video codec found for {video_codec_identifier}. Using default codec libx264.")
-            return "libx264"    # Default
-        
-    def convert_audio_codec(self, audio_codec_identifier) -> str:
+            return "libx264"  # Default
 
+    def convert_audio_codec(self, audio_codec_identifier) -> str:
         """
         Convert audio codec identifier to codec name.
 
@@ -123,6 +122,9 @@ class M3U8_Codec:
         Returns:
             str: Codec name corresponding to the identifier.
         """
+        if not audio_codec_identifier:
+            logging.warning("No audio codec identifier provided. Using default codec aac.")
+            return "aac"  # Default
 
         # Extract codec type from the identifier
         codec_type = audio_codec_identifier.split('.')[0]
@@ -133,25 +135,33 @@ class M3U8_Codec:
 
         if codec_name:
             return codec_name
-        
         else:
             logging.warning(f"No corresponding audio codec found for {audio_codec_identifier}. Using default codec aac.")
-            return "aac"        # Default
-        
+            return "aac"  # Default
+
     def parse_codecs(self):
         """
         Parse video and audio codecs.
         This method updates `video_codec_name` and `audio_codec_name` attributes.
         """
-
         self.video_codec_name = self.convert_video_codec(self.video_codec)
         self.audio_codec_name = self.convert_audio_codec(self.audio_codec)
 
-    def __str__(self):
+    def calculate_bitrates(self):
         """
-        Returns a string representation of the M3U8Codec object.
+        Calculate video and audio bitrates based on the available bandwidth.
         """
-        return f"BANDWIDTH={self.bandwidth},RESOLUTION={self.resolution},CODECS=\"{self.codecs}\""
+        if self.bandwidth:
+            
+            # Define the video and audio bitrates
+            video_bitrate = int(self.bandwidth * 0.8)  # Using 80% of bandwidth for video
+            audio_bitrate = self.bandwidth - video_bitrate
+
+            self.video_bitrate = video_bitrate
+            self.audio_bitrate = audio_bitrate
+        else:
+            logging.warning("No bandwidth provided. Bitrates cannot be calculated.")
+
 
 
 class M3U8_Video:

@@ -19,14 +19,18 @@ except: pass
 from Src.Util._jsonConfig import config_manager
 from Src.Util.os import check_file_existence, suppress_output
 from Src.Util.console import console
-from .util import has_audio_stream, need_to_force_to_ts, check_ffmpeg_input
+from .util import has_audio_stream, need_to_force_to_ts, check_ffmpeg_input, check_duration_v_a
 from .capture import capture_ffmpeg_real_time
+from ..M3U8.parser import M3U8_Codec
 
 
 # Config
 DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
 DEBUG_FFMPEG = "debug" if DEBUG_MODE else "error"
-USE_CODECS = config_manager.get_bool("M3U8_CONVERSION", "use_codec")
+USE_CODEC = config_manager.get_bool("M3U8_CONVERSION", "use_codec")
+USE_VCODEC = config_manager.get_bool("M3U8_CONVERSION", "use_vcodec")
+USE_ACODEC = config_manager.get_bool("M3U8_CONVERSION", "use_acodec")
+USE_BITRATE = config_manager.get_bool("M3U8_CONVERSION", "use_bitrate")
 USE_GPU = config_manager.get_bool("M3U8_CONVERSION", "use_gpu")
 FFMPEG_DEFAULT_PRESET = config_manager.get("M3U8_CONVERSION", "default_preset")
 CHECK_OUTPUT_CONVERSION = config_manager.get_bool("M3U8_CONVERSION", "check_output_after_ffmpeg")
@@ -263,7 +267,7 @@ def __transcode_with_subtitles(video: str, subtitles_list: List[Dict[str, str]],
 
 
 # --> v 1.1 (new)
-def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str = None, bitrate: str = None):
+def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
     
     """
     Joins single ts video file to mp4
@@ -281,12 +285,12 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
         logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
-
     # Start command
     ffmpeg_cmd = ['ffmpeg']
 
     # Enabled the use of gpu
-    ffmpeg_cmd.extend(['-hwaccel', 'cuda', '-hwaccel_output_format', 'cuda'])
+    if USE_GPU:
+        ffmpeg_cmd.extend(['-hwaccel', 'cuda', '-hwaccel_output_format', 'cuda'])
 
     # Add mpegts to force to detect input file as ts file
     if need_to_force_to_ts(video_path):
@@ -294,15 +298,30 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
         ffmpeg_cmd.extend(['-f', 'mpegts'])
         vcodec = "libx264"
 
-
     # Insert input video path
     ffmpeg_cmd.extend(['-i', video_path])
 
     # Add output args
-    if USE_CODECS:
-        if vcodec: ffmpeg_cmd.extend(['-c:v', vcodec])
-        if acodec: ffmpeg_cmd.extend(['-c:a', acodec])
-        if bitrate: ffmpeg_cmd.extend(['-b:a', str(bitrate)])
+    if USE_CODEC:
+        if USE_VCODEC:
+            if codec.video_codec_name: 
+                if not USE_GPU: 
+                    ffmpeg_cmd.extend(['-c:v', codec.video_codec_name])
+                else: 
+                    ffmpeg_cmd.extend(['-c:v', 'h264_nvenc'])
+            else: 
+                console.log("[red]Cant find vcodec for 'join_audios'")
+
+        if USE_ACODEC:
+            if codec.audio_codec_name: 
+                ffmpeg_cmd.extend(['-c:a', codec.audio_codec_name])
+            else: 
+                console.log("[red]Cant find acodec for 'join_audios'")
+
+        if USE_BITRATE:
+            ffmpeg_cmd.extend(['-b:v',  f'{codec.video_bitrate // 1000}k'])
+            ffmpeg_cmd.extend(['-b:a',  f'{codec.audio_bitrate // 1000}k'])
+
     else:
         ffmpeg_cmd.extend(['-c', 'copy'])
 
@@ -312,11 +331,9 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
     else:
         ffmpeg_cmd.extend(['-preset', 'fast'])
 
-
     # Overwrite
     ffmpeg_cmd += [out_path, "-y"]
     logging.info(f"FFmpeg command: {ffmpeg_cmd}")
-
 
     # Run join
     if DEBUG_MODE:
@@ -333,8 +350,6 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join video")
                 print()
 
-
-
     # Check file output
     if CHECK_OUTPUT_CONVERSION:
         console.log("[red]Check output ffmpeg")
@@ -347,7 +362,7 @@ def join_video(video_path: str, out_path: str, vcodec: str = None, acodec: str =
         sys.exit(0)
 
 
-def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: str):
+def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: str, codec: M3U8_Codec = None):
     """
     Joins audio tracks with a video file using FFmpeg.
     
@@ -362,9 +377,17 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
         logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
+    video_audio_same_duration = check_duration_v_a(video_path, audio_tracks[0].get('path'))
 
     # Start command
-    ffmpeg_cmd = ['ffmpeg', '-i', video_path]
+    ffmpeg_cmd = ['ffmpeg']
+
+    # Enabled the use of gpu
+    if USE_GPU:
+        ffmpeg_cmd.extend(['-hwaccel', 'cuda', '-hwaccel_output_format', 'cuda'])
+
+    # Insert input video path
+    ffmpeg_cmd.extend(['-i', video_path])
 
     # Add audio tracks as input
     for i, audio_track in enumerate(audio_tracks):
@@ -372,7 +395,6 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
             ffmpeg_cmd.extend(['-i', audio_track.get('path')])
         else:
             logging.error(f"Skip audio join: {audio_track.get('path')} dont exist")
-
 
     # Map the video and audio streams
     ffmpeg_cmd.append('-map')
@@ -382,17 +404,44 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
         ffmpeg_cmd.append('-map')
         ffmpeg_cmd.append(f'{i}:a')     # Map audio streams from subsequent inputs
 
-
     # Add output args
-    if USE_CODECS:
-        ffmpeg_cmd.extend(['-c:v', 'copy', '-c:a', 'copy'])
+    if USE_CODEC:
+        if USE_VCODEC:
+            if codec.video_codec_name: 
+                if not USE_GPU: 
+                    ffmpeg_cmd.extend(['-c:v', codec.video_codec_name])
+                else: 
+                    ffmpeg_cmd.extend(['-c:v', 'h264_nvenc'])
+            else: 
+                console.log("[red]Cant find vcodec for 'join_audios'")
+
+        if USE_ACODEC:
+            if codec.audio_codec_name: 
+                ffmpeg_cmd.extend(['-c:a', codec.audio_codec_name])
+            else: 
+                console.log("[red]Cant find acodec for 'join_audios'")
+
+        if USE_BITRATE:
+            ffmpeg_cmd.extend(['-b:v',  f'{codec.video_bitrate // 1000}k'])
+            ffmpeg_cmd.extend(['-b:a',  f'{codec.audio_bitrate // 1000}k'])
+
     else:
         ffmpeg_cmd.extend(['-c', 'copy'])
+
+    # Ultrafast preset always or fast for gpu
+    if not USE_GPU:
+        ffmpeg_cmd.extend(['-preset', FFMPEG_DEFAULT_PRESET])
+    else:
+        ffmpeg_cmd.extend(['-preset', 'fast'])
+
+    # Use shortest input path for video and audios
+    if not video_audio_same_duration:
+        console.log("[red]Use shortest input.")
+        ffmpeg_cmd.extend(['-shortest', '-strict', 'experimental'])
 
     # Overwrite
     ffmpeg_cmd += [out_path, "-y"]
     logging.info(f"FFmpeg command: {ffmpeg_cmd}")
-
 
     # Run join
     if DEBUG_MODE:
@@ -408,7 +457,6 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
             with suppress_output():
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join audio")
                 print()
-
 
     # Check file output
     if CHECK_OUTPUT_CONVERSION:
@@ -456,7 +504,7 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
         ffmpeg_cmd += ["-metadata:s:s:{}".format(idx), "title={}".format(subtitle['name'])]
 
     # Add output args
-    if USE_CODECS:
+    if USE_CODEC:
         ffmpeg_cmd.extend(['-c:v', 'copy', '-c:a', 'copy', '-c:s', 'mov_text'])
     else:
         ffmpeg_cmd.extend(['-c', 'copy', '-c:s', 'mov_text'])

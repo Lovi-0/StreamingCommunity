@@ -189,7 +189,7 @@ class ManageRequests:
         timeout: float = HTTP_TIMEOUT, 
         retries: int = HTTP_RETRIES,
         params: Optional[Dict[str, str]] = None,
-        verify_ssl: bool = True,
+        verify: bool = True,
         auth: Optional[tuple] = None,
         proxy: Optional[str] = None,
         cookies: Optional[Dict[str, str]] = None,
@@ -206,7 +206,7 @@ class ManageRequests:
             - timeout (float, optional): The request timeout. Defaults to HTTP_TIMEOUT.
             - retries (int, optional): The number of retries in case of request failure. Defaults to HTTP_RETRIES.
             - params (Optional[Dict[str, str]], optional): The query parameters for the request. Defaults to None.
-            - verify_ssl (bool, optional): Indicates whether SSL certificate verification should be performed. Defaults to True.
+            - verify (bool, optional): Indicates whether SSL certificate verification should be performed. Defaults to True.
             - auth (Optional[tuple], optional): Tuple containing the username and password for basic authentication. Defaults to None.
             - proxy (Optional[str], optional): The proxy URL. Defaults to None.
             - cookies (Optional[Dict[str, str]], optional): The cookies to be included in the request. Defaults to None.
@@ -218,7 +218,7 @@ class ManageRequests:
         self.timeout = timeout
         self.retries = retries
         self.params = params
-        self.verify_ssl = verify_ssl
+        self.verify_ssl = verify
         self.auth = auth
         self.proxy = proxy
         self.cookies = cookies

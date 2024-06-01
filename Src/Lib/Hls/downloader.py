@@ -178,7 +178,7 @@ class Downloader():
 
         # Check if there is some audios, else disable download
         if self.list_available_audio != None:
-            console.log(f"[cyan]Find audios [white]=> [red]{[obj_audio.get('language') for obj_audio in self.list_available_audio]}")
+            console.print(f"[cyan]Find audios [white]=> [red]{[obj_audio.get('language') for obj_audio in self.list_available_audio]}")
         else:
             console.log("[red]Cant find a list of audios")
 
@@ -191,7 +191,7 @@ class Downloader():
 
         # Check if there is some subtitles, else disable download
         if self.list_available_subtitles != None:
-            console.log(f"[cyan]Find subtitles [white]=> [red]{[obj_sub.get('language') for obj_sub in self.list_available_subtitles]}")
+            console.print(f"[cyan]Find subtitles [white]=> [red]{[obj_sub.get('language') for obj_sub in self.list_available_subtitles]}")
         else:
             console.log("[red]Cant find a list of audios")
 
@@ -208,7 +208,7 @@ class Downloader():
         logging.info(f"M3U8 index select: {self.m3u8_index}, with resolution: {video_res}")
 
         # Get URI of the best quality and codecs parameters
-        console.log(f"[cyan]Find resolution [white]=> [red]{sorted(list_available_resolution, reverse=True)}")
+        console.print(f"[cyan]Find resolution [white]=> [red]{sorted(list_available_resolution, reverse=True)}")
 
         # Fix URL if it is not complete with http:\\site_name.domain\...
         if "http" not in self.m3u8_index:
@@ -219,7 +219,7 @@ class Downloader():
 
             # Check if a valid HTTPS URL is obtained
             if self.m3u8_index is not None and "https" in self.m3u8_index:
-                console.log(f"[cyan]Found m3u8 index [white]=> [red]{self.m3u8_index}")
+                console.print(f"[cyan]Found m3u8 index [white]=> [red]{self.m3u8_index}")
             else:
                 logging.error("[download_m3u8] Can't find a valid m3u8 index")
                 raise
@@ -229,7 +229,8 @@ class Downloader():
         logging.info(f"Find codec: {self.codec}")
 
         if self.codec is not None:
-            console.log(f"[cyan]Find codec [white]=> ([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white], [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white], [green]'b'[white]: [yellow]{self.codec.bandwidth})")
+            console.print(f"[cyan]Find codec [white]=> ([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white] ([green]b[white]: [yellow]{self.codec.video_bitrate // 1000}k[white]), [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white] ([green]b[white]: [yellow]{self.codec.audio_bitrate // 1000}k[white]))")
+
 
     def __donwload_video__(self, server_ip: list = None):
         """
@@ -262,6 +263,9 @@ class Downloader():
             
             # Download the video segments
             video_m3u8.download_streams(f"{Colors.MAGENTA}video")
+
+            # Get time of output file
+            print_duration_table(os.path.join(full_path_video, "0.ts"))
 
         else:
             console.log("[cyan]Video [red]already exists.")
@@ -308,6 +312,9 @@ class Downloader():
                 
                 # Download the audio segments
                 audio_m3u8.download_streams(f"{Colors.MAGENTA}audio {Colors.RED}{obj_audio.get('language')}")
+
+                # Get time of output file
+                print_duration_table(os.path.join(full_path_audio, "0.ts"))
 
             else:
                 console.log(f"[cyan]Audio [white]([green]{obj_audio.get('language')}[white]) [red]already exists.")
@@ -373,14 +380,14 @@ class Downloader():
                 )
 
                 # Initiate the download of the subtitle content
-                console.log(f"[cyan]Downloading subtitle: [red]{sub_language.lower()}")
+                console.print(f"[cyan]Downloading subtitle: [red]{sub_language.lower()}")
                 futures.append(executor.submit(self.__save_subtitle_content, m3u8_sub_parser.subtitle[-1], sub_full_path))
             
             # Wait for all downloads to finish
             for future in futures:
                 future.result()
 
-    def __join_video__(self, vcodec = 'copy') -> str:
+    def __join_video__(self) -> str:
         """
         Join downloaded video segments into a single video file.
 
@@ -397,10 +404,9 @@ class Downloader():
             join_video(
                 video_path = self.downloaded_video[0].get('path'),
                 out_path = path_join_video,
-                vcodec = vcodec
+                codec = self.codec
             )
 
-        print_duration_table(path_join_video)
         return path_join_video
 
     def __join_video_audio__(self) -> str:
@@ -420,10 +426,10 @@ class Downloader():
             join_audios(
                 video_path = self.downloaded_video[0].get('path'),
                 audio_tracks = self.downloaded_audio,
-                out_path = path_join_video_audio
+                out_path = path_join_video_audio,
+                codec = self.codec
             )
 
-        print_duration_table(path_join_video_audio)
         return path_join_video_audio
 
     def __join_video_subtitles__(self, input_path: str) -> str:
@@ -449,7 +455,6 @@ class Downloader():
                 path_join_video_subtitle
             )
 
-        print_duration_table(path_join_video_subtitle)
         return path_join_video_subtitle
 
     def __clean__(self, out_path: str) -> None:
@@ -473,7 +478,11 @@ class Downloader():
             os.rename(out_path, self.output_filename)
 
             # Print size of the file
-            console.print(Panel(f"[bold green]Download completed![/bold green]\nFile size: [bold red]{format_size(os.path.getsize(self.output_filename))}[/bold red]", title=f"{os.path.basename(self.output_filename.replace('.mp4', ''))}", border_style="green"))
+            console.print(Panel(
+                f"[bold green]Download completed![/bold green]\n"
+                f"File size: [bold red]{format_size(os.path.getsize(self.output_filename))}[/bold red]\n"
+                f"Duration: [bold]{print_duration_table(self.output_filename, show=False)}[/bold]", 
+            title=f"{os.path.basename(self.output_filename.replace('.mp4', ''))}", border_style="green"))
 
             # Delete all files except the output file
             delete_files_except_one(self.base_path, os.path.basename(self.output_filename))
@@ -535,7 +544,7 @@ class Downloader():
             there_is_video: bool = (len(self.downloaded_video) > 0)
             there_is_audio: bool = (len(self.downloaded_audio) > 0)
             there_is_subtitle: bool = (len(self.downloaded_subtitle) > 0)
-            console.log(f"[cyan]Conversion [white]=> ([green]Audio: [yellow]{there_is_audio}[white], [green]Subtitle: [yellow]{there_is_subtitle}[white])")
+            console.print(f"[cyan]Conversion [white]=> ([green]Audio: [yellow]{there_is_audio}[white], [green]Subtitle: [yellow]{there_is_subtitle}[white])")
 
 
             # Join audio and video

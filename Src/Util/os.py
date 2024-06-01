@@ -16,6 +16,7 @@ import platform
 import importlib
 import subprocess
 import contextlib
+import urllib.request
 import importlib.metadata
 
 from typing import List
@@ -403,6 +404,19 @@ def convert_to_hex(bytes_data: bytes) -> str:
 
 
 # --> OS GET SUMMARY
+def check_internet():
+    while True:
+        try:
+            # Attempt to open a connection to a website to check for internet connection
+            urllib.request.urlopen("http://www.google.com", timeout=1)
+            console.log("[bold green]Internet is available![/bold green]")
+            break
+
+        except urllib.error.URLError:
+            console.log("[bold red]Internet is not available. Waiting...[/bold red]")
+            time.sleep(5)
+    print()
+
 def get_executable_version(command):
     try:
         version_output = subprocess.check_output(command, stderr=subprocess.STDOUT).decode().split('\n')[0]
@@ -419,7 +433,8 @@ def get_library_version(lib_name):
         return f"{lib_name}-not installed"
 
 def get_system_summary():
-
+    
+    check_internet()
     console.print("[bold blue]System Summary[/bold blue][white]:")
 
     # Python version and platform

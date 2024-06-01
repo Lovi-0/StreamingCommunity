@@ -31,7 +31,6 @@ from ..M3U8 import (
     M3U8_UrlFix
 )
 
-
 # Config
 TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
@@ -122,7 +121,7 @@ class M3U8_Segments:
         m3u8_parser = M3U8_Parser()
         m3u8_parser.parse_data(uri=self.url, raw_content=m3u8_content)  # Parse the content of the M3U8 playlist
 
-        console.log(f"[cyan]There is key: [yellow]{m3u8_parser.keys is not None}")
+        console.print(f"[red]There is key: [yellow]{m3u8_parser.keys is not None}")
 
         # Check if there is an encryption key in the playlis
         if m3u8_parser.keys is not None:
@@ -166,6 +165,7 @@ class M3U8_Segments:
 
         # Update segments for estimator
         self.class_ts_estimator.total_segments = len(self.segments)
+        logging.info(f"fSegmnets to donwload: [{len(self.segments)}]")
 
     def get_info(self) -> None:
         """
@@ -220,12 +220,13 @@ class M3U8_Segments:
 
         # Generate new user agent
         headers_segments['user-agent'] = get_headers()
+        logging.info(f"Make request to get segmenet: [{index} - {len(self.segments)}]")
 
         try:
 
             # Make request and calculate time duration
             start_time = time.time()
-            response = requests.get(ts_url, headers=headers_segments, verify_ssl=REQUEST_VERIFY_SSL)
+            response = requests.get(ts_url, headers=headers_segments, verify=REQUEST_VERIFY_SSL, timeout=30)
             duration = time.time() - start_time
             
             if response.ok:
@@ -267,7 +268,7 @@ class M3U8_Segments:
             while not stop_event.is_set() or not self.segment_queue.empty():
                 with self.condition:
                     while self.segment_queue.empty() and not stop_event.is_set():
-                        self.condition.wait(timeout=1)   # Wait until a new segment is available or stop_event is set
+                        self.condition.wait()   # Wait until a new segment is available or stop_event is set
 
                     if stop_event.is_set():
                         break
@@ -311,16 +312,6 @@ class M3U8_Segments:
             mininterval=0.01
         )
 
-        def signal_handler(sig, frame):
-            self.ctrl_c_detected = True  # Set global variable to indicate Ctrl+C detection
-
-            stop_event.set()
-            with self.condition:
-                self.condition.notify_all()     # Wake up the writer thread if it's waiting
-
-        # Register the signal handler for Ctrl+C
-        signal.signal(signal.SIGINT, signal_handler)
-
         with ThreadPoolExecutor(max_workers=TQDM_MAX_WORKER) as executor:
 
             # Start a separate thread to write segments to the file
@@ -330,24 +321,13 @@ class M3U8_Segments:
             # Delay the start of each worker
             for index, segment_url in enumerate(self.segments):
 
-                # Check for Ctrl+C before starting each download task
-                time.sleep(0.03)
-
-                if self.ctrl_c_detected:
-                    console.log("[red]Ctrl+C detected. Stopping further downloads.")
-
-                    stop_event.set()
-                    with self.condition:
-                        self.condition.notify_all()     # Wake up the writer thread if it's waiting
-
-                    break
-
                 # Submit the download task to the executor
                 executor.submit(self.make_requests_stream, segment_url, index, stop_event, progress_bar)
 
             # Wait for all segments to be downloaded
-            executor.shutdown(wait=True)
+            executor.shutdown()
             stop_event.set()                    # Set the stop event to halt the writer thread
             with self.condition:
                 self.condition.notify_all()     # Wake up the writer thread if it's waiting
             writer_thread.join()                # Wait for the writer thread to finish
+

@@ -92,7 +92,7 @@ def format_duration(seconds: float) -> Tuple[int, int, int]:
     return int(hours), int(minutes), int(seconds)
 
 
-def print_duration_table(file_path: str) -> None:
+def print_duration_table(file_path: str, show = True) -> None:
     """
     Print duration of a video file in hours, minutes, and seconds.
 
@@ -104,7 +104,10 @@ def print_duration_table(file_path: str) -> None:
 
     if video_duration is not None:
         hours, minutes, seconds = format_duration(video_duration)
-        console.log(f"[cyan]Duration for [white]([green]{os.path.basename(file_path)}[white]): [yellow]{int(hours)}[red]h [yellow]{int(minutes)}[red]m [yellow]{int(seconds)}[red]s")
+        if show:
+            console.print(f"[cyan]Duration for [white]([green]{os.path.basename(file_path)}[white]): [yellow]{int(hours)}[red]h [yellow]{int(minutes)}[red]m [yellow]{int(seconds)}[red]s")
+        else:
+            return f"[yellow]{int(hours)}[red]h [yellow]{int(minutes)}[red]m [yellow]{int(seconds)}[red]s"
 
 
 def get_ffprobe_info(file_path):
@@ -210,3 +213,24 @@ def check_ffmpeg_input(input_file):
     except Exception as e:
         logging.error(f"An unexpected error occurred: {e}")
         return False
+
+def check_duration_v_a(video_path, audio_path):
+    """
+    Check if the duration of the video and audio matches.
+
+    Args:
+    - video_path (str): Path to the video file.
+    - audio_path (str): Path to the audio file.
+
+    Returns:
+    - bool: True if the duration of the video and audio matches, False otherwise.
+    """
+    
+    # Ottieni la durata del video
+    video_duration = get_video_duration(video_path)
+    
+    # Ottieni la durata dell'audio
+    audio_duration = get_video_duration(audio_path)
+
+    # Verifica se le durate corrispondono
+    return video_duration == audio_duration

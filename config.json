@@ -32,7 +32,10 @@
     },
     "M3U8_CONVERSION": {
         "use_codec": false,
-        "use_gpu": false,
+		"use_vcodec": true,
+		"use_acodec": true,
+		"use_bitrate": true,
+        "use_gpu": true,
         "default_preset": "ultrafast",
         "check_output_after_ffmpeg": false
     },

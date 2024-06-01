@@ -202,7 +202,6 @@ class VideoSource:
             logging.error(f"Error getting content: {e}")
             raise
 
-
     def get_playlist(self) -> str:
         """
         Get playlist.
