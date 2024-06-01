@@ -60,17 +60,4 @@ class PreviewManager:
         images_str = "\n".join(str(image) for image in self.images)
         return f"Title: ID={self.id}, Type={self.type}, Runtime={self.runtime}, Release Date={self.release_date}, Quality={self.quality}, Plot={self.plot}, Seasons Count={self.seasons_count}\nGenres:\n{genres_str}\nPreview:\n{self.preview}\nImages:\n{images_str}"
     
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "type": self.type,
-            "runtime": self.runtime,
-            "release_date": self.release_date,
-            "quality": self.quality,
-            "plot": self.plot,
-            "seasons_count": self.seasons_count,
-            "genres": [genre.__dict__ for genre in self.genres],
-            "preview": self.preview.__dict__,
-            "images": [image.__dict__ for image in self.images]
-        }
 

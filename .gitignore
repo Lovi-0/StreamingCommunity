@@ -42,14 +42,6 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-
-# Vue stuff:
-frontend/dist/
-frontend/node_modules/
-frontend/npm-debug.log
-frontend/.vite/
-frontend/.vscode/
-
 # Jupyter Notebook
 .ipynb_checkpoints
 
@@ -64,6 +56,3 @@ venv.bak/
 
 # Other
 Video
-.idea/
-.vscode/
-.DS_Store

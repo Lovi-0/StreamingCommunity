@@ -37,33 +37,10 @@ class MediaItem:
         self.last_air_date: str = data.get('last_air_date')
         self.seasons_count: int = data.get('seasons_count')
         self.images: List[Image] = [Image(image_data) for image_data in data.get('images', [])]
-        self.comment: str = data.get('comment')
-        self.plot: str = data.get('plot')
 
     def __str__(self):
         return f"MediaItem(id={self.id}, slug='{self.slug}', name='{self.name}', type='{self.type}', score='{self.score}', sub_ita={self.sub_ita}, last_air_date='{self.last_air_date}', seasons_count={self.seasons_count}, images={self.images})"
 
-    @property
-    def to_dict(self) -> dict:
-        """
-        Convert the MediaItem to a dictionary.
-
-        Returns:
-            dict: The MediaItem as a dictionary.
-        """
-        return {
-            "id": self.id,
-            "slug": self.slug,
-            "name": self.name,
-            "type": self.type.upper(),
-            "score": self.score,
-            "sub_ita": self.sub_ita,
-            "last_air_date": self.last_air_date,
-            "seasons_count": self.seasons_count,
-            "images": [image.__dict__ for image in self.images],
-            "comment": self.comment,
-            "plot": self.plot
-        }
 
 class MediaManager:
     def __init__(self):
