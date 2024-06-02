@@ -41,7 +41,7 @@ def start_message():
     
     if SHOW:
         console.print(f"[bold yellow]{msg}")
-        console.print(f"[magenta]Created by: Ghost6446\n")
+        console.print(f"[magenta]Created by: Lovi\n")
 
         row = "-" * console.width
         console.print(f"[yellow]{row} \n")
