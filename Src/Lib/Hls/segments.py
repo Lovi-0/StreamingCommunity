@@ -165,7 +165,7 @@ class M3U8_Segments:
 
         # Update segments for estimator
         self.class_ts_estimator.total_segments = len(self.segments)
-        logging.info(f"fSegmnets to donwload: [{len(self.segments)}]")
+        logging.info(f"Segmnets to donwload: [{len(self.segments)}]")
 
     def get_info(self) -> None:
         """
