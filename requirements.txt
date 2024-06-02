@@ -1,4 +1,5 @@
 ﻿bs4
+certifi
 tqdm
 rich
 unidecode

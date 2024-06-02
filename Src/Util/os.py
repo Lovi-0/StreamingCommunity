@@ -457,7 +457,7 @@ def get_system_summary():
     logging.info(f"Exe versions: ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}")
 
     # Optional libraries versions
-    optional_libraries = ['bs4', 'certifi', 'tqdm', 'rich', 'unidecode']
+    optional_libraries = [line.strip() for line in open('requirements.txt', 'r', encoding='utf-8-sig')]
     optional_libs_versions = [get_library_version(lib) for lib in optional_libraries]
     
     console.print(f"[cyan]Libraries[white]: [bold red]{', '.join(optional_libs_versions)}[/bold red]\n")

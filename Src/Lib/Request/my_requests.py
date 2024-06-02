@@ -39,7 +39,6 @@ from Src.Util._jsonConfig import config_manager
 HTTP_TIMEOUT = config_manager.get_int('REQUESTS', 'timeout')
 HTTP_RETRIES = config_manager.get_int('REQUESTS', 'max_retry')
 HTTP_DELAY = 1
-HTTP_DISABLE_ERROR = config_manager.get_bool('REQUESTS', 'disable_error')
 
 
 
@@ -379,8 +378,7 @@ class ManageRequests:
         """
         Handle request error.
         """
-        if not HTTP_DISABLE_ERROR:
-            logging.error(f"Request failed for URL '{self.url}': {parse_http_error(str(e))}")
+        logging.error(f"Request failed for URL '{self.url}': {parse_http_error(str(e))}")
 
         if self.attempt < self.retries:
             logging.error(f"Retry request for URL '{self.url}' (attempt {self.attempt}/{self.retries})")

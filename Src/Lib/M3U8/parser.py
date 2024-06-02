@@ -404,6 +404,7 @@ class M3U8_Parser:
         self._video: M3U8_Video = None
         self._audio: M3U8_Audio = None
         self._subtitle: M3U8_Subtitle = None
+        self.duration: float = 0
 
         self.__create_variable__()
 
@@ -557,6 +558,10 @@ class M3U8_Parser:
 
         try:
             for segment in m3u8_obj.segments:
+                
+                # Collect all index duration
+                self.duration += segment.duration
+
                 if "vtt" not in segment.uri:
                     self.segments.append(segment.uri)
                 else:
@@ -573,3 +578,21 @@ class M3U8_Parser:
         self._video = M3U8_Video(self.video_playlist)
         self._audio = M3U8_Audio(self.audio_playlist)
         self._subtitle = M3U8_Subtitle(self.subtitle_playlist)
+
+    def get_duration(self):
+        """
+        Convert duration from seconds to hours, minutes, and remaining seconds.
+
+        Parameters:
+        - seconds (float): Duration in seconds.
+
+        Returns:
+        - formatted_duration (str): Formatted duration string with hours, minutes, and seconds.
+        """
+        # Calculate hours, minutes, and remaining seconds
+        hours = int(self.duration / 3600)
+        minutes = int((self.duration % 3600) / 60)
+        remaining_seconds = int(self.duration % 60)
+
+        # Format the duration string with colors
+        return f"[yellow]{int(hours)}[red]h [yellow]{int(minutes)}[red]m [yellow]{int(remaining_seconds)}[red]s"

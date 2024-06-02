@@ -10,7 +10,6 @@
         "not_close": false
     },
     "REQUESTS": {
-        "disable_error": false,
         "timeout": 10,
         "max_retry": 3,
         "verify_ssl": false,

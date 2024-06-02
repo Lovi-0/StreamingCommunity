@@ -111,17 +111,16 @@ else:
             """
             if self.method == "AES":
                 openssl_cmd = f'openssl enc -d -aes-256-ecb -K {self.key.hex()} -nosalt'
-                decrypted_data = subprocess.check_output(openssl_cmd.split(), input=ciphertext)
-
             elif self.method == "AES-128":
                 openssl_cmd = f'openssl enc -d -aes-128-cbc -K {self.key[:16].hex()} -iv {self.iv.hex()}'
-                decrypted_data = subprocess.check_output(openssl_cmd.split(), input=ciphertext)
-
             elif self.method == "AES-128-CTR":
                 openssl_cmd = f'openssl enc -d -aes-128-ctr -K {self.key[:16].hex()} -iv {self.iv.hex()}'
-                decrypted_data = subprocess.check_output(openssl_cmd.split(), input=ciphertext)
-
             else:
                 raise ValueError("Invalid or unsupported method")
+
+            try:
+                decrypted_data = subprocess.check_output(openssl_cmd.split(), input=ciphertext, stderr=subprocess.STDOUT)
+            except subprocess.CalledProcessError as e:
+                raise ValueError(f"Decryption failed: {e.output.decode()}")
 
             return decrypted_data

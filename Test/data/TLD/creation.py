@@ -5,9 +5,6 @@ import json
 from bs4 import BeautifulSoup
 
 
-#  https://onshopify.com/domains/ 
-
-
 # URL of the webpage containing the table
 url = 'https://icannwiki.org/New_gTLD_Generic_Applications'
 
@@ -83,6 +80,7 @@ def main():
     # Write the scraped data to a JSON file
     with open('data.json', 'w') as json_file:
         json.dump(data, json_file)
+
 
 if __name__ == '__main__':
     main()

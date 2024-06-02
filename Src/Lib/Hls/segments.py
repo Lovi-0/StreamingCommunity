@@ -35,7 +35,6 @@ from ..M3U8 import (
 TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_VERIFY_SSL = config_manager.get_bool('REQUESTS', 'verify_ssl')
-REQUEST_DISABLE_ERROR = config_manager.get_bool('REQUESTS', 'disable_error')
 
 
 # Variable
@@ -96,8 +95,6 @@ class M3U8_Segments:
         logging.info(f"Uri key: {key_uri}")
 
         try:
-
-            # Send HTTP GET request to fetch the key
             response = requests.get(key_uri, headers=headers_index)
             response.raise_for_status()
 
@@ -119,9 +116,10 @@ class M3U8_Segments:
             - m3u8_content (str): The content of the M3U8 file.
         """
         m3u8_parser = M3U8_Parser()
-        m3u8_parser.parse_data(uri=self.url, raw_content=m3u8_content)  # Parse the content of the M3U8 playlist
+        m3u8_parser.parse_data(uri=self.url, raw_content=m3u8_content)
 
-        console.print(f"[red]There is key: [yellow]{m3u8_parser.keys is not None}")
+        console.log(f"[red]Expected duration after download: {m3u8_parser.get_duration()}")
+        console.log(f"[red]There is key: [yellow]{m3u8_parser.keys is not None}")
 
         # Check if there is an encryption key in the playlis
         if m3u8_parser.keys is not None:
@@ -246,12 +244,10 @@ class M3U8_Segments:
                     self.condition.notify()                             # Notify the writer thread that a new segment is available
 
             else:
-                if not REQUEST_DISABLE_ERROR:
-                    logging.error(f"Failed to download segment: {ts_url}")
+                logging.error(f"Failed to download segment: {ts_url}")
 
         except Exception as e:
-            if not REQUEST_DISABLE_ERROR:
-                logging.error(f"Exception while downloading segment: {e}")
+            logging.error(f"Exception while downloading segment: {e}")
 
         # Update bar
         progress_bar.update(1)
@@ -265,16 +261,15 @@ class M3U8_Segments:
         """
          
         with open(self.tmp_file_path, 'ab') as f:
-            while not stop_event.is_set() or not self.segment_queue.empty():
+            while not (stop_event.is_set() and self.segment_queue.empty()):     # Wait until both stop_event is set and queue is empty
                 with self.condition:
                     while self.segment_queue.empty() and not stop_event.is_set():
-                        self.condition.wait()   # Wait until a new segment is available or stop_event is set
+                        self.condition.wait()                                   # Wait until a new segment is available or stop_event is set
 
-                    if stop_event.is_set():
+                    if stop_event.is_set() and self.segment_queue.empty():      # Exit loop if both conditions are met
                         break
 
                     if not self.segment_queue.empty():
-
                         # Get the segment from the queue
                         index, segment_content = self.segment_queue.get()
 
@@ -283,10 +278,9 @@ class M3U8_Segments:
                             f.write(segment_content)
                             self.current_index += 1
                             self.segment_queue.task_done()
-
                         else:
                             self.segment_queue.put((index, segment_content))    # Requeue the segment if it is not the next to be written
-                            self.condition.notify()                             # Notify that a segment has been requeued
+                            self.condition.notify()
 
     def download_streams(self, add_desc):
         """
@@ -298,7 +292,7 @@ class M3U8_Segments:
         stop_event = threading.Event()  # Event to signal stopping
 
         if TQDM_USE_LARGE_BAR:
-            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
+            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}| {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}| {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
         else:
             bar_format=f"{Colors.YELLOW}Proc{Colors.WHITE}: {Colors.RED}{{percentage:.2f}}% {Colors.WHITE}| {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
             
