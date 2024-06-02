@@ -71,8 +71,8 @@ def get_video_duration(file_path: str) -> float:
             return float(probe_result['format']['duration'])
     
     except Exception as e:
-        logging.error(f"Error: {e}")
-        return None
+        logging.error(f"Error get video duration: {e}")
+        sys.exit(0)
 
 
 def format_duration(seconds: float) -> Tuple[int, int, int]:
