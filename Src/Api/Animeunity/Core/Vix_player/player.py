@@ -206,47 +206,4 @@ class VideoSource:
         new_url = m._replace(query=new_query)       # Replace the old query string with the new one
         final_url = urlunparse(new_url)             # Construct the final URL from the modified parts
 
-        if "canPlayFHD" in current_params and self.window_video.quality == "1080":
-            return final_url
-        else:
-            console.log("[red]Rebuild master playlist.")
-            return self.re_build_master()
-    
-    def re_build_master(self) -> str:
-        """
-        Rebuild the master playlist.
-
-        Returns:
-            str: The rebuilt master playlist text, or an empty string if there's an error.
-        """
-        try:
-            index_resolution = None
-            master_url = f'https://vixcloud.co/playlist/{self.window_video.id}'
-            index_url = f'https://vixcloud.co/playlist/{self.window_video.id}?type=video&rendition={self.window_video.quality}p'
-
-            try:
-                # Fetch the master playlist text
-                master_text = requests.get(master_url).text
-            except requests.RequestException as e:
-                logging.error(f"Error fetching master playlist from URL: {master_url}, error: {e}")
-                return ""
-
-            # Find the resolution in the index URL
-            for resolution in [(7680, 4320), (3840, 2160), (2560, 1440), (1920, 1080), (1280, 720), (640, 480)]:
-                if str(resolution[1]) in index_url:
-                    index_resolution = resolution
-                    break
-
-            # Add resolution and index URL to the master playlist text
-            if index_resolution:
-                master_text += f'\n#EXT-X-STREAM-INF:BANDWIDTH=2150000,CODECS="avc1.640028,mp4a.40.2",RESOLUTION={index_resolution[0]}x{index_resolution[1]},SUBTITLES="subs"\n'
-                master_text += index_url
-
-            else:
-                logging.warning(f"No matching resolution found in index URL: {index_url}")
-
-            return master_text
-        
-        except Exception as e:
-            logging.error(f"Unexpected error in re_build_master: {e}")
-            sys.exit(0)
+        return final_url

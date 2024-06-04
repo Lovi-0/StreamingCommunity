@@ -109,6 +109,34 @@ class M3U8_Segments:
         logging.info(f"Key: ('hex': {hex_content}, 'byte': {byte_content})")
         return byte_content
 
+    def __test_ip(self):
+        """
+        Tests each proxy IP by sending a request to a corresponding segment URL.
+        """
+
+        failed_ips = []
+
+        for i in range(len(self.fake_proxy_ip)):
+            url_to_test = self.segments[i]
+
+            try:
+
+                # Attempt to send a GET request to the URL
+                requests.get(url_to_test, verify=self.verify_ssl)
+            except:
+
+                # Log the error and add the IP to the list of failed IPs
+                logging.error(f"Failed to make request using IP in this request: {url_to_test}")
+                failed_ips.append(i)
+
+        # Remove the failed IPs from the fake_proxy_ip list
+        self.fake_proxy_ip = [ip for j, ip in enumerate(self.fake_proxy_ip) if j not in failed_ips]
+
+        # Exit the program if 50% requests failed
+        if len(failed_ips) / 2 > len(self.fake_proxy_ip):
+            logging.error("All requests with ip failed. Exiting the program.")
+            sys.exit(0)
+
     def parse_data(self, m3u8_content: str) -> None:
         """
         Parses the M3U8 content to extract segment information.
@@ -155,6 +183,9 @@ class M3U8_Segments:
                 segment_url = self.segments[i]
 
                 self.segments[i] = self.__gen_proxy__(segment_url, self.segments.index(segment_url)) 
+
+            # Test new url with ip
+            self.__test_ip()
 
         # Save new playlist of segment
         path_m3u8_file = os.path.join(self.tmp_folder, "playlist_fix.m3u8")
