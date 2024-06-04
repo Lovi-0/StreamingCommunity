@@ -109,7 +109,7 @@ class M3U8_Segments:
         logging.info(f"Key: ('hex': {hex_content}, 'byte': {byte_content})")
         return byte_content
 
-    def __test_ip(self):
+    def __test_ip(self, url_to_test: str):
         """
         Tests each proxy IP by sending a request to a corresponding segment URL.
         """
@@ -117,16 +117,18 @@ class M3U8_Segments:
         failed_ips = []
 
         for i in range(len(self.fake_proxy_ip)):
-            url_to_test = self.segments[i]
 
             try:
+                response = requests.get(url_to_test, verify=False, retries=0)
 
-                # Attempt to send a GET request to the URL
-                requests.get(url_to_test, verify=self.verify_ssl)
+                if response == None:
+                    logging.error(f"[Work] to make request using: {url_to_test}")
+                    failed_ips.append(i)
+
             except:
 
                 # Log the error and add the IP to the list of failed IPs
-                logging.error(f"Failed to make request using IP in this request: {url_to_test}")
+                logging.error(f"[Fail] to make request using IP in this request: {url_to_test}")
                 failed_ips.append(i)
 
         # Remove the failed IPs from the fake_proxy_ip list
@@ -134,8 +136,13 @@ class M3U8_Segments:
 
         # Exit the program if 50% requests failed
         if len(failed_ips) / 2 > len(self.fake_proxy_ip):
-            logging.error("All requests with ip failed. Exiting the program.")
-            sys.exit(0)
+            logging.error("All requests with ip failed.")
+            
+            # Set to not use proxy
+            self.fake_proxy_ip = None
+            self.fake_proxy = False
+
+            return False
 
     def parse_data(self, m3u8_content: str) -> None:
         """
@@ -182,10 +189,13 @@ class M3U8_Segments:
             for i in range(len(self.segments)):
                 segment_url = self.segments[i]
 
-                self.segments[i] = self.__gen_proxy__(segment_url, self.segments.index(segment_url)) 
+                # Set to not use proxy if 50% failed
+                if not self.__test_ip(segment_url):
+                    console.log("[red]Cant use proxy switch to normal url.")
+                    self.fake_proxy = False
+                    break
 
-            # Test new url with ip
-            self.__test_ip()
+                self.segments[i] = self.__gen_proxy__(segment_url, self.segments.index(segment_url)) 
 
         # Save new playlist of segment
         path_m3u8_file = os.path.join(self.tmp_folder, "playlist_fix.m3u8")
@@ -226,12 +236,17 @@ class M3U8_Segments:
         Returns:
             str: The modified URL with the new IP address.
         """
-        new_ip_address = self.fake_proxy_ip[url_index % len(self.fake_proxy_ip)]
+        if self.fake_proxy:
 
-        # Parse the original URL and replace the hostname with the new IP address
-        parsed_url = urlparse(url)._replace(netloc=new_ip_address)  
+            new_ip_address = self.fake_proxy_ip[url_index % len(self.fake_proxy_ip)]
 
-        return urlunparse(parsed_url)
+            # Parse the original URL and replace the hostname with the new IP address
+            parsed_url = urlparse(url)._replace(netloc=new_ip_address)  
+
+            return urlunparse(parsed_url)
+        
+        else:
+            return url
 
     def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm) -> None:
         """
