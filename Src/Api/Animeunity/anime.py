@@ -18,7 +18,7 @@ from .Core.Util import manage_selection
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-from .costant import ANIME_FOLDER, SERIES_FOLDER, MOVIE_FOLDER, STATIC_IP_SERVER
+from .costant import ANIME_FOLDER, SERIES_FOLDER, MOVIE_FOLDER
 
 
 # Variable
@@ -61,7 +61,7 @@ def download_episode(index_select: int):
     )
 
     # Start downloading
-    obj_download.start(STATIC_IP_SERVER)
+    obj_download.start()
 
 
 def donwload_series(tv_id: int, tv_name: str):
