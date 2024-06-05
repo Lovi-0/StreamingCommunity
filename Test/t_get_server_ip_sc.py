@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore", category=urllib3.exceptions.InsecureRequestWar
 
 
 # Variable
-url_test = "https://sc-b1-18.scws-content.net/hls/170/3/25/32503b5b-4646-4376-ad47-7766c65be7e2/audio/ita/0004-0100.ts"
+url_test = "https://sc-b1-18.scws-content.net/hls/100/b/d3/bd3a430d-0a13-4bec-8fcc-ea41af183555/audio/ita/0010-0100.ts?token=CiEPTIyvEoTkGk3szgDu9g&expires=1722801022"
 
 
 def get_ip_from_url(url):
@@ -80,6 +80,7 @@ def main():
             pass
 
     print(f"Valid IP addresses: {sorted(valid_ip, reverse=True)}")
+
 
 if __name__ == '__main__':
     main()

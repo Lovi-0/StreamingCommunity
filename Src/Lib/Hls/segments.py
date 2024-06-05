@@ -12,7 +12,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 
 
 # External libraries
-from Src.Lib.Request import requests
+import requests
 from tqdm import tqdm
 
 
@@ -22,6 +22,7 @@ from Src.Util.headers import get_headers
 from Src.Util.color import Colors
 from Src.Util._jsonConfig import config_manager
 
+
 # Logic class
 from ..M3U8 import (
     M3U8_Decryption,
@@ -29,6 +30,11 @@ from ..M3U8 import (
     M3U8_Parser,
     M3U8_UrlFix
 )
+
+
+# Warning
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Config
 TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
@@ -265,7 +271,7 @@ class M3U8_Segments:
 
             # Make request and calculate time duration
             start_time = time.time()
-            response = requests.get(ts_url, headers=headers_segments, verify=REQUEST_VERIFY_SSL, timeout=30)
+            response = requests.get(ts_url, headers=headers_segments, verify=REQUEST_VERIFY_SSL, timeout=15)
             duration = time.time() - start_time
             logging.info(f"Make request to get segment: [{index} - {len(self.segments)}] in: {duration}, len data: {len(response.content)}")
 
@@ -275,7 +281,7 @@ class M3U8_Segments:
                 segment_content = response.content
 
                 # Update bar
-                self.class_ts_estimator.update_progress_bar(segment_content, duration, progress_bar)
+                self.class_ts_estimator.update_progress_bar(int(response.headers.get('Content-Length', 0)), duration, progress_bar)
 
                 # Decrypt the segment content if decryption is needed
                 if self.decryption is not None:

@@ -1,15 +1,12 @@
 # 26.05.24
 
 import re
-import os
 import sys
-import time
 import logging
-import subprocess
 
 
 # External libraries
-from Src.Lib.Request import requests
+import requests
 from bs4 import BeautifulSoup
 
 

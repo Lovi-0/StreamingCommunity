@@ -8,7 +8,7 @@ from .lib_parser import load
 
 
 # External libraries
-from Src.Lib.Request import requests
+import requests
 
 
 # Costant

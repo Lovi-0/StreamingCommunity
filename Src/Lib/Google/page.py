@@ -8,7 +8,7 @@ from typing import Generator, Optional
 
 
 # External libraries
-from Src.Lib.Request import requests
+import requests
 from bs4 import BeautifulSoup
 
 

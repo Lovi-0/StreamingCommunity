@@ -10,7 +10,7 @@ from Src.Util.console import console
 
 
 # External library
-from Src.Lib.Request import requests
+import requests
 
 
 # Variable

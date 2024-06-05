@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 # External libraries
-from Src.Lib.Request import requests
+import requests
 from unidecode import unidecode
 
 

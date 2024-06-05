@@ -6,7 +6,7 @@ from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
 
 
 # External libraries
-from Src.Lib.Request import requests
+import requests
 from bs4 import BeautifulSoup
 
 

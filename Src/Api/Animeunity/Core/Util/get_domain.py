@@ -5,8 +5,8 @@ import threading
 import logging
 
 
-# Internal libraries
-from Src.Lib.Request import requests
+# External libraries
+import requests
 
 
 # Internal utilities
