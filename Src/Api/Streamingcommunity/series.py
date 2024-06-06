@@ -96,7 +96,7 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
     Downloader(
         m3u8_playlist = master_playlist,
         output_filename = os.path.join(mp4_path, mp4_name)
-    ).start(STATIC_IP_SERVER)
+    ).start()
 
 
 def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: bool = False) -> None:

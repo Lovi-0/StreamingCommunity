@@ -271,7 +271,7 @@ class M3U8_Segments:
 
             # Make request and calculate time duration
             start_time = time.time()
-            response = requests.get(ts_url, headers=headers_segments, verify=REQUEST_VERIFY_SSL, timeout=15)
+            response = requests.get(ts_url, headers=headers_segments, verify=REQUEST_VERIFY_SSL, timeout=10)
             duration = time.time() - start_time
             logging.info(f"Make request to get segment: [{index} - {len(self.segments)}] in: {duration}, len data: {len(response.content)}")
 

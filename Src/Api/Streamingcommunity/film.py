@@ -59,4 +59,4 @@ def download_film(id_film: str, title_name: str, domain: str):
     Downloader(
         m3u8_playlist = master_playlist,
         output_filename = os.path.join(mp4_path, mp4_format)
-    ).start(STATIC_IP_SERVER)
+    ).start()
