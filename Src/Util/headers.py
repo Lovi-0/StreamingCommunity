@@ -3,8 +3,12 @@
 import logging
 
 
-# Internal utilities
-from Src.Lib.UserAgent import ua
+# External library
+import fake_useragent
+
+
+# Variable
+useragent = fake_useragent.UserAgent()
 
 
 def get_headers() -> str:
@@ -12,11 +16,8 @@ def get_headers() -> str:
     Generate a random user agent to use in HTTP requests.
 
     Returns:
-        str: A random user agent string.
+        - str: A random user agent string.
     """
     
     # Get a random user agent string from the user agent rotator
-    random_headers = ua.get_random_user_agent("firefox")
-
-    #logging.info(f"Use headers: {random_headers}")
-    return random_headers
+    return useragent.firefox

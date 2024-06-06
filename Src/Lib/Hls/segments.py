@@ -5,7 +5,6 @@ import sys
 import time
 import queue
 import threading
-import signal
 import logging
 import binascii
 from concurrent.futures import ThreadPoolExecutor
@@ -13,7 +12,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 
 
 # External libraries
-from Src.Lib.Request import requests
+import requests
 from tqdm import tqdm
 
 
@@ -22,6 +21,7 @@ from Src.Util.console import console
 from Src.Util.headers import get_headers
 from Src.Util.color import Colors
 from Src.Util._jsonConfig import config_manager
+
 
 # Logic class
 from ..M3U8 import (
@@ -32,11 +32,14 @@ from ..M3U8 import (
 )
 
 
+# Warning
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 # Config
 TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_VERIFY_SSL = config_manager.get_bool('REQUESTS', 'verify_ssl')
-REQUEST_DISABLE_ERROR = config_manager.get_bool('REQUESTS', 'disable_error')
 
 
 # Variable
@@ -55,18 +58,20 @@ class M3U8_Segments:
             - tmp_folder (str): The temporary folder to store downloaded segments.
         """
         self.url = url
+        self.fake_proxy = False
         self.tmp_folder = tmp_folder
-        self.decryption: M3U8_Decryption = None                     # Initialize decryption as None
-        self.segment_queue = queue.PriorityQueue()                  # Priority queue to maintain the order of segments
-        self.current_index = 0                                      # Index of the current segment to be written
-        self.tmp_file_path = os.path.join(self.tmp_folder, "0.ts")  # Path to the temporary file
-        self.condition = threading.Condition()                      # Condition variable for thread synchronization
-        self.ctrl_c_detected = False                                # Global variable to track Ctrl+C detection
+        self.tmp_file_path = os.path.join(self.tmp_folder, "0.ts")
+        os.makedirs(self.tmp_folder, exist_ok=True)
 
-        os.makedirs(self.tmp_folder, exist_ok=True)                 # Create the temporary folder if it does not exist
+        # Util class
+        self.decryption: M3U8_Decryption = None 
         self.class_ts_estimator = M3U8_Ts_Estimator(0) 
         self.class_url_fixer = M3U8_UrlFix(url)
-        self.fake_proxy = False
+
+        # Sync
+        self.current_index = 0                                      # Index of the current segment to be written
+        self.segment_queue = queue.PriorityQueue()                  # Priority queue to maintain the order of segments
+        self.condition = threading.Condition()                      # Condition variable for thread synchronization
 
     def add_server_ip(self, list_ip):
         """
@@ -97,8 +102,6 @@ class M3U8_Segments:
         logging.info(f"Uri key: {key_uri}")
 
         try:
-
-            # Send HTTP GET request to fetch the key
             response = requests.get(key_uri, headers=headers_index)
             response.raise_for_status()
 
@@ -112,6 +115,41 @@ class M3U8_Segments:
         logging.info(f"Key: ('hex': {hex_content}, 'byte': {byte_content})")
         return byte_content
 
+    def __test_ip(self, url_to_test: str):
+        """
+        Tests each proxy IP by sending a request to a corresponding segment URL.
+        """
+
+        failed_ips = []
+
+        for i in range(len(self.fake_proxy_ip)):
+
+            try:
+                response = requests.get(url_to_test, verify=False, retries=0)
+
+                if response == None:
+                    logging.error(f"[Work] to make request using: {url_to_test}")
+                    failed_ips.append(i)
+
+            except:
+
+                # Log the error and add the IP to the list of failed IPs
+                logging.error(f"[Fail] to make request using IP in this request: {url_to_test}")
+                failed_ips.append(i)
+
+        # Remove the failed IPs from the fake_proxy_ip list
+        self.fake_proxy_ip = [ip for j, ip in enumerate(self.fake_proxy_ip) if j not in failed_ips]
+
+        # Exit the program if 50% requests failed
+        if len(failed_ips) / 2 > len(self.fake_proxy_ip):
+            logging.error("All requests with ip failed.")
+            
+            # Set to not use proxy
+            self.fake_proxy_ip = None
+            self.fake_proxy = False
+
+            return False
+
     def parse_data(self, m3u8_content: str) -> None:
         """
         Parses the M3U8 content to extract segment information.
@@ -120,9 +158,10 @@ class M3U8_Segments:
             - m3u8_content (str): The content of the M3U8 file.
         """
         m3u8_parser = M3U8_Parser()
-        m3u8_parser.parse_data(uri=self.url, raw_content=m3u8_content)  # Parse the content of the M3U8 playlist
+        m3u8_parser.parse_data(uri=self.url, raw_content=m3u8_content)
 
-        console.log(f"[cyan]There is key: [yellow]{m3u8_parser.keys is not None}")
+        console.log(f"[red]Expected duration after download: {m3u8_parser.get_duration()}")
+        console.log(f"[red]There is key: [yellow]{m3u8_parser.keys is not None}")
 
         # Check if there is an encryption key in the playlis
         if m3u8_parser.keys is not None:
@@ -156,6 +195,12 @@ class M3U8_Segments:
             for i in range(len(self.segments)):
                 segment_url = self.segments[i]
 
+                # Set to not use proxy if 50% failed
+                if not self.__test_ip(segment_url):
+                    console.log("[red]Cant use proxy switch to normal url.")
+                    self.fake_proxy = False
+                    break
+
                 self.segments[i] = self.__gen_proxy__(segment_url, self.segments.index(segment_url)) 
 
         # Save new playlist of segment
@@ -166,6 +211,7 @@ class M3U8_Segments:
 
         # Update segments for estimator
         self.class_ts_estimator.total_segments = len(self.segments)
+        logging.info(f"Segmnets to donwload: [{len(self.segments)}]")
 
     def get_info(self) -> None:
         """
@@ -196,27 +242,27 @@ class M3U8_Segments:
         Returns:
             str: The modified URL with the new IP address.
         """
-        new_ip_address = self.fake_proxy_ip[url_index % len(self.fake_proxy_ip)]
+        if self.fake_proxy:
 
-        # Parse the original URL and replace the hostname with the new IP address
-        parsed_url = urlparse(url)._replace(netloc=new_ip_address)  
+            new_ip_address = self.fake_proxy_ip[url_index % len(self.fake_proxy_ip)]
 
-        return urlunparse(parsed_url)
+            # Parse the original URL and replace the hostname with the new IP address
+            parsed_url = urlparse(url)._replace(netloc=new_ip_address)  
 
-    def make_requests_stream(self, ts_url: str, index: int, stop_event: threading.Event, progress_bar: tqdm) -> None:
+            return urlunparse(parsed_url)
+        
+        else:
+            return url
+
+    def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm) -> None:
         """
         Downloads a TS segment and adds it to the segment queue.
 
         Args:
             - ts_url (str): The URL of the TS segment.
             - index (int): The index of the segment.
-            - stop_event (threading.Event): Event to signal the stop of downloading.
             - progress_bar (tqdm): Progress counter for tracking download progress.
-            - add_desc (str): Additional description for the progress bar.
         """
-
-        if stop_event.is_set():
-            return  # Exit if the stop event is set
 
         # Generate new user agent
         headers_segments['user-agent'] = get_headers()
@@ -225,16 +271,17 @@ class M3U8_Segments:
 
             # Make request and calculate time duration
             start_time = time.time()
-            response = requests.get(ts_url, headers=headers_segments, verify_ssl=REQUEST_VERIFY_SSL)
+            response = requests.get(ts_url, headers=headers_segments, verify=REQUEST_VERIFY_SSL, timeout=15)
             duration = time.time() - start_time
-            
+            logging.info(f"Make request to get segment: [{index} - {len(self.segments)}] in: {duration}, len data: {len(response.content)}")
+
             if response.ok:
 
                 # Get the content of the segment
                 segment_content = response.content
 
                 # Update bar
-                self.class_ts_estimator.update_progress_bar(segment_content, duration, progress_bar)
+                self.class_ts_estimator.update_progress_bar(int(response.headers.get('Content-Length', 0)), duration, progress_bar)
 
                 # Decrypt the segment content if decryption is needed
                 if self.decryption is not None:
@@ -243,37 +290,29 @@ class M3U8_Segments:
                 with self.condition:
                     self.segment_queue.put((index, segment_content))    # Add the segment to the queue
                     self.condition.notify()                             # Notify the writer thread that a new segment is available
-
             else:
-                if not REQUEST_DISABLE_ERROR:
-                    logging.error(f"Failed to download segment: {ts_url}")
+                logging.error(f"Failed to download segment: {ts_url}")
 
         except Exception as e:
-            if not REQUEST_DISABLE_ERROR:
-                logging.error(f"Exception while downloading segment: {e}")
+            logging.error(f"Exception while downloading segment: {e}")
 
         # Update bar
         progress_bar.update(1)
 
-    def write_segments_to_file(self, stop_event: threading.Event):
+    def write_segments_to_file(self):
         """
         Writes downloaded segments to a file in the correct order.
-
-        Args:
-            - stop_event (threading.Event): Event to signal the stop of writing.
         """
-         
         with open(self.tmp_file_path, 'ab') as f:
-            while not stop_event.is_set() or not self.segment_queue.empty():
+            while True:
                 with self.condition:
-                    while self.segment_queue.empty() and not stop_event.is_set():
-                        self.condition.wait(timeout=1)   # Wait until a new segment is available or stop_event is set
+                    while self.segment_queue.empty() and self.current_index < len(self.segments):
+                        self.condition.wait()                                           # Wait until a new segment is available or all segments are downloaded
 
-                    if stop_event.is_set():
-                        break
+                    if self.segment_queue.empty() and self.current_index >= len(self.segments):
+                        break                                                           # Exit loop if all segments have been processed
 
                     if not self.segment_queue.empty():
-
                         # Get the segment from the queue
                         index, segment_content = self.segment_queue.get()
 
@@ -282,10 +321,9 @@ class M3U8_Segments:
                             f.write(segment_content)
                             self.current_index += 1
                             self.segment_queue.task_done()
-
                         else:
-                            self.segment_queue.put((index, segment_content))    # Requeue the segment if it is not the next to be written
-                            self.condition.notify()                             # Notify that a segment has been requeued
+                            self.segment_queue.put((index, segment_content))            # Requeue the segment if it is not the next to be written
+                            self.condition.notify()
 
     def download_streams(self, add_desc):
         """
@@ -294,10 +332,8 @@ class M3U8_Segments:
         Args:
             - add_desc (str): Additional description for the progress bar.
         """
-        stop_event = threading.Event()  # Event to signal stopping
-
         if TQDM_USE_LARGE_BAR:
-            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
+            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}| {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}| {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
         else:
             bar_format=f"{Colors.YELLOW}Proc{Colors.WHITE}: {Colors.RED}{{percentage:.2f}}% {Colors.WHITE}| {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
             
@@ -305,49 +341,24 @@ class M3U8_Segments:
             total=len(self.segments), 
             unit='s',
             ascii='░▒█',
-            bar_format=bar_format,
-            dynamic_ncols=True,
-            ncols=80,
-            mininterval=0.01
+            bar_format=bar_format
         )
-
-        def signal_handler(sig, frame):
-            self.ctrl_c_detected = True  # Set global variable to indicate Ctrl+C detection
-
-            stop_event.set()
-            with self.condition:
-                self.condition.notify_all()     # Wake up the writer thread if it's waiting
-
-        # Register the signal handler for Ctrl+C
-        signal.signal(signal.SIGINT, signal_handler)
 
         with ThreadPoolExecutor(max_workers=TQDM_MAX_WORKER) as executor:
 
             # Start a separate thread to write segments to the file
-            writer_thread = threading.Thread(target=self.write_segments_to_file, args=(stop_event,))
+            writer_thread = threading.Thread(target=self.write_segments_to_file)
             writer_thread.start()
 
-            # Delay the start of each worker
+            # Start all workers
             for index, segment_url in enumerate(self.segments):
 
-                # Check for Ctrl+C before starting each download task
-                time.sleep(0.03)
-
-                if self.ctrl_c_detected:
-                    console.log("[red]Ctrl+C detected. Stopping further downloads.")
-
-                    stop_event.set()
-                    with self.condition:
-                        self.condition.notify_all()     # Wake up the writer thread if it's waiting
-
-                    break
-
                 # Submit the download task to the executor
-                executor.submit(self.make_requests_stream, segment_url, index, stop_event, progress_bar)
+                executor.submit(self.make_requests_stream, segment_url, index, progress_bar)
 
             # Wait for all segments to be downloaded
-            executor.shutdown(wait=True)
-            stop_event.set()                    # Set the stop event to halt the writer thread
+            executor.shutdown()
+
             with self.condition:
                 self.condition.notify_all()     # Wake up the writer thread if it's waiting
             writer_thread.join()                # Wait for the writer thread to finish

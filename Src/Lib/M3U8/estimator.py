@@ -31,7 +31,7 @@ class M3U8_Ts_Estimator:
         """
         self.ts_file_sizes = []
         self.now_downloaded_size = 0
-        self.average_over = 6
+        self.average_over = 3
         self.list_speeds = deque(maxlen=self.average_over)
         self.smoothed_speeds = []
         self.total_segments = total_segments
@@ -52,7 +52,7 @@ class M3U8_Ts_Estimator:
 
         # Calculate speed outside of the lock
         try:
-            speed_mbps = (size_download * 16) / (duration * 1_000_000)
+            speed_mbps = (size_download * 8) / (duration * 1_000_000)
         except ZeroDivisionError as e:
             logging.error("Division by zero error while calculating speed: %s", e)
             return
@@ -114,16 +114,15 @@ class M3U8_Ts_Estimator:
         """
         return format_size(self.now_downloaded_size)
     
-    def update_progress_bar(self, segment_content: bytes, duration: float, progress_counter: tqdm) -> None:
+    def update_progress_bar(self, total_downloaded: int, duration: float, progress_counter: tqdm) -> None:
         """
         Updates the progress bar with information about the TS segment download.
 
         Args:
-            segment_content (bytes): The content of the downloaded TS segment.
+            total_downloaded (int): The len of the content of the downloaded TS segment.
             duration (float): The duration of the segment download in seconds.
             progress_counter (tqdm): The tqdm object representing the progress bar.
         """
-        total_downloaded = len(segment_content)
 
         # Add the size of the downloaded segment to the estimator
         self.add_ts_file(total_downloaded * self.total_segments, total_downloaded, duration)

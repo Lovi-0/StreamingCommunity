@@ -23,23 +23,15 @@ from Src.Lib.M3U8 import M3U8_Parser
 # Test data
 obj_m3u8_parser = M3U8_Parser()
 base_path_file = os.path.join('Test', 'data', 'm3u8')
+
+
+# Collect all index
+index_video = read_file(os.path.join(base_path_file, "index_video.m3u8"))
 index_audio = read_file(os.path.join(base_path_file, "index_audio.m3u8"))
 index_subtitle = read_file(os.path.join(base_path_file,"index_subtitle.m3u8"))
-index_video = read_file(os.path.join(base_path_file, "index_video.m3u8"))
 playlist = read_file(os.path.join(base_path_file, "playlist.m3u8"))
 
 
-print("AUDIO: ")
-print(M3U8(index_audio).data)
-print()
-
-print("SUBTITLE: ")
-print(M3U8(index_subtitle).data)
-print()
-
-print("INDEX: ")
-print(M3U8(index_video).data)
-print()
-
-print("PLAYLIST: ")
-print(M3U8(playlist).data)
+# Test class
+obj_m3u8_parser.parse_data("http", index_audio)
+print(f"Duration : {obj_m3u8_parser.get_duration()}")

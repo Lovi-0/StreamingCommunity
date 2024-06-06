@@ -5,8 +5,11 @@ import threading
 import logging
 
 
+# External library
+import requests
+
+
 # Internal utilities
-from Src.Lib.Request import requests
 from Src.Lib.Google import search as google_search
 
 

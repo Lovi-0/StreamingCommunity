@@ -8,12 +8,12 @@ from typing import Tuple
 
 
 # External libraries
+import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 
 
 # Internal utilities
-from Src.Lib.Request import requests
 from Src.Util.headers import get_headers
 from Src.Util._jsonConfig import config_manager
 from Src.Util.console import console

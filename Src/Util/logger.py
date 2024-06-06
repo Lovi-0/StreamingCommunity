@@ -53,7 +53,3 @@ class Logger:
         formatter = logging.Formatter('[%(filename)s:%(lineno)s - %(funcName)20s() ] %(asctime)s - %(levelname)s - %(message)s')
         file_handler.setFormatter(formatter)
         logging.getLogger('').addHandler(file_handler)
-
-
-# Output
-logger = Logger()

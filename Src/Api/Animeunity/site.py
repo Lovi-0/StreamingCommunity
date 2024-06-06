@@ -5,7 +5,7 @@ import logging
 
 
 # External libraries
-from Src.Lib.Request import requests
+import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 

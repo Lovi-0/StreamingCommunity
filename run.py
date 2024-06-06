@@ -27,34 +27,6 @@ from Src.Api.Altadefinizione import main_film as altadefinizione_film
 CLOSE_CONSOLE = config_manager.get_bool('DEFAULT', 'not_close')
 
 
-def initialize():
-    """
-    Initialize the application.
-    Checks Python version, removes temporary folder, and displays start message.
-    """
-
-    # Set terminal size for win 7
-    if platform.system() == "Windows" and "7" in platform.version():
-        os.system('mode 120, 40')
-
-
-    # Check python version
-    if sys.version_info < (3, 7):
-        console.log("[red]Install python version > 3.7.16")
-        sys.exit(0)
-
-
-    # Removing temporary folder
-    start_message()
-
-
-    # Attempting GitHub update
-    """try:
-        git_update()
-    except Exception as e:
-        console.print(f"[blue]Req github [white]=> [red]Failed: {e}")"""
-
-
 def run_function(func: Callable[..., None], close_console: bool = False) -> None:
     """
     Run a given function indefinitely or once, depending on the value of close_console.
@@ -63,9 +35,6 @@ def run_function(func: Callable[..., None], close_console: bool = False) -> None
         func (Callable[..., None]): The function to run.
         close_console (bool, optional): Whether to close the console after running the function once. Defaults to False.
     """
-    
-    initialize()
-
     if close_console:
         while 1:
             func()
@@ -73,11 +42,40 @@ def run_function(func: Callable[..., None], close_console: bool = False) -> None
         func()
 
 
-def main():
-    
+def initialize():
+    """
+    Initialize the application.
+    Checks Python version, removes temporary folder, and displays start message.
+    """
+
+    start_message()
+
+    # Create logger
     log_not = Logger()
+
+    # Get system info
     get_system_summary()
 
+    # Set terminal size for win 7
+    if platform.system() == "Windows" and "7" in platform.version():
+        os.system('mode 120, 40')
+
+    # Check python version
+    if sys.version_info < (3, 7):
+        console.log("[red]Install python version > 3.7.16")
+        sys.exit(0)
+
+    # Attempting GitHub update
+    try:
+        git_update()
+    except Exception as e:
+        console.print(f"[blue]Req github [white]=> [red]Failed: {e}")
+
+
+def main():
+
+    initialize()
+    
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Script to download film and series from the internet.')
     parser.add_argument('-sa', '--streaming_anime', action='store_true', help='Check into anime category')

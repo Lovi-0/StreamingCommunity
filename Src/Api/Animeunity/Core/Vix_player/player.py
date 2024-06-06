@@ -1,16 +1,18 @@
 # 01.03.24
 
+import sys
 import logging
 from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
 
 
 # External libraries
-from Src.Lib.Request import requests
+import requests
 from bs4 import BeautifulSoup
 
 
 # Internal utilities
 from Src.Util.headers import get_headers
+from Src.Util.console import console
 from Src.Util._jsonConfig import config_manager
 
 

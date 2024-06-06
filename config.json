@@ -10,7 +10,6 @@
         "not_close": false
     },
     "REQUESTS": {
-        "disable_error": false,
         "timeout": 10,
         "max_retry": 3,
         "verify_ssl": false,
@@ -18,7 +17,7 @@
         "segments": { "user-agent": ""}
     },
     "M3U8_DOWNLOAD": {
-        "tdqm_workers": 30,
+        "tdqm_workers": 4,
         "tqdm_use_large_bar": true,
         "download_video": true,
         "download_audio": true,
@@ -32,7 +31,10 @@
     },
     "M3U8_CONVERSION": {
         "use_codec": false,
-        "use_gpu": false,
+		"use_vcodec": true,
+		"use_acodec": true,
+		"use_bitrate": true,
+        "use_gpu": true,
         "default_preset": "ultrafast",
         "check_output_after_ffmpeg": false
     },

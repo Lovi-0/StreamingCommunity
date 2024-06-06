@@ -1,11 +1,12 @@
 #EXTM3U
-#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="Italian",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE="ita",URI="https://vixcloud.co/playlist/213349?type=audio&rendition=ita&token=J0FBqnixXmTN24xdMdxAVg&expires=1720013276"
-
-#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="English [CC]",DEFAULT=NO,AUTOSELECT=NO,FORCED=NO,LANGUAGE="eng",URI="https://vixcloud.co/playlist/213349?type=subtitle&rendition=3-eng&token=J0FBqnixXmTN24xdMdxAVg&expires=1720013276"
-#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="Czech",DEFAULT=NO,AUTOSELECT=NO,FORCED=NO,LANGUAGE="cze",URI="https://vixcloud.co/playlist/213349?type=subtitle&rendition=4-cze&token=J0FBqnixXmTN24xdMdxAVg&expires=1720013276"
-
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="Italian",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE="ita",URI="https://vixcloud.co/playlist/175761?type=audio&rendition=ita&token=AfHdAGc26qqpBDVFAdKJCQ&expires=1722501194&edge=sc-u2-01"
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="English",DEFAULT=NO,AUTOSELECT=NO,FORCED=NO,LANGUAGE="eng",URI="https://vixcloud.co/playlist/175761?type=audio&rendition=eng&token=AfHdAGc26qqpBDVFAdKJCQ&expires=1722501194&edge=sc-u2-01"
+#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="English",DEFAULT=NO,AUTOSELECT=NO,FORCED=NO,LANGUAGE="eng",URI="https://vixcloud.co/playlist/175761?type=subtitle&rendition=eng&token=AfHdAGc26qqpBDVFAdKJCQ&expires=1722501194&edge=sc-u2-01"
+#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="Italian [Forced]",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE="forced-ita",URI="https://vixcloud.co/playlist/175761?type=subtitle&rendition=forced-ita&token=AfHdAGc26qqpBDVFAdKJCQ&expires=1722501194&edge=sc-u2-01"
+#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="Italian",DEFAULT=NO,AUTOSELECT=NO,FORCED=NO,LANGUAGE="ita",URI="https://vixcloud.co/playlist/175761?type=subtitle&rendition=ita&token=AfHdAGc26qqpBDVFAdKJCQ&expires=1722501194&edge=sc-u2-01"
 #EXT-X-STREAM-INF:BANDWIDTH=1200000,CODECS="avc1.640028,mp4a.40.2",RESOLUTION=854x480,AUDIO="audio",SUBTITLES="subs"
-https://vixcloud.co/playlist/213349?type=video&rendition=480p&token=WcQHF0VYTJnnWXRVzGyI4A&expires=1720013276
-
+https://vixcloud.co/playlist/175761?type=video&rendition=480p&token=VQk6xhvJbSGMsktylrOqLg&expires=1722501194&edge=sc-u2-01
 #EXT-X-STREAM-INF:BANDWIDTH=2150000,CODECS="avc1.640028,mp4a.40.2",RESOLUTION=1280x720,AUDIO="audio",SUBTITLES="subs"
-https://vixcloud.co/playlist/213349?type=video&rendition=720p&token=pYMwBEGivMnsWlzTJodYQw&expires=1720013276
+https://vixcloud.co/playlist/175761?type=video&rendition=720p&token=ecGWDJYeeYgEJTP_fjDQKQ&expires=1722501194&edge=sc-u2-01
+#EXT-X-STREAM-INF:BANDWIDTH=4500000,CODECS="avc1.640028,mp4a.40.2",RESOLUTION=1920x1080,AUDIO="audio",SUBTITLES="subs"
+https://vixcloud.co/playlist/175761?type=video&rendition=1080p&token=AhO8JTM1VfOMfrZFpEfjUw&expires=1722501194&edge=sc-u2-01
