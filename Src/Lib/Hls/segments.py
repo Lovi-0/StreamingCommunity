@@ -188,6 +188,8 @@ class M3U8_Segments:
             # Construct the proxy URL based on the presence of user and pass keys
             if "user" in new_proxy and "pass" in new_proxy:
                 proxy_url = f"{proxy_scheme}://{new_proxy['user']}:{new_proxy['pass']}@{new_proxy['ip']}:{new_proxy['port']}"
+            elif "user" in new_proxy:
+                proxy_url = f"{proxy_scheme}://{new_proxy['user']}@{new_proxy['ip']}:{new_proxy['port']}"
             else:
                 proxy_url = f"{proxy_scheme}://{new_proxy['ip']}:{new_proxy['port']}"
             
@@ -210,6 +212,7 @@ class M3U8_Segments:
         """
 
         # Generate new user agent
+        proxy = self.get_proxy(index)
         headers_segments['user-agent'] = get_headers()
 
         try:
@@ -220,7 +223,7 @@ class M3U8_Segments:
             if len(PROXY_LIST) > 0:
 
                 # Make request
-                response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies=self.get_proxy(index))
+                response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies=proxy)
                 response.raise_for_status()
 
             else:
