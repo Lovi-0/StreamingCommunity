@@ -10,8 +10,7 @@
         "not_close": false
     },
     "REQUESTS": {
-        "timeout": 10,
-        "max_retry": 3,
+        "timeout": 5,
         "verify_ssl": false,
         "index": {"user-agent": ""},
         "segments": { "user-agent": ""},

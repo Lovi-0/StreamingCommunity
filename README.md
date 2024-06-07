@@ -96,11 +96,11 @@ You can change some behaviors by tweaking the configuration file.
   * **timeout**: The timeout value for requests.
     - **Default Value**: `10`
 
-  * **max_retry**: Maximum number of retries for requests.
-    - **Default Value**: `3`
-
   * **verify_ssl**: Whether to verify SSL certificates.
     - **Default Value**: `false`
+
+  * **proxy**: The proxy to use for requests. (Note: This parameter works only with HTTP and HTTPS protocols.)
+      - **Example Value**: `[{'protocol': 'http', 'ip': '123.45.67.89', 'port': '8080', 'username': 'your_username', 'password': 'your_password'}, {'protocol': 'https', 'ip': '123.45.67.89', 'port': '8080', 'username': 'your_username', 'password': 'your_password'}]`
 
 </details>
 

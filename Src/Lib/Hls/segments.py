@@ -169,6 +169,36 @@ class M3U8_Segments:
         # Parse the text from the M3U8 index file
         self.parse_data(response.text)  
 
+    def get_proxy(self, index):
+        """
+        Returns the proxy configuration for the given index.
+        
+        Args:
+            - index (int): The index to select the proxy from the PROXY_LIST.
+        
+        Returns:
+            - dict: A dictionary containing the proxy scheme and proxy URL.
+        """
+        try:
+
+            # Select the proxy from the list using the index
+            new_proxy = PROXY_LIST[index % len(PROXY_LIST)]
+            proxy_scheme = new_proxy["protocol"]
+            
+            # Construct the proxy URL based on the presence of user and pass keys
+            if "user" in new_proxy and "pass" in new_proxy:
+                proxy_url = f"{proxy_scheme}://{new_proxy['user']}:{new_proxy['pass']}@{new_proxy['ip']}:{new_proxy['port']}"
+            else:
+                proxy_url = f"{proxy_scheme}://{new_proxy['ip']}:{new_proxy['port']}"
+            
+            logging.info(f"Proxy URL generated: {proxy_url}")
+            return {proxy_scheme: proxy_url}
+        
+        except KeyError as e:
+            logging.error(f"KeyError: Missing required key {e} in proxy configuration.")
+        except Exception as e:
+            logging.error(f"An unexpected error occurred while generating proxy URL: {e}")
+
     def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm) -> None:
         """
         Downloads a TS segment and adds it to the segment queue.
@@ -189,13 +219,8 @@ class M3U8_Segments:
             # Generate proxy
             if len(PROXY_LIST) > 0:
 
-                # Generate proxy
-                new_proxy = PROXY_LIST[index % len(PROXY_LIST)]
-                proxy_url = f"http://{new_proxy['user']}:{new_proxy['pass']}@{new_proxy['ip']}:{new_proxy['port']}"
-                logging.info(f"Generate proxy url: {proxy_url}")
-
                 # Make request
-                response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies={'http': proxy_url, 'https': proxy_url})
+                response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies=self.get_proxy(index))
                 response.raise_for_status()
 
             else:
