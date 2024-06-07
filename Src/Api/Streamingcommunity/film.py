@@ -18,7 +18,7 @@ from .Core.Vix_player.player import VideoSource
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-from .costant import STREAMING_FOLDER, MOVIE_FOLDER, STATIC_IP_SERVER
+from .costant import STREAMING_FOLDER, MOVIE_FOLDER
 
 
 # Variable

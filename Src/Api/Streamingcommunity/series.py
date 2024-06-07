@@ -20,7 +20,7 @@ from .Core.Util import manage_selection, map_episode_title
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-from .costant import STREAMING_FOLDER, SERIES_FOLDER, STATIC_IP_SERVER
+from .costant import STREAMING_FOLDER, SERIES_FOLDER
 
 
 # Variable

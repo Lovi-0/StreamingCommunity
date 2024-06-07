@@ -13,6 +13,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 
 # External libraries
 import requests
+from requests.exceptions import HTTPError, ConnectionError, Timeout, RequestException
 from tqdm import tqdm
 
 
@@ -36,16 +37,19 @@ from ..M3U8 import (
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 # Config
 TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
-REQUEST_VERIFY_SSL = config_manager.get_bool('REQUESTS', 'verify_ssl')
+REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
+PROXY_LIST = config_manager.get_list('REQUESTS', 'proxy')
 
 
 # Variable
 headers_index = config_manager.get_dict('REQUESTS', 'index')
 headers_segments = config_manager.get_dict('REQUESTS', 'segments')
-
+session = requests.Session()
+session.verify = config_manager.get_bool('REQUESTS', 'verify_ssl')
 
 
 class M3U8_Segments:
@@ -58,7 +62,6 @@ class M3U8_Segments:
             - tmp_folder (str): The temporary folder to store downloaded segments.
         """
         self.url = url
-        self.fake_proxy = False
         self.tmp_folder = tmp_folder
         self.tmp_file_path = os.path.join(self.tmp_folder, "0.ts")
         os.makedirs(self.tmp_folder, exist_ok=True)
@@ -72,17 +75,6 @@ class M3U8_Segments:
         self.current_index = 0                                      # Index of the current segment to be written
         self.segment_queue = queue.PriorityQueue()                  # Priority queue to maintain the order of segments
         self.condition = threading.Condition()                      # Condition variable for thread synchronization
-
-    def add_server_ip(self, list_ip):
-        """
-        Add server IP addresses 
-
-        Args:
-            list_ip (list): A list of IP addresses to be added.
-        """
-        if list_ip is not None:
-            self.fake_proxy = True
-            self.fake_proxy_ip = list_ip
 
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
@@ -114,41 +106,6 @@ class M3U8_Segments:
         
         logging.info(f"Key: ('hex': {hex_content}, 'byte': {byte_content})")
         return byte_content
-
-    def __test_ip(self, url_to_test: str):
-        """
-        Tests each proxy IP by sending a request to a corresponding segment URL.
-        """
-
-        failed_ips = []
-
-        for i in range(len(self.fake_proxy_ip)):
-
-            try:
-                response = requests.get(url_to_test, verify=False, retries=0)
-
-                if response == None:
-                    logging.error(f"[Work] to make request using: {url_to_test}")
-                    failed_ips.append(i)
-
-            except:
-
-                # Log the error and add the IP to the list of failed IPs
-                logging.error(f"[Fail] to make request using IP in this request: {url_to_test}")
-                failed_ips.append(i)
-
-        # Remove the failed IPs from the fake_proxy_ip list
-        self.fake_proxy_ip = [ip for j, ip in enumerate(self.fake_proxy_ip) if j not in failed_ips]
-
-        # Exit the program if 50% requests failed
-        if len(failed_ips) / 2 > len(self.fake_proxy_ip):
-            logging.error("All requests with ip failed.")
-            
-            # Set to not use proxy
-            self.fake_proxy_ip = None
-            self.fake_proxy = False
-
-            return False
 
     def parse_data(self, m3u8_content: str) -> None:
         """
@@ -190,25 +147,6 @@ class M3U8_Segments:
                 self.segments[i] = self.class_url_fixer.generate_full_url(segment_url)
                 logging.info(f"Generated new URL: {self.segments[i]}, from: {segment_url}")
 
-        # Change IP address of server
-        if self.fake_proxy:
-            for i in range(len(self.segments)):
-                segment_url = self.segments[i]
-
-                # Set to not use proxy if 50% failed
-                if not self.__test_ip(segment_url):
-                    console.log("[red]Cant use proxy switch to normal url.")
-                    self.fake_proxy = False
-                    break
-
-                self.segments[i] = self.__gen_proxy__(segment_url, self.segments.index(segment_url)) 
-
-        # Save new playlist of segment
-        path_m3u8_file = os.path.join(self.tmp_folder, "playlist_fix.m3u8")
-        with open(path_m3u8_file, "w") as file:
-            for item in self.segments:
-                file.write(f"{item}\n")
-
         # Update segments for estimator
         self.class_ts_estimator.total_segments = len(self.segments)
         logging.info(f"Segmnets to donwload: [{len(self.segments)}]")
@@ -231,29 +169,6 @@ class M3U8_Segments:
         # Parse the text from the M3U8 index file
         self.parse_data(response.text)  
 
-    def __gen_proxy__(self, url: str, url_index: int) -> str:
-        """
-        Change the IP address of the provided URL based on the given index.
-
-        Args:
-            - url (str): The original URL that needs its IP address replaced.
-            - url_index (int): The index used to select a new IP address from the list of FAKE_PROXY_IP.
-
-        Returns:
-            str: The modified URL with the new IP address.
-        """
-        if self.fake_proxy:
-
-            new_ip_address = self.fake_proxy_ip[url_index % len(self.fake_proxy_ip)]
-
-            # Parse the original URL and replace the hostname with the new IP address
-            parsed_url = urlparse(url)._replace(netloc=new_ip_address)  
-
-            return urlunparse(parsed_url)
-        
-        else:
-            return url
-
     def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm) -> None:
         """
         Downloads a TS segment and adds it to the segment queue.
@@ -269,9 +184,27 @@ class M3U8_Segments:
 
         try:
 
-            # Make request and calculate time duration
             start_time = time.time()
-            response = requests.get(ts_url, headers=headers_segments, verify=REQUEST_VERIFY_SSL, timeout=10)
+
+            # Generate proxy
+            if len(PROXY_LIST) > 0:
+
+                # Generate proxy
+                new_proxy = PROXY_LIST[index % len(PROXY_LIST)]
+                proxy_url = f"http://{new_proxy['user']}:{new_proxy['pass']}@{new_proxy['ip']}:{new_proxy['port']}"
+                logging.info(f"Generate proxy url: {proxy_url}")
+
+                # Make request
+                response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies={'http': proxy_url, 'https': proxy_url})
+                response.raise_for_status()
+
+            else:
+
+                # Make request
+                response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT)
+                response.raise_for_status()
+
+            # Calculate duration
             duration = time.time() - start_time
             logging.info(f"Make request to get segment: [{index} - {len(self.segments)}] in: {duration}, len data: {len(response.content)}")
 
@@ -293,8 +226,10 @@ class M3U8_Segments:
             else:
                 logging.error(f"Failed to download segment: {ts_url}")
 
+        except (HTTPError, ConnectionError, Timeout, RequestException) as e:
+            logging.error(f"Request-related exception while downloading segment: {e}")
         except Exception as e:
-            logging.error(f"Exception while downloading segment: {e}")
+            logging.error(f"An unexpected exception occurred while download segment: {e}")
 
         # Update bar
         progress_bar.update(1)
