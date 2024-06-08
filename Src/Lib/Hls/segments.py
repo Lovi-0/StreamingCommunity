@@ -44,6 +44,7 @@ TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 PROXY_LIST = config_manager.get_list('REQUESTS', 'proxy')
+START_THREAD_DELAY = 0.05
 
 
 # Variable
@@ -210,6 +211,8 @@ class M3U8_Segments:
             - index (int): The index of the segment.
             - progress_bar (tqdm): Progress counter for tracking download progress.
         """
+        global START_THREAD_DELAY
+
         try:
 
             # Generate headers
@@ -283,6 +286,8 @@ class M3U8_Segments:
         Args:
             - add_desc (str): Additional description for the progress bar.
         """
+        global START_THREAD_DELAY
+
         if TQDM_USE_LARGE_BAR:
             bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
         else:
@@ -303,6 +308,7 @@ class M3U8_Segments:
         # Start all workers
         with ThreadPoolExecutor(max_workers=TQDM_MAX_WORKER) as executor:
             for index, segment_url in enumerate(self.segments):
+                time.sleep(START_THREAD_DELAY)
                 executor.submit(self.make_requests_stream, segment_url, index, progress_bar)
 
         # Wait for all tasks to complete
