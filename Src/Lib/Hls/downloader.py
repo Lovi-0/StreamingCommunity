@@ -232,15 +232,12 @@ class Downloader():
             console.print(f"[cyan]Find codec [white]=> ([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white] ([green]b[white]: [yellow]{self.codec.video_bitrate // 1000}k[white]), [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white] ([green]b[white]: [yellow]{self.codec.audio_bitrate // 1000}k[white]))")
 
 
-    def __donwload_video__(self, server_ip: list = None):
+    def __donwload_video__(self):
         """
         Downloads and manages video segments.
 
         This method downloads video segments if necessary and updates
         the list of downloaded video segments.
-
-        Args:
-            - server_ip (list): A list of IP addresses to use in requests.
         """
 
         # Construct full path for the video segment directory
@@ -256,7 +253,6 @@ class Downloader():
 
             # Create an instance of M3U8_Segments to handle video segments
             video_m3u8 = M3U8_Segments(self.m3u8_index, full_path_video)
-            video_m3u8.add_server_ip(server_ip)
 
             # Get information about the video segments
             video_m3u8.get_info()
@@ -270,15 +266,12 @@ class Downloader():
         else:
             console.log("[cyan]Video [red]already exists.")
 
-    def __donwload_audio__(self, server_ip: list = None):
+    def __donwload_audio__(self):
         """
         Downloads and manages audio segments.
 
         This method iterates over available audio tracks, downloads them if necessary, and updates
         the list of downloaded audio tracks.
-
-        Args:
-            - server_ip (list): A list of IP addresses to use in requests.
         """
 
         # Iterate over each available audio track
@@ -305,7 +298,6 @@ class Downloader():
 
                 # If the audio segment directory doesn't exist, download audio segments
                 audio_m3u8 = M3U8_Segments(obj_audio.get('uri'), full_path_audio)
-                audio_m3u8.add_server_ip(server_ip)
 
                 # Get information about the audio segments
                 audio_m3u8.get_info()
@@ -494,12 +486,9 @@ class Downloader():
         else:
             logging.info("Video file converted already exist.")
 
-    def start(self, server_ip: list = None) -> None:
+    def start(self) -> None:
         """
         Start the process of fetching, downloading, joining, and cleaning up the video.
-
-        Args:
-            - server_ip (list): A list of IP addresses to use in requests.
         """
 
         # Check if file already exist
@@ -532,9 +521,9 @@ class Downloader():
 
             # Start all download ...
             if DOWNLOAD_VIDEO:
-                self.__donwload_video__(server_ip)
+                self.__donwload_video__()
             if DOWNLOAD_AUDIO:
-                self.__donwload_audio__(server_ip)
+                self.__donwload_audio__()
             if DOWNLOAD_SUBTITLE:
                 self.__download_subtitle__()
 
