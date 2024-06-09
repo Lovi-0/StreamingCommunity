@@ -5,13 +5,12 @@ from collections import namedtuple
 
 
 # Internal utilities
-from ..lib_parser import parser
+from ..parser import parser
 
 
 # Variable
 StreamInfo = namedtuple('StreamInfo', ['bandwidth', 'program_id', 'resolution', 'codecs'])
 Media = namedtuple('Media', ['uri', 'type', 'group_id', 'language', 'name','default', 'autoselect', 'forced', 'characteristics'])
-
 
 
 class M3U8:

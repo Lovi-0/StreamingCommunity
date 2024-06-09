@@ -14,7 +14,7 @@ from Src.Lib.Hls.downloader import Downloader
 
 
 # Logic class
-from .Core.Vix_player.player import VideoSource
+from .Core.Player.vixcloud import VideoSource
 from .Core.Util import manage_selection, map_episode_title
 
 

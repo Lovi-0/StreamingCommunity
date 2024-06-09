@@ -13,11 +13,9 @@ def read_file(file_path):
     return m3u8_content
 
 
-
 # Import
-from Src.Lib.M3U8.lib_parser import M3U8
+from Src.Lib.M3U8.parser import M3U8
 from Src.Lib.M3U8 import M3U8_Parser
-
 
 
 # Test data

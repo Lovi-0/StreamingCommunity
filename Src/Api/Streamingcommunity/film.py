@@ -13,7 +13,7 @@ from Src.Util.message import start_message
 
 
 # Logic class
-from .Core.Vix_player.player import VideoSource
+from .Core.Player.vixcloud import VideoSource
 
 
 # Config

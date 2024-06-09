@@ -4,7 +4,7 @@ import logging
 
 
 # Internal utilities
-from .lib_parser import load
+from ..parser import load
 
 
 # External libraries
