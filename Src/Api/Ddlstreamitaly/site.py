@@ -60,14 +60,14 @@ def title_search() -> int:
     
     parsed_url = urlparse(url_search)
     path_parts = parsed_url.path.split('/')
-    title_name = path_parts[-2] if path_parts[-1] == '' else path_parts[-1] + ".mp4"
+    mp4_name = path_parts[-2] if path_parts[-1] == '' else path_parts[-1] + ".mp4"
 
     # Create destination folder
     mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, MOVIE_FOLDER)
 
     # Check if can create file output
     create_folder(mp4_path)                                                                    
-    if not can_create_file(title_name):  
+    if not can_create_file(mp4_name):  
         logging.error("Invalid mp4 name.")
         sys.exit(0)
 
@@ -75,7 +75,7 @@ def title_search() -> int:
     start_message()
     MP4_downloader(
         url = mp4_link, 
-        path = os.path.join(mp4_path, title_name),
+        path = os.path.join(mp4_path, mp4_name),
         referer = f"{parsed_url.scheme}://{parsed_url.netloc}/",
         add_desc=f"{Colors.MAGENTA}video"
     )

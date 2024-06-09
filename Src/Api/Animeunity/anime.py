@@ -54,14 +54,11 @@ def download_episode(index_select: int):
     else:
         mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, MOVIE_FOLDER, video_source.series_name)
 
-    # Crete downloader
-    obj_download = Downloader(
+    # Start downloading
+    Downloader(
         m3u8_playlist = video_source.get_playlist(),
         output_filename = os.path.join(mp4_path, mp4_name)
-    )
-
-    # Start downloading
-    obj_download.start()
+    ).start()
 
 
 def donwload_series(tv_id: int, tv_name: str):

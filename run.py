@@ -22,6 +22,7 @@ from Src.Api.Streamingcommunity import main_film_series as streamingcommunity_fi
 from Src.Api.Animeunity import main_anime as streamingcommunity_anime
 from Src.Api.Altadefinizione import main_film as altadefinizione_film
 from Src.Api.Ddlstreamitaly import title_search as ddlstreamitaly_film_serie
+from Src.Api.Guardaserie import title_search as guardaserie_serie
 
 
 # Config
@@ -81,16 +82,12 @@ def main():
     parser = argparse.ArgumentParser(description='Script to download film and series from the internet.')
     parser.add_argument('-sa', '--streaming_anime', action='store_true', help='')
     parser.add_argument('-sf', '--streaming_film', action='store_true', help='')
-    parser.add_argument('-af', '--altadefinizione_film', action='store_true', help='')
-    parser.add_argument('-ddd', '--ddlstreamitaly_film_serie', action='store_true', help='')
     args = parser.parse_args()
 
     # Mapping command-line arguments to functions
     arg_to_function = {
         'streaming_anime': streamingcommunity_anime,
         'streaming_film': streamingcommunity_film_serie,
-        'altadefinizione_film': altadefinizione_film,
-        'ddlstreamitaly_film_serie': ddlstreamitaly_film_serie
     }
 
     # Check which argument is provided and run the corresponding function
@@ -104,7 +101,8 @@ def main():
         '0': streamingcommunity_film_serie,
         '1': streamingcommunity_anime,
         '2': altadefinizione_film,
-        '3': ddlstreamitaly_film_serie
+        '3': ddlstreamitaly_film_serie,
+        '4': guardaserie_serie,
     }
 
     # Create dynamic prompt message and choices
@@ -113,7 +111,8 @@ def main():
         '0': "Streamingcommunity",
         '1': "Animeunity",
         '2': "Altadefinizione",
-        '3': "Ddlstreamitaly"
+        '3': "Ddlstreamitaly",
+        '4': "Guardaserie",
     }
     prompt_message = "[cyan]Insert category [white](" + ", ".join(
         f"[red]{key}[white]: [bold magenta]{label}[white]" for key, label in choice_labels.items()

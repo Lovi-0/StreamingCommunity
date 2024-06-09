@@ -55,7 +55,7 @@ def download_film(id_film: str, title_name: str, domain: str):
     mp4_format = (mp4_name) + ".mp4"
     mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, MOVIE_FOLDER, title_name)
 
-    # Download the film using the m3u8 playlist, key, and output filename
+    # Download the film using the m3u8 playlist, and output filename
     Downloader(
         m3u8_playlist = master_playlist,
         output_filename = os.path.join(mp4_path, mp4_format)

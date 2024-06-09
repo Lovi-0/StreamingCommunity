@@ -50,7 +50,7 @@ def download_film(title_name: str, url: str):
     # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()
 
-    # Download the film using the m3u8 playlist, key, and output filename
+    # Download the film using the m3u8 playlist, and output filename
     Downloader(
         m3u8_playlist = master_playlist,
         output_filename = os.path.join(mp4_path, mp4_name)
