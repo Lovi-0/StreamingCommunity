@@ -18,7 +18,7 @@ from .Core.Util import manage_selection
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-from .costant import ANIME_FOLDER, SERIES_FOLDER, MOVIE_FOLDER
+from .costant import MAIN_FOLDER, SERIES_FOLDER, MOVIE_FOLDER
 
 
 # Variable
@@ -50,9 +50,9 @@ def download_episode(index_select: int):
     mp4_path = None
     mp4_name = f"{index_select + 1}.mp4"
     if video_source.is_series:
-        mp4_path = os.path.join(ROOT_PATH, ANIME_FOLDER, SERIES_FOLDER, video_source.series_name)
+        mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, SERIES_FOLDER, video_source.series_name)
     else:
-        mp4_path = os.path.join(ROOT_PATH, ANIME_FOLDER, MOVIE_FOLDER, video_source.series_name)
+        mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, MOVIE_FOLDER, video_source.series_name)
 
     # Crete downloader
     obj_download = Downloader(

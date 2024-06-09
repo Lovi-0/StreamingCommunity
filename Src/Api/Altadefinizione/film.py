@@ -18,7 +18,7 @@ from .Core.Player.supervideo import VideoSource
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-from .costant import STREAMING_FOLDER, MOVIE_FOLDER
+from .costant import MAIN_FOLDER, MOVIE_FOLDER
 
 
 # Variable
@@ -45,7 +45,7 @@ def download_film(title_name: str, url: str):
 
     # Define output path
     mp4_name = str(title_name).replace("-", "_") + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, STREAMING_FOLDER, MOVIE_FOLDER, title_name)
+    mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, MOVIE_FOLDER, title_name)
 
     # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()

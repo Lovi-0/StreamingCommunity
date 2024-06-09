@@ -21,6 +21,7 @@ from Src.Util.logger import Logger
 from Src.Api.Streamingcommunity import main_film_series as streamingcommunity_film_serie
 from Src.Api.Animeunity import main_anime as streamingcommunity_anime
 from Src.Api.Altadefinizione import main_film as altadefinizione_film
+from Src.Api.Ddlstreamitaly import title_search as ddlstreamitaly_film_serie
 
 
 # Config
@@ -78,9 +79,10 @@ def main():
     
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Script to download film and series from the internet.')
-    parser.add_argument('-sa', '--streaming_anime', action='store_true', help='Check into anime category')
-    parser.add_argument('-sf', '--streaming_film', action='store_true', help='Check into film/tv series category')
-    parser.add_argument('-af', '--altadefinizione_film', action='store_true', help='Check into film/tv series category')
+    parser.add_argument('-sa', '--streaming_anime', action='store_true', help='')
+    parser.add_argument('-sf', '--streaming_film', action='store_true', help='')
+    parser.add_argument('-af', '--altadefinizione_film', action='store_true', help='')
+    parser.add_argument('-ddd', '--ddlstreamitaly_film_serie', action='store_true', help='')
     args = parser.parse_args()
 
     # Mapping command-line arguments to functions
@@ -88,6 +90,7 @@ def main():
         'streaming_anime': streamingcommunity_anime,
         'streaming_film': streamingcommunity_film_serie,
         'altadefinizione_film': altadefinizione_film,
+        'ddlstreamitaly_film_serie': ddlstreamitaly_film_serie
     }
 
     # Check which argument is provided and run the corresponding function
@@ -101,14 +104,16 @@ def main():
         '0': streamingcommunity_film_serie,
         '1': streamingcommunity_anime,
         '2': altadefinizione_film,
+        '3': ddlstreamitaly_film_serie
     }
 
     # Create dynamic prompt message and choices
     choices = list(input_to_function.keys())
     choice_labels = {
-        '0': "Film/Series",
-        '1': "Anime",
-        '2': "Altadefinizione"
+        '0': "Streamingcommunity",
+        '1': "Animeunity",
+        '2': "Altadefinizione",
+        '3': "Ddlstreamitaly"
     }
     prompt_message = "[cyan]Insert category [white](" + ", ".join(
         f"[red]{key}[white]: [bold magenta]{label}[white]" for key, label in choice_labels.items()
@@ -121,7 +126,7 @@ def main():
     if category in input_to_function:
         run_function(input_to_function[category], CLOSE_CONSOLE)
     else:
-        console.print("[red]Invalid category, you need to insert 0, 1, or 2.")
+        console.print("[red]Invalid category.")
         sys.exit(0)
 
 

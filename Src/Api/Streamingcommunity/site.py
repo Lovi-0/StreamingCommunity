@@ -26,8 +26,8 @@ from .Core.Class.SearchType import MediaManager, MediaItem
 
 
 # Config
-SC_SITE_NAME = "streamingcommunity"
-SC_DOMAIN_NOW = config_manager.get('SITE', SC_SITE_NAME)
+SITE_NAME = "streamingcommunity"
+DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
 
 
 # Variable
@@ -93,7 +93,7 @@ def get_version_and_domain(new_domain = None) -> Tuple[str, str]:
     
     # Get the current domain from the configuration
     if new_domain is None:
-        config_domain = config_manager.get('SITE', SC_SITE_NAME)
+        config_domain = config_manager.get('SITE', SITE_NAME)
     else:
         config_domain = new_domain
 
@@ -101,8 +101,8 @@ def get_version_and_domain(new_domain = None) -> Tuple[str, str]:
     try:
 
         # Make requests to site to get text
-        console.print(f"[cyan]Test site[white]: [red]https://{SC_SITE_NAME}.{config_domain}")
-        response = requests.get(f"https://{SC_SITE_NAME}.{config_domain}")
+        console.print(f"[cyan]Test site[white]: [red]https://{SITE_NAME}.{config_domain}")
+        response = requests.get(f"https://{SITE_NAME}.{config_domain}")
         console.print(f"[cyan]Test respost site[white]: [red]{response.status_code} \n")
 
         # Extract version from the response
@@ -117,7 +117,7 @@ def get_version_and_domain(new_domain = None) -> Tuple[str, str]:
         console.log(f"[cyan]Extract new domain: [red]{new_domain}")
 
         # Update the domain in the configuration file
-        config_manager.set_key('SITE', SC_SITE_NAME, str(new_domain))
+        config_manager.set_key('SITE', SITE_NAME, str(new_domain))
         config_manager.write_config()
 
         # Retry to get the version and domain
@@ -137,7 +137,7 @@ def title_search(title_search: str, domain: str) -> int:
     """
     
     # Send request to search for titles ( replace à to a and space to "+" )
-    response = requests.get(f"https://{SC_SITE_NAME}.{domain}/api/search?q={unidecode(title_search.replace(' ', '+'))}", headers={'user-agent': get_headers()})
+    response = requests.get(f"https://{SITE_NAME}.{domain}/api/search?q={unidecode(title_search.replace(' ', '+'))}", headers={'user-agent': get_headers()})
     response.raise_for_status()
 
     # Add found titles to media search manager

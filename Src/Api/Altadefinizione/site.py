@@ -1,7 +1,6 @@
 # 26.05.24
 
 import sys
-import json
 import logging
 
 
@@ -23,8 +22,8 @@ from .Core.Class.SearchType import MediaManager, MediaItem
 
 
 # Config
-AD_SITE_NAME = "altadefinizione"
-AD_DOMAIN_NOW = config_manager.get('SITE', AD_SITE_NAME)
+SITE_NAME = "altadefinizione"
+DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
 
 
 # Variable
@@ -39,14 +38,13 @@ def title_search(title_search: str) -> int:
 
     Args:
         - title_search (str): The title to search for.
-        - domain (str): The domain to search on.
 
     Returns:
         int: The number of titles found.
     """
     
     # Send request to search for titles
-    response = requests.get(f"https://{AD_SITE_NAME}.{AD_DOMAIN_NOW}/page/1/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", headers={'user-agent': get_headers()})
+    response = requests.get(f"https://{SITE_NAME}.{DOMAIN_NOW}/page/1/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", headers={'user-agent': get_headers()})
     response.raise_for_status()
 
     # Create soup and find table
