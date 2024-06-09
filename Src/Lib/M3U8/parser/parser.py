@@ -6,7 +6,7 @@ import datetime
 
 
 # Internal utilities
-from ..lib_parser import protocol
+from ..parser import protocol
 from ._util import (
     remove_quotes,
     remove_quotes_parser,

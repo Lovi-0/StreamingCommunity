@@ -21,7 +21,7 @@ from Src.Util.os import check_file_existence, suppress_output
 from Src.Util.console import console
 from .util import has_audio_stream, need_to_force_to_ts, check_ffmpeg_input, check_duration_v_a
 from .capture import capture_ffmpeg_real_time
-from ..M3U8.parser import M3U8_Codec
+from ..M3U8 import M3U8_Codec
 
 
 # Config

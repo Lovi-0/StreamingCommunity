@@ -7,8 +7,9 @@ import queue
 import threading
 import logging
 import binascii
+from queue import PriorityQueue
+from urllib.parse import urljoin
 from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import urljoin, urlparse, urlunparse
 
 
 # External libraries
@@ -31,6 +32,7 @@ from ..M3U8 import (
     M3U8_Parser,
     M3U8_UrlFix
 )
+from .proxyes import main_test_proxy
 
 
 # Warning
@@ -40,9 +42,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Config
 TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
+TQDM_DELAY_WORKER = config_manager.get_float('M3U8_DOWNLOAD', 'tqdm_delay')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
-PROXY_LIST = config_manager.get_list('REQUESTS', 'proxy')
+THERE_IS_PROXY_LIST = len(config_manager.get_list('REQUESTS', 'proxy')) > 0
 
 
 # Variable
@@ -72,10 +75,9 @@ class M3U8_Segments:
         self.class_url_fixer = M3U8_UrlFix(url)
 
         # Sync
-        self.current_index = 0                                      # Index of the current segment to be written
-        self.segment_queue = queue.PriorityQueue()                  # Priority queue to maintain the order of segments
-        self.condition = threading.Condition()                      # Condition variable for thread synchronization
-
+        self.queue = PriorityQueue()
+        self.stop_event = threading.Event()
+        
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
         Retrieves the encryption key from the M3U8 playlist.
@@ -151,6 +153,15 @@ class M3U8_Segments:
         self.class_ts_estimator.total_segments = len(self.segments)
         logging.info(f"Segmnets to donwload: [{len(self.segments)}]")
 
+        # Proxy
+        if THERE_IS_PROXY_LIST:
+            console.log("[red]Validate proxy.")
+            self.valid_proxy = main_test_proxy(self.segments[0])
+            console.log(f"[cyan]N. Valid ip: [red]{len(self.valid_proxy)}")
+
+            if len(self.valid_proxy) == 0:
+                sys.exit(0)
+
     def get_info(self) -> None:
         """
         Makes a request to the index M3U8 file to get information about segments.
@@ -169,38 +180,6 @@ class M3U8_Segments:
         # Parse the text from the M3U8 index file
         self.parse_data(response.text)  
 
-    def get_proxy(self, index):
-        """
-        Returns the proxy configuration for the given index.
-        
-        Args:
-            - index (int): The index to select the proxy from the PROXY_LIST.
-        
-        Returns:
-            - dict: A dictionary containing the proxy scheme and proxy URL.
-        """
-        try:
-
-            # Select the proxy from the list using the index
-            new_proxy = PROXY_LIST[index % len(PROXY_LIST)]
-            proxy_scheme = new_proxy["protocol"]
-            
-            # Construct the proxy URL based on the presence of user and pass keys
-            if "user" in new_proxy and "pass" in new_proxy:
-                proxy_url = f"{proxy_scheme}://{new_proxy['user']}:{new_proxy['pass']}@{new_proxy['ip']}:{new_proxy['port']}"
-            elif "user" in new_proxy:
-                proxy_url = f"{proxy_scheme}://{new_proxy['user']}@{new_proxy['ip']}:{new_proxy['port']}"
-            else:
-                proxy_url = f"{proxy_scheme}://{new_proxy['ip']}:{new_proxy['port']}"
-            
-            logging.info(f"Proxy URL generated: {proxy_url}")
-            return {proxy_scheme: proxy_url}
-        
-        except KeyError as e:
-            logging.error(f"KeyError: Missing required key {e} in proxy configuration.")
-        except Exception as e:
-            logging.error(f"An unexpected error occurred while generating proxy URL: {e}")
-
     def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm) -> None:
         """
         Downloads a TS segment and adds it to the segment queue.
@@ -210,83 +189,72 @@ class M3U8_Segments:
             - index (int): The index of the segment.
             - progress_bar (tqdm): Progress counter for tracking download progress.
         """
-
-        # Generate new user agent
-        headers_segments['user-agent'] = get_headers()
-
         try:
 
+            # Generate headers
             start_time = time.time()
+            headers_segments['user-agent'] = get_headers()
 
-            # Generate proxy
-            if len(PROXY_LIST) > 0:
-
-                # Make request
-                proxy = self.get_proxy(index)
+            # Make request to get content
+            if THERE_IS_PROXY_LIST:
+                proxy = self.valid_proxy[index % len(self.valid_proxy)]
+                logging.info(f"Use proxy: {proxy}")
                 response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies=proxy)
-                response.raise_for_status()
-
             else:
-
-                # Make request
                 response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT)
-                response.raise_for_status()
 
-            # Calculate duration
+            # Get response content
+            response.raise_for_status()
+            segment_content = response.content
+
+            # Update bar
             duration = time.time() - start_time
-            logging.info(f"Make request to get segment: [{index} - {len(self.segments)}] in: {duration}, len data: {len(response.content)}")
+            response_size = int(response.headers.get('Content-Length', 0))
+            self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
+            
+            # Decrypt the segment content if decryption is needed
+            if self.decryption is not None:
+                segment_content = self.decryption.decrypt(segment_content)
 
-            if response.ok:
-
-                # Get the content of the segment
-                segment_content = response.content
-
-                # Update bar
-                self.class_ts_estimator.update_progress_bar(int(response.headers.get('Content-Length', 0)), duration, progress_bar)
-
-                # Decrypt the segment content if decryption is needed
-                if self.decryption is not None:
-                    segment_content = self.decryption.decrypt(segment_content)
-
-                with self.condition:
-                    self.segment_queue.put((index, segment_content))    # Add the segment to the queue
-                    self.condition.notify()                             # Notify the writer thread that a new segment is available
-            else:
-                logging.error(f"Failed to download segment: {ts_url}")
+            # Add the segment to the queue
+            self.queue.put((index, segment_content))
+            progress_bar.update(1)
 
         except (HTTPError, ConnectionError, Timeout, RequestException) as e:
+            progress_bar.update(1)
             logging.error(f"Request-related exception while downloading segment: {e}")
-        except Exception as e:
-            logging.error(f"An unexpected exception occurred while download segment: {e}")
 
-        # Update bar
-        progress_bar.update(1)
+        except Exception as e:
+            progress_bar.update(1)
+            logging.error(f"An unexpected exception occurred while download segment: {e}")
 
     def write_segments_to_file(self):
         """
         Writes downloaded segments to a file in the correct order.
         """
-        with open(self.tmp_file_path, 'ab') as f:
-            while True:
-                with self.condition:
-                    while self.segment_queue.empty() and self.current_index < len(self.segments):
-                        self.condition.wait()                                           # Wait until a new segment is available or all segments are downloaded
+        with open(self.tmp_file_path, 'wb') as f:
+            expected_index = 0
+            buffer = {}
 
-                    if self.segment_queue.empty() and self.current_index >= len(self.segments):
-                        break                                                           # Exit loop if all segments have been processed
+            while not self.stop_event.is_set() or not self.queue.empty():
+                try:
+                    index, segment_content = self.queue.get(timeout=1)
 
-                    if not self.segment_queue.empty():
-                        # Get the segment from the queue
-                        index, segment_content = self.segment_queue.get()
+                    if index == expected_index:
+                        f.write(segment_content)
+                        f.flush()
+                        expected_index += 1
 
-                        # Write the segment to the file
-                        if index == self.current_index:
-                            f.write(segment_content)
-                            self.current_index += 1
-                            self.segment_queue.task_done()
-                        else:
-                            self.segment_queue.put((index, segment_content))            # Requeue the segment if it is not the next to be written
-                            self.condition.notify()
+                        # Write any buffered segments in order
+                        while expected_index in buffer:
+                            f.write(buffer.pop(expected_index))
+                            f.flush()
+                            expected_index += 1
+                    else:
+                        buffer[index] = segment_content
+
+                except queue.Empty:
+                    continue
 
     def download_streams(self, add_desc):
         """
@@ -296,10 +264,11 @@ class M3U8_Segments:
             - add_desc (str): Additional description for the progress bar.
         """
         if TQDM_USE_LARGE_BAR:
-            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}| {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}| {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
+            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
         else:
             bar_format=f"{Colors.YELLOW}Proc{Colors.WHITE}: {Colors.RED}{{percentage:.2f}}% {Colors.WHITE}| {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
-            
+
+        # Create progress bar
         progress_bar = tqdm(
             total=len(self.segments), 
             unit='s',
@@ -307,21 +276,18 @@ class M3U8_Segments:
             bar_format=bar_format
         )
 
+        # Start a separate thread to write segments to the file
+        writer_thread = threading.Thread(target=self.write_segments_to_file)
+        writer_thread.start()
+
+        # Start all workers
         with ThreadPoolExecutor(max_workers=TQDM_MAX_WORKER) as executor:
-
-            # Start a separate thread to write segments to the file
-            writer_thread = threading.Thread(target=self.write_segments_to_file)
-            writer_thread.start()
-
-            # Start all workers
             for index, segment_url in enumerate(self.segments):
-
-                # Submit the download task to the executor
+                time.sleep(TQDM_DELAY_WORKER)
                 executor.submit(self.make_requests_stream, segment_url, index, progress_bar)
 
-            # Wait for all segments to be downloaded
-            executor.shutdown()
-
-            with self.condition:
-                self.condition.notify_all()     # Wake up the writer thread if it's waiting
-            writer_thread.join()                # Wait for the writer thread to finish
+        # Wait for all tasks to complete
+        executor.shutdown(wait=True)
+        self.stop_event.set()
+        writer_thread.join()
+        progress_bar.close()

@@ -53,23 +53,6 @@ class VideoSource:
             self.obj_title_manager: TitleManager = TitleManager()
             self.obj_episode_manager: EpisodeManager = EpisodeManager()
 
-    def get_preview(self) -> None:
-        """
-        Retrieves preview information of a media-id
-        """
-
-        try:
-            
-            response = requests.post(f"https://{self.base_name}.{self.domain}/api/titles/preview/{self.media_id}", headers=self.headers)
-            response.raise_for_status()
-
-            # Collect all info about preview
-            self.obj_preview = PreviewManager(response.json())
-
-        except Exception as e:
-            logging.error(f"Error collecting preview info: {e}")
-            raise
-
     def collect_info_seasons(self) -> None:
         """
         Collect information about seasons.

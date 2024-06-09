@@ -15,6 +15,8 @@ from unidecode import unidecode
 from Src.Util.table import TVShowManager
 from Src.Util.console import console
 from Src.Util._jsonConfig import config_manager
+from Src.Util.headers import get_headers
+
 
 # Logic class
 from .Core.Class.SearchType import MediaManager, MediaItem
@@ -44,7 +46,7 @@ def title_search(title_search: str) -> int:
     """
     
     # Send request to search for titles
-    response = requests.get(f"https://{AD_SITE_NAME}.{AD_DOMAIN_NOW}/page/1/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3")
+    response = requests.get(f"https://{AD_SITE_NAME}.{AD_DOMAIN_NOW}/page/1/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", headers={'user-agent': get_headers()})
     response.raise_for_status()
 
     # Create soup and find table

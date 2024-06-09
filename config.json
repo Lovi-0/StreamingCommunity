@@ -17,7 +17,8 @@
         "proxy": []
     },
     "M3U8_DOWNLOAD": {
-        "tdqm_workers": 4,
+        "tdqm_workers": 3,
+        "tqdm_delay": 0.01,
         "tqdm_use_large_bar": true,
         "download_video": true,
         "download_audio": true,
@@ -45,6 +46,6 @@
     "SITE": {
         "streamingcommunity": "foo",
         "animeunity": "to",
-        "altadefinizione": "food"
+        "altadefinizione": "vodka"
     }
 }

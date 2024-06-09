@@ -51,26 +51,30 @@ class M3U8_Ts_Estimator:
             return
 
         # Calculate speed outside of the lock
-        try:
-            speed_mbps = (size_download * 8) / (duration * 1_000_000)
-        except ZeroDivisionError as e:
-            logging.error("Division by zero error while calculating speed: %s", e)
-            return
+        speed_mbps = (size_download * 4) / (duration * (1024 * 1024))
 
-        # Only update shared data within the lock
-        with self.lock:
-            self.ts_file_sizes.append(size)
-            self.now_downloaded_size += size_download
-            self.list_speeds.append(speed_mbps)
+        # Add total size bytes
+        self.ts_file_sizes.append(size)
+        self.now_downloaded_size += size_download
+        self.list_speeds.append(speed_mbps)
 
-            # Calculate moving average
-            smoothed_speed = sum(self.list_speeds) / len(self.list_speeds)
-            self.smoothed_speeds.append(smoothed_speed)
+        # Calculate moving average
+        smoothed_speed = sum(self.list_speeds) / len(self.list_speeds)
+        self.smoothed_speeds.append(smoothed_speed)
 
-            # Update smooth speeds
-            if len(self.smoothed_speeds) > self.average_over:
-                self.smoothed_speeds.pop(0)
+        # Update smooth speeds
+        if len(self.smoothed_speeds) > self.average_over:
+            self.smoothed_speeds.pop(0)
+    
+    def get_average_speed(self) -> float:
+        """
+        Calculate the average speed from a list of speeds and convert it to megabytes per second (MB/s).
 
+        Returns:
+            float: The average speed in megabytes per second (MB/s).
+        """
+        return (sum(self.smoothed_speeds) / len(self.smoothed_speeds))
+    
     def calculate_total_size(self) -> str:
         """
         Calculate the total size of the files.
@@ -95,15 +99,6 @@ class M3U8_Ts_Estimator:
         except Exception as e:
             logging.error("An unexpected error occurred: %s", e)
             return "Error"
-    
-    def get_average_speed(self) -> float:
-        """
-        Calculate the average speed from a list of speeds and convert it to megabytes per second (MB/s).
-
-        Returns:
-            float: The average speed in megabytes per second (MB/s).
-        """
-        return ((sum(self.smoothed_speeds) / len(self.smoothed_speeds)) / 8 ) * 10  # MB/s
     
     def get_downloaded_size(self) -> str:
         """
@@ -148,5 +143,5 @@ class M3U8_Ts_Estimator:
         else:
             progress_counter.set_postfix_str(
                 f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded}{Colors.RED} {units_file_downloaded} "
-                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed:.2f} {Colors.RED}MB/s"
+                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed:.2f} {Colors.RED}Mbps"
             )

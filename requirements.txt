@@ -1,7 +1,6 @@
 ﻿requests
 bs4
-certifi
-tqdm
 rich
+tqdm
 unidecode
 fake-useragent
