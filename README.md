@@ -100,7 +100,7 @@ You can change some behaviors by tweaking the configuration file.
     - **Default Value**: `false`
 
   * **proxy**: The proxy to use for requests. (Note: This parameter works only with HTTP and HTTPS protocols.)
-      - **Example Value**: `[{'protocol': 'http', 'ip': '123.45.67.89', 'port': '8080', 'username': 'your_username', 'password': 'your_password'}, {'protocol': 'https', 'ip': '123.45.67.89', 'port': '8080', 'username': 'your_username', 'password': 'your_password'}]`
+      - **Example Value**: `["http://user:pass@38.154.227.167:5868"]`
 
 </details>
 

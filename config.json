@@ -18,6 +18,7 @@
     },
     "M3U8_DOWNLOAD": {
         "tdqm_workers": 4,
+        "tqdm_delay": 0.01,
         "tqdm_use_large_bar": true,
         "download_video": true,
         "download_audio": true,

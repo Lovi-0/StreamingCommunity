@@ -32,6 +32,7 @@ from ..M3U8 import (
     M3U8_Parser,
     M3U8_UrlFix
 )
+from .proxyes import main_test_proxy
 
 
 # Warning
@@ -41,10 +42,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Config
 TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
+TQDM_DELAY_WORKER = config_manager.get_float('M3U8_DOWNLOAD', 'tqdm_delay')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
-PROXY_LIST = config_manager.get_list('REQUESTS', 'proxy')
-START_THREAD_DELAY = 0.05
+THERE_IS_PROXY_LIST = len(config_manager.get_list('REQUESTS', 'proxy')) > 0
 
 
 # Variable
@@ -152,6 +153,15 @@ class M3U8_Segments:
         self.class_ts_estimator.total_segments = len(self.segments)
         logging.info(f"Segmnets to donwload: [{len(self.segments)}]")
 
+        # Proxy
+        if THERE_IS_PROXY_LIST:
+            console.log("[red]Validate proxy.")
+            self.valid_proxy = main_test_proxy(self.segments[0])
+            console.log(f"[cyan]N. Valid ip: [red]{len(self.valid_proxy)}")
+
+            if len(self.valid_proxy) == 0:
+                sys.exit(0)
+
     def get_info(self) -> None:
         """
         Makes a request to the index M3U8 file to get information about segments.
@@ -170,38 +180,6 @@ class M3U8_Segments:
         # Parse the text from the M3U8 index file
         self.parse_data(response.text)  
 
-    def get_proxy(self, index):
-        """
-        Returns the proxy configuration for the given index.
-        
-        Args:
-            - index (int): The index to select the proxy from the PROXY_LIST.
-        
-        Returns:
-            - dict: A dictionary containing the proxy scheme and proxy URL.
-        """
-        try:
-
-            # Select the proxy from the list using the index
-            new_proxy = PROXY_LIST[index % len(PROXY_LIST)]
-            proxy_scheme = new_proxy["protocol"]
-            
-            # Construct the proxy URL based on the presence of user and pass keys
-            if "user" in new_proxy and "pass" in new_proxy:
-                proxy_url = f"{proxy_scheme}://{new_proxy['user']}:{new_proxy['pass']}@{new_proxy['ip']}:{new_proxy['port']}"
-            elif "user" in new_proxy:
-                proxy_url = f"{proxy_scheme}://{new_proxy['user']}@{new_proxy['ip']}:{new_proxy['port']}"
-            else:
-                proxy_url = f"{proxy_scheme}://{new_proxy['ip']}:{new_proxy['port']}"
-            
-            logging.info(f"Proxy URL generated: {proxy_url}")
-            return {proxy_scheme: proxy_url}
-        
-        except KeyError as e:
-            logging.error(f"KeyError: Missing required key {e} in proxy configuration.")
-        except Exception as e:
-            logging.error(f"An unexpected error occurred while generating proxy URL: {e}")
-
     def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm) -> None:
         """
         Downloads a TS segment and adds it to the segment queue.
@@ -211,8 +189,6 @@ class M3U8_Segments:
             - index (int): The index of the segment.
             - progress_bar (tqdm): Progress counter for tracking download progress.
         """
-        global START_THREAD_DELAY
-
         try:
 
             # Generate headers
@@ -220,8 +196,9 @@ class M3U8_Segments:
             headers_segments['user-agent'] = get_headers()
 
             # Make request to get content
-            if len(PROXY_LIST) > 0:
-                proxy = self.get_proxy(index)
+            if THERE_IS_PROXY_LIST:
+                proxy = self.valid_proxy[index % len(self.valid_proxy)]
+                logging.info(f"Use proxy: {proxy}")
                 response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies=proxy)
             else:
                 response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT)
@@ -286,8 +263,6 @@ class M3U8_Segments:
         Args:
             - add_desc (str): Additional description for the progress bar.
         """
-        global START_THREAD_DELAY
-
         if TQDM_USE_LARGE_BAR:
             bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
         else:
@@ -308,7 +283,7 @@ class M3U8_Segments:
         # Start all workers
         with ThreadPoolExecutor(max_workers=TQDM_MAX_WORKER) as executor:
             for index, segment_url in enumerate(self.segments):
-                time.sleep(START_THREAD_DELAY)
+                time.sleep(TQDM_DELAY_WORKER)
                 executor.submit(self.make_requests_stream, segment_url, index, progress_bar)
 
         # Wait for all tasks to complete
