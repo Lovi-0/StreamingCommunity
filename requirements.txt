@@ -4,3 +4,4 @@ rich
 tqdm
 unidecode
 fake-useragent
+httpx

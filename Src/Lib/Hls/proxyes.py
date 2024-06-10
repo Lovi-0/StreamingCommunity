@@ -70,6 +70,7 @@ class ProxyManager:
 
         for proxy in self.verified_proxies:
             protocol = proxy.split(":")[0].lower()
+            protocol = f'{protocol}://'
             validate_proxy.append({protocol: proxy})
 
         return validate_proxy
