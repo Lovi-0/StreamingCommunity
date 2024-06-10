@@ -8,7 +8,7 @@ from typing import Generator, Optional
 
 
 # External libraries
-import requests
+import httpx
 from bs4 import BeautifulSoup
 
 
@@ -80,7 +80,7 @@ def search(query: str, num: int = 10, stop: Optional[int] = None, pause: float =
         time.sleep(pause)
         
         # Fetch the HTML content of the search page
-        html = requests.get(url).text
+        html = httpx.get(url).text
         soup = BeautifulSoup(html, 'html.parser')
 
         try:
