@@ -10,7 +10,7 @@ from Src.Util.console import console
 
 
 # External library
-import requests
+import httpx
 
 
 # Variable
@@ -28,9 +28,10 @@ def update():
 
     # Make the GitHub API requests and handle potential errors
     try:
-        response_reposity = requests.get(f"https://api.github.com/repos/{repo_user}/{repo_name}").json()
-        response_releases = requests.get(f"https://api.github.com/repos/{repo_user}/{repo_name}/releases").json()
-    except requests.RequestException as e:
+        response_reposity = httpx.get(f"https://api.github.com/repos/{repo_user}/{repo_name}").json()
+        response_releases = httpx.get(f"https://api.github.com/repos/{repo_user}/{repo_name}/releases").json()
+        
+    except Exception as e:
         console.print(f"[red]Error accessing GitHub API: {e}")
         return
 

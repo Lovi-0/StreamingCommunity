@@ -8,7 +8,7 @@ from typing import Tuple
 
 
 # External libraries
-import requests
+import httpx
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 
@@ -102,7 +102,7 @@ def get_version_and_domain(new_domain = None) -> Tuple[str, str]:
 
         # Make requests to site to get text
         console.print(f"[cyan]Test site[white]: [red]https://{SITE_NAME}.{config_domain}")
-        response = requests.get(f"https://{SITE_NAME}.{config_domain}")
+        response = httpx.get(f"https://{SITE_NAME}.{config_domain}")
         console.print(f"[cyan]Test respost site[white]: [red]{response.status_code} \n")
 
         # Extract version from the response
@@ -137,7 +137,7 @@ def title_search(title_search: str, domain: str) -> int:
     """
     
     # Send request to search for titles ( replace à to a and space to "+" )
-    response = requests.get(f"https://{SITE_NAME}.{domain}/api/search?q={unidecode(title_search.replace(' ', '+'))}", headers={'user-agent': get_headers()})
+    response = httpx.get(f"https://{SITE_NAME}.{domain}/api/search?q={unidecode(title_search.replace(' ', '+'))}", headers={'user-agent': get_headers()})
     response.raise_for_status()
 
     # Add found titles to media search manager

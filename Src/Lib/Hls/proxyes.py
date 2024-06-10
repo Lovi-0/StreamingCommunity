@@ -1,16 +1,18 @@
 # 09.06.24
 
+import os
 import time
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
 
 # External libraries
-import requests
+import httpx
 
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
+from Src.Util.os import check_file_existence
 
 
 class ProxyManager:
@@ -39,15 +41,16 @@ class ProxyManager:
             - Proxy string if working, None otherwise
         """
         protocol = proxy.split(":")[0].lower()
+        protocol = f'{protocol}://'
 
         try:
-            response = requests.get(self.url, proxies={protocol: proxy}, timeout=self.timeout)
+            response = httpx.get(self.url, proxies={protocol: proxy}, timeout=self.timeout)
 
             if response.status_code == 200:
                 logging.info(f"Proxy {proxy} is working.")
                 return proxy
             
-        except requests.RequestException as e:
+        except Exception as e:
             logging.error(f"Proxy {proxy} failed: {e}")
             self.failed_proxies[proxy] = time.time()
             return None
@@ -57,8 +60,9 @@ class ProxyManager:
         Verify all proxies in the list and store the working ones.
         """
         logging.info("Starting proxy verification...")
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
             self.verified_proxies = list(executor.map(self._check_proxy, self.proxy_list))
+            
         self.verified_proxies = [proxy for proxy in self.verified_proxies if proxy]
         logging.info(f"Verification complete. {len(self.verified_proxies)} proxies are working.")
 
@@ -70,6 +74,7 @@ class ProxyManager:
 
         for proxy in self.verified_proxies:
             protocol = proxy.split(":")[0].lower()
+            protocol = f'{protocol}://'                 # For httpx
             validate_proxy.append({protocol: proxy})
 
         return validate_proxy
@@ -77,12 +82,32 @@ class ProxyManager:
 
 def main_test_proxy(url_test):
 
+    path_file_proxt_list = "list_proxy.txt"
+
+    if check_file_existence(path_file_proxt_list):
+
+        # Write test to pass THERE IS PROXY on config.json for segments
+        config_manager.set_key("REQUESTS", "proxy", ["192.168.1.1"])
+
+        # Read file
+        with open(path_file_proxt_list, 'r') as file:
+            ip_addresses = file.readlines()
+
+        # Formatt ip
+        ip_addresses = [ip.strip() for ip in ip_addresses]
+        formatted_ips = [f"http://{ip}" for ip in ip_addresses]
+
     # Get list of proxy from config.json
-    proxy_list = config_manager.get_list('REQUESTS', 'proxy')
+    proxy_list = formatted_ips
 
     # Verify proxy
     manager = ProxyManager(proxy_list, url_test)
     manager.verify_proxies()
+
+    # Write valid ip in txt file
+    with open(path_file_proxt_list, 'w') as file:
+        for ip in ip_addresses:
+            file.write(f"{ip}\n")
     
     # Return valid proxy
     return manager.get_verified_proxies()

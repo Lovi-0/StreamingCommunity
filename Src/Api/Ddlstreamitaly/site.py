@@ -7,9 +7,8 @@ from urllib.parse import urlparse
 
 
 # External libraries
-import requests
+import httpx
 from bs4 import BeautifulSoup
-from unidecode import unidecode
 
 
 # Internal utilities
@@ -41,9 +40,10 @@ def title_search() -> int:
 
     # Send request to search for titles
     try:
-        response = requests.get(url_search, headers={'user-agent': get_headers()}, cookies=cookie_index)
+        response = httpx.get(url_search, headers={'user-agent': get_headers()}, cookies=cookie_index)
         response.raise_for_status()
-    except:
+
+    except Exception as e:
         logging.error("Insert: {'ips4_IPSSessionFront': 'your_code', 'ips4_member_id': 'your_code'} in config file \ REQUESTS \ index, instead of user-agent. Use browser debug and cookie request with a valid account.")
         sys.exit(0)
 
@@ -54,7 +54,8 @@ def title_search() -> int:
     # Get url and filename
     try:
         mp4_link = souce.get("src")
-    except:
+
+    except Exception as e:
         logging.error("Insert: {'ips4_IPSSessionFront': 'your_code', 'ips4_member_id': 'your_code'} in config file \ REQUESTS \ index, instead of user-agent. Use browser debug and cookie request with a valid account.")
         sys.exit(0)
     
