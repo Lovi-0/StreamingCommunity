@@ -58,6 +58,7 @@ session.verify = config_manager.get_bool('REQUESTS', 'verify_ssl')
 
 class M3U8_Segments:
     busy_proxy = []
+    working_proxy_list = []
     def __init__(self, url: str, tmp_folder: str):
         """
         Initializes the M3U8_Segments object.
@@ -199,13 +200,23 @@ class M3U8_Segments:
 
             # Make request to get content
             if THERE_IS_PROXY_LIST:
-                available_proxy = [proxy for proxy in self.valid_proxy if proxy not in self.busy_proxy]
-                if len(available_proxy) == 0:
-                    available_proxy = self.valid_proxy
-                    self.busy_proxy = []
-                    time.sleep(1)
-                proxy = available_proxy[random.randint(0, len(available_proxy) - 1)]
-                self.busy_proxy.append(proxy)
+                # OLD BUT WORKING CODE LEAVE HERE IN CASE OF BREAKING CHANGES
+                # available_proxy = [proxy for proxy in self.valid_proxy if proxy not in self.busy_proxy]
+                # if len(available_proxy) == 0:
+                #     available_proxy = self.valid_proxy
+                #     self.busy_proxy = []
+                #     time.sleep(1)
+                # proxy = available_proxy[random.randint(0, len(available_proxy) - 1)]
+                # self.busy_proxy.append(proxy)
+
+                # create a temp proxy list from self.valid_proxy
+                # use the first proxy in the list as proxy for the reuqest
+                # then move the first proxy to the end of the list
+                # this way we can use all the proxy in the list
+
+                proxy = self.working_proxy_list[0]
+                self.working_proxy_list.append(self.working_proxy_list.pop(0))
+
                 logging.info(f"Use proxy: {proxy}")
                 #response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies=proxy)
                 response = httpx.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies=proxy)
@@ -297,6 +308,7 @@ class M3U8_Segments:
         # else set timeout to TDQM_DELAY_WORKER
         if THERE_IS_PROXY_LIST:
             num_proxies = len(self.valid_proxy)
+            self.working_proxy_list = self.valid_proxy
             if num_proxies > 0:
                 # calculate delay based on number of proxies
                 # dalay should be between 0.3 and 1
