@@ -5,7 +5,7 @@ import logging
 
 
 # External libraries
-import httpx
+import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 
@@ -45,7 +45,7 @@ def get_token(site_name: str, domain: str) -> dict:
     """
 
     # Send a GET request to the specified URL composed of the site name and domain
-    response = httpx.get(f"https://www.{site_name}.{domain}")
+    response = requests.get(f"https://www.{site_name}.{domain}")
     response.raise_for_status()
 
     # Initialize variables to store CSRF token
@@ -83,11 +83,11 @@ def update_domain():
     try:
         
         console.log(f"[cyan]Test site: [red]https://{SITE_NAME}.{DOMAIN_NOW}")
-        response = httpx.get(f"https://www.{SITE_NAME}.{DOMAIN_NOW}")
+        response = requests.get(f"https://www.{SITE_NAME}.{DOMAIN_NOW}")
         response.status_code
 
     # If the current site is inaccessible, try to obtain a new domain
-    except Exception as e:
+    except:
 
         # Get new domain
         console.print("[red]\nExtract new DOMAIN from TLD list.")
@@ -166,7 +166,7 @@ def title_search(title: str) -> int:
     }
 
     # Send a POST request to the API endpoint for live search
-    response = httpx.post(f'https://www.{SITE_NAME}.{url_domain}/livesearch', cookies=cookies, headers=headers, json=json_data)
+    response = requests.post(f'https://www.{SITE_NAME}.{url_domain}/livesearch', cookies=cookies, headers=headers, json_data=json_data)
     response.raise_for_status()
 
     # Process each record returned in the response

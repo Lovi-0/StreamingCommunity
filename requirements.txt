@@ -1,7 +1,6 @@
-﻿httpx
+﻿requests
 bs4
 rich
 tqdm
-m3u8
 unidecode
 fake-useragent
