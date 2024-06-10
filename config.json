@@ -13,8 +13,7 @@
         "timeout": 5,
         "verify_ssl": false,
         "index": {"user-agent": ""},
-        "segments": { "user-agent": ""},
-        "proxy": []
+        "segments": {"user-agent": ""}
     },
     "M3U8_DOWNLOAD": {
         "tdqm_workers": 2,
@@ -32,10 +31,10 @@
     },
     "M3U8_CONVERSION": {
         "use_codec": false,
-		"use_vcodec": true,
-		"use_acodec": true,
-		"use_bitrate": true,
-        "use_gpu": true,
+        "use_vcodec": true,
+        "use_acodec": true,
+        "use_bitrate": true,
+        "use_gpu": false,
         "default_preset": "ultrafast",
         "check_output_after_ffmpeg": false
     },

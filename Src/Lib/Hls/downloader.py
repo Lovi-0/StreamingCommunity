@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 # External libraries
-import requests
+import httpx
 from unidecode import unidecode
 
 
@@ -71,7 +71,7 @@ class Downloader():
 
         Args:
             - output_filename (str): Output filename for the downloaded content.
-            - m3u8_playlist (str, optional): URL to the main M3U8 playlist or text.
+            - m3u8_playlist (str, optional): URL to the main M3U8 playlist.
             - m3u8_playlist (str, optional): URL to the main M3U8 index. ( NOT TEXT )
         """
 
@@ -139,9 +139,10 @@ class Downloader():
             # Send a GET request to the provided URL
             logging.info(f"Test url: {url}")
             headers_index['user-agent'] = get_headers()
-            response = requests.get(url, headers=headers_index)
+            response = httpx.get(url, headers=headers_index)
+            response.raise_for_status()
 
-            if response.ok:
+            if response.status_code == 200:
                 return response.text
             
             else:
@@ -321,9 +322,10 @@ class Downloader():
         """
 
         # Send a GET request to download the subtitle content
-        response = requests.get(uri)
+        response = httpx.get(uri)
+        response.raise_for_status()
 
-        if response.ok:
+        if response.status_code == 200:
 
             # Write the content to the specified file
             with open(path, "wb") as f:
@@ -368,7 +370,7 @@ class Downloader():
                 m3u8_sub_parser = M3U8_Parser()
                 m3u8_sub_parser.parse_data(
                     uri = obj_subtitle.get('uri'),
-                    raw_content = requests.get(obj_subtitle.get('uri')).text
+                    raw_content = httpx.get(obj_subtitle.get('uri')).text
                 )
 
                 # Initiate the download of the subtitle content
@@ -500,16 +502,15 @@ class Downloader():
         if self.m3u8_playlist:
             logging.info("Download from PLAYLIST")
 
-            # Fetch the M3U8 playlist content
-            if not len(str(self.m3u8_playlist).split("\n")) > 2:    # Is a single link
-                m3u8_playlist_text = self.__df_make_req__(self.m3u8_playlist)
 
-                # Add full URL of the M3U8 playlist to fix next .ts without https if necessary
-                self.m3u8_url_fixer.set_playlist(self.m3u8_playlist) # !!!!!!!!!!!!!!!!!! to fix for playlist with text
+            m3u8_playlist_text = self.__df_make_req__(self.m3u8_playlist)
 
-            else:
-                logging.warning("M3U8 master url not set.") # TO DO
-                m3u8_playlist_text = self.m3u8_playlist
+            # Add full URL of the M3U8 playlist to fix next .ts without https if necessary
+            self.m3u8_url_fixer.set_playlist(self.m3u8_playlist)
+
+            if m3u8_playlist_text is None:
+                console.log("[red]Playlist m3u8 to download is empty.")
+                sys.exit(0)
 
             # Save text playlist
             open(os.path.join(self.base_path, "tmp", "playlist.m3u8"), "w+").write(m3u8_playlist_text)

@@ -6,7 +6,7 @@ from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
 
 
 # External libraries
-import requests
+import httpx
 from bs4 import BeautifulSoup
 
 
@@ -60,7 +60,7 @@ class VideoSource:
         """
         try:
 
-            response = requests.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/")
+            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/")
             response.raise_for_status()
 
             # Parse JSON response and return episode count
@@ -87,7 +87,7 @@ class VideoSource:
                 "end_range": index_ep + 1
             }
 
-            response = requests.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/{index_ep}", params = params)
+            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/{index_ep}", params = params)
             response.raise_for_status()
 
             # Return information about the episode
@@ -110,7 +110,7 @@ class VideoSource:
         """
         try:
 
-            response = requests.get(f"https://www.{self.base_name}.{self.domain}/embed-url/{episode_id}")
+            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/embed-url/{episode_id}")
             response.raise_for_status()
 
             # Extract and clean embed URL
@@ -118,7 +118,7 @@ class VideoSource:
             self.iframe_src = embed_url
 
             # Fetch video content using embed URL
-            video_response = requests.get(embed_url)
+            video_response = httpx.get(embed_url)
             video_response.raise_for_status()
 
 

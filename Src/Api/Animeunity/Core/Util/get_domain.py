@@ -6,7 +6,7 @@ import logging
 
 
 # External libraries
-import requests
+import httpx
 
 
 # Internal utilities
@@ -28,7 +28,7 @@ def check_url_for_content(url: str, content: str) -> bool:
     try:
 
         logging.info(f"Test site to extract domain: {url}")
-        response = requests.get(url, timeout = 1)
+        response = httpx.get(url, timeout = 1)
         response.raise_for_status()
 
         if content in response.text:

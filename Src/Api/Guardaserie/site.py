@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 
 
 # External libraries
-import requests
+import httpx
 
 
 # Internal utilities
@@ -36,7 +36,7 @@ def title_search() -> int:
     url_search = msg.ask(f"[cyan]Insert url title")
 
     # Send request to search for titles
-    response = requests.get(url_search, headers={'user-agent': get_headers()})
+    response = httpx.get(url_search, headers={'user-agent': get_headers()})
     response.raise_for_status()
 
     # Get playlist
