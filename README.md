@@ -99,7 +99,8 @@ You can change some behaviors by tweaking the configuration file.
   * **verify_ssl**: Whether to verify SSL certificates.
     - **Default Value**: `false`
 
-  * **proxy**: To use proxy create a file with name list_proxy.txt and copy ip and port like "122.114.232.137:8080". They need to be http 
+  * **proxy**: The proxy to use for requests. (Note: This parameter works only with HTTP and HTTPS protocols.)
+      - **Example Value**: `["http://user:pass@38.154.227.167:5868"]`
 
 </details>
 

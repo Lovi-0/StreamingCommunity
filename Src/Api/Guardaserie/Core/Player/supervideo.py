@@ -1,11 +1,12 @@
 # 26.05.24
 
+import re
 import sys
 import logging
 
 
 # External libraries
-import httpx
+import requests
 from bs4 import BeautifulSoup
 
 
@@ -46,7 +47,7 @@ class VideoSource:
         """
 
         try:
-            response = httpx.get(url, headers=self.headers)
+            response = requests.get(url, headers=self.headers)
             response.raise_for_status()
 
             with open('index.html', 'w', encoding='utf-8') as file:

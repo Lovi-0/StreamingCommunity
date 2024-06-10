@@ -5,7 +5,7 @@ import logging
 
 
 # External libraries
-import httpx
+import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 
@@ -44,7 +44,7 @@ def title_search(title_search: str) -> int:
     """
     
     # Send request to search for titles
-    response = httpx.get(f"https://{SITE_NAME}.{DOMAIN_NOW}/page/1/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", headers={'user-agent': get_headers()})
+    response = requests.get(f"https://{SITE_NAME}.{DOMAIN_NOW}/page/1/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", headers={'user-agent': get_headers()})
     response.raise_for_status()
 
     # Create soup and find table
