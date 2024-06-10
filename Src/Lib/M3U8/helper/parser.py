@@ -1,15 +1,14 @@
 # 20.04.25
 
-import sys
 import logging
 
 
 # Internal utilities
-from m3u8 import loads
+from ..parser import load
 
 
 # External libraries
-import httpx
+import requests
 
 
 # Costant
@@ -373,7 +372,7 @@ class M3U8_Subtitle:
 
             # Send a request to retrieve the subtitle content
             logging.info(f"Download subtitle: {obj_subtitle.get('name')}")
-            response_subitle = httpx.get(obj_subtitle.get('uri'))
+            response_subitle = requests.get(obj_subtitle.get('uri'))
 
             try:
                 # Try to extract the VTT URL from the subtitle content
@@ -419,9 +418,10 @@ class M3U8_Parser:
 
 
         # Get obj of the m3u8 text content download, dictionary with video, audio, segments, subtitles
-        m3u8_obj = loads(raw_content, uri)
+        m3u8_obj = load(raw_content, uri)
 
         self.__parse_video_info__(m3u8_obj)
+        self.__parse_encryption_keys__(m3u8_obj)
         self.__parse_subtitles_and_audio__(m3u8_obj)
         self.__parse_segments__(m3u8_obj)
 
@@ -516,7 +516,6 @@ class M3U8_Parser:
 
         except Exception as e:
             logging.error(f"Error parsing encryption keys: {e}")
-            sys.exit(0)
             pass
 
     def __parse_subtitles_and_audio__(self, m3u8_obj) -> None:
@@ -558,11 +557,7 @@ class M3U8_Parser:
         """
 
         try:
-            
             for segment in m3u8_obj.segments:
-
-                # Parse key
-                self.__parse_encryption_keys__(segment)
                 
                 # Collect all index duration
                 self.duration += segment.duration

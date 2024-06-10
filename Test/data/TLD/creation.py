@@ -1,6 +1,6 @@
 # 29.04.24
 
-import httpx
+import requests
 import json
 from bs4 import BeautifulSoup
 
@@ -22,10 +22,10 @@ preference_registry = ['Verisign', 'KSregistry', 'KNET']
 def scrape_new_gtld_applications(url):
 
     # Send a GET request to the URL
-    response = httpx.get(url)
+    response = requests.get(url)
 
     # Check if the response is successful
-    if response.status_code == 200:
+    if response.ok:
 
         # Parse the HTML content of the page
         soup = BeautifulSoup(response.content, 'html.parser')

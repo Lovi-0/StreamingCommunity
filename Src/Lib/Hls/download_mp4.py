@@ -6,7 +6,7 @@ import logging
 
 
 # External libraries
-import httpx
+import requests
 from tqdm import tqdm
 
 
@@ -38,7 +38,7 @@ def MP4_downloader(url: str, path: str, referer: str, add_desc: str):
 
     # Make request to get content of video
     logging.info(f"Make request to fetch mp4 from: {url}")
-    response = httpx.get(url, stream=True, headers={'Referer': referer, 'user-agent': get_headers()}, verify=REQUEST_VERIFY, timeout=REQUEST_TIMEOUT)
+    response = requests.get(url, stream=True, headers={'Referer': referer, 'user-agent': get_headers()}, verify=REQUEST_VERIFY, timeout=REQUEST_TIMEOUT)
     total = int(response.headers.get('content-length', 0))
 
 

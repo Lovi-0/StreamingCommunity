@@ -68,10 +68,10 @@ def initialize():
         sys.exit(0)
 
     # Attempting GitHub update
-    """try:
+    try:
         git_update()
     except Exception as e:
-        console.print(f"[blue]Req github [white]=> [red]Failed: {e}")"""
+        console.print(f"[blue]Req github [white]=> [red]Failed: {e}")
 
 
 def main():
