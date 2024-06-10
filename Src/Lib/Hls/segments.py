@@ -311,7 +311,7 @@ class M3U8_Segments:
             self.working_proxy_list = self.valid_proxy
             if num_proxies > 0:
                 # calculate delay based on number of proxies
-                # dalay should be between 0.3 and 1
+                # dalay should be between 0.5 and 1
                 delay = max(0.5, min(1, 1 / (num_proxies + 1)))
             else:
                 delay = TQDM_DELAY_WORKER
