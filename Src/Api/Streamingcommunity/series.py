@@ -20,7 +20,7 @@ from .Core.Util import manage_selection, map_episode_title
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-from .costant import STREAMING_FOLDER, SERIES_FOLDER
+from .costant import MAIN_FOLDER, SERIES_FOLDER
 
 
 # Variable
@@ -85,7 +85,7 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
 
     # Define filename and path for the downloaded video
     mp4_name = f"{map_episode_title(tv_name, obj_episode, index_season_selected)}.mp4"
-    mp4_path = os.path.join(ROOT_PATH, STREAMING_FOLDER, SERIES_FOLDER,  tv_name, f"S{index_season_selected}")
+    mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, SERIES_FOLDER,  tv_name, f"S{index_season_selected}")
 
     # Retrieve scws and if available master playlist
     video_source.get_iframe(obj_episode.id)

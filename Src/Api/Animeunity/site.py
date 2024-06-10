@@ -22,8 +22,8 @@ from .Core.Class.SearchType import MediaManager, MediaItem
 
 
 # Config
-AU_SITE_NAME = "animeunity"
-AU_DOMAIN_NOW = config_manager.get('SITE', AU_SITE_NAME)
+SITE_NAME = "animeunity"
+DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
 
 
 # Variable
@@ -82,8 +82,8 @@ def update_domain():
     # Test current site's accessibility
     try:
         
-        console.log(f"[cyan]Test site: [red]https://{AU_SITE_NAME}.{AU_DOMAIN_NOW}")
-        response = requests.get(f"https://www.{AU_SITE_NAME}.{AU_DOMAIN_NOW}")
+        console.log(f"[cyan]Test site: [red]https://{SITE_NAME}.{DOMAIN_NOW}")
+        response = requests.get(f"https://www.{SITE_NAME}.{DOMAIN_NOW}")
         response.status_code
 
     # If the current site is inaccessible, try to obtain a new domain
@@ -97,7 +97,7 @@ def update_domain():
         if new_domain:
 
             # Update configuration with the new domain
-            config_manager.set_key('SITE', AU_SITE_NAME, new_domain)
+            config_manager.set_key('SITE', SITE_NAME, new_domain)
             config_manager.write_config()
 
         else:
@@ -144,8 +144,8 @@ def title_search(title: str) -> int:
     update_domain()
 
     # Get token and session value from configuration
-    url_domain = config_manager.get('SITE', AU_SITE_NAME)  
-    data = get_token(AU_SITE_NAME, url_domain)
+    url_domain = config_manager.get('SITE', SITE_NAME)  
+    data = get_token(SITE_NAME, url_domain)
 
     # Prepare cookies to be used in the request
     cookies = {
@@ -166,7 +166,7 @@ def title_search(title: str) -> int:
     }
 
     # Send a POST request to the API endpoint for live search
-    response = requests.post(f'https://www.{AU_SITE_NAME}.{url_domain}/livesearch', cookies=cookies, headers=headers, json_data=json_data)
+    response = requests.post(f'https://www.{SITE_NAME}.{url_domain}/livesearch', cookies=cookies, headers=headers, json_data=json_data)
     response.raise_for_status()
 
     # Process each record returned in the response
