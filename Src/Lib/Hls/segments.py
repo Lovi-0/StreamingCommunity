@@ -296,10 +296,6 @@ class M3U8_Segments:
                 delay = max(0.5, min(1, 1 / (num_proxies + 1)))
             else:
                 delay = TQDM_DELAY_WORKER
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
         else:
             delay = TQDM_DELAY_WORKER
 
