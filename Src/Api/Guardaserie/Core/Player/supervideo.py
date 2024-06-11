@@ -46,7 +46,7 @@ class VideoSource:
         """
 
         try:
-            response = httpx.get(url, headers=self.headers)
+            response = httpx.get(url, headers=self.headers, follow_redirects=True)
             response.raise_for_status()
 
             with open('index.html', 'w', encoding='utf-8') as file:

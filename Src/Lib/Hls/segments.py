@@ -8,7 +8,7 @@ import threading
 import logging
 import binascii
 from queue import PriorityQueue
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 # Internal utilities
 from Src.Util.console import console
-from Src.Util.headers import get_headers
+from Src.Util.headers import get_headers, random_headers
 from Src.Util.color import Colors
 from Src.Util._jsonConfig import config_manager
 from Src.Util.os import check_file_existence
@@ -50,7 +50,6 @@ THERE_IS_PROXY_LIST = check_file_existence("list_proxy.txt")
 
 # Variable
 headers_index = config_manager.get_dict('REQUESTS', 'index')
-headers_segments = config_manager.get_dict('REQUESTS', 'segments')
 
 
 class M3U8_Segments:
@@ -88,9 +87,10 @@ class M3U8_Segments:
         """
         headers_index['user-agent'] = get_headers()
 
-
         # Construct the full URL of the key
-        key_uri = urljoin(self.url, m3u8_parser.keys.get('uri'))  
+        key_uri = urljoin(self.url, m3u8_parser.keys.get('uri'))
+        parsed_url = urlparse(key_uri)
+        self.key_base_url = f"{parsed_url.scheme}://{parsed_url.netloc}/"
         logging.info(f"Uri key: {key_uri}")
 
         try:
@@ -191,15 +191,21 @@ class M3U8_Segments:
 
             # Generate headers
             start_time = time.time()
-            headers_segments['user-agent'] = get_headers()
 
             # Make request to get content
             if THERE_IS_PROXY_LIST:
                 proxy = self.valid_proxy[index % len(self.valid_proxy)]
                 logging.info(f"Use proxy: {proxy}")
-                response = httpx.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies=proxy, verify=False)
+
+                if 'key_base_url' in self.__dict__:
+                    response = httpx.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, proxies=proxy, verify=False)
+                else:
+                    response = httpx.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, proxies=proxy, verify=False)
             else:
-                response = httpx.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, verify=False)
+                if 'key_base_url' in self.__dict__:
+                    response = httpx.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, verify=False)
+                else:
+                    response = httpx.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, verify=False)
 
             # Get response content
             response.raise_for_status()
@@ -290,7 +296,10 @@ class M3U8_Segments:
                 delay = max(0.5, min(1, 1 / (num_proxies + 1)))
             else:
                 delay = TQDM_DELAY_WORKER
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
         else:
             delay = TQDM_DELAY_WORKER
 
