@@ -5,3 +5,4 @@ tqdm
 m3u8
 unidecode
 fake-useragent
+urllib3

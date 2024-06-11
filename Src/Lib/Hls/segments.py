@@ -158,7 +158,8 @@ class M3U8_Segments:
             console.log(f"[cyan]N. Valid ip: [red]{len(self.valid_proxy)}")
 
             if len(self.valid_proxy) == 0:
-                sys.exit(0)
+                console.log("[red]No valid ip found. Will use default ip.")
+                #sys.exit(0)
 
     def get_info(self) -> None:
         """
@@ -193,7 +194,7 @@ class M3U8_Segments:
             start_time = time.time()
 
             # Make request to get content
-            if THERE_IS_PROXY_LIST:
+            if THERE_IS_PROXY_LIST and len(self.valid_proxy) > 0:
                 proxy = self.valid_proxy[index % len(self.valid_proxy)]
                 logging.info(f"Use proxy: {proxy}")
 
@@ -282,11 +283,11 @@ class M3U8_Segments:
 
         # Ff proxy avaiable set max_workers to number of proxy
         # else set max_workers to TQDM_MAX_WORKER
-        max_workers = len(self.valid_proxy) if THERE_IS_PROXY_LIST else TQDM_MAX_WORKER
+        max_workers = len(self.valid_proxy) if THERE_IS_PROXY_LIST and len(self.valid_proxy) > 0 else TQDM_MAX_WORKER
 
         # if proxy avaiable set timeout to variable time
         # else set timeout to TDQM_DELAY_WORKER
-        if THERE_IS_PROXY_LIST:
+        if THERE_IS_PROXY_LIST and len(self.valid_proxy) > 0:
             num_proxies = len(self.valid_proxy)
             self.working_proxy_list = self.valid_proxy
 
