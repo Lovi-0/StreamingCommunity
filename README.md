@@ -220,6 +220,8 @@ make build-container
 make LOCAL_DIR=/path/to/download run-container
 ```
 
+The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
+
 ## Tutorial
 
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
