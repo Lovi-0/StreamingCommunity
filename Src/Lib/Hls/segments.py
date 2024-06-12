@@ -195,13 +195,17 @@ class M3U8_Segments:
 
             # Make request to get content
             if THERE_IS_PROXY_LIST and len(self.valid_proxy) > 0:
+                # proxies = {
+                #     "http://": "http://p.webshare.io:9999/",
+                #     "https://": "http://p.webshare.io:9999/"
+                # }
                 proxy = self.valid_proxy[index % len(self.valid_proxy)]
                 logging.info(f"Use proxy: {proxy}")
 
                 if 'key_base_url' in self.__dict__:
-                    response = httpx.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, proxies=proxy, verify=False)
+                    response = httpx.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, proxy=proxy, verify=False)
                 else:
-                    response = httpx.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, proxies=proxy, verify=False)
+                    response = httpx.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, proxy=proxy, verify=False)
             else:
                 if 'key_base_url' in self.__dict__:
                     response = httpx.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, verify=False)
