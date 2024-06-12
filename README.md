@@ -209,6 +209,19 @@ By default the videos will be saved in `/app/Video` inside the container, if you
 docker run -it -p 8000:8000 -v /path/to/download:/app/Video streaming-community-api
 ```
 
+### Docker quick setup with Make
+
+Inside the Makefile (install `make`) are already configured two commands to build and run the container:
+
+```
+make build-container
+
+# set your download directory as ENV variable
+make LOCAL_DIR=/path/to/download run-container
+```
+
+The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
+
 ## Tutorial
 
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
