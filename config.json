@@ -12,7 +12,9 @@
     "REQUESTS": {
         "timeout": 5,
         "verify_ssl": false,
-        "index": {"user-agent": ""}
+        "index": {"user-agent": ""},
+        "proxy_start_min": 0.6,
+        "proxy_start_max": 1.0
     },
     "M3U8_DOWNLOAD": {
         "tdqm_workers": 2,

@@ -46,10 +46,41 @@ TQDM_DELAY_WORKER = config_manager.get_float('M3U8_DOWNLOAD', 'tqdm_delay')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 THERE_IS_PROXY_LIST = check_file_existence("list_proxy.txt")
+PROXY_START_MIN = config_manager.get_float('REQUESTS', 'proxy_start_min')
+PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
 
 
 # Variable
 headers_index = config_manager.get_dict('REQUESTS', 'index')
+
+
+
+class RetryTransport(httpx.BaseTransport):
+    def __init__(self, transport, retries=3, backoff_factor=0.3):
+        self.transport = transport
+        self.retries = retries
+        self.backoff_factor = backoff_factor
+
+    def handle_request(self, request: httpx.Request) -> httpx.Response:
+        url = request.url
+
+        for attempt in range(1, self.retries + 1):
+            try:
+                response = self.transport.handle_request(request)
+                response.raise_for_status()
+                return response
+            
+            except (httpx.RequestError, httpx.HTTPStatusError) as e:
+                if attempt == self.retries:
+                    raise 
+                else:
+                    wait = self.backoff_factor * (2 ** (attempt - 1))
+                    print(f"Attempt {attempt} for URL {url} failed: {e}. Retrying in {wait} seconds...")
+                    time.sleep(wait)
+
+
+transport = RetryTransport(httpx.HTTPTransport())
+client = httpx.Client(transport=transport, verify=False, timeout=REQUEST_TIMEOUT)
 
 
 class M3U8_Segments:
@@ -187,46 +218,43 @@ class M3U8_Segments:
             - index (int): The index of the segment.
             - progress_bar (tqdm): Progress counter for tracking download progress.
         """
-        try:
+
 
             # Generate headers
-            start_time = time.time()
+        start_time = time.time()
 
             # Make request to get content
-            if THERE_IS_PROXY_LIST:
-                proxy = self.valid_proxy[index % len(self.valid_proxy)]
-                logging.info(f"Use proxy: {proxy}")
-
-                if 'key_base_url' in self.__dict__:
-                    response = httpx.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, proxies=proxy, verify=False)
-                else:
-                    response = httpx.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, proxies=proxy, verify=False)
+        if THERE_IS_PROXY_LIST:
+            proxy = self.valid_proxy[index % len(self.valid_proxy)]
+            logging.info(f"Use proxy: {proxy}")
+                
+            if 'key_base_url' in self.__dict__:
+                response = client.get(ts_url, headers=random_headers(self.key_base_url), proxy=proxy)
             else:
-                if 'key_base_url' in self.__dict__:
-                    response = httpx.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, verify=False)
-                else:
-                    response = httpx.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, verify=False)
+                response = client.get(ts_url, headers={'user-agent': get_headers()}, proxy=proxy)
+        else:
+            if 'key_base_url' in self.__dict__:
+                response = client.get(ts_url, headers=random_headers(self.key_base_url))
+            else:
+                response = client.get(ts_url, headers={'user-agent': get_headers()})
 
             # Get response content
-            response.raise_for_status()
-            segment_content = response.content
+        response.raise_for_status()
+        segment_content = response.content
 
             # Update bar
-            duration = time.time() - start_time
-            response_size = int(response.headers.get('Content-Length', 0))
-            self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
+        duration = time.time() - start_time
+        response_size = int(response.headers.get('Content-Length', 0))
+        self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
             
             # Decrypt the segment content if decryption is needed
-            if self.decryption is not None:
-                segment_content = self.decryption.decrypt(segment_content)
+        if self.decryption is not None:
+            segment_content = self.decryption.decrypt(segment_content)
 
-            # Add the segment to the queue
-            self.queue.put((index, segment_content))
-            progress_bar.update(1)
+        # Add the segment to the queue
+        self.queue.put((index, segment_content))
+        progress_bar.update(1)
 
-        except Exception as e:
-            progress_bar.update(1)
-            logging.error(f"An unexpected exception occurred while download segment: {e}")
 
     def write_segments_to_file(self):
         """
@@ -293,7 +321,7 @@ class M3U8_Segments:
             if num_proxies > 0:
                 # calculate delay based on number of proxies
                 # dalay should be between 0.5 and 1
-                delay = max(0.5, min(1, 1 / (num_proxies + 1)))
+                delay = max(PROXY_START_MIN, min(PROXY_START_MAX, 1 / (num_proxies + 1)))
             else:
                 delay = TQDM_DELAY_WORKER
         else:
