@@ -12,8 +12,7 @@
     "REQUESTS": {
         "timeout": 5,
         "verify_ssl": false,
-        "index": {"user-agent": ""},
-        "segments": {"user-agent": ""}
+        "index": {"user-agent": ""}
     },
     "M3U8_DOWNLOAD": {
         "tdqm_workers": 2,
@@ -39,7 +38,6 @@
         "check_output_after_ffmpeg": false
     },
     "M3U8_PARSER": {
-        "skip_empty_row_playlist": false,
         "force_resolution": -1
     },
     "SITE": {
