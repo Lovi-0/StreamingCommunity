@@ -18,11 +18,11 @@ from Src.Util.logger import Logger
 
 
 # Internal api
-from Src.Api.Streamingcommunity import main_film_series as streamingcommunity_film_serie
-from Src.Api.Animeunity import main_anime as streamingcommunity_anime
-from Src.Api.Altadefinizione import main_film as altadefinizione_film
-from Src.Api.Ddlstreamitaly import title_search as ddlstreamitaly_film_serie
-from Src.Api.Guardaserie import title_search as guardaserie_serie
+from Src.Api.Streamingcommunity import search as streamingcommunity_film_serie
+from Src.Api.Animeunity import search as streamingcommunity_anime
+from Src.Api.Altadefinizione import search as altadefinizione_film
+from Src.Api.Ddlstreamitaly import search as ddlstreamitaly_film_serie
+from Src.Api.Guardaserie import search as guardaserie_serie
 
 
 # Config

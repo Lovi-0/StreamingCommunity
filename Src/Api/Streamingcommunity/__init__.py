@@ -16,7 +16,7 @@ from .film import download_film
 from .series import download_series
 
 
-def main_film_series():
+def search():
     """
     Main function of the application for film and series.
     """

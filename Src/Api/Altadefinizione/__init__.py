@@ -14,7 +14,7 @@ from .site import (
 from .film import download_film
 
 
-def main_film():
+def search():
     """
     Main function of the application for film and series.
     """

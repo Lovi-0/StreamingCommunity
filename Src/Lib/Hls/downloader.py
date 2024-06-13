@@ -55,7 +55,6 @@ DOWNLOAD_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'download_sub')
 MERGE_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_subs')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_DOWNLOAD', 'cleanup_tmp_folder')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
-CREATE_REPORT = config_manager.get_bool('M3U8_DOWNLOAD', 'create_report')
 
 
 # Variable
@@ -621,16 +620,3 @@ class Downloader():
 
             # Clean all tmp file
             self.__clean__(converted_out_path)
-
-
-        # Create download report
-        if CREATE_REPORT:
-
-            # Get variable to add
-            current_date = datetime.today().date()
-            base_filename = os.path.split(self.output_filename)[-1].replace('.mp4', '')
-            filename_out_size = format_size(os.path.getsize(self.output_filename))
-
-            # Add new row to table and save
-            report_table.add_row_to_database(str(current_date), str(base_filename), str(filename_out_size))
-            report_table.save_database()

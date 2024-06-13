@@ -30,7 +30,7 @@ from .costant import MAIN_FOLDER, MOVIE_FOLDER
 cookie_index = config_manager.get_dict('REQUESTS', 'index')
 
 
-def title_search() -> int:
+def search() -> int:
     """
     Search for titles based on a search query.
     """
