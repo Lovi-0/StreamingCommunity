@@ -8,7 +8,7 @@ from .site import title_search, get_select_title
 from .anime import donwload_film, donwload_series
 
 
-def main_anime():
+def search():
 
     # Make request to site to get content that corrsisponde to that string
     string_to_search = msg.ask("\n[purple]Insert word to search in all site").strip()

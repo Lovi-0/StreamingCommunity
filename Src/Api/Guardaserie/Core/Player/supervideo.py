@@ -48,10 +48,6 @@ class VideoSource:
         try:
             response = httpx.get(url, headers=self.headers, follow_redirects=True)
             response.raise_for_status()
-
-            with open('index.html', 'w', encoding='utf-8') as file:
-                file.write(response.text)
-
             return response.text
         
         except Exception as e:
@@ -77,38 +73,6 @@ class VideoSource:
             logging.error(f"Failed to parse HTML content: {e}")
             return None
         
-    def get_iframe(self, soup):
-        """
-        Extracts the source URL of the second iframe in the provided BeautifulSoup object.
-
-        Args:
-            soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML.
-
-        Returns:
-            str: The source URL of the second iframe, or None if not found.
-        """
-        tag_a = soup.find_all('a', href='#')
-        if tag_a and len(tag_a) > 1:
-            return tag_a[1].get("data-link")
-        
-        return None
-
-    def find_content(self, url):
-        """
-        Makes a request to the specified URL and parses the HTML content.
-
-        Args:
-            url (str): The URL to fetch content from.
-
-        Returns:
-            BeautifulSoup: A BeautifulSoup object representing the parsed HTML content, or None if the request fails.
-        """
-        content = self.make_request(url)
-        if content:
-            return self.parse_html(content)
-        
-        return None
-
     def get_result_node_js(self, soup):
         """
         Prepares and runs a Node.js script from the provided BeautifulSoup object to retrieve the video URL.
@@ -145,17 +109,7 @@ class VideoSource:
                 logging.error("Failed to parse HTML content.")
                 return None
 
-            iframe_src = self.get_iframe(soup)
-            if not iframe_src:
-                logging.error("No iframe found.")
-                return None
-
-            down_page_soup = self.find_content(iframe_src)
-            if not down_page_soup:
-                logging.error("Failed to fetch down page content.")
-                return None
-
-            result = self.get_result_node_js(down_page_soup)
+            result = self.get_result_node_js(soup)
             if not result:
                 logging.error("No video URL found in script.")
                 return None

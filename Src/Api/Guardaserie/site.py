@@ -8,61 +8,130 @@ from urllib.parse import urlparse
 
 # External libraries
 import httpx
+from bs4 import BeautifulSoup
 
 
 # Internal utilities
+from Src.Util.table import TVShowManager
 from Src.Util.console import console, msg
-from Src.Util.os import create_folder, can_create_file
 from Src.Util._jsonConfig import config_manager
 from Src.Util.headers import get_headers
-from Src.Lib.Hls.downloader import Downloader
 
 
 # Logic class
-from .Core.Player.supervideo import VideoSource
+from .Core.Class.SearchType import MediaManager, MediaItem
+
+
+# Variable
+media_search_manager = MediaManager()
+table_show_manager = TVShowManager()
 
 
 # Config
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-from .costant import MAIN_FOLDER, MOVIE_FOLDER
 
 
-def title_search() -> int:
+
+def title_search(word_to_search) -> int:
     """
     Search for titles based on a search query.
     """
 
-    print()
-    url_search = msg.ask(f"[cyan]Insert url title")
-
     # Send request to search for titles
-    response = httpx.get(url_search, headers={'user-agent': get_headers()})
+    response = httpx.get(f"https://guardaserie.ceo/?story={word_to_search}&do=search&subaction=search", headers={'user-agent': get_headers()})
     response.raise_for_status()
 
-    # Get playlist
-    video_source = VideoSource()
-    video_source.setup(url_search)
+    # Create soup and find table
+    soup = BeautifulSoup(response.text, "html.parser")
+    table_content = soup.find('div', class_="mlnew-list")
 
-    
-    parsed_url = urlparse(url_search)
-    path_parts = parsed_url.path.split('/')
-    mp4_name = path_parts[-2] if path_parts[-1] == '' else path_parts[-1] + ".mp4"
+    for serie_div in table_content.find_all('div', class_='mlnew'):
 
-    # Create destination folder
-    mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, MOVIE_FOLDER)
+        try:
+            title = serie_div.find('div', class_='mlnh-2').find("h2").get_text(strip=True)
+            link = serie_div.find('div', class_='mlnh-2').find('a')['href']
+            imdb_rating = serie_div.find('span', class_='mlnh-imdb').get_text(strip=True)
 
-    # Check if can create file output
-    create_folder(mp4_path)                                                                    
-    if not can_create_file(mp4_name):  
-        logging.error("Invalid mp4 name.")
+            serie_info = {
+                'name': title,
+                'url': link,
+                'score': imdb_rating
+            }
+
+            media_search_manager.add_media(serie_info)
+
+        except:
+            pass
+
+    # Return the number of titles found
+    return media_search_manager.get_length()
+
+
+def get_select_title(type_filter: list = None) -> MediaItem:
+    """
+    Display a selection of titles and prompt the user to choose one.
+
+    Args:
+        - type_filter (list): A list of media types to filter. Can include 'film', 'tv', 'ova'. Ex. ['tv', 'film']
+
+    Returns:
+        MediaItem: The selected media item.
+    """
+
+    # Set up table for displaying titles
+    table_show_manager.set_slice_end(10)
+
+    # Add columns to the table
+    column_info = {
+        "Index": {'color': 'red'},
+        "Name": {'color': 'magenta'},
+        "Type": {'color': 'yellow'},
+        "Score": {'color': 'cyan'},
+    }
+    table_show_manager.add_column(column_info)
+
+    # Populate the table with title information
+    for i, media in enumerate(media_search_manager.media_list):
+        
+        # Filter for only a list of category
+        if type_filter is not None:
+            if str(media.type) not in type_filter:
+                continue
+            
+        table_show_manager.add_tv_show({
+            'Index': str(i),
+            'Name': media.name,
+            'Type': media.type,
+            'Score': media.score,
+        })
+
+    # Run the table and handle user input
+    last_command = table_show_manager.run(force_int_input=True, max_int_input=len(media_search_manager.media_list))
+    table_show_manager.clear()
+
+    # Handle user's quit command
+    if last_command == "q":
+        console.print("\n[red]Quit [white]...")
+        sys.exit(0)
+
+    # Check if the selected index is within range
+    if 0 <= int(last_command) <= len(media_search_manager.media_list):
+        return media_search_manager.get(int(last_command))
+    else:
+        console.print("\n[red]Wrong index")
         sys.exit(0)
 
 
-    # Get m3u8 master playlist
-    master_playlist = video_source.get_playlist()
+def manager_clear():
+    """
+    Clears the data lists managed by media_search_manager and table_show_manager.
 
-    # Download the film using the m3u8 playlist, and output filename
-    Downloader(
-        m3u8_playlist = master_playlist,
-        output_filename = os.path.join(mp4_path, mp4_name)
-    ).start()
+    This function clears the data lists managed by global variables media_search_manager
+    and table_show_manager. It removes all the items from these lists, effectively
+    resetting them to empty lists.
+    """
+    global media_search_manager, table_show_manager
+
+    # Clear list of data
+    media_search_manager.clear()
+    table_show_manager.clear()
