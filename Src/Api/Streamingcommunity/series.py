@@ -28,44 +28,6 @@ video_source = VideoSource()
 table_show_manager = TVShowManager()
 
 
-
-def display_episodes_list() -> str:
-    """
-    Display episodes list and handle user input.
-
-    Returns:
-        last_command (str): Last command entered by the user.
-    """
-
-    # Set up table for displaying episodes
-    table_show_manager.set_slice_end(10)
-
-    # Add columns to the table
-    column_info = {
-        "Index": {'color': 'red'},
-        "Name": {'color': 'magenta'},
-        "Duration": {'color': 'green'}
-    }
-    table_show_manager.add_column(column_info)
-
-    # Populate the table with episodes information
-    for i, media in enumerate(video_source.obj_episode_manager.episodes):
-        table_show_manager.add_tv_show({
-            'Index': str(media.number),
-            'Name': media.name,
-            'Duration': str(media.duration)
-        })
-
-    # Run the table and handle user input
-    last_command = table_show_manager.run()
-
-    if last_command == "q":
-        console.print("\n[red]Quit [white]...")
-        sys.exit(0)
-
-    return last_command
-
-
 def donwload_video(tv_name: str, index_season_selected: int, index_episode_selected: int) -> None:
     """
     Download a single episode video.
@@ -187,3 +149,40 @@ def download_series(tv_id: str, tv_name: str, version: str, domain: str) -> None
     else:
         for i_season in list_season_select:
             donwload_episode(tv_name, i_season)
+
+
+def display_episodes_list() -> str:
+    """
+    Display episodes list and handle user input.
+
+    Returns:
+        last_command (str): Last command entered by the user.
+    """
+
+    # Set up table for displaying episodes
+    table_show_manager.set_slice_end(10)
+
+    # Add columns to the table
+    column_info = {
+        "Index": {'color': 'red'},
+        "Name": {'color': 'magenta'},
+        "Duration": {'color': 'green'}
+    }
+    table_show_manager.add_column(column_info)
+
+    # Populate the table with episodes information
+    for i, media in enumerate(video_source.obj_episode_manager.episodes):
+        table_show_manager.add_tv_show({
+            'Index': str(media.number),
+            'Name': media.name,
+            'Duration': str(media.duration)
+        })
+
+    # Run the table and handle user input
+    last_command = table_show_manager.run()
+
+    if last_command == "q":
+        console.print("\n[red]Quit [white]...")
+        sys.exit(0)
+
+    return last_command

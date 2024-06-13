@@ -7,6 +7,7 @@ from typing import List
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
+from Src.Util.os import remove_special_characters
 
 
 # Logic class
@@ -62,10 +63,10 @@ def map_episode_title(tv_name: str, episode: Episode, number_season: int):
         str: The mapped episode title.
     """
     map_episode_temp = MAP_EPISODE
-    map_episode_temp = map_episode_temp.replace("%(tv_name)", tv_name)
+    map_episode_temp = map_episode_temp.replace("%(tv_name)", remove_special_characters(tv_name))
     map_episode_temp = map_episode_temp.replace("%(season)", str(number_season).zfill(2))
     map_episode_temp = map_episode_temp.replace("%(episode)", str(episode.number).zfill(2))
-    map_episode_temp = map_episode_temp.replace("%(episode_name)", episode.name)
+    map_episode_temp = map_episode_temp.replace("%(episode_name)", remove_special_characters(episode.name))
 
     # Additional fix
     map_episode_temp = map_episode_temp.replace(".", "_")

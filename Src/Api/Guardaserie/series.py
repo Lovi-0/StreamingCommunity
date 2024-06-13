@@ -16,7 +16,7 @@ from Src.Lib.Hls.downloader import Downloader
 # Logic class
 from .Core.Class.SearchType import MediaItem
 from .Core.Class.ScrapeSerie import GetSerieInfo
-from .Core.Util.manage_ep import manage_selection
+from .Core.Util.manage_ep import manage_selection, map_episode_title
 from .Core.Player.supervideo import VideoSource
 
 
@@ -48,7 +48,7 @@ def donwload_video(scape_info_serie: GetSerieInfo, index_season_selected: int, i
     print()
 
     # Define filename and path for the downloaded video
-    mp4_name = f"{obj_episode.get('name')}.mp4"
+    mp4_name = f"{map_episode_title(scape_info_serie.tv_name, index_season_selected, index_episode_selected, obj_episode.get('name'))}.mp4"
     mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, SERIES_FOLDER, scape_info_serie.tv_name, f"S{index_season_selected}")
 
     # Setup video source

@@ -7,6 +7,7 @@ from typing import List
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
+from Src.Util.os import remove_special_characters
 
 
 # Config
@@ -44,4 +45,27 @@ def manage_selection(cmd_insert: str, max_count: int) -> List[int]:
     logging.info(f"List return: {list_season_select}")
     return list_season_select
 
+def map_episode_title(tv_name: str, number_season: int, episode_number: int, episode_name: str) -> str:
+    """
+    Maps the episode title to a specific format.
 
+    Args:
+        tv_name (str): The name of the TV show.
+        number_season (int): The season number.
+        episode_number (int): The episode number.
+        episode_name (str): The original name of the episode.
+
+    Returns:
+        str: The mapped episode title.
+    """
+    map_episode_temp = MAP_EPISODE
+    map_episode_temp = map_episode_temp.replace("%(tv_name)", remove_special_characters(tv_name))
+    map_episode_temp = map_episode_temp.replace("%(season)", str(number_season))
+    map_episode_temp = map_episode_temp.replace("%(episode)", str(episode_number))
+    map_episode_temp = map_episode_temp.replace("%(episode_name)", remove_special_characters(episode_name))
+
+    # Additional fix
+    map_episode_temp = map_episode_temp.replace(".", "_")
+
+    logging.info(f"Map episode string return: {map_episode_temp}")
+    return map_episode_temp
