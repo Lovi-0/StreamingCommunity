@@ -54,35 +54,6 @@ PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
 headers_index = config_manager.get_dict('REQUESTS', 'index')
 
 
-
-class RetryTransport(httpx.BaseTransport):
-    def __init__(self, transport, retries=3, backoff_factor=0.3):
-        self.transport = transport
-        self.retries = retries
-        self.backoff_factor = backoff_factor
-
-    def handle_request(self, request: httpx.Request) -> httpx.Response:
-        url = request.url
-
-        for attempt in range(1, self.retries + 1):
-            try:
-                response = self.transport.handle_request(request)
-                response.raise_for_status()
-                return response
-            
-            except (httpx.RequestError, httpx.HTTPStatusError) as e:
-                if attempt == self.retries:
-                    raise 
-                else:
-                    wait = self.backoff_factor * (2 ** (attempt - 1))
-                    print(f"Attempt {attempt} for URL {url} failed: {e}. Retrying in {wait} seconds...")
-                    time.sleep(wait)
-
-
-transport = RetryTransport(httpx.HTTPTransport())
-client = httpx.Client(transport=transport)
-
-
 class M3U8_Segments:
     def __init__(self, url: str, tmp_folder: str):
         """
