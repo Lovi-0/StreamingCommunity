@@ -28,7 +28,9 @@ table_show_manager = TVShowManager()
 
 
 # Config
+SITE_NAME = "guardaserie"
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
+DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
 
 
 
@@ -38,7 +40,7 @@ def title_search(word_to_search) -> int:
     """
 
     # Send request to search for titles
-    response = httpx.get(f"https://guardaserie.ceo/?story={word_to_search}&do=search&subaction=search", headers={'user-agent': get_headers()})
+    response = httpx.get(f"https://guardaserie.{DOMAIN_NOW}/?story={word_to_search}&do=search&subaction=search", headers={'user-agent': get_headers()})
     response.raise_for_status()
 
     # Create soup and find table

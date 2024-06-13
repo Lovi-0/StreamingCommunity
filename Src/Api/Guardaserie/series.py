@@ -62,6 +62,7 @@ def donwload_video(scape_info_serie: GetSerieInfo, index_season_selected: int, i
         output_filename = os.path.join(mp4_path, mp4_name)
     ).start()
 
+
 def donwload_episode(scape_info_serie: GetSerieInfo, index_season_selected: int, donwload_all: bool = False) -> None:
     """
     Download all episodes of a season.
@@ -99,7 +100,6 @@ def donwload_episode(scape_info_serie: GetSerieInfo, index_season_selected: int,
         else:
             for i_episode in list_episode_select:
                 donwload_video(scape_info_serie, index_season_selected, i_episode)
-
 
 
 def download_series(dict_serie: MediaItem) -> None:

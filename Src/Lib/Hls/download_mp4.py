@@ -31,44 +31,47 @@ REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 
 def MP4_downloader(url: str, path: str, referer: str, add_desc: str):
 
-    if not os.path.exists(path):
-        console.log("[cyan]Video [red]already exists.")
-        sys.exit(0)
-
-
     # Make request to get content of video
     logging.info(f"Make request to fetch mp4 from: {url}")
-    response = httpx.get(url, stream=True, headers={'Referer': referer, 'user-agent': get_headers()}, verify=REQUEST_VERIFY, timeout=REQUEST_TIMEOUT)
-    total = int(response.headers.get('content-length', 0))
+    headers = {'Referer': referer, 'user-agent': get_headers()}
+    
+    with httpx.Client(verify=REQUEST_VERIFY, timeout=REQUEST_TIMEOUT) as client:
+        with client.stream("GET", url, headers=headers) as response:
+            total = int(response.headers.get('content-length', 0))
 
+            # Create bar format
+            if TQDM_USE_LARGE_BAR:
+                bar_format = (f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): "
+                              f"{Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ "
+                              f"{Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] "
+                              f"{Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}} {Colors.WHITE}| "
+                              f"{Colors.YELLOW}{{rate_fmt}}{{postfix}} {Colors.WHITE}]")
+            else:
+                bar_format = (f"{Colors.YELLOW}Proc{Colors.WHITE}: {Colors.RED}{{percentage:.2f}}% "
+                              f"{Colors.WHITE}| {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]")
 
-    # Create bar format
-    if TQDM_USE_LARGE_BAR:
-        bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}} {Colors.WHITE}| {Colors.YELLOW}{{rate_fmt}}{{postfix}} {Colors.WHITE}]"
-    else:
-        bar_format=f"{Colors.YELLOW}Proc{Colors.WHITE}: {Colors.RED}{{percentage:.2f}}% {Colors.WHITE}| {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
+            # Create progress bar
+            progress_bar = tqdm(
+                total=total,
+                unit='iB',
+                ascii='░▒█',
+                bar_format=bar_format,
+                unit_scale=True,
+                unit_divisor=1024
+            )
 
-    # Create progress bar
-    progress_bar = tqdm(
-        total=total,
-        unit='iB',
-        ascii='░▒█',
-        bar_format=bar_format,
-        unit_scale=True, 
-        unit_divisor=1024
-    )
-
-
-    # Download file
-    with open(path, 'wb') as file, progress_bar as bar:
-        for data in response.iter_content(chunk_size=1024):
-            size = file.write(data)
-            bar.update(size)
-
+            # Download file
+            with open(path, 'wb') as file, progress_bar as bar:
+                for chunk in response.iter_bytes(chunk_size=1024):
+                    if chunk:
+                        size = file.write(chunk)
+                        bar.update(size)
 
     # Get summary
     console.print(Panel(
-                f"[bold green]Download completed![/bold green]\n"
-                f"File size: [bold red]{format_size(os.path.getsize(path))}[/bold red]\n"
-                f"Duration: [bold]{print_duration_table(path, show=False)}[/bold]", 
-            title=f"{os.path.basename(path.replace('.mp4', ''))}", border_style="green"))
+        f"[bold green]Download completed![/bold green]\n"
+        f"File size: [bold red]{format_size(os.path.getsize(path))}[/bold red]\n"
+        f"Duration: [bold]{print_duration_table(path, show=False)}[/bold]", 
+        title=f"{os.path.basename(path.replace('.mp4', ''))}", 
+        border_style="green"
+    ))
