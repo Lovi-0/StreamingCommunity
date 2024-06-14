@@ -10,9 +10,9 @@
         "not_close": false
     },
     "REQUESTS": {
-        "timeout": 5,
+        "timeout": 10,
         "max_retry": 3,
-        "verify_ssl": false,
+        "verify_ssl": true,
         "index": {
             "user-agent": ""
         },

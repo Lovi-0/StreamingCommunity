@@ -44,7 +44,6 @@ class GetSerieInfo:
         try:
 
             # Make an HTTP request to the series URL
-            print(self.url)
             response = httpx.get(self.url, headers=self.headers, timeout=10)
             response.raise_for_status()
 

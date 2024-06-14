@@ -149,7 +149,7 @@ def main():
 
     # Create dynamic prompt message and choices
     choice_labels = {str(i): alias.split("_")[0].capitalize() for i, alias in enumerate(search_functions.keys())}
-    prompt_message = f"Insert category [white]({', '.join([f'[red]{key}: [magenta]{label}' for key, label in choice_labels.items()])}[white]): "
+    prompt_message = f"[green]Insert category [white]({', '.join([f'[red]{key}: [magenta]{label}' for key, label in choice_labels.items()])}[white]): "
 
     # Ask the user for input
     category = msg.ask(prompt_message, choices=list(choice_labels.keys()), default="0")

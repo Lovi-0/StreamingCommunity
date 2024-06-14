@@ -46,6 +46,7 @@ TQDM_DELAY_WORKER = config_manager.get_float('M3U8_DOWNLOAD', 'tqdm_delay')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 REQUEST_MAX_RETRY = config_manager.get_int('REQUESTS', 'max_retry')
+REQUEST_VERIFY = config_manager.get_bool('REQUESTS', 'verify_ssl')
 THERE_IS_PROXY_LIST = check_file_existence("list_proxy.txt")
 PROXY_START_MIN = config_manager.get_float('REQUESTS', 'proxy_start_min')
 PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
@@ -53,7 +54,6 @@ PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
 
 # Variable
 headers_index = config_manager.get_dict('REQUESTS', 'index')
-transport = httpx.HTTPTransport(retries=REQUEST_MAX_RETRY)
 
 
 
@@ -160,7 +160,7 @@ class M3U8_Segments:
 
         # Proxy
         if THERE_IS_PROXY_LIST:
-            console.log("[red]Validate proxy.")
+            console.log("[red]Start validation proxy.")
             self.valid_proxy = main_test_proxy(self.segments[0])
             console.log(f"[cyan]N. Valid ip: [red]{len(self.valid_proxy)}")
 
@@ -204,16 +204,15 @@ class M3U8_Segments:
             if THERE_IS_PROXY_LIST:
                 proxy = self.valid_proxy[index % len(self.valid_proxy)]
                 logging.info(f"Use proxy: {proxy}")
-                #print(client.get("https://api.ipify.org/?format=json").json())
 
-                with httpx.Client(proxies=proxy, verify=False, transport=transport) as client:  
+                with httpx.Client(proxies=proxy, verify=REQUEST_VERIFY) as client:  
                     if 'key_base_url' in self.__dict__:
                         response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
                     else:
                         response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT)
             else:
 
-                with httpx.Client(verify=False, transport=transport) as client_2:
+                with httpx.Client(verify=REQUEST_VERIFY) as client_2:
                     if 'key_base_url' in self.__dict__:
                         response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
                     else:
