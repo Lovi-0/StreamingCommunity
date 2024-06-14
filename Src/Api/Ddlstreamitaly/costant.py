@@ -2,3 +2,4 @@
 
 MAIN_FOLDER = "ddlstreamitaly"
 MOVIE_FOLDER = "Movie"
+SERIES_FOLDER = "Serie"

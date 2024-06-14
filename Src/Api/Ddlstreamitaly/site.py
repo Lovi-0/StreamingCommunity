@@ -1,9 +1,7 @@
 # 09.06.24
 
-import os
 import sys
 import logging
-from urllib.parse import urlparse
 
 
 # External libraries
@@ -12,71 +10,121 @@ from bs4 import BeautifulSoup
 
 
 # Internal utilities
-from Src.Util.message import start_message
-from Src.Util.color import Colors
+from Src.Util.table import TVShowManager
 from Src.Util.console import console, msg
-from Src.Util.os import create_folder, can_create_file
 from Src.Util._jsonConfig import config_manager
 from Src.Util.headers import get_headers
-from Src.Lib.Hls.download_mp4 import MP4_downloader
+
+
+# Logic class
+from .Core.Class.SearchType import MediaManager, MediaItem
 
 
 # Config
-ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-from .costant import MAIN_FOLDER, MOVIE_FOLDER
+SITE_NAME = "ddlstreamitaly"
+DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
 
 
 # Variable
 cookie_index = config_manager.get_dict('REQUESTS', 'index')
+media_search_manager = MediaManager()
+table_show_manager = TVShowManager()
 
 
-def search() -> int:
+
+def title_search(word_to_search) -> int:
     """
     Search for titles based on a search query.
     """
-
-    print()
-    url_search = msg.ask(f"[cyan]Insert url title")
-
-    # Send request to search for titles
     try:
-        response = httpx.get(url_search, headers={'user-agent': get_headers()}, cookies=cookie_index)
+
+        # Send request to search for titles
+        response = httpx.get(f"https://ddlstreamitaly.{DOMAIN_NOW}/search/?&q={word_to_search}&quick=1&type=videobox_video&nodes=11", headers={'user-agent': get_headers()})
         response.raise_for_status()
 
-    except Exception as e:
-        logging.error("Insert: {'ips4_IPSSessionFront': 'your_code', 'ips4_member_id': 'your_code'} in config file \ REQUESTS \ index, instead of user-agent. Use browser debug and cookie request with a valid account.")
+        # Create soup and find table
+        soup = BeautifulSoup(response.text, "html.parser")
+        table_content = soup.find('ol', class_="ipsStream")
+
+        if table_content:
+            for title_div in table_content.find_all('li', class_='ipsStreamItem'):
+                try:
+                    title_type = title_div.find("p", class_="ipsType_reset").find_all("a")[-1].get_text(strip=True)
+                    name = title_div.find("span", class_="ipsContained").find("a").get_text(strip=True)
+                    link = title_div.find("span", class_="ipsContained").find("a").get("href")
+
+                    title_info = {
+                        'name': name,
+                        'url': link,
+                        'type': title_type
+                    }
+
+                    media_search_manager.add_media(title_info)
+
+                except Exception as e:
+                    logging.error(f"Error processing title div: {e}")
+
+            # Return the number of titles found
+            return media_search_manager.get_length()
+        
+        else:
+            logging.error("No table content found.")
+            return -999
+
+    except Exception as err:
+        logging.error(f"An error occurred: {err}")
+
+    return -9999
+
+
+def get_select_title(type_filter: list = None) -> MediaItem:
+    """
+    Display a selection of titles and prompt the user to choose one.
+
+    Args:
+        - type_filter (list): A list of media types to filter. Can include 'film', 'tv', 'ova'. Ex. ['tv', 'film']
+
+    Returns:
+        MediaItem: The selected media item.
+    """
+
+    # Set up table for displaying titles
+    table_show_manager.set_slice_end(10)
+
+    # Add columns to the table
+    column_info = {
+        "Index": {'color': 'red'},
+        "Name": {'color': 'magenta'},
+        "Type": {'color': 'yellow'},
+    }
+    table_show_manager.add_column(column_info)
+
+    # Populate the table with title information
+    for i, media in enumerate(media_search_manager.media_list):
+        
+        # Filter for only a list of category
+        if type_filter is not None:
+            if str(media.type) not in type_filter:
+                continue
+            
+        table_show_manager.add_tv_show({
+            'Index': str(i),
+            'Name': media.name,
+            'Type': media.type,
+        })
+
+    # Run the table and handle user input
+    last_command = table_show_manager.run(force_int_input=True, max_int_input=len(media_search_manager.media_list))
+    table_show_manager.clear()
+
+    # Handle user's quit command
+    if last_command == "q":
+        console.print("\n[red]Quit [white]...")
         sys.exit(0)
 
-    # Create soup and mp4 video
-    soup = BeautifulSoup(response.text, "html.parser")
-    souce = soup.find("source")
-
-    # Get url and filename
-    try:
-        mp4_link = souce.get("src")
-
-    except Exception as e:
-        logging.error("Insert: {'ips4_IPSSessionFront': 'your_code', 'ips4_member_id': 'your_code'} in config file \ REQUESTS \ index, instead of user-agent. Use browser debug and cookie request with a valid account.")
+    # Check if the selected index is within range
+    if 0 <= int(last_command) <= len(media_search_manager.media_list):
+        return media_search_manager.get(int(last_command))
+    else:
+        console.print("\n[red]Wrong index")
         sys.exit(0)
-    
-    parsed_url = urlparse(url_search)
-    path_parts = parsed_url.path.split('/')
-    mp4_name = path_parts[-2] if path_parts[-1] == '' else path_parts[-1] + ".mp4"
-
-    # Create destination folder
-    mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, MOVIE_FOLDER)
-
-    # Check if can create file output
-    create_folder(mp4_path)                                                                    
-    if not can_create_file(mp4_name):  
-        logging.error("Invalid mp4 name.")
-        sys.exit(0)
-
-    # Start download
-    start_message()
-    MP4_downloader(
-        url = mp4_link, 
-        path = os.path.join(mp4_path, mp4_name),
-        referer = f"{parsed_url.scheme}://{parsed_url.netloc}/",
-        add_desc=f"{Colors.MAGENTA}video"
-    )

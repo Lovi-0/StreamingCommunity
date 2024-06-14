@@ -3,6 +3,7 @@
 # Internal utilities
 from Src.Util.console import console, msg
 
+
 # Logic class
 from .site import title_search, get_select_title
 from .anime import donwload_film, donwload_series
@@ -14,7 +15,7 @@ def search():
     string_to_search = msg.ask("\n[purple]Insert word to search in all site").strip()
     len_database = title_search(string_to_search)
 
-    if len_database != 0:
+    if len_database > 0:
 
         # Select title from list
         select_title = get_select_title()
@@ -31,6 +32,5 @@ def search():
                 title_name=select_title.slug
             )
 
-    # If no media find
     else:
-        console.print("[red]Cant find a single element")
+        console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

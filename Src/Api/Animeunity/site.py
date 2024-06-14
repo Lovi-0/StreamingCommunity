@@ -239,19 +239,3 @@ def get_select_title(type_filter: list = None) -> MediaItem:
     else:
         console.print("\n[red]Wrong index")
         sys.exit(0)
-
-
-def manager_clear():
-    """
-    Clears the data lists managed by media_search_manager and table_show_manager.
-
-    This function clears the data lists managed by global variables media_search_manager
-    and table_show_manager. It removes all the items from these lists, effectively
-    resetting them to empty lists.
-    """
-    global media_search_manager, table_show_manager
-
-    # Clear list of data
-    media_search_manager.clear()
-    table_show_manager.clear()
-

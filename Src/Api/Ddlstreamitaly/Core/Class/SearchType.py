@@ -1,4 +1,4 @@
-# 26.05.24
+# 13.06.24
 
 from typing import List
 
@@ -6,12 +6,11 @@ from typing import List
 class MediaItem:
     def __init__(self, data: dict):
         self.name: str = data.get('name')
-        self.type: str = "serie"
-        self.score: str = data.get('score')
+        self.type: str = data.get('type')
         self.url: int = data.get('url')
 
     def __str__(self):
-        return f"MediaItem(name='{self.name}', type='{self.type}', score='{self.score}', url={self.url})"
+        return f"MediaItem(name='{self.name}', type='{self.type}', url={self.url})"
 
 
 class MediaManager:

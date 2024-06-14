@@ -33,7 +33,6 @@ class GetSerieInfo:
         self.url = dict_serie.url
         self.tv_name = None
         self.list_episodes = None
-        self.list_episodes = None
 
     def get_seasons_number(self) -> int:
         """
