@@ -15,8 +15,9 @@
         "index": {
             "user-agent": ""
         },
-        "proxy_start_min": 0.6,
-        "proxy_start_max": 1.0
+        "proxy_start_min": 0.1,
+        "proxy_start_max": 0.4,
+        "proxy": []
     },
     "M3U8_DOWNLOAD": {
         "tdqm_workers": 2,
@@ -25,10 +26,15 @@
         "download_video": true,
         "download_audio": true,
         "merge_audio": true,
-        "specific_list_audio": ["ita"],
+        "specific_list_audio": [
+            "ita"
+        ],
         "download_sub": true,
         "merge_subs": true,
-        "specific_list_subtitles": ["eng", "spa"],
+        "specific_list_subtitles": [
+            "eng",
+            "spa"
+        ],
         "cleanup_tmp_folder": true,
         "create_report": false
     },

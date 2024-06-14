@@ -95,6 +95,7 @@ class M3U8_Segments:
         self.key_base_url = f"{parsed_url.scheme}://{parsed_url.netloc}/"
         logging.info(f"Uri key: {key_uri}")
 
+        # Make request to get porxy
         try:
             response = httpx.get(key_uri, headers=headers_index)
             response.raise_for_status()
@@ -190,41 +191,48 @@ class M3U8_Segments:
             - progress_bar (tqdm): Progress counter for tracking download progress.
         """
 
+        try:
 
-        # Generate headers
-        start_time = time.time()
+            # Generate headers
+            start_time = time.time()
 
-        # Make request to get content
-        if THERE_IS_PROXY_LIST:
-            proxy = self.valid_proxy[index % len(self.valid_proxy)]
-            logging.info(f"Use proxy: {proxy}")
+            # Make request to get content
+            if THERE_IS_PROXY_LIST:
+                proxy = self.valid_proxy[index % len(self.valid_proxy)]
+                logging.info(f"Use proxy: {proxy}")
+
+                with httpx.Client(proxies=proxy, verify=False) as client:
+                    #print(client.get("https://api.ipify.org/?format=json").json())
+                        
+                    if 'key_base_url' in self.__dict__:
+                        response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
+                    else:
+                        response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT)
+            else:
+                if 'key_base_url' in self.__dict__:
+                    response = httpx.get(ts_url, headers=random_headers(self.key_base_url), verify=False, timeout=REQUEST_TIMEOUT)
+                else:
+                    response = httpx.get(ts_url, headers={'user-agent': get_headers()}, verify=False, timeout=REQUEST_TIMEOUT)
+
+            # Get response content
+            response.raise_for_status()
+            segment_content = response.content
+
+            # Update bar
+            duration = time.time() - start_time
+            response_size = int(response.headers.get('Content-Length', 0))
+            self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
                 
-            if 'key_base_url' in self.__dict__:
-                response = httpx.get(ts_url, headers=random_headers(self.key_base_url), proxy=proxy, verify=False, timeout=REQUEST_TIMEOUT)
-            else:
-                response = httpx.get(ts_url, headers={'user-agent': get_headers()}, proxy=proxy, verify=False, timeout=REQUEST_TIMEOUT)
-        else:
-            if 'key_base_url' in self.__dict__:
-                response = httpx.get(ts_url, headers=random_headers(self.key_base_url), verify=False, timeout=REQUEST_TIMEOUT)
-            else:
-                response = httpx.get(ts_url, headers={'user-agent': get_headers()}, verify=False, timeout=REQUEST_TIMEOUT)
+            # Decrypt the segment content if decryption is needed
+            if self.decryption is not None:
+                segment_content = self.decryption.decrypt(segment_content)
 
-        # Get response content
-        response.raise_for_status()
-        segment_content = response.content
+            # Add the segment to the queue
+            self.queue.put((index, segment_content))
+            progress_bar.update(1)
 
-        # Update bar
-        duration = time.time() - start_time
-        response_size = int(response.headers.get('Content-Length', 0))
-        self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
-            
-        # Decrypt the segment content if decryption is needed
-        if self.decryption is not None:
-            segment_content = self.decryption.decrypt(segment_content)
-
-        # Add the segment to the queue
-        self.queue.put((index, segment_content))
-        progress_bar.update(1)
+        except Exception as e:
+            console.print(f"Failed to download '{ts_url}', status error: {e}.")
 
     def write_segments_to_file(self):
         """

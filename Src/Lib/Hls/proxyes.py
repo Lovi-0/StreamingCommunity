@@ -1,6 +1,7 @@
 # 09.06.24
 
 import os
+import sys
 import time
 import logging
 from concurrent.futures import ThreadPoolExecutor
@@ -12,6 +13,7 @@ import httpx
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
+from Src.Util.headers import get_headers
 from Src.Util.os import check_file_existence
 
 
@@ -26,7 +28,6 @@ class ProxyManager:
         """
         self.proxy_list = proxy_list or []
         self.verified_proxies = []
-        self.failed_proxies = {}
         self.timeout = config_manager.get_float('REQUESTS', 'timeout')
         self.url = url
 
@@ -42,17 +43,18 @@ class ProxyManager:
         """
         protocol = proxy.split(":")[0].lower()
         protocol = f'{protocol}://'
+        proxy = {protocol: proxy, "https://": proxy}
 
         try:
-            response = httpx.get(self.url, proxies={protocol: proxy}, timeout=self.timeout)
+            with httpx.Client(proxies=proxy, verify=False) as client:
+                response = client.get(self.url, timeout=self.timeout, headers={'user-agent': get_headers()})
 
-            if response.status_code == 200:
-                logging.info(f"Proxy {proxy} is working.")
-                return proxy
+                if response.status_code == 200:
+                    logging.info(f"Proxy {proxy} is working.")
+                    return proxy
             
         except Exception as e:
-            logging.error(f"Proxy {proxy} failed: {e}")
-            self.failed_proxies[proxy] = time.time()
+            logging.error(f"Test proxy {proxy} failed: {e}")
             return None
 
     def verify_proxies(self):
@@ -70,24 +72,20 @@ class ProxyManager:
         """
         Get validate proxies.
         """
-        validate_proxy = []
 
-        for proxy in self.verified_proxies:
-            protocol = proxy.split(":")[0].lower()
-            protocol = f'{protocol}://'                 # For httpx
-            validate_proxy.append({protocol: proxy})
-
-        return validate_proxy
-    
+        if len(self.verified_proxies) > 0:
+            return self.verified_proxies
+        
+        else:
+            logging.error("Cant find valid proxy.")
+            sys.exit(0)
+        
 
 def main_test_proxy(url_test):
 
     path_file_proxt_list = "list_proxy.txt"
 
     if check_file_existence(path_file_proxt_list):
-
-        # Write test to pass THERE IS PROXY on config.json for segments
-        config_manager.set_key("REQUESTS", "proxy", ["192.168.1.1"])
 
         # Read file
         with open(path_file_proxt_list, 'r') as file:
