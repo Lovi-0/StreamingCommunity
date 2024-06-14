@@ -11,6 +11,7 @@
     },
     "REQUESTS": {
         "timeout": 5,
+        "max_retry": 3,
         "verify_ssl": false,
         "index": {
             "user-agent": ""

@@ -53,7 +53,7 @@ class GetSerieInfo:
             response.raise_for_status()
 
         except Exception as e:
-            logging.error(f"Insert: {'ips4_IPSSessionFront': 'your_code', 'ips4_member_id': 'your_code'} in config file \ REQUESTS \ index, instead of user-agent. Use browser debug and cookie request with a valid account. Error: {e}")
+            logging.error(f"Insert: ['ips4_IPSSessionFront': 'your_code', 'ips4_member_id': 'your_code'] in config file \ REQUESTS \ index, instead of user-agent. Use browser debug and cookie request with a valid account. Error: {e}")
             sys.exit(0)
 
         # Parse HTML content of the page
