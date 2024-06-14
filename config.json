@@ -11,9 +11,13 @@
     },
     "REQUESTS": {
         "timeout": 5,
+        "max_retry": 3,
         "verify_ssl": false,
-        "index": {"user-agent": ""},
-        "segments": { "user-agent": ""},
+        "index": {
+            "user-agent": ""
+        },
+        "proxy_start_min": 0.1,
+        "proxy_start_max": 0.4,
         "proxy": []
     },
     "M3U8_DOWNLOAD": {
@@ -23,29 +27,35 @@
         "download_video": true,
         "download_audio": true,
         "merge_audio": true,
-        "specific_list_audio": ["ita"],
+        "specific_list_audio": [
+            "ita"
+        ],
         "download_sub": true,
         "merge_subs": true,
-        "specific_list_subtitles": ["eng", "spa"],
+        "specific_list_subtitles": [
+            "eng",
+            "spa"
+        ],
         "cleanup_tmp_folder": true,
         "create_report": false
     },
     "M3U8_CONVERSION": {
         "use_codec": false,
-		"use_vcodec": true,
-		"use_acodec": true,
-		"use_bitrate": true,
-        "use_gpu": true,
+        "use_vcodec": true,
+        "use_acodec": true,
+        "use_bitrate": true,
+        "use_gpu": false,
         "default_preset": "ultrafast",
         "check_output_after_ffmpeg": false
     },
     "M3U8_PARSER": {
-        "skip_empty_row_playlist": false,
         "force_resolution": -1
     },
     "SITE": {
         "streamingcommunity": "foo",
         "animeunity": "to",
-        "altadefinizione": "vodka"
+        "altadefinizione": "vodka",
+        "guardaserie": "ceo",
+        "ddlstreamitaly": "co"
     }
 }

@@ -6,7 +6,7 @@ import logging
 
 
 # External libraries
-import requests
+import httpx
 from bs4 import BeautifulSoup
 
 
@@ -47,12 +47,12 @@ class VideoSource:
         """
 
         try:
-            response = requests.get(url, headers=self.headers)
+            response = httpx.get(url, headers=self.headers, follow_redirects=True)
             response.raise_for_status()
             return response.text
         
         except Exception as e:
-            logging.error(f"Request failed: {e}")
+            logging.error(f"Request failed [supervideo]: {e}")
             return None
 
     def parse_html(self, html_content: str) -> BeautifulSoup:

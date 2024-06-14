@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 # External libraries
-import requests
+import httpx
 from unidecode import unidecode
 
 
@@ -55,7 +55,6 @@ DOWNLOAD_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'download_sub')
 MERGE_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_subs')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_DOWNLOAD', 'cleanup_tmp_folder')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
-CREATE_REPORT = config_manager.get_bool('M3U8_DOWNLOAD', 'create_report')
 
 
 # Variable
@@ -71,7 +70,7 @@ class Downloader():
 
         Args:
             - output_filename (str): Output filename for the downloaded content.
-            - m3u8_playlist (str, optional): URL to the main M3U8 playlist or text.
+            - m3u8_playlist (str, optional): URL to the main M3U8 playlist.
             - m3u8_playlist (str, optional): URL to the main M3U8 index. ( NOT TEXT )
         """
 
@@ -139,9 +138,10 @@ class Downloader():
             # Send a GET request to the provided URL
             logging.info(f"Test url: {url}")
             headers_index['user-agent'] = get_headers()
-            response = requests.get(url, headers=headers_index)
+            response = httpx.get(url, headers=headers_index)
+            response.raise_for_status()
 
-            if response.ok:
+            if response.status_code == 200:
                 return response.text
             
             else:
@@ -321,9 +321,10 @@ class Downloader():
         """
 
         # Send a GET request to download the subtitle content
-        response = requests.get(uri)
+        response = httpx.get(uri)
+        response.raise_for_status()
 
-        if response.ok:
+        if response.status_code == 200:
 
             # Write the content to the specified file
             with open(path, "wb") as f:
@@ -368,7 +369,7 @@ class Downloader():
                 m3u8_sub_parser = M3U8_Parser()
                 m3u8_sub_parser.parse_data(
                     uri = obj_subtitle.get('uri'),
-                    raw_content = requests.get(obj_subtitle.get('uri')).text
+                    raw_content = httpx.get(obj_subtitle.get('uri')).text
                 )
 
                 # Initiate the download of the subtitle content
@@ -500,16 +501,15 @@ class Downloader():
         if self.m3u8_playlist:
             logging.info("Download from PLAYLIST")
 
-            # Fetch the M3U8 playlist content
-            if not len(str(self.m3u8_playlist).split("\n")) > 2:    # Is a single link
-                m3u8_playlist_text = self.__df_make_req__(self.m3u8_playlist)
 
-                # Add full URL of the M3U8 playlist to fix next .ts without https if necessary
-                self.m3u8_url_fixer.set_playlist(self.m3u8_playlist) # !!!!!!!!!!!!!!!!!! to fix for playlist with text
+            m3u8_playlist_text = self.__df_make_req__(self.m3u8_playlist)
 
-            else:
-                logging.warning("M3U8 master url not set.") # TO DO
-                m3u8_playlist_text = self.m3u8_playlist
+            # Add full URL of the M3U8 playlist to fix next .ts without https if necessary
+            self.m3u8_url_fixer.set_playlist(self.m3u8_playlist)
+
+            if m3u8_playlist_text is None:
+                console.log("[red]Playlist m3u8 to download is empty.")
+                sys.exit(0)
 
             # Save text playlist
             open(os.path.join(self.base_path, "tmp", "playlist.m3u8"), "w+").write(m3u8_playlist_text)
@@ -620,16 +620,3 @@ class Downloader():
 
             # Clean all tmp file
             self.__clean__(converted_out_path)
-
-
-        # Create download report
-        if CREATE_REPORT:
-
-            # Get variable to add
-            current_date = datetime.today().date()
-            base_filename = os.path.split(self.output_filename)[-1].replace('.mp4', '')
-            filename_out_size = format_size(os.path.getsize(self.output_filename))
-
-            # Add new row to table and save
-            report_table.add_row_to_database(str(current_date), str(base_filename), str(filename_out_size))
-            report_table.save_database()

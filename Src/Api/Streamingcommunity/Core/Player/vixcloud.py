@@ -6,7 +6,7 @@ from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
 
 
 # External libraries
-import requests
+import httpx
 from bs4 import BeautifulSoup
 
 
@@ -66,7 +66,7 @@ class VideoSource:
 
         try:
 
-            response = requests.get(f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", headers=self.headers)
+            response = httpx.get(f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", headers=self.headers)
             response.raise_for_status()
 
             # Extract JSON response if available
@@ -90,7 +90,7 @@ class VideoSource:
         try:
 
             # Make a request to collect information about a specific season
-            response = requests.get(f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', headers=self.headers)
+            response = httpx.get(f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', headers=self.headers)
             response.raise_for_status()
 
             # Extract JSON response if available
@@ -122,7 +122,7 @@ class VideoSource:
         try:
 
             # Make a request to get iframe source
-            response = requests.get(f"https://{self.base_name}.{self.domain}/iframe/{self.media_id}", params=params)
+            response = httpx.get(f"https://{self.base_name}.{self.domain}/iframe/{self.media_id}", params=params)
             response.raise_for_status()
 
             # Parse response with BeautifulSoup to get iframe source
@@ -164,15 +164,15 @@ class VideoSource:
 
                 # Make a request to get content
                 try:
-                    response = requests.get(self.iframe_src, headers=self.headers)
+                    response = httpx.get(self.iframe_src, headers=self.headers)
                     response.raise_for_status()
 
-                except:
+                except Exception as e:
                     print("\n")
                     console.print(Panel("[red bold]Coming soon", title="Notification", title_align="left", border_style="yellow"))
                     sys.exit(0)
 
-                if response.ok:
+                if response.status_code == 200:
 
                     # Parse response with BeautifulSoup to get content
                     soup = BeautifulSoup(response.text, "html.parser")

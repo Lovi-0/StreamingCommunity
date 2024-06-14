@@ -1,16 +1,20 @@
 # 09.06.24
 
+import os
+import sys
 import time
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
 
 # External libraries
-import requests
+import httpx
 
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
+from Src.Util.headers import get_headers
+from Src.Util.os import check_file_existence
 
 
 class ProxyManager:
@@ -24,7 +28,6 @@ class ProxyManager:
         """
         self.proxy_list = proxy_list or []
         self.verified_proxies = []
-        self.failed_proxies = {}
         self.timeout = config_manager.get_float('REQUESTS', 'timeout')
         self.url = url
 
@@ -39,17 +42,19 @@ class ProxyManager:
             - Proxy string if working, None otherwise
         """
         protocol = proxy.split(":")[0].lower()
+        protocol = f'{protocol}://'
+        proxy = {protocol: proxy, "https://": proxy}
 
         try:
-            response = requests.get(self.url, proxies={protocol: proxy}, timeout=self.timeout)
+            with httpx.Client(proxies=proxy, verify=False) as client:
+                response = client.get(self.url, timeout=self.timeout, headers={'user-agent': get_headers()})
 
-            if response.status_code == 200:
-                logging.info(f"Proxy {proxy} is working.")
-                return proxy
+                if response.status_code == 200:
+                    logging.info(f"Proxy {proxy} is working.")
+                    return proxy
             
-        except requests.RequestException as e:
-            logging.error(f"Proxy {proxy} failed: {e}")
-            self.failed_proxies[proxy] = time.time()
+        except Exception as e:
+            logging.error(f"Test proxy {proxy} failed: {e}")
             return None
 
     def verify_proxies(self):
@@ -57,8 +62,9 @@ class ProxyManager:
         Verify all proxies in the list and store the working ones.
         """
         logging.info("Starting proxy verification...")
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
             self.verified_proxies = list(executor.map(self._check_proxy, self.proxy_list))
+            
         self.verified_proxies = [proxy for proxy in self.verified_proxies if proxy]
         logging.info(f"Verification complete. {len(self.verified_proxies)} proxies are working.")
 
@@ -66,23 +72,40 @@ class ProxyManager:
         """
         Get validate proxies.
         """
-        validate_proxy = []
 
-        for proxy in self.verified_proxies:
-            protocol = proxy.split(":")[0].lower()
-            validate_proxy.append({protocol: proxy})
-
-        return validate_proxy
-    
+        if len(self.verified_proxies) > 0:
+            return self.verified_proxies
+        
+        else:
+            logging.error("Cant find valid proxy.")
+            sys.exit(0)
+        
 
 def main_test_proxy(url_test):
 
+    path_file_proxt_list = "list_proxy.txt"
+
+    if check_file_existence(path_file_proxt_list):
+
+        # Read file
+        with open(path_file_proxt_list, 'r') as file:
+            ip_addresses = file.readlines()
+
+        # Formatt ip
+        ip_addresses = [ip.strip() for ip in ip_addresses]
+        formatted_ips = [f"http://{ip}" for ip in ip_addresses]
+
     # Get list of proxy from config.json
-    proxy_list = config_manager.get_list('REQUESTS', 'proxy')
+    proxy_list = formatted_ips
 
     # Verify proxy
     manager = ProxyManager(proxy_list, url_test)
     manager.verify_proxies()
+
+    # Write valid ip in txt file
+    with open(path_file_proxt_list, 'w') as file:
+        for ip in ip_addresses:
+            file.write(f"{ip}\n")
     
     # Return valid proxy
     return manager.get_verified_proxies()

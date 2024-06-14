@@ -8,27 +8,29 @@ from Src.Util.console import console, msg
 from .site import (
     get_version_and_domain,
     title_search,
-    get_select_title,
-    manager_clear
+    get_select_title
 )
 
 from .film import download_film
 from .series import download_series
 
 
-def main_film_series():
+# Variable
+indice = 0
+
+def search():
     """
     Main function of the application for film and series.
     """
 
-    # Get site domain and version
-    site_version, domain = get_version_and_domain()
-
     # Make request to site to get content that corrsisponde to that string
-    film_search = msg.ask("\n[purple]Insert word to search in all site").strip()
-    len_database = title_search(film_search, domain)
+    string_to_search = msg.ask("\n[purple]Insert word to search in all site").strip()
 
-    if len_database != 0:
+    # Get site domain and version and get result of the search
+    site_version, domain = get_version_and_domain()
+    len_database = title_search(string_to_search, domain)
+
+    if len_database > 0:
 
         # Select title from list
         select_title = get_select_title()
@@ -50,6 +52,5 @@ def main_film_series():
                 domain=domain
             )
     
-    # If no media find
     else:
-        console.print("[red]Cant find a single element")
+        console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

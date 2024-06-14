@@ -8,21 +8,21 @@ import threading
 import logging
 import binascii
 from queue import PriorityQueue
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor
 
 
 # External libraries
-import requests
-from requests.exceptions import HTTPError, ConnectionError, Timeout, RequestException
+import httpx
 from tqdm import tqdm
 
 
 # Internal utilities
 from Src.Util.console import console
-from Src.Util.headers import get_headers
+from Src.Util.headers import get_headers, random_headers
 from Src.Util.color import Colors
 from Src.Util._jsonConfig import config_manager
+from Src.Util.os import check_file_existence
 
 
 # Logic class
@@ -45,14 +45,17 @@ TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
 TQDM_DELAY_WORKER = config_manager.get_float('M3U8_DOWNLOAD', 'tqdm_delay')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
-THERE_IS_PROXY_LIST = len(config_manager.get_list('REQUESTS', 'proxy')) > 0
+REQUEST_MAX_RETRY = config_manager.get_int('REQUESTS', 'max_retry')
+THERE_IS_PROXY_LIST = check_file_existence("list_proxy.txt")
+PROXY_START_MIN = config_manager.get_float('REQUESTS', 'proxy_start_min')
+PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
 
 
 # Variable
 headers_index = config_manager.get_dict('REQUESTS', 'index')
-headers_segments = config_manager.get_dict('REQUESTS', 'segments')
-session = requests.Session()
-session.verify = config_manager.get_bool('REQUESTS', 'verify_ssl')
+transport = httpx.HTTPTransport(retries=REQUEST_MAX_RETRY)
+
+
 
 
 class M3U8_Segments:
@@ -90,13 +93,15 @@ class M3U8_Segments:
         """
         headers_index['user-agent'] = get_headers()
 
-
         # Construct the full URL of the key
-        key_uri = urljoin(self.url, m3u8_parser.keys.get('uri'))  
+        key_uri = urljoin(self.url, m3u8_parser.keys.get('uri'))
+        parsed_url = urlparse(key_uri)
+        self.key_base_url = f"{parsed_url.scheme}://{parsed_url.netloc}/"
         logging.info(f"Uri key: {key_uri}")
 
+        # Make request to get porxy
         try:
-            response = requests.get(key_uri, headers=headers_index)
+            response = httpx.get(key_uri, headers=headers_index)
             response.raise_for_status()
 
         except Exception as e:
@@ -169,11 +174,11 @@ class M3U8_Segments:
         headers_index['user-agent'] = get_headers()
 
         # Send a GET request to retrieve the index M3U8 file
-        response = requests.get(self.url, headers=headers_index)
+        response = httpx.get(self.url, headers=headers_index)
         response.raise_for_status()
 
         # Save the M3U8 file to the temporary folder
-        if response.ok:
+        if response.status_code == 200:
             path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
             open(path_m3u8_file, "w+").write(response.text) 
 
@@ -189,19 +194,30 @@ class M3U8_Segments:
             - index (int): The index of the segment.
             - progress_bar (tqdm): Progress counter for tracking download progress.
         """
+
         try:
 
             # Generate headers
             start_time = time.time()
-            headers_segments['user-agent'] = get_headers()
 
             # Make request to get content
             if THERE_IS_PROXY_LIST:
                 proxy = self.valid_proxy[index % len(self.valid_proxy)]
                 logging.info(f"Use proxy: {proxy}")
-                response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT, proxies=proxy)
+                #print(client.get("https://api.ipify.org/?format=json").json())
+
+                with httpx.Client(proxies=proxy, verify=False, transport=transport) as client:  
+                    if 'key_base_url' in self.__dict__:
+                        response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
+                    else:
+                        response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT)
             else:
-                response = session.get(ts_url, headers=headers_segments, timeout=REQUEST_TIMEOUT)
+
+                with httpx.Client(verify=False, transport=transport) as client_2:
+                    if 'key_base_url' in self.__dict__:
+                        response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
+                    else:
+                        response = client_2.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT)
 
             # Get response content
             response.raise_for_status()
@@ -211,7 +227,7 @@ class M3U8_Segments:
             duration = time.time() - start_time
             response_size = int(response.headers.get('Content-Length', 0))
             self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
-            
+                
             # Decrypt the segment content if decryption is needed
             if self.decryption is not None:
                 segment_content = self.decryption.decrypt(segment_content)
@@ -220,13 +236,8 @@ class M3U8_Segments:
             self.queue.put((index, segment_content))
             progress_bar.update(1)
 
-        except (HTTPError, ConnectionError, Timeout, RequestException) as e:
-            progress_bar.update(1)
-            logging.error(f"Request-related exception while downloading segment: {e}")
-
         except Exception as e:
-            progress_bar.update(1)
-            logging.error(f"An unexpected exception occurred while download segment: {e}")
+            console.print(f"Failed to download '{ts_url}', status error: {e}.")
 
     def write_segments_to_file(self):
         """
@@ -280,10 +291,29 @@ class M3U8_Segments:
         writer_thread = threading.Thread(target=self.write_segments_to_file)
         writer_thread.start()
 
+        # Ff proxy avaiable set max_workers to number of proxy
+        # else set max_workers to TQDM_MAX_WORKER
+        max_workers = len(self.valid_proxy) if THERE_IS_PROXY_LIST else TQDM_MAX_WORKER
+
+        # if proxy avaiable set timeout to variable time
+        # else set timeout to TDQM_DELAY_WORKER
+        if THERE_IS_PROXY_LIST:
+            num_proxies = len(self.valid_proxy)
+            self.working_proxy_list = self.valid_proxy
+
+            if num_proxies > 0:
+                # calculate delay based on number of proxies
+                # dalay should be between 0.5 and 1
+                delay = max(PROXY_START_MIN, min(PROXY_START_MAX, 1 / (num_proxies + 1)))
+            else:
+                delay = TQDM_DELAY_WORKER
+        else:
+            delay = TQDM_DELAY_WORKER
+
         # Start all workers
-        with ThreadPoolExecutor(max_workers=TQDM_MAX_WORKER) as executor:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
             for index, segment_url in enumerate(self.segments):
-                time.sleep(TQDM_DELAY_WORKER)
+                time.sleep(delay)
                 executor.submit(self.make_requests_stream, segment_url, index, progress_bar)
 
         # Wait for all tasks to complete
