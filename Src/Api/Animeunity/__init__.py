@@ -9,6 +9,10 @@ from .site import title_search, get_select_title
 from .anime import donwload_film, donwload_series
 
 
+# Variable
+indice = 1
+
+
 def search():
 
     # Make request to site to get content that corrsisponde to that string

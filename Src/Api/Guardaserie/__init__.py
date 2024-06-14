@@ -9,6 +9,10 @@ from .site import title_search, get_select_title
 from .series import download_series
 
 
+# Variable
+indice = 4
+
+
 def search():
     """
     Main function of the application for film and series.

@@ -15,16 +15,19 @@ from .film import download_film
 from .series import download_series
 
 
+# Variable
+indice = 0
+
 def search():
     """
     Main function of the application for film and series.
     """
 
-    # Get site domain and version
-    site_version, domain = get_version_and_domain()
-
     # Make request to site to get content that corrsisponde to that string
     string_to_search = msg.ask("\n[purple]Insert word to search in all site").strip()
+
+    # Get site domain and version and get result of the search
+    site_version, domain = get_version_and_domain()
     len_database = title_search(string_to_search, domain)
 
     if len_database > 0:

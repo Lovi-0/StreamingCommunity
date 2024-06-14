@@ -5,13 +5,12 @@ from Src.Util.console import console, msg
 
 
 # Logic class
-from .site import (
-    title_search,
-    get_select_title,
-)
-
+from .site import title_search, get_select_title
 from .film import download_film
 
+
+# Variable
+indice = 2
 
 def search():
     """
