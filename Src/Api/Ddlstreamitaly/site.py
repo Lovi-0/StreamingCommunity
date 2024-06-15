@@ -20,12 +20,8 @@ from Src.Util.headers import get_headers
 from .Core.Class.SearchType import MediaManager, MediaItem
 
 
-# Config
-SITE_NAME = "ddlstreamitaly"
-DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
-
-
 # Variable
+from .costant import DOMAIN_NOW
 cookie_index = config_manager.get_dict('REQUESTS', 'index')
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()

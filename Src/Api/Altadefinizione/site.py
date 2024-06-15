@@ -13,7 +13,6 @@ from unidecode import unidecode
 # Internal utilities
 from Src.Util.table import TVShowManager
 from Src.Util.console import console
-from Src.Util._jsonConfig import config_manager
 from Src.Util.headers import get_headers
 
 
@@ -21,12 +20,8 @@ from Src.Util.headers import get_headers
 from .Core.Class.SearchType import MediaManager, MediaItem
 
 
-# Config
-SITE_NAME = "altadefinizione"
-DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
-
-
 # Variable
+from .costant import SITE_NAME, DOMAIN_NOW
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 

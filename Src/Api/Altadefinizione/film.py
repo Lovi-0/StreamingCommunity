@@ -7,7 +7,6 @@ import logging
 
 # Internal utilities
 from Src.Util.console import console
-from Src.Util._jsonConfig import config_manager
 from Src.Lib.Hls.downloader import Downloader
 from Src.Util.message import start_message
 
@@ -17,8 +16,7 @@ from .Core.Player.supervideo import VideoSource
 
 
 # Config
-ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-from .costant import MAIN_FOLDER, MOVIE_FOLDER
+from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
 
 
 # Variable
@@ -45,7 +43,7 @@ def download_film(title_name: str, url: str):
 
     # Define output path
     mp4_name = str(title_name).replace("-", "_") + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, MOVIE_FOLDER, title_name)
+    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name)
 
     # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()

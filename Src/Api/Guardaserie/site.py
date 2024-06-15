@@ -1,9 +1,7 @@
 # 09.06.24
 
-import os
 import sys
 import logging
-from urllib.parse import urlparse
 
 
 # External libraries
@@ -14,7 +12,6 @@ from bs4 import BeautifulSoup
 # Internal utilities
 from Src.Util.table import TVShowManager
 from Src.Util.console import console, msg
-from Src.Util._jsonConfig import config_manager
 from Src.Util.headers import get_headers
 
 
@@ -23,15 +20,9 @@ from .Core.Class.SearchType import MediaManager, MediaItem
 
 
 # Variable
+from .costant import DOMAIN_NOW
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
-
-
-# Config
-SITE_NAME = "guardaserie"
-ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
-
 
 
 def title_search(word_to_search) -> int:

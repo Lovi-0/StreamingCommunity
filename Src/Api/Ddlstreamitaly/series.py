@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 from Src.Util.color import Colors
 from Src.Util.console import console, msg
 from Src.Util.os import create_folder, can_create_file
-from Src.Util._jsonConfig import config_manager
 from Src.Util.table import TVShowManager
 from Src.Util.message import start_message
 from Src.Lib.Hls.download_mp4 import MP4_downloader
@@ -23,13 +22,9 @@ from .Core.Util.manage_ep import manage_selection, map_episode_title
 from .Core.Player.ddl import VideoSource
 
 
-# Config
-ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-
-
 # Variable
+from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER
 table_show_manager = TVShowManager()
-from .costant import MAIN_FOLDER, SERIES_FOLDER
 video_source = VideoSource()
 
 
@@ -51,7 +46,7 @@ def donwload_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) 
 
     # Define filename and path for the downloaded video
     mp4_name = f"{map_episode_title(scape_info_serie.tv_name, None, index_episode_selected, obj_episode.get('name'))}.mp4"
-    mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, SERIES_FOLDER, scape_info_serie.tv_name)
+    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, scape_info_serie.tv_name)
 
     # Check if can create file output
     create_folder(mp4_path)                                                                    

@@ -6,7 +6,6 @@ import logging
 
 # Internal utilities
 from Src.Util.console import console, msg
-from Src.Util._jsonConfig import config_manager
 from Src.Lib.Hls.downloader import Downloader
 from Src.Util.message import start_message
 
@@ -16,12 +15,8 @@ from .Core.Player.vixcloud import VideoSource
 from .Core.Util import manage_selection
 
 
-# Config
-ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
-from .costant import MAIN_FOLDER, SERIES_FOLDER, MOVIE_FOLDER
-
-
 # Variable
+from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER, MOVIE_FOLDER
 video_source = VideoSource()
 
 
@@ -50,9 +45,9 @@ def download_episode(index_select: int):
     mp4_path = None
     mp4_name = f"{index_select + 1}.mp4"
     if video_source.is_series:
-        mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, SERIES_FOLDER, video_source.series_name)
+        mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, video_source.series_name)
     else:
-        mp4_path = os.path.join(ROOT_PATH, MAIN_FOLDER, MOVIE_FOLDER, video_source.series_name)
+        mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, video_source.series_name)
 
     # Start downloading
     Downloader(
