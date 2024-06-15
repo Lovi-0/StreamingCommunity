@@ -1,11 +1,14 @@
 # 20.02.24
 
-import threading
+import os
+import time
 import logging
+import threading
 from collections import deque
 
 
 # External libraries
+import psutil
 from tqdm import tqdm
 
 
@@ -13,7 +16,6 @@ from tqdm import tqdm
 from Src.Util.color import Colors
 from Src.Util.os import format_size
 from Src.Util._jsonConfig import config_manager
-
 
 
 # Variable
@@ -26,16 +28,16 @@ class M3U8_Ts_Estimator:
         Initialize the TSFileSizeCalculator object.
 
         Args:
-            - workers (int): The number of workers using with ThreadPool.
             - total_segments (int): Len of total segments to download
         """
         self.ts_file_sizes = []
         self.now_downloaded_size = 0
-        self.average_over = 3
-        self.list_speeds = deque(maxlen=self.average_over)
-        self.smoothed_speeds = []
         self.total_segments = total_segments
         self.lock = threading.Lock()
+        self.speeds = deque(maxlen=3)
+        self.speed_thread = threading.Thread(target=self.capture_speed)
+        self.speed_thread.daemon = True
+        self.speed_thread.start()
 
     def add_ts_file(self, size: int, size_download: int, duration: float):
         """
@@ -50,31 +52,47 @@ class M3U8_Ts_Estimator:
             logging.error("Invalid input values: size=%d, size_download=%d, duration=%f", size, size_download, duration)
             return
 
-        # Calculate speed outside of the lock
-        speed_mbps = (size_download * 4) / (duration * (1024 * 1024))
-
         # Add total size bytes
         self.ts_file_sizes.append(size)
         self.now_downloaded_size += size_download
-        self.list_speeds.append(speed_mbps)
 
-        # Calculate moving average
-        smoothed_speed = sum(self.list_speeds) / len(self.list_speeds)
-        self.smoothed_speeds.append(smoothed_speed)
+    def capture_speed(self, interval: float = 0.5):
+        """
+        Capture the internet speed periodically and store the values in a deque.
+        """
+        def get_process_network_io(pid):
+            process = psutil.Process(pid)
+            io_counters = process.io_counters()
+            return io_counters
 
-        # Update smooth speeds
-        if len(self.smoothed_speeds) > self.average_over:
-            self.smoothed_speeds.pop(0)
-    
+        def convert_bytes_to_mbps(bytes):
+            return (bytes * 8) / (1024 * 1024)
+
+        pid = os.getpid()
+
+        while True:
+            old_value = get_process_network_io(pid)
+            time.sleep(interval)
+            new_value = get_process_network_io(pid)
+            bytes_sent = new_value[2] - old_value[2]
+            bytes_recv = new_value[3] - old_value[3]
+            mbps_recv = convert_bytes_to_mbps(bytes_recv) / interval
+
+            with self.lock:
+                self.speeds.append(mbps_recv)
+
     def get_average_speed(self) -> float:
         """
-        Calculate the average speed from a list of speeds and convert it to megabytes per second (MB/s).
+        Calculate the average internet speed from the values in the deque.
 
         Returns:
-            float: The average speed in megabytes per second (MB/s).
+            float: The average internet speed in Mbps.
         """
-        return (sum(self.smoothed_speeds) / len(self.smoothed_speeds))
-    
+        with self.lock:
+            if len(self.speeds) == 0:
+                return 0.0
+            return sum(self.speeds) / len(self.speeds)
+
     def calculate_total_size(self) -> str:
         """
         Calculate the total size of the files.
@@ -118,7 +136,6 @@ class M3U8_Ts_Estimator:
             duration (float): The duration of the segment download in seconds.
             progress_counter (tqdm): The tqdm object representing the progress bar.
         """
-
         # Add the size of the downloaded segment to the estimator
         self.add_ts_file(total_downloaded * self.total_segments, total_downloaded, duration)
                     
@@ -131,7 +148,7 @@ class M3U8_Ts_Estimator:
         number_file_total_size = file_total_size.split(' ')[0]
         units_file_downloaded = downloaded_file_size_str.split(' ')[1]
         units_file_total_size = file_total_size.split(' ')[1]
-        average_internet_speed = self.get_average_speed()
+        average_internet_speed = self.get_average_speed() / 8 # Mbps -> MB\s
 
         # Update the progress bar's postfix
         if TQDM_USE_LARGE_BAR:
@@ -139,7 +156,6 @@ class M3U8_Ts_Estimator:
                 f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded} {Colors.WHITE}< {Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
                 f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed:.2f} {Colors.RED}MB/s"
             )
-
         else:
             progress_counter.set_postfix_str(
                 f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded}{Colors.RED} {units_file_downloaded} "

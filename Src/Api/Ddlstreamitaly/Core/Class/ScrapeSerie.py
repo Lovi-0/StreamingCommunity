@@ -53,7 +53,7 @@ class GetSerieInfo:
             response.raise_for_status()
 
         except Exception as e:
-            logging.error(f"Insert: ['ips4_device_key': 'your_code', 'ips4_member_id': 'your_code', 'ips4_login_key': 'your_code'] in config file \ REQUESTS \ index, instead of user-agent. Use browser debug and cookie request with a valid account, filter by DOC.")
+            logging.error(f"Insert: ['ips4_device_key': 'your_code', 'ips4_member_id': 'your_code', 'ips4_login_key': 'your_code'] in config.json file REQUESTS -> index, instead of user-agent. Use browser debug and cookie request with a valid account, filter by DOC.")
             sys.exit(0)
 
         # Parse HTML content of the page

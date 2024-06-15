@@ -90,11 +90,8 @@ def load_search_functions():
 
 
 def initialize():
-    """
-    Initialize the application.
-    Checks Python version, removes temporary folder, and displays start message.
-    """
 
+    # Get start message
     start_message()
 
     # Create logger
@@ -120,6 +117,7 @@ def initialize():
 
 
 def main():
+
     # Load search functions
     search_functions = load_search_functions()
 
