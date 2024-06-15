@@ -56,7 +56,7 @@ class M3U8_Ts_Estimator:
         self.ts_file_sizes.append(size)
         self.now_downloaded_size += size_download
 
-    def capture_speed(self, interval: float = 0.5):
+    def capture_speed(self, interval: float = 1.0):
         """
         Capture the internet speed periodically and store the values in a deque.
         """

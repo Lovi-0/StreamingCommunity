@@ -57,7 +57,6 @@ headers_index = config_manager.get_dict('REQUESTS', 'index')
 
 
 
-
 class M3U8_Segments:
     def __init__(self, url: str, tmp_folder: str):
         """
@@ -202,17 +201,19 @@ class M3U8_Segments:
 
             # Make request to get content
             if THERE_IS_PROXY_LIST:
+
+                # Get proxy from list
                 proxy = self.valid_proxy[index % len(self.valid_proxy)]
                 logging.info(f"Use proxy: {proxy}")
 
-                with httpx.Client(proxies=proxy, verify=REQUEST_VERIFY) as client:  
+                with httpx.Client(transport=httpx.HTTPTransport(retries=3), proxies=proxy, verify=REQUEST_VERIFY) as client:  
                     if 'key_base_url' in self.__dict__:
                         response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
                     else:
                         response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT)
             else:
 
-                with httpx.Client(verify=REQUEST_VERIFY) as client_2:
+                with httpx.Client(transport=httpx.HTTPTransport(retries=3), verify=REQUEST_VERIFY) as client_2:
                     if 'key_base_url' in self.__dict__:
                         response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
                     else:
