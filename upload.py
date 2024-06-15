@@ -1,10 +1,16 @@
-# 10.12.24
+# 15.06.24
 
-# General imports
-import requests, os, shutil
-from zipfile import ZipFile
+import os
+import sys
+import shutil
 from io import BytesIO
+from zipfile import ZipFile
+
+
+# External library
+import httpx
 from rich.console import Console
+
 
 # Variable
 console = Console()
@@ -78,7 +84,7 @@ def download_and_extract_latest_commit(author: str, repo_name: str):
 
     # Get the latest commit information using GitHub API
     api_url = f'https://api.github.com/repos/{author}/{repo_name}/commits?per_page=1'
-    response = requests.get(api_url)
+    response = httpx.get(api_url)
     console.log("[green]Making a request to GitHub repository...")
 
     if response.ok:
@@ -88,7 +94,7 @@ def download_and_extract_latest_commit(author: str, repo_name: str):
         console.log("[green]Getting zip file from repository...")
 
         # Download the zipball
-        response = requests.get(zipball_url)
+        response = httpx.get(zipball_url)
 
         # Extract the content of the zipball into a temporary folder
         temp_path = os.path.join(os.path.dirname(os.getcwd()), 'temp_extracted')
