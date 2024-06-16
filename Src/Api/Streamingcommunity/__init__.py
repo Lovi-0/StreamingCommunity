@@ -18,6 +18,7 @@ from .series import download_series
 # Variable
 indice = 0
 
+
 def search():
     """
     Main function of the application for film and series.

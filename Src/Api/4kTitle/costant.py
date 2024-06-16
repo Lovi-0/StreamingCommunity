@@ -1,4 +1,4 @@
-# 09.06.24
+# 26.05.24
 
 import os
 
@@ -11,4 +11,5 @@ SITE_NAME = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
 ROOT_PATH = config_manager.get('DEFAULT', 'root_path')
 DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
 
-SERIES_FOLDER = "Serie"
+MOVIE_FOLDER = "Movie"
+SERIE_FOLDER = "Serie"
