@@ -18,8 +18,11 @@ from Src.Util.console import console, Panel
 # Logic class
 from ..Class.SeriesType import TitleManager
 from ..Class.EpisodeType import EpisodeManager
-from ..Class.PreviewType import PreviewManager
 from ..Class.WindowType import WindowVideo, WindowParameter, DynamicJSONConverter
+
+
+# Variable
+from ...costant import SITE_NAME
 
 
 class VideoSource:
@@ -31,7 +34,7 @@ class VideoSource:
             'user-agent': get_headers()
         }
         self.is_series = False
-        self.base_name = "streamingcommunity"
+        self.base_name = SITE_NAME
 
     def setup(self, version: str = None, domain: str = None, media_id: int = None, series_name: str = None):
         """

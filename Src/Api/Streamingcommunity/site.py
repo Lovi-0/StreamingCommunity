@@ -26,8 +26,7 @@ from .Core.Class.SearchType import MediaManager, MediaItem
 
 
 # Config
-SITE_NAME = "streamingcommunity"
-DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
+from .costant import SITE_NAME
 
 
 # Variable

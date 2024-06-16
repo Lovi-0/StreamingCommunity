@@ -4,9 +4,6 @@
 from Src.Util.console import console, msg
 
 
-# Variable
-indice = 5
-
 
 def search():
     """

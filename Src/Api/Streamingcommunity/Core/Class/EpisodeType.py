@@ -3,13 +3,8 @@
 from typing import Dict, Any, List
 
 
-# Internal utilities
-from Src.Util._jsonConfig import config_manager
-
-
-# Config
-SC_SITE_NAME = "streamingcommunity"
-SC_DOMAIN_NOW = config_manager.get('SITE', SC_SITE_NAME)
+# Variable
+from ...costant import SITE_NAME, DOMAIN_NOW
 
 
 
@@ -23,7 +18,7 @@ class Image:
         self.created_at: str = image_data.get('created_at', '')
         self.updated_at: str = image_data.get('updated_at', '')
         self.original_url_field: str = image_data.get('original_url_field', '')
-        self.url: str = f"https://cdn.{SC_SITE_NAME}.{SC_DOMAIN_NOW}/images/{self.filename}"
+        self.url: str = f"https://cdn.{SITE_NAME}.{DOMAIN_NOW}/images/{self.filename}"
 
     def __str__(self):
         return f"Image(id={self.id}, filename='{self.filename}', type='{self.type}', imageable_type='{self.imageable_type}', url='{self.url}')"

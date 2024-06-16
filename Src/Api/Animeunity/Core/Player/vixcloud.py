@@ -12,15 +12,17 @@ from bs4 import BeautifulSoup
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Util.console import console
 from Src.Util._jsonConfig import config_manager
 
 
 # Logic class
 from ..Class.SeriesType import TitleManager
 from ..Class.EpisodeType import EpisodeManager, Episode
-from ..Class.PreviewType import PreviewManager
 from ..Class.WindowType import WindowVideo, WindowParameter, DynamicJSONConverter
+
+
+# Variable
+from ...costant import SITE_NAME
 
 
 class VideoSource:
@@ -32,7 +34,7 @@ class VideoSource:
             'user-agent': get_headers()
         }
         self.is_series = False
-        self.base_name = "animeunity"
+        self.base_name = SITE_NAME
         self.domain = config_manager.get('SITE', self.base_name)  
 
     def setup(self, media_id: int = None, series_name: str = None):

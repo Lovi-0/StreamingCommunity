@@ -21,12 +21,8 @@ from .Core.Util import extract_domain
 from .Core.Class.SearchType import MediaManager, MediaItem
 
 
-# Config
-SITE_NAME = "animeunity"
-DOMAIN_NOW = config_manager.get('SITE', SITE_NAME)
-
-
 # Variable
+from .costant import SITE_NAME, DOMAIN_NOW
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 
