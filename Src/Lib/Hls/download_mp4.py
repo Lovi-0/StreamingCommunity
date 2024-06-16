@@ -36,7 +36,7 @@ def MP4_downloader(url: str, path: str, referer: str, add_desc: str):
     headers = {'Referer': referer, 'user-agent': get_headers()}
     
     with httpx.Client(verify=REQUEST_VERIFY, timeout=REQUEST_TIMEOUT) as client:
-        with client.stream("GET", url, headers=headers) as response:
+        with client.stream("GET", url, headers=headers, timeout=99) as response:
             total = int(response.headers.get('content-length', 0))
 
             # Create bar format
