@@ -41,13 +41,12 @@ def run_function(func: Callable[..., None], close_console: bool = False) -> None
 
 def load_search_functions():
 
+    modules = []
     loaded_functions = {}
 
     # Traverse the Api directory
     api_dir = os.path.join(os.path.dirname(__file__), 'Src', 'Api')
     init_files = glob.glob(os.path.join(api_dir, '*', '__init__.py'))
-
-    modules = []
 
     # Retrieve modules and their indices
     for init_file in init_files:
@@ -111,7 +110,8 @@ def initialize():
 
     # Attempting GitHub update
     try:
-        git_update()
+        #git_update()
+        print()
     except:
         console.log("[red]Error with loading github.")
 

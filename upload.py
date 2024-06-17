@@ -1,7 +1,6 @@
 # 15.06.24
 
 import os
-import sys
 import shutil
 from io import BytesIO
 from zipfile import ZipFile
@@ -15,6 +14,7 @@ from rich.console import Console
 # Variable
 console = Console()
 local_path = os.path.join(".")
+from Src.Upload.version import __author__, __title__
 
 
 def move_content(source: str, destination: str) :
@@ -73,24 +73,20 @@ def keep_specific_items(directory: str, keep_folder: str, keep_file: str):
         print(f"Error: {e}")
 
 
-def download_and_extract_latest_commit(author: str, repo_name: str):
+def download_and_extract_latest_commit():
     """
     Download and extract the latest commit from a GitHub repository.
-
-    Args:
-        author (str): The owner of the GitHub repository.
-        repo_name (str): The name of the GitHub repository.
     """
 
     # Get the latest commit information using GitHub API
-    api_url = f'https://api.github.com/repos/{author}/{repo_name}/commits?per_page=1'
+    api_url = f'https://api.github.com/repos/{__author__}/{__title__}/commits?per_page=1'
     response = httpx.get(api_url)
     console.log("[green]Making a request to GitHub repository...")
 
-    if response.ok:
+    if response.status_code == 200:
         commit_info = response.json()[0]
         commit_sha = commit_info['sha']
-        zipball_url = f'https://github.com/{author}/{repo_name}/archive/{commit_sha}.zip'
+        zipball_url = f'https://github.com/{__author__}/{__title__}/archive/{commit_sha}.zip'
         console.log("[green]Getting zip file from repository...")
 
         # Download the zipball
@@ -112,7 +108,7 @@ def download_and_extract_latest_commit(author: str, repo_name: str):
         shutil.rmtree(temp_path)
 
         # Move all folder to main folder
-        new_folder_name = f"{repo_name}-{commit_sha}"
+        new_folder_name = f"{__title__}-{commit_sha}"
         move_content(new_folder_name, ".")
 
         # Remove old temp folder
@@ -128,9 +124,6 @@ def main_upload():
     Main function to upload the latest commit of a GitHub repository.
     """
 
-    repository_owner = 'Lovi-0'
-    repository_name = 'StreamingCommunity'
-
     cmd_insert = input("Are you sure you want to delete all files? (Only videos folder will remain) [yes/no]: ")
 
     if cmd_insert == "yes":
@@ -138,7 +131,7 @@ def main_upload():
         # Remove all old file
         keep_specific_items(".", "Video", "upload.py")
 
-        download_and_extract_latest_commit(repository_owner, repository_name)
+        download_and_extract_latest_commit()
 
 
 main_upload()
