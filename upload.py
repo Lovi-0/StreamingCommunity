@@ -90,7 +90,7 @@ def download_and_extract_latest_commit():
         console.log("[green]Getting zip file from repository...")
 
         # Download the zipball
-        response = httpx.get(zipball_url)
+        response = httpx.get(zipball_url, follow_redirects=True, timeout=10)
 
         # Extract the content of the zipball into a temporary folder
         temp_path = os.path.join(os.path.dirname(os.getcwd()), 'temp_extracted')
