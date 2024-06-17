@@ -15,6 +15,7 @@ from .series import download_thread
 
 # Variable
 indice = 3
+_deprecate = False
 
 
 def search():

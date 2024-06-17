@@ -1,4 +1,6 @@
-﻿httpx
+﻿urllib3
+certifi
+httpx
 bs4
 rich
 tqdm

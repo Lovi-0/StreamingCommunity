@@ -11,6 +11,7 @@ from .series import download_series
 
 # Variable
 indice = 4
+_deprecate = False
 
 
 def search():

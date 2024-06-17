@@ -3,6 +3,7 @@
 import os
 import sys
 import glob
+import logging
 import platform
 import argparse
 import importlib
@@ -47,20 +48,29 @@ def load_search_functions():
     # Traverse the Api directory
     api_dir = os.path.join(os.path.dirname(__file__), 'Src', 'Api')
     init_files = glob.glob(os.path.join(api_dir, '*', '__init__.py'))
+    
+    logging.info(f"Base folder path: {api_dir}")
+    logging.info(f"Api module path: {init_files}")
+
 
     # Retrieve modules and their indices
     for init_file in init_files:
-        module_name = os.path.basename(os.path.dirname(init_file))  # Get folder name as module name
+
+        # Get folder name as module name
+        module_name = os.path.basename(os.path.dirname(init_file))
+        logging.info(f"Load module name: {module_name}")
 
         try:
             # Dynamically import the module
             mod = importlib.import_module(f'Src.Api.{module_name}')
 
             # Get 'indice' from the module
-            indice = getattr(mod, 'indice', 0)                      # If 'indice' is not defined, default to 0
+            indice = getattr(mod, 'indice', 0)
+            is_deprecate = bool(getattr(mod, '_deprecate', True))
 
             # Add module and indice to the list
-            modules.append((module_name, indice))
+            if not is_deprecate:
+                modules.append((module_name, indice))
 
         except Exception as e:
             console.print(f"[red]Failed to import module {module_name}: {str(e)}")
@@ -70,7 +80,10 @@ def load_search_functions():
 
     # Load search functions in the sorted order
     for module_name, _ in modules:
-        module_alias = f'{module_name}_search'                      # Construct a unique alias for the module
+
+        # Construct a unique alias for the module
+        module_alias = f'{module_name}_search'
+        logging.info(f"Module alias: {module_alias}")
 
         try:
             # Dynamically import the module

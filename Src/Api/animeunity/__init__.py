@@ -11,7 +11,7 @@ from .anime import donwload_film, donwload_series
 
 # Variable
 indice = 1
-
+_deprecate = False
 
 def search():
 
