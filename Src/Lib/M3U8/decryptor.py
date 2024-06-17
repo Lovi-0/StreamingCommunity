@@ -71,11 +71,14 @@ if crypto_installed:
 else:
 
     # Check if openssl command is available
-    openssl_available = subprocess.run(["openssl", "version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
-    logging.info("Decrypy use: OPENSSL")
+    try:
+        openssl_available = subprocess.run(["openssl", "version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+        logging.info("Decrypy use: OPENSSL")
+    except:
+        openssl_available = False
 
     if not openssl_available:
-        console.log("[red]Neither Crypto nor openssl is installed. Please install either one of them.")
+        console.log("[red]Neither python library: pycryptodome nor openssl software is installed. Please install either one of them. Read readme.md [Requirement].")
         sys.exit(0)
 
     class M3U8_Decryption:
