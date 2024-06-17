@@ -21,7 +21,6 @@ from Src.Util.table import TVShowManager
 
 
 # Logic class
-from .Core.Util import extract_domain
 from .Core.Class.SearchType import MediaManager, MediaItem
 
 
@@ -102,6 +101,8 @@ def get_version_and_domain(new_domain = None) -> Tuple[str, str]:
         # Make requests to site to get text
         console.print(f"[cyan]Test site[white]: [red]https://{SITE_NAME}.{config_domain}")
         response = httpx.get(f"https://{SITE_NAME}.{config_domain}")
+        response.raise_for_status()
+
         console.print(f"[cyan]Test respost site[white]: [red]{response.status_code} \n")
 
         # Extract version from the response
@@ -111,16 +112,8 @@ def get_version_and_domain(new_domain = None) -> Tuple[str, str]:
 
     except:
 
-        console.print("[red]\nExtract new DOMAIN from TLD list.")
-        new_domain = extract_domain(method="light")
-        console.log(f"[cyan]Extract new domain: [red]{new_domain}")
-
-        # Update the domain in the configuration file
-        config_manager.set_key('SITE', SITE_NAME, str(new_domain))
-        config_manager.write_config()
-
-        # Retry to get the version and domain
-        return get_version_and_domain(new_domain)
+        console.log("[red]Upload domain.")
+        sys.exit(0)
 
 
 def title_search(title_search: str, domain: str) -> int:

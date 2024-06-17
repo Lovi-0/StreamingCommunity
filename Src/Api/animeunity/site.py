@@ -17,7 +17,6 @@ from Src.Util._jsonConfig import config_manager
 
 
 # Logic class
-from .Core.Util import extract_domain
 from .Core.Class.SearchType import MediaManager, MediaItem
 
 
@@ -80,25 +79,12 @@ def update_domain():
         
         console.log(f"[cyan]Test site: [red]https://{SITE_NAME}.{DOMAIN_NOW}")
         response = httpx.get(f"https://www.{SITE_NAME}.{DOMAIN_NOW}")
-        response.status_code
+        response.raise_for_status()
 
-    # If the current site is inaccessible, try to obtain a new domain
     except Exception as e:
 
-        # Get new domain
-        console.print("[red]\nExtract new DOMAIN from TLD list.")
-        new_domain = extract_domain(method="light")
-        console.log(f"[cyan]Extract new domain: [red]{new_domain}")
-
-        if new_domain:
-
-            # Update configuration with the new domain
-            config_manager.set_key('SITE', SITE_NAME, new_domain)
-            config_manager.write_config()
-
-        else:
-            logging.error("Failed to find a new animeunity domain")
-            sys.exit(0)
+        console.log("[red]Upload domain")
+        sys.exit(0)
 
 
 def get_real_title(record):
