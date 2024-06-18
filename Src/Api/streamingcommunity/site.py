@@ -15,9 +15,10 @@ from unidecode import unidecode
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Util._jsonConfig import config_manager
 from Src.Util.console import console
 from Src.Util.table import TVShowManager
+from ..Template import search_domain
+
 
 
 # Logic class
@@ -75,45 +76,15 @@ def get_version(text: str) -> tuple[str, list]:
         raise
 
 
-def get_version_and_domain(new_domain = None) -> Tuple[str, str]:
-    """
-    Retrieves the version and domain of the streaming website.
+def get_version_and_domain() -> Tuple[str, str]:
 
-    This function retrieves the version and domain of the streaming website.
-    It first checks the accessibility of the current site.
-    If the site is accessible, it extracts the version from the response.
-    If configured to do so, it also scrapes and prints the titles of the moments.
-    If the site is inaccessible, it attempts to obtain a new domain using the 'insta' method.
+    # Find new domain if prev dont work
+    domain_to_use, base_url = search_domain(SITE_NAME, '<meta name="author" content="StreamingCommunity">', f"https://{SITE_NAME}")
 
-    Returns:
-        Tuple[str, str]: A tuple containing the version and domain.
-    """
-    
-    # Get the current domain from the configuration
-    if new_domain is None:
-        config_domain = config_manager.get('SITE', SITE_NAME)
-    else:
-        config_domain = new_domain
+    # Extract version from the response
+    version, list_title_top_10 = get_version(httpx.get(base_url, headers={'user-agent': get_headers()}).text)
 
-    # Test the accessibility of the current site
-    try:
-
-        # Make requests to site to get text
-        console.print(f"[cyan]Test site[white]: [red]https://{SITE_NAME}.{config_domain}")
-        response = httpx.get(f"https://{SITE_NAME}.{config_domain}")
-        response.raise_for_status()
-
-        console.print(f"[cyan]Test respost site[white]: [red]{response.status_code} \n")
-
-        # Extract version from the response
-        version, list_title_top_10 = get_version(response.text)
-
-        return version, config_domain
-
-    except:
-
-        console.log("[red]Upload domain.")
-        sys.exit(0)
+    return version, domain_to_use
 
 
 def title_search(title_search: str, domain: str) -> int:

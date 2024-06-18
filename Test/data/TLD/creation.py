@@ -1,12 +1,11 @@
 # 29.04.24
 
 import httpx
-import json
 from bs4 import BeautifulSoup
 
 
 # URL of the webpage containing the table
-url = 'https://icannwiki.org/New_gTLD_Generic_Applications'
+url = 'https://icannwiki.org/All_New_gTLD_Applications'
 
 
 # List to store scraped data
@@ -78,8 +77,9 @@ def main():
     print(len(data))
 
     # Write the scraped data to a JSON file
-    with open('data.json', 'w') as json_file:
-        json.dump(data, json_file)
+    with open('data.txt', 'w') as json_file:
+        for find_tld in data:
+            json_file.write(find_tld['application_id'] + "\n")
 
 
 if __name__ == '__main__':

@@ -11,9 +11,10 @@ from unidecode import unidecode
 
 
 # Internal utilities
-from Src.Util.table import TVShowManager
 from Src.Util.console import console
 from Src.Util._jsonConfig import config_manager
+from Src.Util.table import TVShowManager
+from ..Template import search_domain
 
 
 # Logic class
@@ -65,28 +66,6 @@ def get_token(site_name: str, domain: str) -> dict:
     }
 
 
-def update_domain():
-    """
-    Update the domain for the anime streaming site.
-
-    This function tests the accessibility of the current anime streaming site.
-    If the current domain is inaccessible, it attempts to obtain and set a new domain.
-    It uses the 'light' method to extract a new domain from Anime Unity.
-    """
-
-    # Test current site's accessibility
-    try:
-        
-        console.log(f"[cyan]Test site: [red]https://{SITE_NAME}.{DOMAIN_NOW}")
-        response = httpx.get(f"https://www.{SITE_NAME}.{DOMAIN_NOW}")
-        response.raise_for_status()
-
-    except Exception as e:
-
-        console.log("[red]Upload domain")
-        sys.exit(0)
-
-
 def get_real_title(record):
     """
     Get the real title from a record.
@@ -122,12 +101,9 @@ def title_search(title: str) -> int:
         - int: A number containing the length of media search manager.
     """
 
-    # Update domain
-    update_domain()
-
     # Get token and session value from configuration
-    url_domain = config_manager.get('SITE', SITE_NAME)  
-    data = get_token(SITE_NAME, url_domain)
+    domain_to_use, _ = search_domain(SITE_NAME, '<meta name="author" content="AnimeUnity Staff">', f"https://www.{SITE_NAME}")
+    data = get_token(SITE_NAME, domain_to_use)
 
     # Prepare cookies to be used in the request
     cookies = {
@@ -148,7 +124,7 @@ def title_search(title: str) -> int:
     }
 
     # Send a POST request to the API endpoint for live search
-    response = httpx.post(f'https://www.{SITE_NAME}.{url_domain}/livesearch', cookies=cookies, headers=headers, json=json_data)
+    response = httpx.post(f'https://www.{SITE_NAME}.{domain_to_use}/livesearch', cookies=cookies, headers=headers, json=json_data)
     response.raise_for_status()
 
     # Process each record returned in the response

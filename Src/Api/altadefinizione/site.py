@@ -11,9 +11,10 @@ from unidecode import unidecode
 
 
 # Internal utilities
-from Src.Util.table import TVShowManager
-from Src.Util.console import console
 from Src.Util.headers import get_headers
+from Src.Util.console import console
+from Src.Util.table import TVShowManager
+from ..Template import search_domain
 
 
 # Logic class
@@ -37,9 +38,12 @@ def title_search(title_search: str) -> int:
     Returns:
         int: The number of titles found.
     """
+
+    # Find new domain if prev dont work
+    domain_to_use, _ = search_domain(SITE_NAME, '<meta name="generator" content="altadefinizione">', f"https://{SITE_NAME}")
     
     # Send request to search for titles
-    response = httpx.get(f"https://{SITE_NAME}.{DOMAIN_NOW}/page/1/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", headers={'user-agent': get_headers()})
+    response = httpx.get(f"https://{SITE_NAME}.{domain_to_use}/page/1/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", headers={'user-agent': get_headers()})
     response.raise_for_status()
 
     # Create soup and find table
