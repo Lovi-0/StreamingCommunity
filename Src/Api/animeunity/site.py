@@ -1,6 +1,5 @@
 # 10.12.23
 
-import sys
 import logging
 
 
@@ -11,18 +10,16 @@ from unidecode import unidecode
 
 
 # Internal utilities
-from Src.Util.console import console
-from Src.Util._jsonConfig import config_manager
 from Src.Util.table import TVShowManager
-from ..Template import search_domain
+from ..Template import search_domain, get_select_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaManager, MediaItem
+from .Core.Class.SearchType import MediaManager
 
 
 # Variable
-from .costant import SITE_NAME, DOMAIN_NOW
+from .costant import SITE_NAME
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 
@@ -142,58 +139,8 @@ def title_search(title: str) -> int:
 
 
 
-def get_select_title(type_filter: list = None) -> MediaItem:
+def run_get_select_title():
     """
     Display a selection of titles and prompt the user to choose one.
-
-    Args:
-        - type_filter (list): A list of media types to filter. Can include 'film', 'tv', 'ova'. Ex. ['tv', 'film']
-
-    Returns:
-        MediaItem: The selected media item.
     """
-
-    # Set up table for displaying titles
-    table_show_manager.set_slice_end(10)
-
-    # Add columns to the table
-    column_info = {
-        "Index": {'color': 'red'},
-        "Name": {'color': 'magenta'},
-        "Type": {'color': 'yellow'},
-        "Score": {'color': 'cyan'},
-        "Date": {'color': 'green'}
-    }
-    table_show_manager.add_column(column_info)
-
-    # Populate the table with title information
-    for i, media in enumerate(media_search_manager.media_list):
-        
-        # Filter for only a list of category
-        if type_filter is not None:
-            if str(media.type) not in type_filter:
-                continue
-            
-        table_show_manager.add_tv_show({
-            'Index': str(i),
-            'Name': media.name,
-            'Type': media.type,
-            'Score': media.score,
-            'Date': media.last_air_date
-        })
-
-    # Run the table and handle user input
-    last_command = table_show_manager.run(force_int_input=True, max_int_input=len(media_search_manager.media_list))
-    table_show_manager.clear()
-
-    # Handle user's quit command
-    if last_command == "q":
-        console.print("\n[red]Quit [white]...")
-        sys.exit(0)
-
-    # Check if the selected index is within range
-    if 0 <= int(last_command) <= len(media_search_manager.media_list):
-        return media_search_manager.get(int(last_command))
-    else:
-        console.print("\n[red]Wrong index")
-        sys.exit(0)
+    return get_select_title(table_show_manager, media_search_manager)

@@ -5,7 +5,7 @@ from Src.Util.console import console, msg
 
 
 # Logic class
-from .site import title_search, get_select_title
+from .site import title_search, run_get_select_title
 from .film import download_film
 
 
@@ -26,7 +26,7 @@ def search():
     if len_database > 0:
 
         # Select title from list
-        select_title = get_select_title()
+        select_title = run_get_select_title()
 
         # Download only film
         download_film(

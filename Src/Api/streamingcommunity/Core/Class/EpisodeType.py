@@ -7,23 +7,6 @@ from typing import Dict, Any, List
 from ...costant import SITE_NAME, DOMAIN_NOW
 
 
-
-class Image:
-    def __init__(self, image_data: Dict[str, Any]):
-        self.id: int = image_data.get('id', '')
-        self.filename: str = image_data.get('filename', '')
-        self.type: str = image_data.get('type', '')
-        self.imageable_type: str = image_data.get('imageable_type', '')
-        self.imageable_id: int = image_data.get('imageable_id', '')
-        self.created_at: str = image_data.get('created_at', '')
-        self.updated_at: str = image_data.get('updated_at', '')
-        self.original_url_field: str = image_data.get('original_url_field', '')
-        self.url: str = f"https://cdn.{SITE_NAME}.{DOMAIN_NOW}/images/{self.filename}"
-
-    def __str__(self):
-        return f"Image(id={self.id}, filename='{self.filename}', type='{self.type}', imageable_type='{self.imageable_type}', url='{self.url}')"
-
-
 class Episode:
     def __init__(self, data: Dict[str, Any]):
         self.id: int = data.get('id', '')
@@ -36,7 +19,6 @@ class Episode:
         self.created_by: str = data.get('created_by', '')
         self.created_at: str = data.get('created_at', '')
         self.updated_at: str = data.get('updated_at', '')
-        self.images: List[Image] = [Image(image_data) for image_data in data.get('images', [])]
 
     def __str__(self):
         return f"Episode(id={self.id}, number={self.number}, name='{self.name}', plot='{self.plot}', duration={self.duration} sec)"
