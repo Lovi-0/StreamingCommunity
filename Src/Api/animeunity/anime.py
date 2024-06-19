@@ -8,11 +8,11 @@ import logging
 from Src.Util.console import console, msg
 from Src.Lib.Hls.downloader import Downloader
 from Src.Util.message import start_message
+from ..Template import manage_selection
 
 
 # Logic class
 from .Core.Player.vixcloud import VideoSource
-from .Core.Util import manage_selection
 
 
 # Variable

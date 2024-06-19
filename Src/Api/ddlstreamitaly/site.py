@@ -16,7 +16,7 @@ from ..Template import search_domain, get_select_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaManager, MediaItem
+from .Core.Class.SearchType import MediaManager
 
 
 # Variable

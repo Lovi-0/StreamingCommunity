@@ -76,7 +76,7 @@ class Downloader():
 
         self.m3u8_playlist = m3u8_playlist
         self.m3u8_index = m3u8_index
-        self.output_filename = output_filename
+        self.output_filename = output_filename.replace(" ", "_")
 
         # Auto generate out file name if not present
         if output_filename == None:

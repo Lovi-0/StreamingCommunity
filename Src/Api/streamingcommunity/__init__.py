@@ -5,12 +5,7 @@ from Src.Util.console import console, msg
 
 
 # Logic class
-from .site import (
-    get_version_and_domain,
-    title_search,
-    run_get_select_title
-)
-
+from .site import get_version_and_domain, title_search, run_get_select_title
 from .film import download_film
 from .series import download_series
 

@@ -9,16 +9,16 @@ from urllib.parse import urlparse
 # Internal utilities
 from Src.Util.color import Colors
 from Src.Util.console import console, msg
+from Src.Util.message import start_message
 from Src.Util.os import create_folder, can_create_file
 from Src.Util.table import TVShowManager
-from Src.Util.message import start_message
 from Src.Lib.Hls.download_mp4 import MP4_downloader
+from ..Template import manage_selection, map_episode_title
 
 
 # Logic class
 from .Core.Class.SearchType import MediaItem
 from .Core.Class.ScrapeSerie import GetSerieInfo
-from .Core.Util.manage_ep import manage_selection, map_episode_title
 from .Core.Player.ddl import VideoSource
 
 
@@ -26,6 +26,7 @@ from .Core.Player.ddl import VideoSource
 from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER
 table_show_manager = TVShowManager()
 video_source = VideoSource()
+
 
 
 def donwload_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) -> None:

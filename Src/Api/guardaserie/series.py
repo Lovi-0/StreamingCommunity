@@ -10,12 +10,12 @@ from Src.Util.console import console, msg
 from Src.Util.table import TVShowManager
 from Src.Util.message import start_message
 from Src.Lib.Hls.downloader import Downloader
+from ..Template import manage_selection, map_episode_title
 
 
 # Logic class
 from .Core.Class.SearchType import MediaItem
 from .Core.Class.ScrapeSerie import GetSerieInfo
-from .Core.Util.manage_ep import manage_selection, map_episode_title
 from .Core.Player.supervideo import VideoSource
 
 
@@ -23,6 +23,7 @@ from .Core.Player.supervideo import VideoSource
 from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER
 table_show_manager = TVShowManager()
 video_source = VideoSource()
+
 
 
 def donwload_video(scape_info_serie: GetSerieInfo, index_season_selected: int, index_episode_selected: int) -> None:
