@@ -1,8 +1,10 @@
-requests
-bs4 
-lxml
-tqdm
+﻿urllib3
+certifi
+httpx
+bs4
 rich
-random-user-agent
-ffmpeg-python
-moviepy
+tqdm
+m3u8
+psutil
+unidecode
+fake-useragent

@@ -1,0 +1,61 @@
+{
+    "DEFAULT": {
+        "debug": false,
+        "log_file": "app.log",
+        "log_to_file": true,
+        "show_message": true,
+        "clean_console": true,
+        "root_path": "Video",
+        "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
+        "not_close": false
+    },
+    "REQUESTS": {
+        "timeout": 10,
+        "max_retry": 3,
+        "verify_ssl": false,
+        "index": {
+            "user-agent": ""
+        },
+        "proxy_start_min": 0.1,
+        "proxy_start_max": 0.5,
+        "proxy": []
+    },
+    "M3U8_DOWNLOAD": {
+        "tdqm_workers": 2,
+        "tqdm_delay": 0.01,
+        "tqdm_use_large_bar": true,
+        "download_video": true,
+        "download_audio": true,
+        "merge_audio": true,
+        "specific_list_audio": [
+            "ita"
+        ],
+        "download_sub": true,
+        "merge_subs": true,
+        "specific_list_subtitles": [
+            "eng",
+            "spa"
+        ],
+        "cleanup_tmp_folder": true,
+        "create_report": false
+    },
+    "M3U8_CONVERSION": {
+        "use_codec": false,
+        "use_vcodec": true,
+        "use_acodec": true,
+        "use_bitrate": true,
+        "use_gpu": false,
+        "default_preset": "ultrafast",
+        "check_output_after_ffmpeg": false
+    },
+    "M3U8_PARSER": {
+        "force_resolution": -1
+    },
+    "SITE": {
+        "streamingcommunity": "boston",
+        "animeunity": "to",
+        "altadefinizione": "vodka",
+        "guardaserie": "ceo",
+        "ddlstreamitaly": "co"
+    }
+}

@@ -1,0 +1,5 @@
+__title__ = 'StreamingCommunity'
+__version__ = 'v1.2.0'
+__author__ = 'Lovi-0'
+__description__ = 'A command-line program to download film'
+__copyright__ = 'Copyright 2024'
