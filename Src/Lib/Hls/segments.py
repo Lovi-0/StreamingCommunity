@@ -277,7 +277,9 @@ class M3U8_Segments:
 
         # Get config site from prev stack
         frames = get_call_stack()
-        config_site = str(os.path.basename(frames[-1]['folder'])).lower()
+        logging.info(f"Extract info from: {frames}")
+        config_site = str(frames[-4]['folder_base'])
+        logging.info(f"Use frame: {frames[-1]}")
 
         # Workers to use for downloading
         TQDM_MAX_WORKER = 0

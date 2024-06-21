@@ -35,7 +35,7 @@ class VideoSource:
         }
         self.is_series = False
         self.base_name = SITE_NAME
-        self.domain = config_manager.get('SITE', self.base_name)  
+        self.domain = config_manager.get_dict('SITE', self.base_name)['domain']
 
     def setup(self, media_id: int = None, series_name: str = None):
         """
