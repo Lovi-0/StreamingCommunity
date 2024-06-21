@@ -20,7 +20,7 @@ from .Core.Class.SearchType import MediaManager
 
 
 # Variable
-from .costant import SITE_NAME, DOMAIN_NOW
+from .costant import SITE_NAME
 cookie_index = config_manager.get_dict('REQUESTS', 'index')
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
@@ -33,8 +33,11 @@ def title_search(word_to_search) -> int:
     """
     try:
 
+        # Find new domain if prev dont work
+        domain_to_use, _ = search_domain(SITE_NAME, '<meta property="og:site_name" content="DDLstreamitaly', f"https://{SITE_NAME}")
+
         # Send request to search for titles
-        response = httpx.get(f"https://{SITE_NAME}.{DOMAIN_NOW}/search/?&q={word_to_search}&quick=1&type=videobox_video&nodes=11", headers={'user-agent': get_headers()})
+        response = httpx.get(f"https://{SITE_NAME}.{domain_to_use}/search/?&q={word_to_search}&quick=1&type=videobox_video&nodes=11", headers={'user-agent': get_headers()})
         response.raise_for_status()
 
         # Create soup and find table

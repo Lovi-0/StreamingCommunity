@@ -3,13 +3,14 @@
 import os
 import sys
 import logging
-from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 
 # External libraries
 import httpx
 from unidecode import unidecode
+
+
 
 
 # Internal utilities

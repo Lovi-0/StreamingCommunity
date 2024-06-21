@@ -4,9 +4,9 @@ import os
 import sys
 import time
 import queue
-import threading
 import logging
 import binascii
+import threading
 from queue import PriorityQueue
 from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor
@@ -23,6 +23,7 @@ from Src.Util.headers import get_headers, random_headers
 from Src.Util.color import Colors
 from Src.Util._jsonConfig import config_manager
 from Src.Util.os import check_file_existence
+from Src.Util.call_stack import get_call_stack
 
 
 # Logic class
@@ -41,7 +42,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 # Config
-TQDM_MAX_WORKER = config_manager.get_int('M3U8_DOWNLOAD', 'tdqm_workers')
 TQDM_DELAY_WORKER = config_manager.get_float('M3U8_DOWNLOAD', 'tqdm_delay')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
@@ -274,6 +274,27 @@ class M3U8_Segments:
         Args:
             - add_desc (str): Additional description for the progress bar.
         """
+
+        # Get config site from prev stack
+        frames = get_call_stack()
+        config_site = str(os.path.basename(frames[-1]['folder'])).lower()
+
+        # Workers to use for downloading
+        TQDM_MAX_WORKER = 0
+
+        # Select audio workers from folder of frames stack prev call.
+        VIDEO_WORKERS = int(config_manager.get_dict('SITE', config_site)['video_workers'])
+        if VIDEO_WORKERS == -1: VIDEO_WORKERS = os.cpu_count()
+        AUDIO_WORKERS = int(config_manager.get_dict('SITE', config_site)['audio_workers'])
+        if AUDIO_WORKERS == -1: AUDIO_WORKERS = os.cpu_count()
+
+        # Differnt workers for audio and video
+        if "video" in str(add_desc):
+            TQDM_MAX_WORKER = VIDEO_WORKERS
+        if "audio" in str(add_desc):
+            TQDM_MAX_WORKER = AUDIO_WORKERS
+
+        # Custom bar for mobile and pc
         if TQDM_USE_LARGE_BAR:
             bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
         else:

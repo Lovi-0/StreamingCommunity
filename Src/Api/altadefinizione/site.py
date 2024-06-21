@@ -21,7 +21,7 @@ from .Core.Class.SearchType import MediaManager
 
 
 # Variable
-from .costant import SITE_NAME, DOMAIN_NOW
+from .costant import SITE_NAME
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 

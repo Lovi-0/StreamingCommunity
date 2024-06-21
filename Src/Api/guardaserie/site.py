@@ -19,7 +19,7 @@ from .Core.Class.SearchType import MediaManager
 
 
 # Variable
-from .costant import DOMAIN_NOW
+from .costant import SITE_NAME
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 
@@ -29,8 +29,11 @@ def title_search(word_to_search) -> int:
     Search for titles based on a search query.
     """
 
+    # Find new domain if prev dont work
+    domain_to_use, _ = search_domain(SITE_NAME, '<meta name="generator" content="Guardaserie Streaming', f"https://{SITE_NAME}")
+
     # Send request to search for titles
-    response = httpx.get(f"https://guardaserie.{DOMAIN_NOW}/?story={word_to_search}&do=search&subaction=search", headers={'user-agent': get_headers()})
+    response = httpx.get(f"https://guardaserie.{domain_to_use}/?story={word_to_search}&do=search&subaction=search", headers={'user-agent': get_headers()})
     response.raise_for_status()
 
     # Create soup and find table

@@ -3,10 +3,6 @@
 from typing import Dict, Any, List
 
 
-# Variable
-from ...costant import SITE_NAME, DOMAIN_NOW
-
-
 class Episode:
     def __init__(self, data: Dict[str, Any]):
         self.id: int = data.get('id', '')

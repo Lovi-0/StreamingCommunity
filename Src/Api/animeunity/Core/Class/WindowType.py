@@ -26,6 +26,7 @@ class WindowVideo:
     def __str__(self):
         return f"WindowVideo(id={self.id}, name='{self.name}', filename='{self.filename}', size='{self.size}', quality='{self.quality}', duration='{self.duration}', views={self.views}, is_viewable={self.is_viewable}, status='{self.status}', fps={self.fps}, legacy={self.legacy}, folder_id={self.folder_id}, created_at_diff='{self.created_at_diff}')"
 
+
 class WindowParameter:
     def __init__(self, data: Dict[str, Any]):
         self.data = data

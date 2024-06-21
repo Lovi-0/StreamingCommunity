@@ -21,6 +21,10 @@ from Src.Util.console import console
 from Src.Util._jsonConfig import config_manager
 
 
+# Variable
+AUTO_UPDATE_DOMAIN = config_manager.get_bool('DEFAULT', 'auto_update_domain')
+
+
 
 def check_url_for_content(url: str, content: str, timeout: int = 1) -> bool:
     """
@@ -56,6 +60,7 @@ def check_url_for_content(url: str, content: str, timeout: int = 1) -> bool:
         logging.warning(f"Error for {url}: {e}")
 
     return False
+
 
 def get_top_level_domain(base_url: str, target_content: str, max_workers: int = os.cpu_count(), timeout: int = 2, retries: int = 1) -> str:
     """
@@ -156,8 +161,10 @@ def search_domain(site_name: str, target_content: str, base_url: str):
         tuple: The found domain and the complete URL.
     """
 
+
+
     # Extract config domain
-    domain = config_manager.get("SITE", site_name)
+    domain = str(config_manager.get_dict("SITE", site_name)['domain'])
     console.print(f"[cyan]Test site[white]: [red]{base_url}.{domain}")
 
     try:
@@ -170,23 +177,31 @@ def search_domain(site_name: str, target_content: str, base_url: str):
         console.print(f"[cyan]Use domain: [red]{domain}")
         return domain, f"{base_url}.{domain}"
 
-    except:
+    except Exception as e:
 
         # If the current domain fails, find a new one
+        console.print(f"[cyan]Error test response site[white]: [red]{e}")
         print()
-        console.print("[red]Extract new DOMAIN from TLD list.")
-        new_domain = get_top_level_domain(base_url=base_url, target_content=target_content)
 
-        if new_domain is not None:
+        if AUTO_UPDATE_DOMAIN:
+            console.print("[red]Extract new DOMAIN from TLD list.")
+            new_domain = get_top_level_domain(base_url=base_url, target_content=target_content)
 
-            # Update domain in config.json
-            config_manager.set_key('SITE', site_name, new_domain)
-            config_manager.write_config()
+            if new_domain is not None:
 
-            # Return new config domain
-            console.print(f"[cyan]Use domain: [red]{new_domain}")
-            return new_domain, f"{base_url}.{new_domain}"
-        
+                # Update domain in config.json
+                config_manager.config['SITE'][site_name]['domain'] = new_domain
+                config_manager.write_config()
+
+                # Return new config domain
+                console.print(f"[cyan]Use domain: [red]{new_domain}")
+                return new_domain, f"{base_url}.{new_domain}"
+            
+            else:
+                logging.error(f"Failed to find a new domain for: {base_url}")
+                sys.exit(0)
+
         else:
-            logging.error(f"Failed to find a new domain for: {base_url}")
+            logging.error(f"Update domain manually in config.json")
             sys.exit(0)
+

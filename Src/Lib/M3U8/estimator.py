@@ -34,7 +34,7 @@ class M3U8_Ts_Estimator:
         self.now_downloaded_size = 0
         self.total_segments = total_segments
         self.lock = threading.Lock()
-        self.speeds = deque(maxlen=3)
+        self.speed = 0
         self.speed_thread = threading.Thread(target=self.capture_speed)
         self.speed_thread.daemon = True
         self.speed_thread.start()
@@ -56,30 +56,44 @@ class M3U8_Ts_Estimator:
         self.ts_file_sizes.append(size)
         self.now_downloaded_size += size_download
 
-    def capture_speed(self, interval: float = 1.0):
+    def capture_speed(self, interval: float = 0.8):
         """
         Capture the internet speed periodically and store the values in a deque.
         """
-        def get_process_network_io(pid):
-            process = psutil.Process(pid)
-            io_counters = process.io_counters()
+        def get_network_io():
+            io_counters = psutil.net_io_counters()
             return io_counters
 
-        def convert_bytes_to_mbps(bytes):
-            return (bytes * 8) / (1024 * 1024)
-
+        def format_bytes(bytes):
+            if bytes < 1024:
+                return f"{bytes:.2f} Bytes/s"
+            elif bytes < 1024 * 1024:
+                return f"{bytes / 1024:.2f} KB/s"
+            else:
+                return f"{bytes / (1024 * 1024):.2f} MB/s"
+            
+        
+        # Get proc id
         pid = os.getpid()
-
+        
         while True:
-            old_value = get_process_network_io(pid)
+
+            # Get value
+            old_value = get_network_io()
             time.sleep(interval)
-            new_value = get_process_network_io(pid)
-            bytes_sent = new_value[2] - old_value[2]
-            bytes_recv = new_value[3] - old_value[3]
-            mbps_recv = convert_bytes_to_mbps(bytes_recv) / interval
+            new_value = get_network_io()
 
             with self.lock:
-                self.speeds.append(mbps_recv)
+                upload_speed = (new_value.bytes_sent - old_value.bytes_sent) / interval
+                download_speed = (new_value.bytes_recv - old_value.bytes_recv) / interval
+                
+                self.speed = ({
+                    "upload": format_bytes(upload_speed),
+                    "download": format_bytes(download_speed)
+                })
+
+                old_value = new_value
+            
 
     def get_average_speed(self) -> float:
         """
@@ -89,9 +103,7 @@ class M3U8_Ts_Estimator:
             float: The average internet speed in Mbps.
         """
         with self.lock:
-            if len(self.speeds) == 0:
-                return 0.0
-            return sum(self.speeds) / len(self.speeds)
+                return self.speed['download'].split(" ")
 
     def calculate_total_size(self) -> str:
         """
@@ -148,16 +160,18 @@ class M3U8_Ts_Estimator:
         number_file_total_size = file_total_size.split(' ')[0]
         units_file_downloaded = downloaded_file_size_str.split(' ')[1]
         units_file_total_size = file_total_size.split(' ')[1]
-        average_internet_speed = self.get_average_speed() / 8 # Mbps -> MB\s
+
+        average_internet_speed = self.get_average_speed()[0]
+        average_internet_unit = self.get_average_speed()[1]
 
         # Update the progress bar's postfix
         if TQDM_USE_LARGE_BAR:
             progress_counter.set_postfix_str(
                 f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded} {Colors.WHITE}< {Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
-                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed:.2f} {Colors.RED}MB/s"
+                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed} {Colors.RED}{average_internet_unit}"
             )
         else:
             progress_counter.set_postfix_str(
                 f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded}{Colors.RED} {units_file_downloaded} "
-                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed:.2f} {Colors.RED}Mbps"
+                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed} {Colors.RED}{average_internet_unit}"
             )

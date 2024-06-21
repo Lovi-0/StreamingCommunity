@@ -3,11 +3,6 @@
 from typing import List
 
 
-# Variable
-from ...costant import SITE_NAME, DOMAIN_NOW
-
-
-
 class MediaItem:
     def __init__(self, data: dict):
         self.id: int = data.get('id')
@@ -68,4 +63,3 @@ class MediaManager:
 
     def __str__(self):
         return f"MediaManager(num_media={len(self.media_list)})"
-

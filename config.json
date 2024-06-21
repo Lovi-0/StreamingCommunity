@@ -7,6 +7,7 @@
         "clean_console": true,
         "root_path": "Video",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
+        "auto_update_domain": true,
         "not_close": false
     },
     "REQUESTS": {
@@ -21,7 +22,6 @@
         "proxy": []
     },
     "M3U8_DOWNLOAD": {
-        "tdqm_workers": 2,
         "tqdm_delay": 0.01,
         "tqdm_use_large_bar": true,
         "download_video": true,
@@ -52,10 +52,30 @@
         "force_resolution": -1
     },
     "SITE": {
-        "streamingcommunity": "boston",
-        "animeunity": "to",
-        "altadefinizione": "vodka",
-        "guardaserie": "ceo",
-        "ddlstreamitaly": "co"
+        "streamingcommunity": {
+            "video_workers": 4,
+            "audio_workers": 2,
+            "domain": "boston"
+        },
+        "animeunity": {
+            "video_workers": 4,
+            "audio_workers": 2,
+            "domain": "to"
+        },
+        "altadefinizione": {
+            "video_workers": -1,
+            "audio_workers": -1,
+            "domain": "vodka"
+        },
+        "guardaserie": {
+            "video_workers": -1,
+            "audio_workers": -1,
+            "domain": "ceo"
+        },
+        "ddlstreamitaly": {
+            "video_workers": -1,
+            "audio_workers": -1,
+            "domain": "co"
+        }
     }
 }
