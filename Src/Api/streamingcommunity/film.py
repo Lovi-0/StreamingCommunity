@@ -6,7 +6,7 @@ import logging
 
 # Internal utilities
 from Src.Util.console import console
-from Src.Lib.Hls.downloader import Downloader
+from Src.Lib.Downloader import HLS_Downloader
 from Src.Util.message import start_message
 
 
@@ -50,7 +50,7 @@ def download_film(id_film: str, title_name: str, domain: str):
     mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name)
 
     # Download the film using the m3u8 playlist, and output filename
-    Downloader(
+    HLS_Downloader(
         m3u8_playlist = master_playlist,
         output_filename = os.path.join(mp4_path, mp4_format)
     ).start()

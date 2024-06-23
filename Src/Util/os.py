@@ -23,11 +23,13 @@ from typing import List
 
 
 # External library
+import httpx
 import unicodedata
 
 
 # Internal utilities
 from .console import console
+from .headers import get_headers
 
 
 
@@ -316,32 +318,45 @@ def clean_json(path: str) -> None:
 
 
 
-# --> OS MANAGE SIZE FILE
-def format_size(size_bytes: float) -> str:
+# --> OS MANAGE SIZE FILE AND INTERNET SPEED
+def format_file_size(size_bytes: float) -> str:
     """
-    Format the size in bytes into a human-readable format.
+    Formats a file size from bytes into a human-readable string representation.
 
     Args:
-        - size_bytes (float): The size in bytes to be formatted.
+        size_bytes (float): Size in bytes to be formatted.
 
     Returns:
-        str: The formatted size.
+        str: Formatted string representing the file size with appropriate unit (B, KB, MB, GB, TB).
     """
-
     if size_bytes <= 0:
         return "0B"
 
     units = ['B', 'KB', 'MB', 'GB', 'TB']
     unit_index = 0
 
-    # Convert bytes to appropriate unit
     while size_bytes >= 1024 and unit_index < len(units) - 1:
         size_bytes /= 1024
         unit_index += 1
 
-    # Round the size to two decimal places and return with the appropriate unit
     return f"{size_bytes:.2f} {units[unit_index]}"
 
+def format_transfer_speed(bytes: float) -> str:
+    """
+    Formats a transfer speed from bytes per second into a human-readable string representation.
+
+    Args:
+        bytes (float): Speed in bytes per second to be formatted.
+
+    Returns:
+        str: Formatted string representing the transfer speed with appropriate unit (Bytes/s, KB/s, MB/s).
+    """
+    if bytes < 1024:
+        return f"{bytes:.2f} Bytes/s"
+    elif bytes < 1024 * 1024:
+        return f"{bytes / 1024:.2f} KB/s"
+    else:
+        return f"{bytes / (1024 * 1024):.2f} MB/s"
 
 
 
@@ -452,7 +467,6 @@ def get_system_summary():
     
     console.print(f"[cyan]Python[white]: [bold red]{python_version} ({python_implementation} {arch}) - {os_info} ({openssl_version}, {glibc_version})[/bold red]")
     logging.info(f"Python: {python_version} ({python_implementation} {arch}) - {os_info} ({openssl_version}, {glibc_version})")
-
     
     # ffmpeg and ffprobe versions
     ffmpeg_version = get_executable_version(['ffmpeg', '-version'])
@@ -523,6 +537,79 @@ def run_node_script(script_content: str) -> str:
         # Clean up the temporary script file
         import os
         os.remove('script.js')
+
+def run_node_script_api(script_content: str) -> str:
+    """
+    Runs a Node.js script and returns its output.
+
+    Args:
+        script_content (str): The content of the Node.js script to run.
+
+    Returns:
+        str: The output of the Node.js script.
+    """
+
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+        'dnt': '1',
+        'origin': 'https://onecompiler.com',
+        'priority': 'u=1, i',
+        'referer': 'https://onecompiler.com/javascript',
+        'user-agent': get_headers()
+    }
+
+    json_data = {
+        'name': 'JavaScript',
+        'title': '42gyum6qn',
+        'version': 'ES6',
+        'mode': 'javascript',
+        'description': None,
+        'extension': 'js',
+        'languageType': 'programming',
+        'active': False,
+        'properties': {
+            'language': 'javascript',
+            'docs': False,
+            'tutorials': False,
+            'cheatsheets': False,
+            'filesEditable': False,
+            'filesDeletable': False,
+            'files': [
+                {
+                    'name': 'index.js',
+                    'content': script_content
+                },
+            ],
+            'newFileOptions': [
+                {
+                    'helpText': 'New JS file',
+                    'name': 'script${i}.js',
+                    'content': "/**\n *  In main file\n *  let script${i} = require('./script${i}');\n *  console.log(script${i}.sum(1, 2));\n */\n\nfunction sum(a, b) {\n    return a + b;\n}\n\nmodule.exports = { sum };",
+                },
+                {
+                    'helpText': 'Add Dependencies',
+                    'name': 'package.json',
+                    'content': '{\n  "name": "main_app",\n  "version": "1.0.0",\n  "description": "",\n  "main": "HelloWorld.js",\n  "dependencies": {\n    "lodash": "^4.17.21"\n  }\n}',
+                },
+            ],
+        },
+        '_id': '42gcvpkbg_42gyuud7m',
+        'user': None,
+        'visibility': 'public',
+    }
+
+    # Return error
+    response = httpx.post('https://onecompiler.com/api/code/exec', headers=headers, json=json_data)
+    response.raise_for_status()
+
+    if response.status_code == 200:
+        return str(response.json()['stderr']).split("\n")[1]
+    
+    else:
+        logging.error("Cant connect to site: onecompiler.com")
+        sys.exit(0)
+
 
 
 

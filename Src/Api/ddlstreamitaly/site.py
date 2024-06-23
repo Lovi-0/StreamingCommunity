@@ -1,5 +1,6 @@
 # 09.06.24
 
+import sys
 import logging
 
 
@@ -21,7 +22,6 @@ from .Core.Class.SearchType import MediaManager
 
 # Variable
 from .costant import SITE_NAME
-cookie_index = config_manager.get_dict('REQUESTS', 'index')
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 

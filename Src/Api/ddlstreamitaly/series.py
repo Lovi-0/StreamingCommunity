@@ -7,12 +7,11 @@ from urllib.parse import urlparse
 
 
 # Internal utilities
-from Src.Util.color import Colors
-from Src.Util.console import console, msg
+from Src.Util.console import console
 from Src.Util.message import start_message
 from Src.Util.os import create_folder, can_create_file
 from Src.Util.table import TVShowManager
-from Src.Lib.Hls.download_mp4 import MP4_downloader
+from Src.Lib.Downloader import MP4_downloader
 from ..Template import manage_selection, map_episode_title
 
 
@@ -70,7 +69,6 @@ def donwload_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) 
         url = master_playlist, 
         path = os.path.join(mp4_path, mp4_name),
         referer = f"{parsed_url.scheme}://{parsed_url.netloc}/",
-        add_desc=f"{Colors.MAGENTA}video"
     )
 
 

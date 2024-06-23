@@ -9,7 +9,7 @@ import logging
 from Src.Util.console import console, msg
 from Src.Util.message import start_message
 from Src.Util.table import TVShowManager
-from Src.Lib.Hls.downloader import Downloader
+from Src.Lib.Downloader import HLS_Downloader
 from ..Template import manage_selection, map_episode_title
 
 
@@ -51,7 +51,7 @@ def donwload_video(tv_name: str, index_season_selected: int, index_episode_selec
     master_playlist = video_source.get_playlist()
     
     # Download the episode
-    Downloader(
+    HLS_Downloader(
         m3u8_playlist = master_playlist,
         output_filename = os.path.join(mp4_path, mp4_name)
     ).start()

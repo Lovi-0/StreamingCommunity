@@ -12,7 +12,7 @@ from typing import Tuple
 
 # Internal utilities
 from Src.Util.console import console
-from Src.Util.os import format_size
+from Src.Util.os import format_file_size
 
 
 # Variable
@@ -61,12 +61,11 @@ def capture_output(process: subprocess.Popen, description: str) -> None:
                         else:
                             byte_size = int(re.findall(r'\d+', data.get('size', '0'))[0]) * 1000
 
-                        time_now = datetime.now().strftime('%H:%M:%S')
 
                         # Construct the progress string with formatted output information
-                        progress_string = (f"[blue][{time_now}][purple] FFmpeg [white][{description}[white]]: "
+                        progress_string = (f"[yellow][FFmpeg] [white][{description}[white]]: "
                                            f"([green]'speed': [yellow]{data.get('speed', 'N/A')}[white], "
-                                           f"[green]'size': [yellow]{format_size(byte_size)}[white])")
+                                           f"[green]'size': [yellow]{format_file_size(byte_size)}[white])")
                         max_length = max(max_length, len(progress_string))
 
                         # Print the progress string to the console, overwriting the previous line

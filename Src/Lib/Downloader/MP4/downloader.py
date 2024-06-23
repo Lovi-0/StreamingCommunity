@@ -15,11 +15,11 @@ from Src.Util.headers import get_headers
 from Src.Util.color import Colors
 from Src.Util.console import console, Panel
 from Src.Util._jsonConfig import config_manager
-from Src.Util.os import format_size
+from Src.Util.os import format_file_size
 
 
 # Logic class
-from ..FFmpeg import print_duration_table
+from ...FFmpeg import print_duration_table
 
 
 # Config
@@ -29,19 +29,32 @@ REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 
 
 
-def MP4_downloader(url: str, path: str, referer: str, add_desc: str):
+def MP4_downloader(url: str, path: str, referer: str):
 
+    """
+    Downloads an MP4 video from a given URL using the specified referer header.
+
+    Parameter:
+        - url (str): The URL of the MP4 video to download.
+        - path (str): The local path where the downloaded MP4 file will be saved.
+        - referer (str): The referer header value to include in the HTTP request headers.
+    """
+    
     # Make request to get content of video
     logging.info(f"Make request to fetch mp4 from: {url}")
-    headers = {'Referer': referer, 'user-agent': get_headers()}
+
+    if referer != None:
+        headers = {'Referer': referer, 'user-agent': get_headers()}
+    else:
+        headers = {'user-agent': get_headers()}
     
     with httpx.Client(verify=REQUEST_VERIFY, timeout=REQUEST_TIMEOUT) as client:
-        with client.stream("GET", url, headers=headers, timeout=99) as response:
+        with client.stream("GET", url, headers=headers, timeout=10) as response:
             total = int(response.headers.get('content-length', 0))
 
             # Create bar format
             if TQDM_USE_LARGE_BAR:
-                bar_format = (f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): "
+                bar_format = (f"{Colors.YELLOW}[MP4] {Colors.WHITE}({Colors.CYAN}video{Colors.WHITE}): "
                               f"{Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ "
                               f"{Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] "
                               f"{Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}} {Colors.WHITE}| "
@@ -53,11 +66,11 @@ def MP4_downloader(url: str, path: str, referer: str, add_desc: str):
             # Create progress bar
             progress_bar = tqdm(
                 total=total,
-                unit='iB',
                 ascii='░▒█',
                 bar_format=bar_format,
                 unit_scale=True,
-                unit_divisor=1024
+                unit_divisor=1024,
+                mininterval=0.05
             )
 
             # Download file
@@ -70,8 +83,8 @@ def MP4_downloader(url: str, path: str, referer: str, add_desc: str):
     # Get summary
     console.print(Panel(
         f"[bold green]Download completed![/bold green]\n"
-        f"File size: [bold red]{format_size(os.path.getsize(path))}[/bold red]\n"
-        f"Duration: [bold]{print_duration_table(path, show=False)}[/bold]", 
+        f"[cyan]File size: [bold red]{format_file_size(os.path.getsize(path))}[/bold red]\n"
+        f"[cyan]Duration: [bold]{print_duration_table(path, description=False, return_string=True)}[/bold]", 
         title=f"{os.path.basename(path.replace('.mp4', ''))}", 
         border_style="green"
     ))

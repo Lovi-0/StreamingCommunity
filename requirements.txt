@@ -8,3 +8,4 @@ m3u8
 psutil
 unidecode
 fake-useragent
+qbittorrent-api

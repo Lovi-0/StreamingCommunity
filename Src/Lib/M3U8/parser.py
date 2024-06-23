@@ -584,20 +584,34 @@ class M3U8_Parser:
         self._audio = M3U8_Audio(self.audio_playlist)
         self._subtitle = M3U8_Subtitle(self.subtitle_playlist)
 
-    def get_duration(self):
+    def get_duration(self, return_string:bool = True):
         """
         Convert duration from seconds to hours, minutes, and remaining seconds.
 
         Parameters:
-        - seconds (float): Duration in seconds.
+        - return_string (bool): If True, returns the formatted duration string. 
+                                If False, returns a dictionary with hours, minutes, and seconds.
 
         Returns:
-        - formatted_duration (str): Formatted duration string with hours, minutes, and seconds.
+            - formatted_duration (str): Formatted duration string with hours, minutes, and seconds if return_string is True.
+            - duration_dict (dict): Dictionary with keys 'h', 'm', 's' representing hours, minutes, and seconds respectively if return_string is False.
+
+        Example usage:
+        >>> obj = YourClass(duration=3661)
+        >>> obj.get_duration()
+        '[yellow]1[red]h [yellow]1[red]m [yellow]1[red]s'
+        >>> obj.get_duration(return_string=False)
+        {'h': 1, 'm': 1, 's': 1}
         """
+
         # Calculate hours, minutes, and remaining seconds
-        hours = int(self.duration / 3600)
-        minutes = int((self.duration % 3600) / 60)
-        remaining_seconds = int(self.duration % 60)
+        hours, remainder = divmod(self.duration, 3600)
+        minutes, seconds = divmod(remainder, 60)
+
+
 
         # Format the duration string with colors
-        return f"[yellow]{int(hours)}[red]h [yellow]{int(minutes)}[red]m [yellow]{int(remaining_seconds)}[red]s"
+        if return_string:
+            return f"[yellow]{int(hours)}[red]h [yellow]{int(minutes)}[red]m [yellow]{int(seconds)}[red]s"
+        else:
+            return {'h': int(hours), 'm': int(minutes), 's': int(seconds)}

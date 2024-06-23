@@ -29,8 +29,6 @@ Make sure you have the following prerequisites installed on your system:
 * [ffmpeg](https://www.gyan.dev/ffmpeg/builds/)
 * [opnessl](https://www.openssl.org) or [pycryptodome](https://pypi.org/project/pycryptodome/)
 
-* [nodejs](https://nodejs.org/)
-
 ## Installation
 
 Install the required Python libraries using the following command:

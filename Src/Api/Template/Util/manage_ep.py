@@ -14,6 +14,27 @@ from Src.Util.os import remove_special_characters
 MAP_EPISODE = config_manager.get('DEFAULT', 'map_episode_name')
 
 
+def dynamic_format_number(n: int) -> str:
+    """
+    Formats a number by adding a leading zero.
+    The width of the resulting string is dynamic, calculated as the number of digits in the number plus one.
+    
+    Args:
+        - n (int): The number to format.
+    
+    Returns:
+        - str: The formatted number as a string with a leading zero.
+    
+    Examples:
+    >>> dynamic_format_number(1)
+    '01'
+    >>> dynamic_format_number(20)
+    '020'
+    """
+    width = len(str(n)) + 1
+    return str(n).zfill(width)
+
+
 def manage_selection(cmd_insert: str, max_count: int) -> List[int]:
     """
     Manage user selection for seasons to download.
@@ -45,6 +66,7 @@ def manage_selection(cmd_insert: str, max_count: int) -> List[int]:
     logging.info(f"List return: {list_season_select}")
     return list_season_select
 
+
 def map_episode_title(tv_name: str, number_season: int, episode_number: int, episode_name: str) -> str:
     """
     Maps the episode title to a specific format.
@@ -60,8 +82,8 @@ def map_episode_title(tv_name: str, number_season: int, episode_number: int, epi
     """
     map_episode_temp = MAP_EPISODE
     map_episode_temp = map_episode_temp.replace("%(tv_name)", remove_special_characters(tv_name))
-    map_episode_temp = map_episode_temp.replace("%(season)", str(number_season))
-    map_episode_temp = map_episode_temp.replace("%(episode)", str(episode_number))
+    map_episode_temp = map_episode_temp.replace("%(season)", dynamic_format_number(number_season))
+    map_episode_temp = map_episode_temp.replace("%(episode)", dynamic_format_number(episode_number))
     map_episode_temp = map_episode_temp.replace("%(episode_name)", remove_special_characters(episode_name))
 
     # Additional fix

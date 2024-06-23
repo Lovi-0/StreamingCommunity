@@ -9,7 +9,7 @@ import logging
 from Src.Util.console import console, msg
 from Src.Util.table import TVShowManager
 from Src.Util.message import start_message
-from Src.Lib.Hls.downloader import Downloader
+from Src.Lib.Downloader import HLS_Downloader
 from ..Template import manage_selection, map_episode_title
 
 
@@ -53,7 +53,7 @@ def donwload_video(scape_info_serie: GetSerieInfo, index_season_selected: int, i
     # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()
     
-    Downloader(
+    HLS_Downloader(
         m3u8_playlist = master_playlist,
         output_filename = os.path.join(mp4_path, mp4_name)
     ).start()

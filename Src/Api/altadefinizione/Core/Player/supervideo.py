@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Util.os import run_node_script
+from Src.Util.os import run_node_script, run_node_script_api
 
 
 class VideoSource:
@@ -118,9 +118,14 @@ class VideoSource:
         """
         for script in soup.find_all("script"):
             if "eval" in str(script):
-                new_script = str(script.text).replace("eval", "var a = ")
-                new_script = new_script.replace(")))", ")));console.log(a);")
-                return run_node_script(new_script)
+
+                # WITH INSTALL NODE JS
+                #new_script = str(script.text).replace("eval", "var a = ")
+                #new_script = new_script.replace(")))", ")));console.log(a);")
+                #return run_node_script(new_script)
+
+                # WITH API
+                return run_node_script_api(script.text)
             
         return None
 
@@ -155,7 +160,7 @@ class VideoSource:
             pattern = r'data-link="(//supervideo[^"]+)"'
             match = re.search(pattern, str(down_page_soup))
             if not match:
-                logging.error("No match found for supervideo URL.")
+                logging.error("No player available for download.")
                 return None
 
             supervideo_url = "https:" + match.group(1)

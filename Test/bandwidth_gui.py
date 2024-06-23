@@ -1,8 +1,14 @@
-import tkinter as tk
-from threading import Thread, Lock
-from collections import deque
-import psutil
+# 23.06.24
+
 import time
+from collections import deque
+from threading import Thread, Lock
+
+
+# External library
+import psutil
+import tkinter as tk
+
 
 class NetworkMonitor:
     def __init__(self, maxlen=10):
@@ -37,6 +43,7 @@ class NetworkMonitor:
                 })
 
                 old_value = new_value
+
 
 class NetworkMonitorApp:
     def __init__(self, root):
@@ -77,7 +84,8 @@ class NetworkMonitorApp:
         self.monitor_thread = Thread(target=self.monitor.capture_speed, args=(0.5,), daemon=True)
         self.monitor_thread.start()
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = NetworkMonitorApp(root)
-    root.mainloop()
+
+
+root = tk.Tk()
+app = NetworkMonitorApp(root)
+root.mainloop()

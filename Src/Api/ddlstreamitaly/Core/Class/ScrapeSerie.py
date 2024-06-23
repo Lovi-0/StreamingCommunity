@@ -13,11 +13,14 @@ from bs4 import BeautifulSoup
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Util._jsonConfig import config_manager
 
 
 # Logic class
 from .SearchType import MediaItem
+
+
+# Variable
+from ...costant import COOKIE
 
 
 
@@ -28,10 +31,10 @@ class GetSerieInfo:
         Initializes the GetSerieInfo object with default values.
 
         Args:
-            dict_serie (MediaItem): Dictionary containing series information (optional).
+            - dict_serie (MediaItem): Dictionary containing series information (optional).
         """
         self.headers = {'user-agent': get_headers()}
-        self.cookies = config_manager.get_dict('REQUESTS', 'index')
+        self.cookies = COOKIE
         self.url = dict_serie.url
         self.tv_name = None
         self.list_episodes = None
@@ -49,7 +52,7 @@ class GetSerieInfo:
 
         # Make an HTTP request to the series URL
         try:
-            response = httpx.get(self.url + "?area=online", cookies=self.cookies, headers=self.headers)
+            response = httpx.get(self.url + "?area=online", cookies=self.cookies, headers=self.headers, timeout=10)
             response.raise_for_status()
 
         except Exception as e:

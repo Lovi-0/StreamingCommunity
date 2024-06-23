@@ -14,6 +14,10 @@ from Src.Util.headers import get_headers
 from Src.Util._jsonConfig import config_manager
 
 
+# Variable
+from ...costant import COOKIE
+
+
 class VideoSource:
 
     def __init__(self) -> None:
@@ -25,7 +29,7 @@ class VideoSource:
             cookie (dict): A dictionary to store cookies.
         """
         self.headers = {'user-agent': get_headers()}
-        self.cookie = config_manager.get_dict('REQUESTS', 'index')
+        self.cookie = COOKIE
 
     def setup(self, url: str) -> None:
         """

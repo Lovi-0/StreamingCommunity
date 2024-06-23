@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Util.os import run_node_script
+from Src.Util.os import run_node_script, run_node_script_api
 
 
 class VideoSource:
@@ -46,7 +46,7 @@ class VideoSource:
         """
 
         try:
-            response = httpx.get(url, headers=self.headers, follow_redirects=True)
+            response = httpx.get(url, headers=self.headers, follow_redirects=True, timeout=10)
             response.raise_for_status()
             return response.text
         
@@ -85,9 +85,14 @@ class VideoSource:
         """
         for script in soup.find_all("script"):
             if "eval" in str(script):
-                new_script = str(script.text).replace("eval", "var a = ")
-                new_script = new_script.replace(")))", ")));console.log(a);")
-                return run_node_script(new_script)
+                
+                # WITH INSTALL NODE JS
+                #new_script = str(script.text).replace("eval", "var a = ")
+                #new_script = new_script.replace(")))", ")));console.log(a);")
+                #return run_node_script(new_script)
+
+                # WITH API
+                return run_node_script_api(script.text)
             
         return None
 

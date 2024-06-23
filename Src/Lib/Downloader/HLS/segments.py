@@ -27,7 +27,7 @@ from Src.Util.call_stack import get_call_stack
 
 
 # Logic class
-from ..M3U8 import (
+from ...M3U8 import (
     M3U8_Decryption,
     M3U8_Ts_Estimator,
     M3U8_Parser,
@@ -53,7 +53,7 @@ PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
 
 
 # Variable
-headers_index = config_manager.get_dict('REQUESTS', 'index')
+headers_index = config_manager.get_dict('REQUESTS', 'user-agent')
 
 
 
@@ -68,6 +68,7 @@ class M3U8_Segments:
         """
         self.url = url
         self.tmp_folder = tmp_folder
+        self.expected_real_time = None 
         self.tmp_file_path = os.path.join(self.tmp_folder, "0.ts")
         os.makedirs(self.tmp_folder, exist_ok=True)
 
@@ -90,7 +91,7 @@ class M3U8_Segments:
         Returns:
             bytes: The encryption key in bytes.
         """
-        headers_index['user-agent'] = get_headers()
+        headers_index = {'user-agent': get_headers()}
 
         # Construct the full URL of the key
         key_uri = urljoin(self.url, m3u8_parser.keys.get('uri'))
@@ -123,8 +124,9 @@ class M3U8_Segments:
         m3u8_parser = M3U8_Parser()
         m3u8_parser.parse_data(uri=self.url, raw_content=m3u8_content)
 
-        console.log(f"[red]Expected duration after download: {m3u8_parser.get_duration()}")
-        console.log(f"[red]There is key: [yellow]{m3u8_parser.keys is not None}")
+        #console.log(f"[red]Expected duration after download: {m3u8_parser.get_duration()}")
+        #console.log(f"[red]There is key: [yellow]{m3u8_parser.keys is not None}")
+        self.expected_real_time = m3u8_parser.get_duration(return_string=False)
 
         # Check if there is an encryption key in the playlis
         if m3u8_parser.keys is not None:
@@ -170,7 +172,7 @@ class M3U8_Segments:
         """
         Makes a request to the index M3U8 file to get information about segments.
         """
-        headers_index['user-agent'] = get_headers()
+        headers_index = {'user-agent': get_headers()}
 
         # Send a GET request to retrieve the index M3U8 file
         response = httpx.get(self.url, headers=headers_index)
@@ -206,14 +208,14 @@ class M3U8_Segments:
                 proxy = self.valid_proxy[index % len(self.valid_proxy)]
                 logging.info(f"Use proxy: {proxy}")
 
-                with httpx.Client(transport=httpx.HTTPTransport(retries=3), proxies=proxy, verify=REQUEST_VERIFY) as client:  
+                with httpx.Client(proxies=proxy, verify=REQUEST_VERIFY) as client:  
                     if 'key_base_url' in self.__dict__:
                         response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
                     else:
                         response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT)
             else:
 
-                with httpx.Client(transport=httpx.HTTPTransport(retries=3), verify=REQUEST_VERIFY) as client_2:
+                with httpx.Client(verify=REQUEST_VERIFY) as client_2:
                     if 'key_base_url' in self.__dict__:
                         response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
                     else:
@@ -298,16 +300,28 @@ class M3U8_Segments:
 
         # Custom bar for mobile and pc
         if TQDM_USE_LARGE_BAR:
-            bar_format=f"{Colors.YELLOW}Downloading {Colors.WHITE}({add_desc}{Colors.WHITE}): {Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] {Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
+            bar_format = (
+                f"{Colors.YELLOW}[HLS] {Colors.WHITE}({Colors.CYAN}{add_desc}{Colors.WHITE}): "
+                f"{Colors.RED}{{percentage:.2f}}% "
+                f"{Colors.MAGENTA}{{bar}} "
+                f"{Colors.WHITE}[ {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] "
+                f"{Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
+            )
         else:
-            bar_format=f"{Colors.YELLOW}Proc{Colors.WHITE}: {Colors.RED}{{percentage:.2f}}% {Colors.WHITE}| {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
+            bar_format = (
+                f"{Colors.YELLOW}Proc{Colors.WHITE}: "
+                f"{Colors.RED}{{percentage:.2f}}% "
+                f"{Colors.WHITE}| "
+                f"{Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]"
+            )
 
         # Create progress bar
         progress_bar = tqdm(
             total=len(self.segments), 
             unit='s',
             ascii='░▒█',
-            bar_format=bar_format
+            bar_format=bar_format,
+            mininterval=0.05
         )
 
         # Start a separate thread to write segments to the file

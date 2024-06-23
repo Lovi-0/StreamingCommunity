@@ -11,8 +11,6 @@ import httpx
 from unidecode import unidecode
 
 
-
-
 # Internal utilities
 from Src.Util.headers import get_headers
 from Src.Util._jsonConfig import config_manager
@@ -22,7 +20,7 @@ from Src.Util.os import (
     remove_folder,
     delete_files_except_one,
     compute_sha1_hash,
-    format_size,
+    format_file_size,
     create_folder, 
     reduce_base_name, 
     remove_special_characters,
@@ -31,19 +29,18 @@ from Src.Util.os import (
 
 
 # Logic class
-from ..FFmpeg import (
+from ...FFmpeg import (
     print_duration_table,
     join_video,
     join_audios,
     join_subtitle
 )
-from ..M3U8 import (
+from ...M3U8 import (
     M3U8_Parser,
     M3U8_Codec,
     M3U8_UrlFix
 )
 from .segments import M3U8_Segments
-from ..E_Table import report_table
 
 
 # Config
@@ -59,11 +56,11 @@ FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolutio
 
 
 # Variable
-headers_index = config_manager.get_dict('REQUESTS', 'index')
+headers_index = config_manager.get_dict('REQUESTS', 'user-agent')
 
 
     
-class Downloader():
+class HLS_Downloader():
     def __init__(self, output_filename: str = None, m3u8_playlist:str = None, m3u8_index:str = None):
 
         """
@@ -77,7 +74,8 @@ class Downloader():
 
         self.m3u8_playlist = m3u8_playlist
         self.m3u8_index = m3u8_index
-        self.output_filename = output_filename.replace(" ", "_")
+        self.output_filename = output_filename
+        self.expected_real_time = None 
 
         # Auto generate out file name if not present
         if output_filename == None:
@@ -87,6 +85,8 @@ class Downloader():
                 self.output_filename = os.path.join("missing", compute_sha1_hash(m3u8_index))
 
         else:
+
+            # For missing output_filename
             folder, base_name = os.path.split(self.output_filename)                             # Split file_folder output
             base_name = reduce_base_name(remove_special_characters(base_name))   # Remove special char
             create_folder(folder)                                                               # Create folder and check if exist
@@ -94,6 +94,7 @@ class Downloader():
                 logging.error("Invalid mp4 name.")
                 sys.exit(0)
 
+            # Parse to only ascii for win, linux, mac and termux
             self.output_filename = os.path.join(folder, base_name)
             self.output_filename = unidecode(self.output_filename)
 
@@ -134,23 +135,17 @@ class Downloader():
             str: The text content of the response.
         """
 
+        # Send a GET request to the provided URL
+        logging.info(f"Test url: {url}")
+        headers_index = {'user-agent': get_headers()}
+        response = httpx.get(url, headers=headers_index)
+
         try:
-
-            # Send a GET request to the provided URL
-            logging.info(f"Test url: {url}")
-            headers_index['user-agent'] = get_headers()
-            response = httpx.get(url, headers=headers_index)
             response.raise_for_status()
-
-            if response.status_code == 200:
-                return response.text
+            return response.text
             
-            else:
-                logging.error(f"Test request to {url} failed with status code: {response.status_code}")
-                return None
-
         except Exception as e:
-            logging.error(f"An unexpected error occurred with test request: {e}")
+            logging.error(f"Test request to {url} failed with error: {e}")
             return None
         
     def __manage_playlist__(self, m3u8_playlist_text):
@@ -179,7 +174,7 @@ class Downloader():
 
         # Check if there is some audios, else disable download
         if self.list_available_audio != None:
-            console.print(f"[cyan]Find audios [white]=> [red]{[obj_audio.get('language') for obj_audio in self.list_available_audio]}")
+            console.print(f"[cyan]Audios [white]=> [red]{[obj_audio.get('language') for obj_audio in self.list_available_audio]}")
         else:
             console.log("[red]Cant find a list of audios")
 
@@ -209,7 +204,7 @@ class Downloader():
         logging.info(f"M3U8 index select: {self.m3u8_index}, with resolution: {video_res}")
 
         # Get URI of the best quality and codecs parameters
-        console.print(f"[cyan]Find resolution [white]=> [red]{sorted(list_available_resolution, reverse=True)}")
+        console.print(f"[cyan]Resolutions [white]=> [red]{sorted(list_available_resolution, reverse=True)}")
 
         # Fix URL if it is not complete with http:\\site_name.domain\...
         if "http" not in self.m3u8_index:
@@ -230,7 +225,7 @@ class Downloader():
         logging.info(f"Find codec: {self.codec}")
 
         if self.codec is not None:
-            console.print(f"[cyan]Find codec [white]=> ([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white] ([green]b[white]: [yellow]{self.codec.video_bitrate // 1000}k[white]), [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white] ([green]b[white]: [yellow]{self.codec.audio_bitrate // 1000}k[white]))")
+            console.print(f"[cyan]Codec [white]=> ([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white] ([green]b[white]: [yellow]{self.codec.video_bitrate // 1000}k[white]), [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white] ([green]b[white]: [yellow]{self.codec.audio_bitrate // 1000}k[white]))")
 
 
     def __donwload_video__(self):
@@ -260,6 +255,7 @@ class Downloader():
             
             # Download the video segments
             video_m3u8.download_streams(f"{Colors.MAGENTA}video")
+            self.expected_real_time = video_m3u8.expected_real_time
 
             # Get time of output file
             print_duration_table(os.path.join(full_path_video, "0.ts"))
@@ -459,6 +455,10 @@ class Downloader():
             - out_path (str): Path of the output file.
         """
 
+        def dict_to_seconds(d):
+            return d['h'] * 3600 + d['m'] * 60 + d['s']
+        
+
         # Check if file to rename exist
         logging.info(f"Check if end file converted exist: {out_path}")
         if out_path is None or not os.path.isfile(out_path):
@@ -471,12 +471,29 @@ class Downloader():
             # Rename file converted to original set in init
             os.rename(out_path, self.output_filename)
 
-            # Print size of the file
-            console.print(Panel(
+            # Get dict with h m s for ouput file name
+            end_output_time = print_duration_table(self.output_filename, description=False, return_string=False)
+
+            # Calculate info for panel
+            formatted_size = format_file_size(os.path.getsize(self.output_filename))
+            formatted_duration = print_duration_table(self.output_filename, description=False, return_string=True)
+            
+            expected_real_seconds = dict_to_seconds(self.expected_real_time)
+            end_output_seconds = dict_to_seconds(end_output_time)
+            missing_ts = not (expected_real_seconds - 3 <= end_output_seconds <= expected_real_seconds + 3)
+
+            panel_content = (
                 f"[bold green]Download completed![/bold green]\n"
-                f"File size: [bold red]{format_size(os.path.getsize(self.output_filename))}[/bold red]\n"
-                f"Duration: [bold]{print_duration_table(self.output_filename, show=False)}[/bold]", 
-            title=f"{os.path.basename(self.output_filename.replace('.mp4', ''))}", border_style="green"))
+                f"[cyan]File size: [bold red]{formatted_size}[/bold red]\n"
+                f"[cyan]Duration: [bold]{formatted_duration}[/bold]\n"
+                f"[cyan]Missing TS: [bold red]{missing_ts}[/bold red]"
+            )
+
+            console.print(Panel(
+                panel_content,
+                title=f"{os.path.basename(self.output_filename.replace('.mp4', ''))}",
+                border_style="green"
+            ))
 
             # Delete all files except the output file
             delete_files_except_one(self.base_path, os.path.basename(self.output_filename))
@@ -501,8 +518,6 @@ class Downloader():
 
         if self.m3u8_playlist:
             logging.info("Download from PLAYLIST")
-
-
             m3u8_playlist_text = self.__df_make_req__(self.m3u8_playlist)
 
             # Add full URL of the M3U8 playlist to fix next .ts without https if necessary
