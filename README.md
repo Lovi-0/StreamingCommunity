@@ -27,7 +27,7 @@ Make sure you have the following prerequisites installed on your system:
 
 * [python](https://www.python.org/downloads/) > 3.8
 * [ffmpeg](https://www.gyan.dev/ffmpeg/builds/)
-* [opnessl](https://www.openssl.org) or [pycryptodome](https://pypi.org/project/pycryptodome/)
+* [openssl](https://www.openssl.org) or [pycryptodome](https://pypi.org/project/pycryptodome/)
 
 ## Installation
 
