@@ -3,6 +3,7 @@ certifi
 httpx
 bs4
 rich
+pycryptodome
 tqdm
 m3u8
 psutil
