@@ -9,3 +9,4 @@ psutil
 unidecode
 fake-useragent
 qbittorrent-api
+python-qbittorrent 

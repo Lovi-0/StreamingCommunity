@@ -32,28 +32,33 @@ def download_episode(index_select: int):
     # Get information about the selected episode
     obj_episode = video_source.get_info_episode(index_select)
 
-    start_message()
-    console.print(f"[yellow]Download:  [red]EP_{obj_episode.number} \n")
+    if obj_episode is not None:
 
-    # Get the embed URL for the episode
-    embed_url = video_source.get_embed(obj_episode.id)
+        start_message()
+        console.print(f"[yellow]Download:  [red]EP_{obj_episode.number} \n")
 
-    # Parse parameter in embed text
-    video_source.parse_script(embed_url)
+        # Get the embed URL for the episode
+        embed_url = video_source.get_embed(obj_episode.id)
 
-    # Create output path
-    mp4_path = None
-    mp4_name = f"{index_select + 1}.mp4"
-    if video_source.is_series:
-        mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, video_source.series_name)
+        # Parse parameter in embed text
+        video_source.parse_script(embed_url)
+
+        # Create output path
+        mp4_path = None
+        mp4_name = f"{obj_episode.number}.mp4"
+        if video_source.is_series:
+            mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, video_source.series_name)
+        else:
+            mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, video_source.series_name)
+
+        # Start downloading
+        HLS_Downloader(
+            m3u8_playlist = video_source.get_playlist(),
+            output_filename = os.path.join(mp4_path, mp4_name)
+        ).start()
+
     else:
-        mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, video_source.series_name)
-
-    # Start downloading
-    HLS_Downloader(
-        m3u8_playlist = video_source.get_playlist(),
-        output_filename = os.path.join(mp4_path, mp4_name)
-    ).start()
+        logging.error(f"Skip index: {index_select} cant find info with api.")
 
 
 def donwload_series(tv_id: int, tv_name: str):

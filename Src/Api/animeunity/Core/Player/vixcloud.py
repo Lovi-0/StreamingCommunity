@@ -62,7 +62,7 @@ class VideoSource:
         """
         try:
 
-            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/")
+            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/", headers=self.headers)
             response.raise_for_status()
 
             # Parse JSON response and return episode count
@@ -89,7 +89,7 @@ class VideoSource:
                 "end_range": index_ep + 1
             }
 
-            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/{index_ep}", params = params)
+            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/{index_ep}", headers=self.headers, params=params, timeout=5)
             response.raise_for_status()
 
             # Return information about the episode
@@ -112,7 +112,7 @@ class VideoSource:
         """
         try:
 
-            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/embed-url/{episode_id}")
+            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/embed-url/{episode_id}", headers=self.headers)
             response.raise_for_status()
 
             # Extract and clean embed URL

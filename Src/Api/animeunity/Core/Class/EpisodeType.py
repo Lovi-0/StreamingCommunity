@@ -34,17 +34,22 @@ class EpisodeManager:
         episode = Episode(episode_data)
         self.episodes.append(episode)
 
-    def get_episode_by_index(self, index: int) -> Episode:
+    def find_episode_by_id(self, episode_id: int) -> Episode:
         """
-        Get an episode by its index.
+        Get an episode by its id.
 
         Args:
-            - index (int): Index of the episode to retrieve.
+            - episode_id (int): Index of the episode to retrieve.
 
         Returns:
             Episode: The episode object.
         """
-        return self.episodes[index]
+
+        for episode in self.episodes:
+            if episode.id == episode_id:
+                return episode
+            
+        return None
     
     def get_length(self) -> int:
         """

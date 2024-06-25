@@ -88,7 +88,7 @@ class HLS_Downloader():
 
             # For missing output_filename
             folder, base_name = os.path.split(self.output_filename)                             # Split file_folder output
-            base_name = reduce_base_name(remove_special_characters(base_name))   # Remove special char
+            base_name = reduce_base_name(remove_special_characters(base_name))                  # Remove special char
             create_folder(folder)                                                               # Create folder and check if exist
             if not can_create_file(base_name):                                                  # Check if folder file name can be create
                 logging.error("Invalid mp4 name.")
@@ -158,6 +158,7 @@ class HLS_Downloader():
 
         # Create an instance of the M3U8_Parser class
         obj_parse = M3U8_Parser()
+        self.main_obj_parser = obj_parse
 
         # Extract information about the M3U8 playlist
         obj_parse.parse_data(
@@ -227,7 +228,6 @@ class HLS_Downloader():
         if self.codec is not None:
             console.print(f"[cyan]Codec [white]=> ([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white] ([green]b[white]: [yellow]{self.codec.video_bitrate // 1000}k[white]), [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white] ([green]b[white]: [yellow]{self.codec.audio_bitrate // 1000}k[white]))")
 
-
     def __donwload_video__(self):
         """
         Downloads and manages video segments.
@@ -254,9 +254,12 @@ class HLS_Downloader():
             video_m3u8.get_info()
             
             # Download the video segments
-            video_m3u8.download_streams(f"{Colors.MAGENTA}video")
             self.expected_real_time = video_m3u8.expected_real_time
+            list_available_resolution_size = self.main_obj_parser._video.get_list_resolution_and_size(video_m3u8.expected_real_time_s)
+            #console.print(f"[cyan]Estimate size [white]=> [red]{sorted(list_available_resolution_size, reverse=True)}")
 
+            video_m3u8.download_streams(f"{Colors.MAGENTA}video")
+            
             # Get time of output file
             print_duration_table(os.path.join(full_path_video, "0.ts"))
 
@@ -496,7 +499,10 @@ class HLS_Downloader():
             ))
 
             # Delete all files except the output file
-            delete_files_except_one(self.base_path, os.path.basename(self.output_filename))
+            if not missing_ts:
+                delete_files_except_one(self.base_path, os.path.basename(self.output_filename))
+            else:
+                delete_files_except_one(self.base_path, os.path.basename(self.output_filename.replace(".mp4", "_failed.mp4")))
 
             # Remove the base folder
             if REMOVE_SEGMENTS_FOLDER:

@@ -14,7 +14,6 @@ def read_file(file_path):
 
 
 # Import
-from Src.Lib.M3U8.parser import M3U8
 from Src.Lib.M3U8 import M3U8_Parser
 
 
@@ -31,5 +30,5 @@ playlist = read_file(os.path.join(base_path_file, "playlist.m3u8"))
 
 
 # Test class
-obj_m3u8_parser.parse_data("http", index_audio)
-print(f"Duration : {obj_m3u8_parser.get_duration()}")
+obj_m3u8_parser.parse_data("", playlist)
+print(obj_m3u8_parser._video.get_list_resolution_and_size(50000))

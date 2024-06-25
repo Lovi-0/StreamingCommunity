@@ -127,6 +127,7 @@ class M3U8_Segments:
         #console.log(f"[red]Expected duration after download: {m3u8_parser.get_duration()}")
         #console.log(f"[red]There is key: [yellow]{m3u8_parser.keys is not None}")
         self.expected_real_time = m3u8_parser.get_duration(return_string=False)
+        self.expected_real_time_s = m3u8_parser.duration
 
         # Check if there is an encryption key in the playlis
         if m3u8_parser.keys is not None:

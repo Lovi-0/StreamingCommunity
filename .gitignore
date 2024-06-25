@@ -57,5 +57,6 @@ venv.bak/
 
 # Other
 Video
+note.txt
 list_proxy.txt
-note
+config.json

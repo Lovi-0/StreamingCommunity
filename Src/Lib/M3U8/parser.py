@@ -6,6 +6,7 @@ import logging
 
 # Internal utilities
 from m3u8 import loads
+from Src.Util.os import format_file_size
 
 
 # External libraries
@@ -228,6 +229,24 @@ class M3U8_Video:
             list: A list of resolutions extracted from the video playlist.
         """
         return [video['resolution'] for video in self.video_playlist]
+    
+    def get_list_resolution_and_size(self, duration):
+        """
+        Retrieve a list of resolutions and size from the video playlist.
+
+        Args:
+            - duration (int): Total duration of the video in 's'.
+        
+        Returns:
+            list: A list of resolutions extracted from the video playlist.
+        """
+        result = []
+
+        for video in self.video_playlist:
+            video_size = format_file_size((video['bandwidth'] * duration) / 8)
+            result.append((video_size))
+
+        return result
 
 
 class M3U8_Audio:
@@ -474,7 +493,8 @@ class M3U8_Parser:
 
                     self.video_playlist.append({
                         "uri": playlist.uri, 
-                        "resolution": playlist.stream_info.resolution
+                        "resolution": playlist.stream_info.resolution,
+                        "bandwidth": playlist.stream_info.bandwidth
                     })
 
                     if there_is_codec:
@@ -485,7 +505,8 @@ class M3U8_Parser:
 
                     self.video_playlist.append({
                         "uri": playlist.uri, 
-                        "resolution": M3U8_Parser.extract_resolution(playlist.uri)
+                        "resolution": M3U8_Parser.extract_resolution(playlist.uri),
+                        "bandwidth": playlist.stream_info.bandwidth
                     })    
 
                     if there_is_codec:
@@ -607,7 +628,6 @@ class M3U8_Parser:
         # Calculate hours, minutes, and remaining seconds
         hours, remainder = divmod(self.duration, 3600)
         minutes, seconds = divmod(remainder, 60)
-
 
 
         # Format the duration string with colors
