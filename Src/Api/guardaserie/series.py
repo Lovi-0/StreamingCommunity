@@ -99,6 +99,12 @@ def donwload_episode(scape_info_serie: GetSerieInfo, index_season_selected: int,
 
 
 def download_series(dict_serie: MediaItem) -> None:
+    """
+    Download all episodes of a TV series.
+
+    Parameter:
+        - dict_serie (MediaItem): obj with url name type and score
+    """
 
     # Start message and set up video source
     start_message()

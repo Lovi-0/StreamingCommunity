@@ -73,7 +73,9 @@ def donwload_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) 
 
 
 def download_thread(dict_serie: MediaItem):
-    """Download all episode of a thread"""
+    """
+    Download all episode of a thread
+    """
 
     # Start message and set up video source
     start_message()

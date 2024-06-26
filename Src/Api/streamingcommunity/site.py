@@ -4,8 +4,6 @@ import sys
 import json
 import logging
 
-from typing import Tuple
-
 
 # External libraries
 import httpx
@@ -34,7 +32,7 @@ table_show_manager = TVShowManager()
 
 
 
-def get_version(text: str) -> tuple[str, list]:
+def get_version(text: str):
     """
     Extracts the version from the HTML text of a webpage.
 
@@ -75,7 +73,14 @@ def get_version(text: str) -> tuple[str, list]:
         raise
 
 
-def get_version_and_domain() -> Tuple[str, str]:
+def get_version_and_domain():
+    """
+    Retrieve the current version and domain of the site.
+
+    This function performs the following steps:
+    1. Determines the correct domain to use for the site by searching for a specific meta tag.
+    2. Fetches the content of the site to extract the version information.
+    """
 
     # Find new domain if prev dont work
     domain_to_use, base_url = search_domain(SITE_NAME, '<meta name="author" content="StreamingCommunity">', f"https://{SITE_NAME}")

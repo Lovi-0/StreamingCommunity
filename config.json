@@ -57,7 +57,7 @@
     },
     "SITE": {
         "streamingcommunity": {
-            "video_workers": 4,
+            "video_workers": 2,
             "audio_workers": 2,
             "domain": "boston"
         },
