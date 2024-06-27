@@ -49,8 +49,7 @@
         "use_acodec": true,
         "use_bitrate": true,
         "use_gpu": false,
-        "default_preset": "ultrafast",
-        "check_output_after_ffmpeg": false
+        "default_preset": "ultrafast"
     },
     "M3U8_PARSER": {
         "force_resolution": -1

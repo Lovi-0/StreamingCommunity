@@ -1,13 +1,9 @@
 # 16.04.24
 
 import re
-import sys
 import logging
 import threading
 import subprocess
-from datetime import datetime
-
-from typing import Tuple
 
 
 # Internal utilities

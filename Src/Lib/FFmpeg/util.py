@@ -74,6 +74,36 @@ def get_video_duration(file_path: str) -> float:
         logging.error(f"Error get video duration: {e}")
         sys.exit(0)
 
+def get_video_duration_s(filename):
+    """
+    Get the duration of a video file using ffprobe.
+
+    Parameters:
+    - filename (str): Path to the video file (e.g., 'sim.mp4')
+
+    Returns:
+    - duration (float): Duration of the video in seconds, or None if an error occurs.
+    """
+    ffprobe_cmd = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', filename]
+
+    try:
+        
+        # Run ffprobe command and capture output
+        result = subprocess.run(ffprobe_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, text=True)
+        
+        # Extract duration from the output
+        duration_str = result.stdout.strip()
+        duration = float(duration_str)  # Convert duration to float
+        
+        return int(duration)
+    
+    except subprocess.CalledProcessError as e:
+        print(f"Error running ffprobe: {e}")
+        return None
+    except ValueError as e:
+        print(f"Error converting duration to float: {e}")
+        return None
+
 
 def format_duration(seconds: float) -> Tuple[int, int, int]:
     """
@@ -104,16 +134,6 @@ def print_duration_table(file_path: str, description: str = "Duration", return_s
     Returns:
         - str: The formatted duration string if return_string is True.
         - dict: A dictionary with keys 'h', 'm', 's' representing hours, minutes, and seconds if return_string is False.
-
-    Example usage:
-    >>> print_duration_table("path/to/video.mp4")
-    [cyan]Duration for [white]([green]video.mp4[white]): [yellow]1[red]h [yellow]1[red]m [yellow]1[red]s
-
-    >>> print_duration_table("path/to/video.mp4", description=None)
-    '[yellow]1[red]h [yellow]1[red]m [yellow]1[red]s'
-
-    >>> print_duration_table("path/to/video.mp4", description=None, return_string=False)
-    {'h': 1, 'm': 1, 's': 1}
     """
 
     video_duration = get_video_duration(file_path)
@@ -196,45 +216,6 @@ def need_to_force_to_ts(file_path):
        return True
     return False
 
-
-def check_ffmpeg_input(input_file):
-    """
-    Check if an input file can be processed by FFmpeg.
-
-    Args:
-        input_file (str): Path to the input file.
-    
-    Returns:
-        bool: True if the input file is valid and can be processed by FFmpeg, False otherwise.
-    """
-    command = [
-        'ffmpeg', '-v', 'error', '-i', input_file, '-f', 'null', '-'
-    ]
-    logging.info(f"FFmpeg command check: {command}")
-
-    try:
-        # Run the FFmpeg command and capture output
-        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        
-        # Check the exit status
-        if result.returncode != 0:
-            logging.error("FFmpeg encountered an error with the input file:")
-            logging.error(result.stderr.decode('utf-8'))
-            return False
-        
-        # Optionally, you can analyze the output to check for specific errors
-        stderr_output = result.stderr.decode('utf-8')
-        if 'error' in stderr_output.lower():
-            logging.error("FFmpeg reported an error in the input file:")
-            logging.error(stderr_output)
-            return False
-
-        logging.info(f"Input file is valid: {input_file}")
-        return True
-
-    except Exception as e:
-        logging.error(f"An unexpected error occurred: {e}")
-        return False
 
 def check_duration_v_a(video_path, audio_path):
     """

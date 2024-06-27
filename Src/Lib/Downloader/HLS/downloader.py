@@ -31,6 +31,7 @@ from Src.Util.os import (
 # Logic class
 from ...FFmpeg import (
     print_duration_table,
+    get_video_duration_s,
     join_video,
     join_audios,
     join_subtitle
@@ -137,7 +138,6 @@ class HLS_Downloader():
 
         # Send a GET request to the provided URL
         logging.info(f"Test url: {url}")
-        headers_index = {'user-agent': get_headers()}
         response = httpx.get(url, headers=headers_index)
 
         try:
@@ -485,6 +485,11 @@ class HLS_Downloader():
             end_output_seconds = dict_to_seconds(end_output_time)
             missing_ts = not (expected_real_seconds - 3 <= end_output_seconds <= expected_real_seconds + 3)
 
+            # Second check 
+            if not missing_ts:
+                if get_video_duration_s(self.output_filename) < int(expected_real_seconds) - 5:
+                    missing_ts = True
+
             panel_content = (
                 f"[bold green]Download completed![/bold green]\n"
                 f"[cyan]File size: [bold red]{formatted_size}[/bold red]\n"
@@ -499,10 +504,11 @@ class HLS_Downloader():
             ))
 
             # Delete all files except the output file
-            if not missing_ts:
-                delete_files_except_one(self.base_path, os.path.basename(self.output_filename))
-            else:
-                delete_files_except_one(self.base_path, os.path.basename(self.output_filename.replace(".mp4", "_failed.mp4")))
+            if missing_ts:
+                os.rename(self.output_filename, self.output_filename.replace(".mp4", "_failed.mp4"))
+
+            # Delete all other conversion
+            delete_files_except_one(self.base_path, os.path.basename(self.output_filename.replace(".mp4", "_failed.mp4")))
 
             # Remove the base folder
             if REMOVE_SEGMENTS_FOLDER:

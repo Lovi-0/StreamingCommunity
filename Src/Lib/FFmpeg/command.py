@@ -12,7 +12,7 @@ from typing import List, Dict
 from Src.Util._jsonConfig import config_manager
 from Src.Util.os import check_file_existence, suppress_output
 from Src.Util.console import console
-from .util import need_to_force_to_ts, check_ffmpeg_input, check_duration_v_a
+from .util import need_to_force_to_ts, check_duration_v_a
 from .capture import capture_ffmpeg_real_time
 from ..M3U8 import M3U8_Codec
 
@@ -26,7 +26,6 @@ USE_ACODEC = config_manager.get_bool("M3U8_CONVERSION", "use_acodec")
 USE_BITRATE = config_manager.get_bool("M3U8_CONVERSION", "use_bitrate")
 USE_GPU = config_manager.get_bool("M3U8_CONVERSION", "use_gpu")
 FFMPEG_DEFAULT_PRESET = config_manager.get("M3U8_CONVERSION", "default_preset")
-CHECK_OUTPUT_CONVERSION = config_manager.get_bool("M3U8_CONVERSION", "check_output_after_ffmpeg")
 
 
 # Variable
@@ -115,12 +114,6 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
             with suppress_output():
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join video")
                 print()
-
-    # Check file output
-    if CHECK_OUTPUT_CONVERSION:
-        console.log("[red]Check output ffmpeg")
-        time.sleep(0.5)
-        check_ffmpeg_input(out_path)
 
     time.sleep(0.5)
     if not check_file_existence(out_path):
@@ -224,12 +217,6 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join audio")
                 print()
 
-    # Check file output
-    if CHECK_OUTPUT_CONVERSION:
-        console.log("[red]Check output ffmpeg")
-        time.sleep(0.5)
-        check_ffmpeg_input(out_path)
-
     time.sleep(0.5)
     if not check_file_existence(out_path):
         logging.error("Missing output video for ffmpeg conversion audio.")
@@ -294,13 +281,6 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
             with suppress_output():
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join subtitle")
                 print()
-
-        
-    # Check file output
-    if CHECK_OUTPUT_CONVERSION:
-        console.log("[red]Check output ffmpeg")
-        time.sleep(0.5)
-        check_ffmpeg_input(out_path)
 
     time.sleep(0.5)
     if not check_file_existence(out_path):
