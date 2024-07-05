@@ -90,9 +90,6 @@ You can change some behaviors by tweaking the configuration file.
 <details>
   <summary><strong>REQUESTS</strong></summary>
 
-  * **disable_error**: Whether to disable error messages.
-    - **Default Value**: `false`
-
   * **timeout**: The timeout value for requests.
     - **Default Value**: `10`
 
@@ -158,9 +155,6 @@ You can change some behaviors by tweaking the configuration file.
 <details>
   <summary><strong>M3U8_PARSER</strong></summary>
 
-  * **skip_empty_row_playlist**: Whether to skip empty rows in the playlist m3u8.
-    - **Default Value**: `false`
-
   * **force_resolution**: Forces the use of a specific resolution. `-1` means no forced resolution.
     - **Default Value**: `-1`
     - **Example Value**: `1080`
@@ -222,6 +216,8 @@ The `run-container` command mounts also the `config.json` file, so any change to
 ## Tutorial
 
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
+Add [api_1](https://www.youtube.com/watch?v=3ylBSMyQlhM)
+Add [api_2](https://www.youtube.com/watch?v=ReEYUIbdbG4)
 
 
 ## To do

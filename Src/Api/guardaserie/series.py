@@ -7,8 +7,9 @@ import logging
 
 # Internal utilities
 from Src.Util.console import console, msg
-from Src.Util.table import TVShowManager
+from Src.Util.os import create_folder, can_create_file
 from Src.Util.message import start_message
+from Src.Util.table import TVShowManager
 from Src.Lib.Downloader import HLS_Downloader
 from ..Template import manage_selection, map_episode_title
 
@@ -46,6 +47,14 @@ def donwload_video(scape_info_serie: GetSerieInfo, index_season_selected: int, i
     # Define filename and path for the downloaded video
     mp4_name = f"{map_episode_title(scape_info_serie.tv_name, index_season_selected, index_episode_selected, obj_episode.get('name'))}.mp4"
     mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, scape_info_serie.tv_name, f"S{index_season_selected}")
+
+    # Ensure the folder path exists
+    create_folder(mp4_path)
+
+    # Check if the MP4 file can be created
+    if not can_create_file(mp4_name):
+        logging.error("Invalid mp4 name.")
+        sys.exit(0)
 
     # Setup video source
     video_source.setup(obj_episode.get('url'))

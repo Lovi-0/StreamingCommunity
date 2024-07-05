@@ -16,14 +16,14 @@ from Src.Util.os import run_node_script, run_node_script_api
 
 
 class VideoSource:
-
-    def __init__(self) -> None:
+    def __init__(self, url: str):
         """
-        Initializes the VideoSource object with default values.
+        Sets up the video source with the provided URL.
 
-        Attributes:
-            headers (dict): An empty dictionary to store HTTP headers.
+        Args:
+            url (str): The URL of the video.
         """
+        self.url = url
         self.headers = {'user-agent': get_headers()}
 
     def setup(self, url: str) -> None:

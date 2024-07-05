@@ -16,7 +16,7 @@ from Src.Util.console import console, Panel
 
 
 # Logic class
-from ..Class.SeriesType import TitleManager
+from ..Class.SeriesType import SeasonManager
 from ..Class.EpisodeType import EpisodeManager
 from ..Class.WindowType import WindowVideo, WindowParameter, DynamicJSONConverter
 
@@ -30,9 +30,7 @@ class VideoSource:
         """
         Initialize a VideoSource object.
         """
-        self.headers = {
-            'user-agent': get_headers()
-        }
+        self.headers = {'user-agent': get_headers()}
         self.is_series = False
         self.base_name = SITE_NAME
 
@@ -53,7 +51,7 @@ class VideoSource:
         if series_name is not None:
             self.is_series = True
             self.series_name = series_name
-            self.obj_title_manager: TitleManager = TitleManager()
+            self.obj_season_manager: SeasonManager = SeasonManager()
             self.obj_episode_manager: EpisodeManager = EpisodeManager()
 
     def collect_info_seasons(self) -> None:
@@ -69,7 +67,7 @@ class VideoSource:
 
         try:
 
-            response = httpx.get(f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", headers=self.headers)
+            response = httpx.get(f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", headers=self.headers, timeout=15)
             response.raise_for_status()
 
             # Extract JSON response if available
@@ -77,7 +75,7 @@ class VideoSource:
                 
             # Iterate over JSON data and add titles to the manager
             for dict_season in json_response:
-                self.obj_title_manager.add_title(dict_season)
+                self.obj_season_manager.add_season(dict_season)
 
         except Exception as e:
             logging.error(f"Error collecting season info: {e}")
@@ -93,7 +91,7 @@ class VideoSource:
         try:
 
             # Make a request to collect information about a specific season
-            response = httpx.get(f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', headers=self.headers)
+            response = httpx.get(f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', headers=self.headers, timeout=15)
             response.raise_for_status()
 
             # Extract JSON response if available
@@ -125,7 +123,7 @@ class VideoSource:
         try:
 
             # Make a request to get iframe source
-            response = httpx.get(f"https://{self.base_name}.{self.domain}/iframe/{self.media_id}", params=params)
+            response = httpx.get(f"https://{self.base_name}.{self.domain}/iframe/{self.media_id}", params=params, timeout=15)
             response.raise_for_status()
 
             # Parse response with BeautifulSoup to get iframe source
@@ -167,7 +165,7 @@ class VideoSource:
 
                 # Make a request to get content
                 try:
-                    response = httpx.get(self.iframe_src, headers=self.headers)
+                    response = httpx.get(self.iframe_src, headers=self.headers, timeout=15)
                     response.raise_for_status()
 
                 except Exception as e:

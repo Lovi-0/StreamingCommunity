@@ -44,7 +44,7 @@ class GetSerieInfo:
         try:
 
             # Make an HTTP request to the series URL
-            response = httpx.get(self.url, headers=self.headers, timeout=10)
+            response = httpx.get(self.url, headers=self.headers, timeout=15)
             response.raise_for_status()
 
             # Parse HTML content of the page
@@ -79,7 +79,7 @@ class GetSerieInfo:
         try:
 
             # Make an HTTP request to the series URL
-            response = httpx.get(self.url, headers=self.headers)
+            response = httpx.get(self.url, headers=self.headers, timeout=15)
             response.raise_for_status()
 
             # Parse HTML content of the page

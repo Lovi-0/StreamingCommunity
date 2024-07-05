@@ -29,7 +29,7 @@ REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 
 
 
-def MP4_downloader(url: str, path: str, referer: str):
+def MP4_downloader(url: str, path: str, referer: str = None):
 
     """
     Downloads an MP4 video from a given URL using the specified referer header.
@@ -39,6 +39,10 @@ def MP4_downloader(url: str, path: str, referer: str):
         - path (str): The local path where the downloaded MP4 file will be saved.
         - referer (str): The referer header value to include in the HTTP request headers.
     """
+
+    if "http" not in url or "https" not in url:
+        logging.error(f"Invalid url: {url}")
+        sys.exit(0)
     
     # Make request to get content of video
     logging.info(f"Make request to fetch mp4 from: {url}")

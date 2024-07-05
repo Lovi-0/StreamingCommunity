@@ -40,7 +40,7 @@ def check_url_for_content(url: str, content: str, timeout: int = 1) -> bool:
     """
     try:
 
-        response = httpx.get(url, timeout=timeout, headers={'user-agent': get_headers()})
+        response = httpx.get(url, timeout=timeout, headers={'user-agent': get_headers()}, follow_redirects=True)
         logging.info(f"Testing site to extract domain: {url}, response: {response.status_code}")
 
         # Raise an error if the status is not successful
@@ -169,7 +169,7 @@ def search_domain(site_name: str, target_content: str, base_url: str):
 
     try:
         # Test the current domain
-        response = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=2)
+        response = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=5, follow_redirects=True)
         console.print(f"[cyan]Test response site[white]: [red]{response.status_code}")
         response.raise_for_status()
 

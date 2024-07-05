@@ -16,7 +16,6 @@ from Src.Util._jsonConfig import config_manager
 
 
 # Logic class
-from ..Class.SeriesType import TitleManager
 from ..Class.EpisodeType import EpisodeManager, Episode
 from ..Class.WindowType import WindowVideo, WindowParameter, DynamicJSONConverter
 
@@ -30,9 +29,7 @@ class VideoSource:
         """
         Initialize a VideoSource object.
         """
-        self.headers = {
-            'user-agent': get_headers()
-        }
+        self.headers = {'user-agent': get_headers()}
         self.is_series = False
         self.base_name = SITE_NAME
         self.domain = config_manager.get_dict('SITE', self.base_name)['domain']
@@ -50,7 +47,6 @@ class VideoSource:
         if series_name is not None:
             self.is_series = True
             self.series_name = series_name
-            self.obj_title_manager: TitleManager = TitleManager()
             self.obj_episode_manager: EpisodeManager = EpisodeManager()
             
     def get_count_episodes(self):

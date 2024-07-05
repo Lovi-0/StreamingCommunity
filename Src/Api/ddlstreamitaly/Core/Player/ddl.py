@@ -11,7 +11,6 @@ from bs4 import BeautifulSoup
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Util._jsonConfig import config_manager
 
 
 # Variable
@@ -19,7 +18,6 @@ from ...costant import COOKIE
 
 
 class VideoSource:
-
     def __init__(self) -> None:
         """
         Initializes the VideoSource object with default values.
@@ -54,10 +52,10 @@ class VideoSource:
             response = httpx.get(url, headers=self.headers, cookies=self.cookie)
             response.raise_for_status()
             return response.text
-        except httpx.HTTPStatusError as http_err:
-            logging.error(f"HTTP error occurred: {http_err}")
+        
         except Exception as err:
             logging.error(f"An error occurred: {err}")
+
         return None
 
     def get_playlist(self):

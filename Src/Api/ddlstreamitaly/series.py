@@ -63,7 +63,6 @@ def donwload_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) 
     # Parse start page url
     start_message()
     parsed_url = urlparse(obj_episode.get('url'))
-    path_parts = parsed_url.path.split('/')
 
     MP4_downloader(
         url = master_playlist, 

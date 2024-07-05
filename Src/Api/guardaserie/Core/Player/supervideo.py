@@ -15,7 +15,6 @@ from Src.Util.os import run_node_script, run_node_script_api
 
 
 class VideoSource:
-
     def __init__(self) -> None:
         """
         Initializes the VideoSource object with default values.

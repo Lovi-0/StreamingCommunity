@@ -1,6 +1,7 @@
 # 23.06.24
 
 import os
+import sys
 import time
 import shutil
 import logging
@@ -97,7 +98,7 @@ class TOR_downloader:
                 return
             
             # Sleep to load magnet to qbit app
-            time.sleep(5)
+            time.sleep(10)
             latest_torrent = torrents[-1]
             torrent_hash = latest_torrent['hash']
 
@@ -178,6 +179,7 @@ class TOR_downloader:
 
         except Exception as e:
             logging.error(f"Download error: {str(e)}")
+            sys.exit(0)
 
     def move_downloaded_files(self, destination=None):
         """
@@ -190,20 +192,18 @@ class TOR_downloader:
         Returns:
         - bool: True if files are moved successfully, False otherwise.
         """
+        time.sleep(2)
 
         # List directories in the save path
         dirs = [d for d in os.listdir(self.save_path) if os.path.isdir(os.path.join(self.save_path, d))]
         
         for dir_name in dirs:
-            if dir_name in self.torrent_name :
+            if self.torrent_name.split(" ")[0] in dir_name:
                 dir_path = os.path.join(self.save_path, dir_name)
-                if destination:
-                    destination_path = os.path.join(destination, dir_name)
-                else:
-                    destination_path = os.path.join(os.getcwd(), dir_name)
-                
-                shutil.move(dir_path, destination_path)
-                logging.info(f"Moved directory {dir_name} to {destination_path}")
+
+                shutil.move(dir_path, destination)
+                logging.info(f"Moved directory {dir_name} to {destination}")
                 break
         
+        self.qb.delete_permanently(self.qb.torrents()[-1]['hash'])
         return True

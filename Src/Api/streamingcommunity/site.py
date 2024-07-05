@@ -78,8 +78,8 @@ def get_version_and_domain():
     Retrieve the current version and domain of the site.
 
     This function performs the following steps:
-    1. Determines the correct domain to use for the site by searching for a specific meta tag.
-    2. Fetches the content of the site to extract the version information.
+        - Determines the correct domain to use for the site by searching for a specific meta tag.
+        - Fetches the content of the site to extract the version information.
     """
 
     # Find new domain if prev dont work

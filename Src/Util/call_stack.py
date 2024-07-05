@@ -18,21 +18,6 @@ def get_call_stack():
             - folder_base (str): The base name of the directory path.
             - script (str): The name of the script file containing the function.
             - line (int): The line number in the script where the function is defined.
-
-    Example:
-        >>> def func_a():
-        ...     return func_b()
-        ...
-        >>> def func_b():
-        ...     return func_c()
-        ...
-        >>> def func_c():
-        ...     return get_call_stack()
-        ...
-        >>> stack_trace = func_a()
-        >>> for frame in stack_trace:
-        ...     print(f"Function: {frame['function']}, Folder: {frame['folder']}, "
-        ...           f"Folder Base: {frame['folder_base']}, Script: {frame['script']}, Line: {frame['line']}")
     """
     stack = inspect.stack()
     call_stack = []

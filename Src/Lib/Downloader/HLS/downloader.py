@@ -62,20 +62,23 @@ headers_index = config_manager.get_dict('REQUESTS', 'user-agent')
 
     
 class HLS_Downloader():
-    def __init__(self, output_filename: str = None, m3u8_playlist:str = None, m3u8_index:str = None):
-
+    def __init__(self, output_filename: str = None, m3u8_playlist: str = None, m3u8_index: str = None, is_playlist_url: bool = True, is_index_url: bool = True):
         """
-        Initialize the Downloader object.
+        Initialize the HLS Downloader object.
 
         Args:
             - output_filename (str): Output filename for the downloaded content.
             - m3u8_playlist (str, optional): URL to the main M3U8 playlist.
-            - m3u8_playlist (str, optional): URL to the main M3U8 index. ( NOT TEXT )
+            - m3u8_index (str, optional): URL to the main M3U8 index file. (NOT USED)
+            - is_playlist_url (bool): Flag indicating if `m3u8_playlist` is a URL (default True).
+            - is_index_url (bool): Flag indicating if `m3u8_index` is a URL (default True).
         """
 
+        self.output_filename = output_filename
         self.m3u8_playlist = m3u8_playlist
         self.m3u8_index = m3u8_index
-        self.output_filename = output_filename
+        self.is_playlist_url = is_playlist_url
+        self.is_index_url = is_index_url
         self.expected_real_time = None 
 
         # Auto generate out file name if not present
@@ -135,6 +138,10 @@ class HLS_Downloader():
         Returns:
             str: The text content of the response.
         """
+
+        if "http" not in url or "https" not in url:
+            logging.error(f"Invalid url: {url}")
+            sys.exit(0)
 
         # Send a GET request to the provided URL
         logging.info(f"Test url: {url}")
@@ -248,7 +255,13 @@ class HLS_Downloader():
         if not os.path.exists(self.downloaded_video[-1].get('path')):
 
             # Create an instance of M3U8_Segments to handle video segments
-            video_m3u8 = M3U8_Segments(self.m3u8_index, full_path_video)
+            if self.is_index_url:
+                logging.info("Parse index by url.")
+                video_m3u8 = M3U8_Segments(self.m3u8_index, full_path_video, True)
+
+            else:
+                logging.info("Parse index by text input.")
+                video_m3u8 = M3U8_Segments(self.m3u8_index, full_path_video, False)
 
             # Get information about the video segments
             video_m3u8.get_info()
@@ -528,19 +541,28 @@ class HLS_Downloader():
             self.m3u8_index = False
             console.log("[red]Output file already exist.")
 
+
         if self.m3u8_playlist:
             logging.info("Download from PLAYLIST")
-            m3u8_playlist_text = self.__df_make_req__(self.m3u8_playlist)
 
-            # Add full URL of the M3U8 playlist to fix next .ts without https if necessary
-            self.m3u8_url_fixer.set_playlist(self.m3u8_playlist)
+            # If playlist is a url and not a text of the playlist
+            if self.is_playlist_url:
+                logging.info("Parse playlist by url.")
+                m3u8_playlist_text = self.__df_make_req__(self.m3u8_playlist)
 
-            if m3u8_playlist_text is None:
-                console.log("[red]Playlist m3u8 to download is empty.")
-                sys.exit(0)
+                # Add full URL of the M3U8 playlist to fix next .ts without https if necessary
+                self.m3u8_url_fixer.set_playlist(self.m3u8_playlist)
+
+                if m3u8_playlist_text is None:
+                    console.log("[red]Playlist m3u8 to download is empty.")
+                    sys.exit(0)
+
+            else:
+                logging.info("Parse playlist by text input.")
+                m3u8_playlist_text = self.m3u8_playlist
 
             # Save text playlist
-            open(os.path.join(self.base_path, "tmp", "playlist.m3u8"), "w+").write(m3u8_playlist_text)
+            open(os.path.join(self.base_path, "tmp", "playlist.m3u8"), "w+", encoding="utf-8").write(m3u8_playlist_text)
 
 
             # Collect information about the playlist

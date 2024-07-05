@@ -1,13 +1,15 @@
 # 3.12.23
 
 import os
+import sys
 import logging
 
 
 # Internal utilities
 from Src.Util.console import console
-from Src.Lib.Downloader import HLS_Downloader
 from Src.Util.message import start_message
+from Src.Util.os import create_folder, can_create_file, remove_special_characters
+from Src.Lib.Downloader import HLS_Downloader
 
 
 # Logic class
@@ -48,6 +50,14 @@ def download_film(id_film: str, title_name: str, domain: str):
     mp4_name = title_name.replace("-", "_")
     mp4_format = (mp4_name) + ".mp4"
     mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name)
+
+    # Ensure the folder path exists
+    create_folder(mp4_path)
+
+    # Check if the MP4 file can be created
+    if not can_create_file(mp4_name):
+        logging.error("Invalid mp4 name.")
+        sys.exit(0)
 
     # Download the film using the m3u8 playlist, and output filename
     HLS_Downloader(

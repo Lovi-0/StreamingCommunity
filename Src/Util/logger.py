@@ -6,7 +6,6 @@ from logging.handlers import RotatingFileHandler
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
-from .os import remove_file
 
 
 class Logger:
@@ -16,11 +15,6 @@ class Logger:
         self.DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
         self.log_to_file = config_manager.get_bool("DEFAULT", "log_to_file")
         self.log_file = config_manager.get("DEFAULT", "log_file") if self.log_to_file else None
-
-        # Remove log file
-        if self.log_file:
-            remove_file(self.log_file)
-
         
         # Setting logging level based on DEBUG_MODE
         if self.DEBUG_MODE:

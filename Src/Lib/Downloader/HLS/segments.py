@@ -14,6 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # External libraries
 import httpx
+from httpx import HTTPTransport
 from tqdm import tqdm
 
 
@@ -58,17 +59,20 @@ headers_index = config_manager.get_dict('REQUESTS', 'user-agent')
 
 
 class M3U8_Segments:
-    def __init__(self, url: str, tmp_folder: str):
+    def __init__(self, url: str, tmp_folder: str, is_index_url: bool = True):
         """
         Initializes the M3U8_Segments object.
 
         Args:
             - url (str): The URL of the M3U8 playlist.
             - tmp_folder (str): The temporary folder to store downloaded segments.
+            - is_index_url (bool): Flag indicating if `m3u8_index` is a URL (default True).
         """
         self.url = url
         self.tmp_folder = tmp_folder
+        self.is_index_url = is_index_url
         self.expected_real_time = None 
+        
         self.tmp_file_path = os.path.join(self.tmp_folder, "0.ts")
         os.makedirs(self.tmp_folder, exist_ok=True)
 
@@ -124,8 +128,6 @@ class M3U8_Segments:
         m3u8_parser = M3U8_Parser()
         m3u8_parser.parse_data(uri=self.url, raw_content=m3u8_content)
 
-        #console.log(f"[red]Expected duration after download: {m3u8_parser.get_duration()}")
-        #console.log(f"[red]There is key: [yellow]{m3u8_parser.keys is not None}")
         self.expected_real_time = m3u8_parser.get_duration(return_string=False)
         self.expected_real_time_s = m3u8_parser.duration
 
@@ -175,17 +177,24 @@ class M3U8_Segments:
         """
         headers_index = {'user-agent': get_headers()}
 
-        # Send a GET request to retrieve the index M3U8 file
-        response = httpx.get(self.url, headers=headers_index)
-        response.raise_for_status()
+        if self.is_index_url:
 
-        # Save the M3U8 file to the temporary folder
-        if response.status_code == 200:
-            path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
-            open(path_m3u8_file, "w+").write(response.text) 
+            # Send a GET request to retrieve the index M3U8 file
+            response = httpx.get(self.url, headers=headers_index)
+            response.raise_for_status()
 
-        # Parse the text from the M3U8 index file
-        self.parse_data(response.text)  
+            # Save the M3U8 file to the temporary folder
+            if response.status_code == 200:
+                path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
+                open(path_m3u8_file, "w+").write(response.text) 
+
+            # Parse the text from the M3U8 index file
+            self.parse_data(response.text)  
+
+        else:
+
+            # Parser data of content of index pass in input to class
+            self.parse_data(self.url)  
 
     def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm) -> None:
         """
@@ -196,10 +205,7 @@ class M3U8_Segments:
             - index (int): The index of the segment.
             - progress_bar (tqdm): Progress counter for tracking download progress.
         """
-
         try:
-
-            # Generate headers
             start_time = time.time()
 
             # Make request to get content
@@ -209,14 +215,14 @@ class M3U8_Segments:
                 proxy = self.valid_proxy[index % len(self.valid_proxy)]
                 logging.info(f"Use proxy: {proxy}")
 
-                with httpx.Client(proxies=proxy, verify=REQUEST_VERIFY) as client:  
+                with httpx.Client(proxies=proxy, verify=True) as client:  
                     if 'key_base_url' in self.__dict__:
                         response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
                     else:
                         response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT)
-            else:
 
-                with httpx.Client(verify=REQUEST_VERIFY) as client_2:
+            else:
+                with httpx.Client(verify=True) as client_2:
                     if 'key_base_url' in self.__dict__:
                         response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
                     else:
@@ -224,13 +230,23 @@ class M3U8_Segments:
 
             # Get response content
             response.raise_for_status()
+            duration = time.time() - start_time
             segment_content = response.content
 
             # Update bar
-            duration = time.time() - start_time
             response_size = int(response.headers.get('Content-Length', 0))
+
+            if response_size == 0:
+                response_size = int(len(response.content))
+
+            # Check length segments
+            """
+            expected_length = int(response.headers.get('Content-Length', 0))
+            if not (expected_length != 0 and len(response.content) == expected_length):
+                console.print(f"Incomplete download for '{ts_url}' (received {len(response.content)} bytes, expected {expected_length}).")
+            """
             self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
-                
+
             # Decrypt the segment content if decryption is needed
             if self.decryption is not None:
                 segment_content = self.decryption.decrypt(segment_content)
@@ -288,10 +304,17 @@ class M3U8_Segments:
         TQDM_MAX_WORKER = 0
 
         # Select audio workers from folder of frames stack prev call.
-        VIDEO_WORKERS = int(config_manager.get_dict('SITE', config_site)['video_workers'])
-        if VIDEO_WORKERS == -1: VIDEO_WORKERS = os.cpu_count()
-        AUDIO_WORKERS = int(config_manager.get_dict('SITE', config_site)['audio_workers'])
-        if AUDIO_WORKERS == -1: AUDIO_WORKERS = os.cpu_count()
+        try:
+            VIDEO_WORKERS = int(config_manager.get_dict('SITE', config_site)['video_workers'])
+            if VIDEO_WORKERS == -1: VIDEO_WORKERS = os.cpu_count()
+        except:
+            VIDEO_WORKERS = os.cpu_count()
+
+        try:
+            AUDIO_WORKERS = int(config_manager.get_dict('SITE', config_site)['audio_workers'])
+            if AUDIO_WORKERS == -1: AUDIO_WORKERS = os.cpu_count()
+        except:
+            AUDIO_WORKERS = os.cpu_count()
 
         # Differnt workers for audio and video
         if "video" in str(add_desc):
@@ -349,6 +372,7 @@ class M3U8_Segments:
             delay = TQDM_DELAY_WORKER
 
         # Start all workers
+        logging.info(f"Worker to use: {max_workers}")
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             for index, segment_url in enumerate(self.segments):
                 time.sleep(delay)

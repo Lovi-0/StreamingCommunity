@@ -6,6 +6,7 @@ import logging
 # External libraries
 import httpx
 from bs4 import BeautifulSoup
+from unidecode import unidecode
 
 
 # Internal utilities
@@ -24,16 +25,22 @@ media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 
 
-def title_search(word_to_search) -> int:
+def title_search(word_to_search: str) -> int:
     """
     Search for titles based on a search query.
+
+    Args:
+        - title_search (str): The title to search for.
+
+    Returns:
+        int: The number of titles found.
     """
 
     # Find new domain if prev dont work
     domain_to_use, _ = search_domain(SITE_NAME, '<meta name="generator" content="Guardaserie Streaming', f"https://{SITE_NAME}")
 
     # Send request to search for titles
-    response = httpx.get(f"https://guardaserie.{domain_to_use}/?story={word_to_search}&do=search&subaction=search", headers={'user-agent': get_headers()})
+    response = httpx.get(f"https://guardaserie.{domain_to_use}/?story={unidecode(word_to_search)}&do=search&subaction=search", headers={'user-agent': get_headers()}, timeout=15)
     response.raise_for_status()
 
     # Create soup and find table

@@ -7,6 +7,7 @@ tqdm
 m3u8
 psutil
 unidecode
+seleniumbase
 fake-useragent
 qbittorrent-api
 python-qbittorrent 
