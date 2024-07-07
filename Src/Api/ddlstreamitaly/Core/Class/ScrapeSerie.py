@@ -56,7 +56,7 @@ class GetSerieInfo:
             response.raise_for_status()
 
         except Exception as e:
-            logging.error(f"Insert value for [ips4_device_key, ips4_member_id, ips4_login_key] in config.json file SITE \ ddlstreamitaly \ cookie. Use browser debug and cookie request with a valid account, filter by DOC.")
+            logging.error(f"Insert value for [ips4_device_key, ips4_member_id, ips4_login_key] in config.json file SITE \\ ddlstreamitaly \\ cookie. Use browser debug and cookie request with a valid account, filter by DOC.")
             sys.exit(0)
 
         # Parse HTML content of the page
