@@ -472,9 +472,11 @@ class HLS_Downloader():
         """
 
         def dict_to_seconds(d):
-            return d['h'] * 3600 + d['m'] * 60 + d['s']
+            if d != None:
+                return d['h'] * 3600 + d['m'] * 60 + d['s']
+            else:
+                1 # Default false
         
-
         # Check if file to rename exist
         logging.info(f"Check if end file converted exist: {out_path}")
         if out_path is None or not os.path.isfile(out_path):
