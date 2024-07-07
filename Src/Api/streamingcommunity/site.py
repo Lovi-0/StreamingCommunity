@@ -19,7 +19,7 @@ from ..Template import search_domain, get_select_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaManager
+from ..Template.Class.SearchType import MediaManager
 
 
 # Config
@@ -36,7 +36,7 @@ def get_version(text: str):
     """
     Extracts the version from the HTML text of a webpage.
 
-    Args:
+    Parameters:
         - text (str): The HTML text of the webpage.
 
     Returns:
@@ -95,7 +95,7 @@ def title_search(title_search: str, domain: str) -> int:
     """
     Search for titles based on a search query.
 
-    Args:
+    Parameters:
         - title_search (str): The title to search for.
         - domain (str): The domain to search on.
 
@@ -109,7 +109,13 @@ def title_search(title_search: str, domain: str) -> int:
 
     # Add found titles to media search manager
     for dict_title in response.json()['data']:
-        media_search_manager.add_media(dict_title)
+        media_search_manager.add_media({
+            'id': dict_title.get('id'),
+            'slug': dict_title.get('slug'),
+            'name': dict_title.get('name'),
+            'type': dict_title.get('type'),
+            'score': dict_title.get('score')
+        })
 
     # Return the number of titles found
     return media_search_manager.get_length()

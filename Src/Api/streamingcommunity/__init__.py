@@ -32,22 +32,11 @@ def search():
         # Select title from list
         select_title = run_get_select_title()
         
-        # For series
         if select_title.type == 'tv':
-            download_series(
-                tv_id=select_title.id,
-                tv_name=select_title.slug, 
-                version=site_version, 
-                domain=domain
-            )
+            download_series(select_title, domain, site_version)
         
-        # For film
         else:
-            download_film(
-                id_film=select_title.id, 
-                title_name=select_title.slug, 
-                domain=domain
-            )
+            download_film(select_title, domain, site_version)
     
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

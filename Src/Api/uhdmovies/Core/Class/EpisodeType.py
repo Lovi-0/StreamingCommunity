@@ -20,17 +20,17 @@ class EpisodeManager:
         """
         Add a new episode to the manager.
 
-        Args:
+        Parameters:
             - episode_data (Dict[str, Any]): A dictionary containing data for the new episode.
         """
         episode = Episode(episode_data)
         self.episodes.append(episode)
 
-    def get_episode_by_index(self, index: int) -> Episode:
+    def get(self, index: int) -> Episode:
         """
         Get an episode by its index.
 
-        Args:
+        Parameters:
             - index (int): Index of the episode to retrieve.
 
         Returns:
@@ -51,7 +51,7 @@ class EpisodeManager:
         """
         This method clears the episodes list.
 
-        Args:
+        Parameters:
             - self: The object instance.
         """
         self.episodes.clear()

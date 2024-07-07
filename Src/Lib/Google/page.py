@@ -16,7 +16,7 @@ def filter_result(link: str) -> Optional[str]:
     """
     Filters search result links to remove unwanted ones.
 
-    Args:
+    Parameters:
         - link (str): The URL of the search result.
 
     Returns:
@@ -45,7 +45,7 @@ def search(query: str, num: int = 10, stop: Optional[int] = None, pause: float =
     """
     Performs a Google search and yields the URLs of search results.
 
-    Args:
+    Parameters:
         - query (str): The search query.
         - num (int): Number of results to fetch per request. Default is 10.
         - stop (int, optional): Total number of results to retrieve. Default is None.

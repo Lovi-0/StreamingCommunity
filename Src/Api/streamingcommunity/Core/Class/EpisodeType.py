@@ -10,11 +10,6 @@ class Episode:
         self.name: str = data.get('name', '')
         self.plot: str = data.get('plot', '')
         self.duration: int = data.get('duration', '')
-        self.scws_id: int = data.get('scws_id', '')
-        self.season_id: int = data.get('season_id', '')
-        self.created_by: str = data.get('created_by', '')
-        self.created_at: str = data.get('created_at', '')
-        self.updated_at: str = data.get('updated_at', '')
 
     def __str__(self):
         return f"Episode(id={self.id}, number={self.number}, name='{self.name}', plot='{self.plot}', duration={self.duration} sec)"
@@ -28,21 +23,21 @@ class EpisodeManager:
         """
         Add a new episode to the manager.
 
-        Args:
+        Parameters:
             - episode_data (Dict[str, Any]): A dictionary containing data for the new episode.
         """
         episode = Episode(episode_data)
         self.episodes.append(episode)
 
-    def get_episode_by_index(self, index: int) -> Episode:
+    def get(self, index: int) -> Episode:
         """
         Get an episode by its index.
 
-        Args:
+        Parameters:
             - index (int): Index of the episode to retrieve.
 
         Returns:
-            Episode: The episode object.
+            - Episode: The episode object.
         """
         return self.episodes[index]
     
@@ -51,7 +46,7 @@ class EpisodeManager:
         Get the number of episodes in the manager.
 
         Returns:
-            int: Number of episodes.
+            - int: Number of episodes.
         """
         return len(self.episodes)
     
@@ -59,7 +54,7 @@ class EpisodeManager:
         """
         This method clears the episodes list.
 
-        Args:
+        Parameters:
             - self: The object instance.
         """
         self.episodes.clear()

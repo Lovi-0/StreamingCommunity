@@ -1,9 +1,5 @@
 # 01.07.24
 
-import sys
-import logging
-
-
 # Internal utilities
 from Src.Util.console import console, msg
 
@@ -11,7 +7,6 @@ from Src.Util.console import console, msg
 # Logic class
 from .site import title_search, run_get_select_title
 from .title import download_title
-
 
 
 # Variable
@@ -32,6 +27,8 @@ def search():
 
         # Select title from list
         select_title = run_get_select_title()
+
+        # Download title
         download_title(select_title)
 
 

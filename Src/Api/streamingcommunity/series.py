@@ -15,6 +15,7 @@ from ..Template import manage_selection, map_episode_title
 
 # Logic class
 from .Core.Player.vixcloud import VideoSource
+from ..Template.Class.SearchType import MediaItem
 
 
 # Variable
@@ -23,12 +24,11 @@ video_source = VideoSource()
 table_show_manager = TVShowManager()
 
 
-
 def donwload_video(tv_name: str, index_season_selected: int, index_episode_selected: int) -> None:
     """
     Download a single episode video.
 
-    Args:
+    Parameters:
         - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
         - index_episode_selected (int): Index of the selected episode.
@@ -61,7 +61,7 @@ def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: boo
     """
     Download all episodes of a season.
 
-    Args:
+    Parameters:
         - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
         - donwload_all (bool): Donwload all seasons episodes
@@ -100,14 +100,12 @@ def donwload_episode(tv_name: str, index_season_selected: int, donwload_all: boo
                 donwload_video(tv_name, index_season_selected, i_episode)
 
 
-def download_series(tv_id: str, tv_name: str, version: str, domain: str) -> None:
+def download_series(select_title: MediaItem, domain: str, version: str) -> None:
     """
     Download all episodes of a TV series.
 
-    Args:
-        - tv_id (str): ID of the TV series.
-        - tv_name (str): Name of the TV series.
-        - version (str): Version of the TV series.
+    Parameters:
+        - version (str): Version of site.
         - domain (str): Domain from which to download.
     """
 
@@ -115,12 +113,7 @@ def download_series(tv_id: str, tv_name: str, version: str, domain: str) -> None
     start_message()
 
     # Setup video source
-    video_source.setup(
-        version = version,
-        domain = domain,
-        media_id = tv_id,
-        series_name = tv_name
-    )
+    video_source.setup(version, domain, select_title.id, select_title.slug)
 
     # Collect information about seasons
     video_source.collect_info_seasons()
@@ -134,17 +127,17 @@ def download_series(tv_id: str, tv_name: str, version: str, domain: str) -> None
     # Download selected episodes
     if len(list_season_select) == 1 and index_season_selected != "*":
         if 1 <= int(index_season_selected) <= seasons_count:
-            donwload_episode(tv_name, list_season_select[0])
+            donwload_episode(select_title.slug, list_season_select[0])
 
     # Dowload all seasons and episodes
     elif index_season_selected == "*":
         for i_season in list_season_select:
-            donwload_episode(tv_name, i_season, True)
+            donwload_episode(select_title.slug, i_season, True)
 
     # Download all other season selecter
     else:
         for i_season in list_season_select:
-            donwload_episode(tv_name, i_season)
+            donwload_episode(select_title.slug, i_season)
 
 
 def display_episodes_list() -> str:

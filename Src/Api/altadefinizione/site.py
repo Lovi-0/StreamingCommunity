@@ -14,10 +14,7 @@ from unidecode import unidecode
 from Src.Util.headers import get_headers
 from Src.Util.table import TVShowManager
 from ..Template import search_domain, get_select_title
-
-
-# Logic class
-from .Core.Class.SearchType import MediaManager
+from ..Template.Class.SearchType import MediaManager
 
 
 # Variable
@@ -31,7 +28,7 @@ def title_search(title_search: str) -> int:
     """
     Search for titles based on a search query.
 
-    Args:
+    Parameters:
         - title_search (str): The title to search for.
 
     Returns:

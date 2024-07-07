@@ -38,9 +38,8 @@ class VideoSource:
         """
         Set up the class
 
-        Args:
+        Parameters:
             - version (str): The version to set.
-            - media_id (str): The media ID to set.
             - media_id (int): The media ID to set.
             - series_name (str): The series name to set.
         """
@@ -85,7 +84,7 @@ class VideoSource:
         """
         Collect information about a specific season.
 
-        Args:
+        Parameters:
             - number_season (int): The season number.
         """
         try:
@@ -109,7 +108,7 @@ class VideoSource:
         """
         Get iframe source.
 
-        Args:
+        Parameters:
             - episode_id (int): The episode ID, present only for series
         """
         params = {}
@@ -138,7 +137,7 @@ class VideoSource:
         """
         Parse script text.
 
-        Args:
+        Parameters:
             - script_text (str): The script text to parse.
         """
         try:
@@ -191,7 +190,7 @@ class VideoSource:
         Get playlist.
 
         Returns:
-            str: The playlist URL, or None if there's an error.
+            - str: The playlist URL, or None if there's an error.
         """
 
         iframe_url = self.iframe_src

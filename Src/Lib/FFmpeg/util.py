@@ -17,7 +17,7 @@ def has_audio_stream(video_path: str) -> bool:
     """
     Check if the input video has an audio stream.
 
-    Args:
+    Parameters:
         - video_path (str): Path to the input video file.
 
     Returns:
@@ -44,7 +44,7 @@ def get_video_duration(file_path: str) -> float:
     """
     Get the duration of a video file.
 
-    Args:
+    Parameters:
         - file_path (str): The path to the video file.
 
     Returns:
@@ -109,7 +109,7 @@ def format_duration(seconds: float) -> Tuple[int, int, int]:
     """
     Format duration in seconds into hours, minutes, and seconds.
 
-    Args:
+    Parameters:
         - seconds (float): Duration in seconds.
 
     Returns:
@@ -126,7 +126,7 @@ def print_duration_table(file_path: str, description: str = "Duration", return_s
     """
     Print the duration of a video file in hours, minutes, and seconds, or return it as a formatted string.
 
-    Args:
+    Parameters:
         - file_path (str): The path to the video file.
         - description (str): Optional description to be included in the output. Defaults to "Duration". If not provided, the duration will not be printed.
         - return_string (bool): If True, returns the formatted duration string. If False, returns a dictionary with hours, minutes, and seconds.
@@ -156,7 +156,7 @@ def get_ffprobe_info(file_path):
     """
     Get format and codec information for a media file using ffprobe.
 
-    Args:
+    Parameters:
         file_path (str): Path to the media file.
 
     Returns:
@@ -191,7 +191,7 @@ def is_png_format_or_codec(file_info):
     """
     Check if the format is 'png_pipe' or if any codec is 'png'.
 
-    Args:
+    Parameters:
         file_info (dict): The dictionary containing file information.
 
     Returns:
@@ -206,7 +206,7 @@ def need_to_force_to_ts(file_path):
     """
     Get if a file to TS format if it is in PNG format or contains a PNG codec.
 
-    Args:
+    Parameters:
         file_path (str): Path to the input media file.
     """
     logging.info(f"Processing file: {file_path}")
@@ -221,7 +221,7 @@ def check_duration_v_a(video_path, audio_path):
     """
     Check if the duration of the video and audio matches.
 
-    Args:
+    Parameters:
     - video_path (str): Path to the video file.
     - audio_path (str): Path to the audio file.
 

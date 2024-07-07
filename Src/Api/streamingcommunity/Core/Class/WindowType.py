@@ -50,7 +50,7 @@ class DynamicJSONConverter:
         """
         Initialize the converter with the input string.
 
-        Args:
+        Parameters:
             input_string (str): The input string to convert.
         """
         self.input_string = input_string
@@ -60,7 +60,7 @@ class DynamicJSONConverter:
         """
         Parse a key-value pair.
 
-        Args:
+        Parameters:
             key (str): The key.
             value (str): The value.
 
@@ -83,7 +83,7 @@ class DynamicJSONConverter:
         """
         Parse a JSON object.
 
-        Args:
+        Parameters:
             obj_str (str): The string representation of the JSON object.
 
         Returns:
@@ -104,7 +104,7 @@ class DynamicJSONConverter:
         """
         Parse a non-JSON value.
 
-        Args:
+        Parameters:
             value (str): The value to parse.
 
         Returns:

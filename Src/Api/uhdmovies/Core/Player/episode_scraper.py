@@ -34,7 +34,7 @@ class EpisodeScraper:
         Retrieves and parses the webpage content using BeautifulSoup.
 
         Returns:
-        BeautifulSoup: The parsed HTML content of the webpage.
+            - BeautifulSoup: The parsed HTML content of the webpage.
         """
         try:
             response = httpx.get(self.url)
@@ -51,7 +51,7 @@ class EpisodeScraper:
         Extracts the episode information from the parsed HTML.
 
         Returns:
-        list: A list of dictionaries containing episode information.
+            - list: A list of dictionaries containing episode information.
         """
         rows = self.soup.find_all("p", style="text-align: center;")  
         info_site = []
@@ -110,7 +110,7 @@ class EpisodeScraper:
         Organizes the extracted information into seasons.
 
         Returns:
-        dict: A dictionary organizing episodes by season.
+            - dict: A dictionary organizing episodes by season.
         """
         stagioni = {}
 
@@ -135,7 +135,7 @@ class EpisodeScraper:
         Returns a list of available seasons.
 
         Returns:
-        list: A list of available seasons.
+            - list: A list of available seasons.
         """
         return list(self.stagioni.keys())
 
@@ -200,6 +200,9 @@ class ApiManager:
         self.obj_episode_manager: EpisodeManager = EpisodeManager()
 
     def collect_season(self):
+        """
+        Collect available seasons from the webpage and add them to the season manager.
+        """
 
         available_seasons = self.episode_scraper.get_available_seasons()
 
@@ -207,6 +210,12 @@ class ApiManager:
             self.obj_season_manager.add_season({'name': dict_season})
 
     def collect_episode(self, season_name):  
+        """
+        Collect episodes for a given season and add them to the episode manager.
+
+        Parameters:
+            - season_name (str): The name of the season for which to collect episodes.
+        """
 
         dict_episodes = self.episode_scraper.get_episodes_by_season(season_name)
 
@@ -214,5 +223,10 @@ class ApiManager:
             self.obj_episode_manager.add_episode(dict_episode)
 
     def get_film_playlist(self):
+        """
+        Get the film playlist from the episode scraper.
 
+        Returns:
+            - list: A list of films in the playlist.
+        """
         return self.episode_scraper.get_film()

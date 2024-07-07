@@ -15,7 +15,7 @@ from ..Template import search_domain, get_select_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaManager
+from ..Template.Class.SearchType import MediaManager
 
 
 # Variable
@@ -29,11 +29,11 @@ def title_search(word_to_search: str) -> int:
     """
     Search for titles based on a search query.
 
-    Args:
+    Parameters:
         - title_search (str): The title to search for.
 
     Returns:
-        int: The number of titles found.
+        - int: The number of titles found.
     """
 
     # Create a web automation driver instance

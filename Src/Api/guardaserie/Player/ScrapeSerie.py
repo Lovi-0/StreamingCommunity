@@ -16,8 +16,7 @@ from Src.Util.headers import get_headers
 
 
 # Logic class
-from .SearchType import MediaItem
-
+from ...Template.Class.SearchType import MediaItem
 
 
 class GetSerieInfo:
@@ -26,7 +25,7 @@ class GetSerieInfo:
         """
         Initializes the GetSerieInfo object with default values.
 
-        Args:
+        Parameters:
             dict_serie (MediaItem): Dictionary containing series information (optional).
         """
         self.headers = {'user-agent': get_headers()}
@@ -70,7 +69,7 @@ class GetSerieInfo:
         """
         Retrieves the number of episodes for a specific season.
 
-        Args:
+        Parameters:
             n_season (int): The season number.
 
         Returns:
@@ -102,6 +101,7 @@ class GetSerieInfo:
                     'name': name,
                     'url': link
                 }
+                
                 list_dict_episode.append(obj_episode)
 
             self.list_episodes = list_dict_episode

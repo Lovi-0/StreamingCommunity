@@ -11,7 +11,7 @@ class ConfigManager:
     def __init__(self, file_path: str = 'config.json') -> None:
         """Initialize the ConfigManager.
 
-        Args:
+        Parameters:
             - file_path (str, optional): The path to the configuration file. Default is 'config.json'.
         """
         self.file_path = file_path
@@ -32,7 +32,7 @@ class ConfigManager:
     def read_key(self, section: str, key: str, data_type: type = str) -> Any:
         """Read a key from the configuration file.
 
-        Args:
+        Parameters:
             - section (str): The section in the configuration file.
             - key (str): The key to be read.
             - data_type (type, optional): The expected data type of the key's value. Default is str.
@@ -59,7 +59,7 @@ class ConfigManager:
     def _convert_to_data_type(self, value: str, data_type: type) -> Any:
         """Convert the value to the specified data type.
 
-        Args:
+        Parameters:
             - value (str): The value to be converted.
             - data_type (type): The expected data type.
 
@@ -80,7 +80,7 @@ class ConfigManager:
     def get(self, section: str, key: str) -> Any:
         """Read a value from the configuration file.
 
-        Args:
+        Parameters:
             - section (str): The section in the configuration file.
             - key (str): The key to be read.
 
@@ -92,7 +92,7 @@ class ConfigManager:
     def get_int(self, section: str, key: str) -> int:
         """Read an integer value from the configuration file.
 
-        Args:
+        Parameters:
             - section (str): The section in the configuration file.
             - key (str): The key to be read.
 
@@ -104,7 +104,7 @@ class ConfigManager:
     def get_float(self, section: str, key: str) -> int:
         """Read an float value from the configuration file.
 
-        Args:
+        Parameters:
             - section (str): The section in the configuration file.
             - key (str): The key to be read.
 
@@ -116,7 +116,7 @@ class ConfigManager:
     def get_bool(self, section: str, key: str) -> bool:
         """Read a boolean value from the configuration file.
 
-        Args:
+        Parameters:
             - section (str): The section in the configuration file.
             - key (str): The key to be read.
 
@@ -128,7 +128,7 @@ class ConfigManager:
     def get_list(self, section: str, key: str) -> List[str]:
         """Read a list value from the configuration file.
 
-        Args:
+        Parameters:
             - section (str): The section in the configuration file.
             - key (str): The key to be read.
 
@@ -140,7 +140,7 @@ class ConfigManager:
     def get_dict(self, section: str, key: str) -> dict:
         """Read a dictionary value from the configuration file.
 
-        Args:
+        Parameters:
             - section (str): The section in the configuration file.
             - key (str): The key to be read.
 
@@ -152,7 +152,7 @@ class ConfigManager:
     def set_key(self, section: str, key: str, value: Any) -> None:
         """Set a key in the configuration file.
 
-        Args:
+        Parameters:
             - section (str): The section in the configuration file.
             - key (str): The key to be set.
             - value (Any): The value to be associated with the key.

@@ -4,6 +4,7 @@ import os
 import sys
 import logging
 
+
 # Internal utilities
 from Src.Util.console import console
 from Src.Util.message import start_message
@@ -12,18 +13,20 @@ from Src.Lib.Downloader import HLS_Downloader
 
 
 # Logic class
-from .Core.Class.SearchType import MediaItem
-from .Core.Player.maxstream import VideoSource
+from ..Template.Class.SearchType import MediaItem
+from .Player.maxstream import VideoSource
 
 
 # Config
 from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
 
 
-
 def download_film(select_title: MediaItem):
     """
     Downloads a film using the provided obj.
+
+    Parameters:
+        - select_title (MediaItem): The media item to be downloaded. This should be an instance of the MediaItem class, containing attributes like `name` and `url`.
     """
 
     # Start message and display film information

@@ -15,9 +15,9 @@ from ..Template import manage_selection, map_episode_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaItem
-from .Core.Class.ScrapeSerie import GetSerieInfo
-from .Core.Player.supervideo import VideoSource
+from ..Template.Class.SearchType import MediaItem
+from .Player.ScrapeSerie import GetSerieInfo
+from .Player.supervideo import VideoSource
 
 
 # Variable
@@ -26,12 +26,11 @@ table_show_manager = TVShowManager()
 video_source = VideoSource()
 
 
-
 def donwload_video(scape_info_serie: GetSerieInfo, index_season_selected: int, index_episode_selected: int) -> None:
     """
     Download a single episode video.
 
-    Args:
+    Parameters:
         - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
         - index_episode_selected (int): Index of the selected episode.
@@ -72,7 +71,7 @@ def donwload_episode(scape_info_serie: GetSerieInfo, index_season_selected: int,
     """
     Download all episodes of a season.
 
-    Args:
+    Parameters:
         - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
         - donwload_all (bool): Donwload all seasons episodes
@@ -111,7 +110,7 @@ def download_series(dict_serie: MediaItem) -> None:
     """
     Download all episodes of a TV series.
 
-    Parameter:
+    Parameters:
         - dict_serie (MediaItem): obj with url name type and score
     """
 

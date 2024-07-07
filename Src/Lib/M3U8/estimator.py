@@ -27,7 +27,7 @@ class M3U8_Ts_Estimator:
         """
         Initialize the TSFileSizeCalculator object.
 
-        Args:
+        Parameters:
             - total_segments (int): Len of total segments to download
         """
         self.ts_file_sizes = []
@@ -43,7 +43,7 @@ class M3U8_Ts_Estimator:
         """
         Add a file size to the list of file sizes.
 
-        Args:
+        Parameters:
             - size (int): The size of the ts file to be added.
             - size_download (int): Single size of the ts file.
             - duration (float): Time to download segment file.
@@ -134,7 +134,7 @@ class M3U8_Ts_Estimator:
         """
         Updates the progress bar with information about the TS segment download.
 
-        Args:
+        Parameters:
             total_downloaded (int): The len of the content of the downloaded TS segment.
             duration (float): The duration of the segment download in seconds.
             progress_counter (tqdm): The tqdm object representing the progress bar.

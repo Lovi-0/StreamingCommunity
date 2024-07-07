@@ -26,7 +26,7 @@ class WebAutomation:
         """
         Initializes the WebAutomation instance with SeleniumBase Driver.
 
-        Args:
+        Parameters:
             headless (bool, optional): Whether to run the browser in headless mode. Default is True.
         """
         logging.getLogger('seleniumbase').setLevel(logging.ERROR)
@@ -47,7 +47,7 @@ class WebAutomation:
         """
         Navigates the browser to the specified URL.
 
-        Args:
+        Parameters:
             url (str): The URL to navigate to.
         """
         self.driver.get(url)

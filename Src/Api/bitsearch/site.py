@@ -17,7 +17,7 @@ from ..Template import search_domain, get_select_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaManager
+from ..Template.Class.SearchType import MediaManager
 
 
 # Variable
@@ -31,11 +31,11 @@ def title_search(word_to_search: str) -> int:
     """
     Search for titles based on a search query.
     
-    Args:
+    Parameters:
         - title_search (str): The title to search for.
 
     Returns:
-        int: The number of titles found.
+        - int: The number of titles found.
     """
 
     # Find new domain if prev dont work
@@ -51,8 +51,8 @@ def title_search(word_to_search: str) -> int:
     for title_div in soup.find_all("li", class_ = "card"):
 
         title_info = {
-            'title': title_div.find("a").get_text(strip=True),
-            'link': title_div.find_all("a")[-1].get("href"),
+            'name': title_div.find("a").get_text(strip=True),
+            'url': title_div.find_all("a")[-1].get("href"),
             'size': title_div.find_all("div")[-5].get_text(strip=True),
             'seader': title_div.find_all("div")[-4].get_text(strip=True),
             'leacher': title_div.find_all("div")[-3].get_text(strip=True),

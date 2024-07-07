@@ -19,7 +19,7 @@ def dynamic_format_number(n: int) -> str:
     Formats a number by adding a leading zero.
     The width of the resulting string is dynamic, calculated as the number of digits in the number plus one.
     
-    Args:
+    Parameters:
         - n (int): The number to format.
     
     Returns:
@@ -39,7 +39,7 @@ def manage_selection(cmd_insert: str, max_count: int) -> List[int]:
     """
     Manage user selection for seasons to download.
 
-    Args:
+    Parameters:
         - cmd_insert (str): User input for season selection.
         - max_count (int): Maximum count of seasons available.
 
@@ -71,7 +71,7 @@ def map_episode_title(tv_name: str, number_season: int, episode_number: int, epi
     """
     Maps the episode title to a specific format.
 
-    Args:
+    Parameters:
         tv_name (str): The name of the TV show.
         number_season (int): The season number.
         episode_number (int): The episode number.

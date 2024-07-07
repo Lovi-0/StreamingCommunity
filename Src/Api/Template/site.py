@@ -24,7 +24,7 @@ def get_select_title(table_show_manager, media_search_manager):
     # Set up table for displaying titles
     table_show_manager.set_slice_end(10)
 
-    # Determine column_info dynamically
+    # Determine column_info dynamically for (search site)
     if not media_search_manager.media_list:
         console.print("\n[red]No media items available.")
         return None

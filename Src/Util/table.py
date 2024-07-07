@@ -17,7 +17,7 @@ class TVShowManager:
         """
         Initialize TVShowManager with provided column information.
 
-        Args:
+        Parameters:
             - column_info (Dict[str, Dict[str, str]]): Dictionary containing column names, their colors, and justification.
         """
         self.console = Console()
@@ -31,7 +31,7 @@ class TVShowManager:
         """
         Set the end of the slice for displaying TV shows.
 
-        Args:
+        Parameters:
             - new_slice (int): The new value for the slice end.
         """
         self.slice_end = new_slice
@@ -41,7 +41,7 @@ class TVShowManager:
         """
         Add column information.
     
-        Args:
+        Parameters:
             - column_info (Dict[str, Dict[str, str]]): Dictionary containing column names, their colors, and justification.
         """
         self.column_info = column_info
@@ -50,7 +50,7 @@ class TVShowManager:
         """
         Add a TV show to the list of TV shows.
 
-        Args:
+        Parameters:
             - tv_show (Dict[str, Any]): Dictionary containing TV show details.
         """
         self.tv_shows.append(tv_show)
@@ -59,7 +59,7 @@ class TVShowManager:
         """
         Display TV show data in a tabular format.
 
-        Args:
+        Parameters:
             - data_slice (List[Dict[str, Any]]): List of dictionaries containing TV show details to display.
         """
         table = Table(border_style="white")
@@ -84,7 +84,7 @@ class TVShowManager:
         """
         Run the TV show manager application.
 
-        Args:
+        Parameters:
             - force_int_input(bool): If True, only accept integer inputs from 0 to max_int_input
             - max_int_input (int): range of row to show
         

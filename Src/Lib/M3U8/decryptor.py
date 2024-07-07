@@ -28,7 +28,7 @@ if crypto_installed:
             """
             Initialize the M3U8_Decryption object.
 
-            Args:
+            Parameters:
                 - key (bytes): The encryption key.
                 - iv (bytes): The initialization vector (IV).
                 - method (str): The encryption method.
@@ -45,7 +45,7 @@ if crypto_installed:
             """
             Decrypt the ciphertext using the specified encryption method.
 
-            Args:
+            Parameters:
                 - ciphertext (bytes): The encrypted content to decrypt.
 
             Returns:
@@ -89,7 +89,7 @@ else:
             """
             Initialize the M3U8_Decryption object.
 
-            Args:
+            Parameters:
                 - key (bytes): The encryption key.
                 - iv (bytes): The initialization vector (IV).
                 - method (str): The encryption method.
@@ -106,7 +106,7 @@ else:
             """
             Decrypt the ciphertext using the specified encryption method.
 
-            Args:
+            Parameters:
                 - ciphertext (bytes): The encrypted content to decrypt.
 
             Returns:

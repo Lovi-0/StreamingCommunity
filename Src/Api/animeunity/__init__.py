@@ -23,18 +23,12 @@ def search():
 
         # Select title from list
         select_title = run_get_select_title()
-        
+
         if select_title.type == 'TV':
-            donwload_series(
-                tv_id=select_title.id,
-                tv_name=select_title.slug
-            )
+            donwload_series(select_title)
 
         else:
-            donwload_film(
-                id_film=select_title.id, 
-                title_name=select_title.slug
-            )
+            donwload_film(select_title)
 
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

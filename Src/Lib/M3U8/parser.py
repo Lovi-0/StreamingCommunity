@@ -54,7 +54,7 @@ class M3U8_Codec:
         """
         Initializes the M3U8Codec object with the provided parameters.
 
-        Args:
+        Parameters:
             - bandwidth (int): Bandwidth of the codec.
             - codecs (str): Codecs information in the format "avc1.xxxxxx,mp4a.xx".
         """
@@ -91,7 +91,7 @@ class M3U8_Codec:
         """
         Convert video codec identifier to codec name.
 
-        Args:
+        Parameters:
             - video_codec_identifier (str): Identifier of the video codec.
 
         Returns:
@@ -118,7 +118,7 @@ class M3U8_Codec:
         """
         Convert audio codec identifier to codec name.
 
-        Args:
+        Parameters:
             - audio_codec_identifier (str): Identifier of the audio codec.
 
         Returns:
@@ -171,7 +171,7 @@ class M3U8_Video:
         """
         Initializes an M3U8_Video object with the provided video playlist.
 
-        Args:
+        Parameters:
             - video_playlist (M3U8): An M3U8 object representing the video playlist.
         """
         self.video_playlist = video_playlist
@@ -206,7 +206,7 @@ class M3U8_Video:
         """
         Returns the URI corresponding to a custom resolution from the video list.
 
-        Args:
+        Parameters:
             - video_list (list): A list of dictionaries containing video URIs and resolutions.
             - custom_resolution (tuple): A tuple representing the custom resolution.
 
@@ -234,7 +234,7 @@ class M3U8_Video:
         """
         Retrieve a list of resolutions and size from the video playlist.
 
-        Args:
+        Parameters:
             - duration (int): Total duration of the video in 's'.
         
         Returns:
@@ -254,7 +254,7 @@ class M3U8_Audio:
         """
         Initializes an M3U8_Audio object with the provided audio playlist.
 
-        Args:
+        Parameters:
             - audio_playlist (M3U8): An M3U8 object representing the audio playlist.
         """  
         self.audio_playlist = audio_playlist
@@ -263,7 +263,7 @@ class M3U8_Audio:
         """
         Returns a dictionary with 'name' and 'uri' given a specific language.
 
-        Args:
+        Parameters:
             - audio_list (list): List of dictionaries containing audio information.
             - language (str): The desired language.
 
@@ -279,7 +279,7 @@ class M3U8_Audio:
         """
         Returns a list of dictionaries containing all URIs and names.
 
-        Args:
+        Parameters:
             - audio_list (list): List of dictionaries containing audio information.
 
         Returns:
@@ -298,7 +298,7 @@ class M3U8_Audio:
         """
         Returns the dictionary with 'default' equal to 'YES'.
 
-        Args:
+        Parameters:
             - audio_list (list): List of dictionaries containing audio information.
 
         Returns:
@@ -315,7 +315,7 @@ class M3U8_Subtitle:
         """
         Initializes an M3U8_Subtitle object with the provided subtitle playlist.
 
-        Args:
+        Parameters:
             - subtitle_playlist (M3U8): An M3U8 object representing the subtitle playlist.
         """
         self.subtitle_playlist = subtitle_playlist
@@ -324,7 +324,7 @@ class M3U8_Subtitle:
         """
         Returns a dictionary with 'name' and 'uri' given a specific language for subtitles.
 
-        Args:
+        Parameters:
             - subtitle_list (list): List of dictionaries containing subtitle information.
             - language (str): The desired language.
 
@@ -340,7 +340,7 @@ class M3U8_Subtitle:
         """
         Returns a list of dictionaries containing all URIs and names of subtitles.
 
-        Args:
+        Parameters:
             - subtitle_list (list): List of dictionaries containing subtitle information.
 
         Returns:
@@ -359,7 +359,7 @@ class M3U8_Subtitle:
         """
         Returns the dictionary with 'default' equal to 'YES' for subtitles.
 
-        Args:
+        Parameters:
             - subtitle_list (list): List of dictionaries containing subtitle information.
 
         Returns:
@@ -374,7 +374,7 @@ class M3U8_Subtitle:
         """
         Download all subtitles listed in the object's attributes, filtering based on a provided list of custom subtitles.
 
-        Args:
+        Parameters:
             - custom_subtitle (list): A list of custom subtitles to download.
 
         Returns:
@@ -432,7 +432,7 @@ class M3U8_Parser:
         """
         Extracts all information present in the provided M3U8 content.
 
-        Args:
+        Parameters:
             - m3u8_content (str): The content of the M3U8 file.
         """
 
@@ -449,7 +449,7 @@ class M3U8_Parser:
         """
         Extracts the video resolution from the given URI.
 
-        Args:
+        Parameters:
             - uri (str): The URI containing video information.
 
         Returns:
@@ -472,7 +472,7 @@ class M3U8_Parser:
         """
         Extracts video information from the M3U8 object.
 
-        Args:
+        Parameters:
             - m3u8_obj: The M3U8 object containing video playlists.
         """
 
@@ -521,7 +521,7 @@ class M3U8_Parser:
         """
         Extracts encryption keys from the M3U8 object.
 
-        Args:
+        Parameters:
             - m3u8_obj: The M3U8 object containing encryption keys.
         """
         try:
@@ -544,7 +544,7 @@ class M3U8_Parser:
         """
         Extracts subtitles and audio information from the M3U8 object.
 
-        Args:
+        Parameters:
             - m3u8_obj: The M3U8 object containing subtitles and audio data.
         """
         try:
@@ -574,7 +574,7 @@ class M3U8_Parser:
         """
         Extracts segment information from the M3U8 object.
 
-        Args:
+        Parameters:
             - m3u8_obj: The M3U8 object containing segment data.
         """
 

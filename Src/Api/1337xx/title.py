@@ -19,7 +19,7 @@ from Src.Lib.Downloader import TOR_downloader
 
 
 # Logic class
-from .Core.Class.SearchType import MediaItem
+from ..Template.Class.SearchType import MediaItem
 
 
 # Config
@@ -36,7 +36,6 @@ def download_title(select_title: MediaItem):
     """
 
     start_message()
-
     console.print(f"[yellow]Download:  [red]{select_title.name} \n")
     print() 
 

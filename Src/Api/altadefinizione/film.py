@@ -13,7 +13,8 @@ from Src.Lib.Downloader import HLS_Downloader
 
 
 # Logic class
-from .Core.Player.supervideo import VideoSource
+from .Player.supervideo import VideoSource
+from ..Template.Class.SearchType import MediaItem
 
 
 # Config
@@ -21,25 +22,25 @@ from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
 
   
 
-def download_film(title_name: str, url: str):
+def download_film(select_title: MediaItem):
     """
     Downloads a film using the provided film ID, title name, and domain.
 
-    Args:
+    Parameters:
         - title_name (str): The name of the film title.
         - url (str): The url of the video
     """
 
     # Start message and display film information
     start_message()
-    console.print(f"[yellow]Download:  [red]{title_name} \n")
+    console.print(f"[yellow]Download:  [red]{select_title.name} \n")
 
     # Set domain and media ID for the video source
-    video_source = VideoSource(url)
+    video_source = VideoSource(select_title.url)
 
     # Define output path
-    mp4_name = str(title_name).replace("-", "_") + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name)
+    mp4_name = str(select_title.name).replace("-", "_") + ".mp4"
+    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, select_title.name)
 
     # Ensure the folder path exists
     create_folder(mp4_path)

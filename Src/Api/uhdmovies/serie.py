@@ -18,7 +18,7 @@ from ..Template import manage_selection, map_episode_title
 # Logic class
 from .Core.Player.episode_scraper import ApiManager
 from .Core.Player.driveleech import DownloadAutomation
-from .Core.Class.SearchType import MediaItem
+from ..Template.Class.SearchType import MediaItem
 
 
 # Variable
@@ -30,7 +30,7 @@ def donwload_video(api_manager: ApiManager, index_season_selected: int, index_ep
     """
     Download a single episode video.
 
-    Args:
+    Parameters:
         - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
         - index_episode_selected (int): Index of the selected episode.
@@ -75,7 +75,7 @@ def donwload_episode(api_manager: ApiManager, index_season_selected: int, donwlo
     """
     Download all episodes of a season.
 
-    Args:
+    Parameters:
         - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
         - donwload_all (bool): Donwload all seasons episodes
@@ -120,7 +120,7 @@ def donwload_serie(media: MediaItem):
     """
     Downloads a media title using its API manager and WebAutomation driver.
 
-    Args:
+    Parameters:
         media (MediaItem): The media item to be downloaded.
     """
 

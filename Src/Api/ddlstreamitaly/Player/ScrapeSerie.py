@@ -16,12 +16,11 @@ from Src.Util.headers import get_headers
 
 
 # Logic class
-from .SearchType import MediaItem
+from ...Template.Class.SearchType import MediaItem
 
 
 # Variable
-from ...costant import COOKIE
-
+from ..costant import COOKIE
 
 
 class GetSerieInfo:
@@ -30,7 +29,7 @@ class GetSerieInfo:
         """
         Initializes the GetSerieInfo object with default values.
 
-        Args:
+        Parameters:
             - dict_serie (MediaItem): Dictionary containing series information (optional).
         """
         self.headers = {'user-agent': get_headers()}
@@ -43,7 +42,7 @@ class GetSerieInfo:
         """
         Retrieves the number of episodes for a specific season.
 
-        Args:
+        Parameters:
             n_season (int): The season number.
 
         Returns:
@@ -55,7 +54,7 @@ class GetSerieInfo:
             response = httpx.get(self.url + "?area=online", cookies=self.cookies, headers=self.headers, timeout=10)
             response.raise_for_status()
 
-        except Exception as e:
+        except:
             logging.error(f"Insert value for [ips4_device_key, ips4_member_id, ips4_login_key] in config.json file SITE \\ ddlstreamitaly \\ cookie. Use browser debug and cookie request with a valid account, filter by DOC.")
             sys.exit(0)
 
@@ -75,12 +74,11 @@ class GetSerieInfo:
             part_name = episode_div.get_text(strip=True)
 
             if part_name:
-                link = episode_div['href']
-
                 obj_episode = {
                     'name': part_name,
-                    'url': link
+                    'url': episode_div['href']
                 }
+
                 list_dict_episode.append(obj_episode)
      
         self.list_episodes = list_dict_episode

@@ -15,7 +15,7 @@ from ..Template import search_domain, get_select_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaManager
+from ..Template.Class.SearchType import MediaManager
 
 
 # Variable
@@ -29,7 +29,7 @@ def get_token(site_name: str, domain: str) -> dict:
     """
     Function to retrieve session tokens from a specified website.
 
-    Args:
+    Parameters:
         - site_name (str): The name of the site.
         - domain (str): The domain of the site.
 
@@ -70,7 +70,7 @@ def get_real_title(record):
     This function takes a record, which is assumed to be a dictionary representing a row of JSON data.
     It looks for a title in the record, prioritizing English over Italian titles if available.
     
-    Args:
+    Parameters:
         - record (dict): A dictionary representing a row of JSON data.
     
     Returns:
@@ -91,7 +91,7 @@ def title_search(title: str) -> int:
     """
     Function to perform an anime search using a provided title.
 
-    Args:
+    Parameters:
         - title_search (str): The title to search for.
 
     Returns:
@@ -125,18 +125,23 @@ def title_search(title: str) -> int:
     response.raise_for_status()
 
     # Process each record returned in the response
-    for record in response.json()['records']:
+    for dict_title in response.json()['records']:
 
         # Rename keys for consistency
-        record['name'] = get_real_title(record)
-        record['last_air_date'] = record.pop('date')  
+        dict_title['name'] = get_real_title(dict_title)
 
         # Add the record to media search manager if the name is not None
-        media_search_manager.add_media(record)
+        media_search_manager.add_media({
+            'id': dict_title.get('id'),
+            'slug': dict_title.get('slug'),
+            'name': dict_title.get('name'),
+            'type': dict_title.get('type'),
+            'score': dict_title.get('score'),
+            'episodes_count': dict_title.get('episodes_count')
+        })
 
     # Return the length of media search manager
     return media_search_manager.get_length()
-
 
 
 def run_get_select_title():

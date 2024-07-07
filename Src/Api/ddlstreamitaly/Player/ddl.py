@@ -14,17 +14,13 @@ from Src.Util.headers import get_headers
 
 
 # Variable
-from ...costant import COOKIE
+from ..costant import COOKIE
 
 
 class VideoSource:
     def __init__(self) -> None:
         """
         Initializes the VideoSource object with default values.
-
-        Attributes:
-            headers (dict): A dictionary to store HTTP headers.
-            cookie (dict): A dictionary to store cookies.
         """
         self.headers = {'user-agent': get_headers()}
         self.cookie = COOKIE
@@ -33,8 +29,8 @@ class VideoSource:
         """
         Sets up the video source with the provided URL.
 
-        Args:
-            url (str): The URL of the video source.
+        Parameters:
+            - url (str): The URL of the video source.
         """
         self.url = url
 
@@ -42,15 +38,16 @@ class VideoSource:
         """
         Make an HTTP GET request to the provided URL.
 
-        Args:
-            url (str): The URL to make the request to.
+        Parameters:
+            - url (str): The URL to make the request to.
 
         Returns:
-            str: The response content if successful, None otherwise.
+            - str: The response content if successful, None otherwise.
         """
         try:
             response = httpx.get(url, headers=self.headers, cookies=self.cookie)
             response.raise_for_status()
+
             return response.text
         
         except Exception as err:
@@ -63,7 +60,7 @@ class VideoSource:
         Retrieves the playlist URL from the video source.
 
         Returns:
-            tuple: The mp4 link if found, None otherwise.
+            - tuple: The mp4 link if found, None otherwise.
         """
         try:
             text = self.make_request(self.url)
@@ -78,6 +75,7 @@ class VideoSource:
             
                 else:
                     logging.error("No <source> tag found in the HTML.")
+                    
             else:
                 logging.error("Failed to retrieve content from the URL.")
 

@@ -9,7 +9,7 @@ class M3U8_UrlFix:
         """
         Initializes an M3U8_UrlFix object with the provided playlist URL.
 
-        Args:
+        Parameters:
             - url (str, optional): The URL of the playlist. Defaults to None.
         """
         self.url_playlist: str = url
@@ -18,7 +18,7 @@ class M3U8_UrlFix:
         """
         Set the M3U8 playlist URL.
 
-        Args:
+        Parameters:
             - url (str): The M3U8 playlist URL.
         """
         self.url_playlist = url
@@ -27,7 +27,7 @@ class M3U8_UrlFix:
         """
         Generate a full URL for a given resource using the base URL from the playlist.
 
-        Args:
+        Parameters:
             - url_resource (str): The relative URL of the resource within the playlist.
 
         Returns:

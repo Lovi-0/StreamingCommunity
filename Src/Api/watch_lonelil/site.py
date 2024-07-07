@@ -14,7 +14,7 @@ from ..Template import search_domain, get_select_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaManager
+from ..Template.Class.SearchType import MediaManager
 
 
 # Variable
@@ -23,12 +23,11 @@ media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 
 
-
 def title_search(word_to_search: str) -> int:
     """
     Search for titles based on a search query.
 
-    Args:
+    Parameters:
         - title_search (str): The title to search for.
 
     Returns:
@@ -50,14 +49,12 @@ def title_search(word_to_search: str) -> int:
     for title in content_table:
         if any(keyword in str(title).lower() for keyword in ["show/", "movie/", "anime/"]):
             
-            # Construct a media object with the title's details
             obj = {
                 'url': f"https://{full_site_name}" + title.get("href"),
                 'name': title.find("img").get("alt"),
                 'type': title.find_all("p")[-1].get_text().split("·")[0].strip().lower()
             }
 
-            # Add the media object to the media search manager
             media_search_manager.add_media(obj)
     
     # Return the number of titles found

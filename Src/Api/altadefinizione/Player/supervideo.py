@@ -20,8 +20,8 @@ class VideoSource:
         """
         Sets up the video source with the provided URL.
 
-        Args:
-            url (str): The URL of the video.
+        Parameters:
+            - url (str): The URL of the video.
         """
         self.url = url
         self.headers = {'user-agent': get_headers()}
@@ -30,8 +30,8 @@ class VideoSource:
         """
         Sets up the video source with the provided URL.
 
-        Args:
-            url (str): The URL of the video source.
+        Parameters:
+            - url (str): The URL of the video source.
         """
         self.url = url
 
@@ -39,16 +39,17 @@ class VideoSource:
         """
         Make an HTTP GET request to the provided URL.
 
-        Args:
-            url (str): The URL to make the request to.
+        Parameters:
+            - url (str): The URL to make the request to.
 
         Returns:
-            str: The response content if successful, None otherwise.
+            - str: The response content if successful, None otherwise.
         """
 
         try:
             response = httpx.get(url, headers=self.headers, follow_redirects=True)
             response.raise_for_status()
+
             return response.text
         
         except Exception as e:
@@ -59,11 +60,11 @@ class VideoSource:
         """
         Parse the provided HTML content using BeautifulSoup.
 
-        Args:
-            html_content (str): The HTML content to parse.
+        Parameters:
+            - html_content (str): The HTML content to parse.
 
         Returns:
-            BeautifulSoup: Parsed HTML content if successful, None otherwise.
+            - BeautifulSoup: Parsed HTML content if successful, None otherwise.
         """
 
         try:
@@ -78,11 +79,11 @@ class VideoSource:
         """
         Extracts the source URL of the second iframe in the provided BeautifulSoup object.
 
-        Args:
-            soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML.
+        Parameters:
+            - soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML.
 
         Returns:
-            str: The source URL of the second iframe, or None if not found.
+            - str: The source URL of the second iframe, or None if not found.
         """
         iframes = soup.find_all("iframe")
         if iframes and len(iframes) > 1:
@@ -94,11 +95,11 @@ class VideoSource:
         """
         Makes a request to the specified URL and parses the HTML content.
 
-        Args:
-            url (str): The URL to fetch content from.
+        Parameters:
+            - url (str): The URL to fetch content from.
 
         Returns:
-            BeautifulSoup: A BeautifulSoup object representing the parsed HTML content, or None if the request fails.
+            - BeautifulSoup: A BeautifulSoup object representing the parsed HTML content, or None if the request fails.
         """
         content = self.make_request(url)
         if content:
@@ -110,11 +111,11 @@ class VideoSource:
         """
         Prepares and runs a Node.js script from the provided BeautifulSoup object to retrieve the video URL.
 
-        Args:
-            soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML content.
+        Parameters:
+            - soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML content.
 
         Returns:
-            str: The output from the Node.js script, or None if the script cannot be found or executed.
+            - str: The output from the Node.js script, or None if the script cannot be found or executed.
         """
         for script in soup.find_all("script"):
             if "eval" in str(script):
@@ -134,7 +135,7 @@ class VideoSource:
         Download a video from the provided URL.
 
         Returns:
-            str: The URL of the downloaded video if successful, None otherwise.
+            - str: The URL of the downloaded video if successful, None otherwise.
         """
         try:
             html_content = self.make_request(self.url)

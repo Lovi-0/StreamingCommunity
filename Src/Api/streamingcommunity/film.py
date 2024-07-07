@@ -8,12 +8,13 @@ import logging
 # Internal utilities
 from Src.Util.console import console
 from Src.Util.message import start_message
-from Src.Util.os import create_folder, can_create_file, remove_special_characters
+from Src.Util.os import create_folder, can_create_file
 from Src.Lib.Downloader import HLS_Downloader
 
 
 # Logic class
 from .Core.Player.vixcloud import VideoSource
+from ..Template.Class.SearchType import MediaItem
 
 
 # Variable
@@ -21,25 +22,21 @@ from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
 video_source = VideoSource()
         
 
-def download_film(id_film: str, title_name: str, domain: str):
+def download_film(select_title: MediaItem, domain: str,  version: str):
     """
     Downloads a film using the provided film ID, title name, and domain.
 
-    Args:
-        - id_film (str): The ID of the film.
-        - title_name (str): The name of the film title.
+    Parameters:
         - domain (str): The domain of the site
+        - version (str): Version of site.
     """
 
     # Start message and display film information
     start_message()
-    console.print(f"[yellow]Download:  [red]{title_name} \n")
+    console.print(f"[yellow]Download:  [red]{select_title.slug} \n")
 
     # Set domain and media ID for the video source
-    video_source.setup(
-        domain = domain,
-        media_id = id_film
-    )
+    video_source.setup(version, domain, select_title.id)
 
     # Retrieve scws and if available master playlist
     video_source.get_iframe()
@@ -47,9 +44,9 @@ def download_film(id_film: str, title_name: str, domain: str):
     master_playlist = video_source.get_playlist()
 
     # Define the filename and path for the downloaded film
-    mp4_name = title_name.replace("-", "_")
+    mp4_name = str(select_title.slug).replace("-", "_")
     mp4_format = (mp4_name) + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name)
+    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, str(select_title.slug))
 
     # Ensure the folder path exists
     create_folder(mp4_path)

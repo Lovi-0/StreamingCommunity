@@ -40,6 +40,7 @@ def run_function(func: Callable[..., None], close_console: bool = False) -> None
         func()
 
 
+
 def load_search_functions():
 
     modules = []
@@ -101,6 +102,7 @@ def load_search_functions():
     return loaded_functions
 
 
+
 def initialize():
 
     # Get start message
@@ -123,7 +125,7 @@ def initialize():
 
     # Attempting GitHub update
     try:
-        git_update()
+        #git_update()
         print()
     except:
         console.log("[red]Error with loading github.")
@@ -172,6 +174,8 @@ def main():
     else:
         console.print("[red]Invalid category.")
         sys.exit(0)
+
+
 
 if __name__ == '__main__':
     initialize()

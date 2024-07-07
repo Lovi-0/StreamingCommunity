@@ -20,7 +20,7 @@ class VideoSource:
         Initializes the VideoSource object with default values.
 
         Attributes:
-            headers (dict): An empty dictionary to store HTTP headers.
+            - headers (dict): An empty dictionary to store HTTP headers.
         """
         self.headers = {'user-agent': get_headers()}
 
@@ -28,8 +28,8 @@ class VideoSource:
         """
         Sets up the video source with the provided URL.
 
-        Args:
-            url (str): The URL of the video source.
+        Parameters:
+            - url (str): The URL of the video source.
         """
         self.url = url
 
@@ -37,11 +37,11 @@ class VideoSource:
         """
         Make an HTTP GET request to the provided URL.
 
-        Args:
-            url (str): The URL to make the request to.
+        Parameters:
+            - url (str): The URL to make the request to.
 
         Returns:
-            str: The response content if successful, None otherwise.
+            - str: The response content if successful, None otherwise.
         """
 
         try:
@@ -57,11 +57,11 @@ class VideoSource:
         """
         Parse the provided HTML content using BeautifulSoup.
 
-        Args:
-            html_content (str): The HTML content to parse.
+        Parameters:
+            - html_content (str): The HTML content to parse.
 
         Returns:
-            BeautifulSoup: Parsed HTML content if successful, None otherwise.
+            - BeautifulSoup: Parsed HTML content if successful, None otherwise.
         """
 
         try:
@@ -76,11 +76,11 @@ class VideoSource:
         """
         Prepares and runs a Node.js script from the provided BeautifulSoup object to retrieve the video URL.
 
-        Args:
-            soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML content.
+        Parameters:
+            - soup (BeautifulSoup): A BeautifulSoup object representing the parsed HTML content.
 
         Returns:
-            str: The output from the Node.js script, or None if the script cannot be found or executed.
+            - str: The output from the Node.js script, or None if the script cannot be found or executed.
         """
         for script in soup.find_all("script"):
             if "eval" in str(script):

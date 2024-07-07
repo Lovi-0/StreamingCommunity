@@ -20,8 +20,8 @@ class VideoSource:
         """
         Sets up the video source with the provided URL.
 
-        Args:
-            url (str): The URL of the video.
+        Parameters:
+            - url (str): The URL of the video.
         """
         self.url = url
         self.redirect_url = None
@@ -58,10 +58,8 @@ class VideoSource:
         """
         Sends a request to the redirect URL and extracts the Maxstream URL.
         """
-        if not self.redirect_url:
-            raise ValueError("Redirect URL not found. Please call get_redirect_url() first.")
-
         try:
+
             # Send a GET request to the redirect URL
             response = httpx.get(self.redirect_url, headers=self.headers, follow_redirects=True, timeout=10)
             response.raise_for_status()
@@ -112,10 +110,8 @@ class VideoSource:
         """
         Sends a request to the Maxstream URL and extracts the .m3u8 file URL.
         """
-        if not self.maxstream_url:
-            raise ValueError("Maxstream URL not found. Please call get_maxstream_url() first.")
-
         try:
+            
             # Send a GET request to the Maxstream URL
             response = httpx.get(self.maxstream_url, headers=self.headers, follow_redirects=True, timeout=10)
             response.raise_for_status() 

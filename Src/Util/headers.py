@@ -17,7 +17,7 @@ def extract_versions(user_agent):
     """
     Extract browser versions from the user agent.
 
-    Args:
+    Parameters:
         user_agent (str): User agent of the browser.
 
     Returns:
@@ -46,7 +46,7 @@ def get_platform(user_agent):
     """
     Determine the device platform from the user agent.
 
-    Args:
+    Parameters:
         user_agent (str): User agent of the browser.
 
     Returns:
@@ -68,7 +68,7 @@ def get_model(user_agent):
     """
     Determine the device model from the user agent.
 
-    Args:
+    Parameters:
         user_agent (str): User agent of the browser.
 
     Returns:

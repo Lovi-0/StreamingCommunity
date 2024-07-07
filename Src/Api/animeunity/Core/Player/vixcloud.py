@@ -38,7 +38,7 @@ class VideoSource:
         """
         Set up the class
 
-        Args:
+        Parameters:
             - media_id (int): The media ID to set.
             - series_name (str): The series name to set.
         """
@@ -54,7 +54,7 @@ class VideoSource:
         Fetches the total count of episodes available for the anime.
         
         Returns:
-            int or None: Total count of episodes if successful, otherwise None.
+            - int or None: Total count of episodes if successful, otherwise None.
         """
         try:
 
@@ -72,11 +72,11 @@ class VideoSource:
         """
         Fetches information about a specific episode.
         
-        Args:
+        Parameters:
             - index_ep (int): Index of the episode.
             
         Returns:
-            obj Episode or None: Information about the episode if successful, otherwise None.
+            - obj Episode or None: Information about the episode if successful, otherwise None.
         """
         try:
 
@@ -100,11 +100,11 @@ class VideoSource:
         """
         Fetches the script text for a given episode ID.
         
-        Args:
+        Parameters:
             - episode_id (int): ID of the episode.
             
         Returns:
-            str or None: Script successful, otherwise None.
+            - str or None: Script successful, otherwise None.
         """
         try:
 
@@ -134,7 +134,7 @@ class VideoSource:
         """
         Parse script text.
 
-        Args:
+        Parameters:
             - script_text (str): The script text to parse.
         """
         try:

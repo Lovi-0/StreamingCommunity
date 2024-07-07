@@ -17,7 +17,7 @@ from ..Template import search_domain, get_select_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaManager
+from ..Template.Class.SearchType import MediaManager
 
 
 # Variable
@@ -26,16 +26,15 @@ media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 
 
-
 def title_search(word_to_search: str) -> int:
     """
     Search for titles based on a search query.
 
-    Args:
+    Parameters:
         - title_search (str): The title to search for.
 
     Returns:
-        int: The number of titles found.
+        - int: The number of titles found.
     """
     try:
 
@@ -56,9 +55,9 @@ def title_search(word_to_search: str) -> int:
             desc = div_title.find("span").find("strong").get_text(strip=True)
 
             title_info = {
-                'url': url,
                 'name': title,
-                'desc': desc
+                'desc': desc,
+                'url': url
             }
 
             media_search_manager.add_media(title_info)

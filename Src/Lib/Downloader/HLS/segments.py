@@ -63,7 +63,7 @@ class M3U8_Segments:
         """
         Initializes the M3U8_Segments object.
 
-        Args:
+        Parameters:
             - url (str): The URL of the M3U8 playlist.
             - tmp_folder (str): The temporary folder to store downloaded segments.
             - is_index_url (bool): Flag indicating if `m3u8_index` is a URL (default True).
@@ -89,7 +89,7 @@ class M3U8_Segments:
         """
         Retrieves the encryption key from the M3U8 playlist.
 
-        Args:
+        Parameters:
             - m3u8_parser (M3U8_Parser): The parser object containing M3U8 playlist information.
 
         Returns:
@@ -122,7 +122,7 @@ class M3U8_Segments:
         """
         Parses the M3U8 content to extract segment information.
 
-        Args:
+        Parameters:
             - m3u8_content (str): The content of the M3U8 file.
         """
         m3u8_parser = M3U8_Parser()
@@ -200,7 +200,7 @@ class M3U8_Segments:
         """
         Downloads a TS segment and adds it to the segment queue.
 
-        Args:
+        Parameters:
             - ts_url (str): The URL of the TS segment.
             - index (int): The index of the segment.
             - progress_bar (tqdm): Progress counter for tracking download progress.
@@ -290,7 +290,7 @@ class M3U8_Segments:
         """
         Downloads all TS segments in parallel and writes them to a file.
 
-        Args:
+        Parameters:
             - add_desc (str): Additional description for the progress bar.
         """
 

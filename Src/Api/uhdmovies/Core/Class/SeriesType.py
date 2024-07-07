@@ -19,39 +19,36 @@ class SeasonManager:
         """
         Add a new season to the manager.
 
-        Args:
-            season_data (Dict[str, Union[int, str, None]]): A dictionary containing data for the new season.
+        Parameters:
+            - season_data (Dict[str, Union[int, str, None]]): A dictionary containing data for the new season.
         """
         season = Season(season_data)
         self.seasons.append(season)
 
-    def get_season_by_index(self, index: int) -> Season:
+    def get(self, index: int) -> Season:
         """
-        Get a season by its index.
+        Get a season item from the list by index.
 
-        Args:
-            index (int): Index of the season to retrieve.
+        Parameters:
+            - index (int): The index of the seasons item to retrieve.
 
         Returns:
-            Season: The season object.
+            - Season: The media item at the specified index.
         """
-        return self.seasons[index]
+        return self.media_list[index]
     
     def get_length(self) -> int:
         """
         Get the number of seasons in the manager.
 
         Returns:
-            int: Number of seasons.
+            - int: Number of seasons.
         """
         return len(self.seasons)
     
     def clear(self) -> None:
         """
         This method clears the seasons list.
-
-        Args:
-            self: The object instance.
         """
         self.seasons.clear()
 

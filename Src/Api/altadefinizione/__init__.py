@@ -29,10 +29,7 @@ def search():
         select_title = run_get_select_title()
 
         # Download only film
-        download_film(
-            title_name=select_title.name,
-            url=select_title.url
-        )
+        download_film(select_title)
 
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

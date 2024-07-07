@@ -1,9 +1,5 @@
 # 09.06.24
 
-import sys
-import logging
-
-
 # Internal utilities
 from Src.Util.console import console, msg
 
@@ -33,8 +29,8 @@ def search():
         # Select title from list
         select_title = run_get_select_title()
 
+        # Download only TV
         donwload_serie(select_title)
-
 
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

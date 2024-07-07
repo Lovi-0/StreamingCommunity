@@ -66,7 +66,7 @@ class HLS_Downloader():
         """
         Initialize the HLS Downloader object.
 
-        Args:
+        Parameters:
             - output_filename (str): Output filename for the downloaded content.
             - m3u8_playlist (str, optional): URL to the main M3U8 playlist.
             - m3u8_index (str, optional): URL to the main M3U8 index file. (NOT USED)
@@ -132,7 +132,7 @@ class HLS_Downloader():
         """
         Make a request to get text from the provided URL to test if index or m3u8 work correcly.
 
-        Args:
+        Parameters:
             - url (str): The URL to make the request to.
 
         Returns:
@@ -159,7 +159,7 @@ class HLS_Downloader():
         """
         Parses the M3U8 playlist to extract information about keys, playlists, subtitles, etc.
 
-        Args:
+        Parameters:
             - m3u8_playlist_text (str): The text content of the M3U8 playlist.
         """
 
@@ -328,7 +328,7 @@ class HLS_Downloader():
         """
         Download subtitle content from the provided URI and save it to the specified path.
 
-        Args:
+        Parameters:
             - uri (str): The URI from which to download the subtitle content.
             - path (str): The path where the subtitle content will be saved.
         """
@@ -442,7 +442,7 @@ class HLS_Downloader():
         """
         Join downloaded video with subtitles.
 
-        Args:
+        Parameters:
             - input_path (str): Path of the input video file.
 
         Returns:
@@ -467,7 +467,7 @@ class HLS_Downloader():
         """
         Clean up temporary files and folders.
 
-        Args:
+        Parameters:
             - out_path (str): Path of the output file.
         """
 

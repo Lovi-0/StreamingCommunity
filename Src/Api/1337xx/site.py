@@ -17,8 +17,7 @@ from ..Template import search_domain, get_select_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaManager
-
+from ..Template.Class.SearchType import MediaManager
 
 # Variable
 from .costant import SITE_NAME
@@ -26,16 +25,15 @@ media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 
 
-
 def title_search(word_to_search: str) -> int:
     """
     Search for titles based on a search query.
 
-    Args:
+    Parameters:
         - title_search (str): The title to search for.
 
     Returns:
-        int: The number of titles found.
+        - int: The number of titles found.
     """
 
     # Find new domain if prev dont work
@@ -50,12 +48,11 @@ def title_search(word_to_search: str) -> int:
 
     # Scrape div film in table on single page
     for tr in soup.find_all('tr'):
-
         try:
 
             title_info = {
-                'title': tr.find_all("a")[1].get_text(strip=True),
-                'link': tr.find_all("a")[1].get("href"),
+                'name': tr.find_all("a")[1].get_text(strip=True),
+                'url': tr.find_all("a")[1].get("href"),
                 'seader': tr.find_all("td")[-5].get_text(strip=True),
                 'leacher': tr.find_all("td")[-4].get_text(strip=True),
                 'date': tr.find_all("td")[-3].get_text(strip=True).replace("'", ""),

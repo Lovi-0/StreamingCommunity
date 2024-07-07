@@ -1,28 +1,27 @@
-
 # 29.06.24
+
 import sys 
+import logging
 import json
 import urllib.parse
 
 
 # Logic class
-from ..Class.SearchType import MediaItem 
+from ...Template.Class.SearchType import MediaItem
 from Src.Lib.Driver import WebAutomation
 
+
 # Variable
-from ...costant import SITE_NAME, DOMAIN_NOW 
+from ..costant import SITE_NAME, DOMAIN_NOW 
 full_site_name=f"{SITE_NAME}.{DOMAIN_NOW}"
 
 
 class ApiManager:
-    """
-    A class to manage API interactions for media items.
-    """
     def __init__(self, media: MediaItem, main_driver: WebAutomation) -> None: 
         """
         Initializes the ApiManager with a media item and a web automation driver.
 
-        Args:
+        Parameters:
             - media (MediaItem): The media item to be processed.
             - main_driver (WebAutomation): The driver to perform web automation tasks.
         """
@@ -62,6 +61,12 @@ class ApiManager:
         # Retrieve and parse the page content 
         soup = self.main_driver.retrieve_soup() 
         content = soup.find("pre").text
+
+        if "error" in str(content):
+            logging.error("Failed to make request. Work in progress to add all other provider ...")
+            # TO DO !!! ADD ALL OTHER PROVIDER
+            sys.exit(0)
+
         data = json.loads(content)[0]['result']['data']['json']['stream'][0]['qualities']
 
         # Return the URL based on the available quality

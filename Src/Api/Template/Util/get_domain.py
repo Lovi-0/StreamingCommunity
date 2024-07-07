@@ -30,7 +30,7 @@ def check_url_for_content(url: str, content: str, timeout: int = 1) -> bool:
     """
     Check if a URL contains specific content.
 
-    Args:
+    Parameters:
         - url (str): The URL to check.
         - content (str): The content to search for in the response.
         - timeout (int): Timeout for the request in seconds.
@@ -66,7 +66,7 @@ def get_top_level_domain(base_url: str, target_content: str, max_workers: int = 
     """
     Get the top-level domain (TLD) from a list of URLs.
 
-    Args:
+    Parameters:
         - base_url (str): The base URL to construct complete URLs.
         - target_content (str): The content to search for in the response.
         - max_workers (int): Maximum number of threads.
@@ -152,7 +152,7 @@ def search_domain(site_name: str, target_content: str, base_url: str):
     """
     Search for a valid domain for the given site name and base URL.
 
-    Args:
+    Parameters:
         - site_name (str): The name of the site to search the domain for.
         - target_content (str): The content to search for in the response.
         - base_url (str): The base URL to construct complete URLs.

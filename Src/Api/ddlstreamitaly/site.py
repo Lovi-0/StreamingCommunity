@@ -17,7 +17,7 @@ from ..Template import search_domain, get_select_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaManager
+from ..Template.Class.SearchType import MediaManager
 
 
 # Variable
@@ -26,16 +26,15 @@ media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 
 
-
 def title_search(word_to_search: str) -> int:
     """
     Search for titles based on a search query.
 
-    Args:
+    Parameters:
         - title_search (str): The title to search for.
 
     Returns:
-        int: The number of titles found.
+        - int: The number of titles found.
     """
     try:
 
@@ -53,6 +52,7 @@ def title_search(word_to_search: str) -> int:
         if table_content:
             for title_div in table_content.find_all('li', class_='ipsStreamItem'):
                 try:
+
                     title_type = title_div.find("p", class_="ipsType_reset").find_all("a")[-1].get_text(strip=True)
                     name = title_div.find("span", class_="ipsContained").find("a").get_text(strip=True)
                     link = title_div.find("span", class_="ipsContained").find("a").get("href")
@@ -68,7 +68,6 @@ def title_search(word_to_search: str) -> int:
                 except Exception as e:
                     logging.error(f"Error processing title div: {e}")
 
-            # Return the number of titles found
             return media_search_manager.get_length()
         
         else:

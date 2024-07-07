@@ -19,7 +19,7 @@ def capture_output(process: subprocess.Popen, description: str) -> None:
     """
     Function to capture and print output from a subprocess.
 
-    Args:
+    Parameters:
         - process (subprocess.Popen): The subprocess whose output is captured.
         - description (str): Description of the command being executed.
     """
@@ -87,7 +87,7 @@ def parse_output_line(line: str) -> dict:
     """
     Function to parse the output line and extract relevant information.
 
-    Args:
+    Parameters:
         - line (str): The output line to parse.
 
     Returns:
@@ -119,7 +119,7 @@ def terminate_process(process):
     """
     Function to terminate a subprocess if it's still running.
 
-    Args:
+    Parameters:
         - process (subprocess.Popen): The subprocess to terminate.
     """
     try:
@@ -133,7 +133,7 @@ def capture_ffmpeg_real_time(ffmpeg_command: list, description: str) -> None:
     """
     Function to capture real-time output from ffmpeg process.
 
-    Args:
+    Parameters:
         - ffmpeg_command (list): The command to execute ffmpeg.
         - description (str): Description of the command being executed.
     """
@@ -149,7 +149,7 @@ def capture_ffmpeg_real_time(ffmpeg_command: list, description: str) -> None:
         process = subprocess.Popen(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
 
         # Start a thread to capture and print output
-        output_thread = threading.Thread(target=capture_output, args=(process, description))
+        output_thread = threading.Thread(target=capture_output, Parameters=(process, description))
         output_thread.start()
 
         try:

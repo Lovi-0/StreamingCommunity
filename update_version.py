@@ -9,6 +9,7 @@ from zipfile import ZipFile
 # External library
 import httpx
 from rich.console import Console
+from rich.prompt import Prompt
 
 
 # Variable
@@ -21,7 +22,7 @@ def move_content(source: str, destination: str) :
     """
     Move all content from the source folder to the destination folder.
 
-    Args:
+    Parameters:
         source (str): The path to the source folder.
         destination (str): The path to the destination folder.
     """
@@ -46,7 +47,7 @@ def keep_specific_items(directory: str, keep_folder: str, keep_file: str):
     """
     Delete all items in the directory except for the specified folder and file.
 
-    Args:
+    Parameters:
         directory (str): The path to the directory.
         keep_folder (str): The name of the folder to keep.
         keep_file (str): The name of the file to keep.
@@ -124,14 +125,17 @@ def main_upload():
     Main function to upload the latest commit of a GitHub repository.
     """
 
-    cmd_insert = input("Are you sure you want to delete all files? (Only videos folder will remain) [yes/no]: ")
+    cmd_insert = Prompt.ask("[bold red]Are you sure you want to delete all files? (Only videos folder will remain)[/bold red] [yes/no]")
 
-    if cmd_insert == "yes":
+    if cmd_insert.lower() == "yes":
+        console.print("[red]Deleting all files except the videos folder...")
 
         # Remove all old file
         keep_specific_items(".", "Video", "upload.py")
 
         download_and_extract_latest_commit()
 
+    else:
+         console.print("[red]Operation cancelled.")
 
 main_upload()

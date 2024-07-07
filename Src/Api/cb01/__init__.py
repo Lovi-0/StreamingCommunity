@@ -1,9 +1,5 @@
 # 09.06.24
 
-import sys
-import logging
-
-
 # Internal utilities
 from Src.Util.console import console, msg
 
@@ -11,7 +7,6 @@ from Src.Util.console import console, msg
 # Logic class
 from .site import title_search, run_get_select_title
 from .film import download_film
-
 
 
 # Variable

@@ -13,6 +13,7 @@ from ..Template import manage_selection
 
 # Logic class
 from .Core.Player.vixcloud import VideoSource
+from ..Template.Class.SearchType import MediaItem
 
 
 # Variable
@@ -25,7 +26,7 @@ def download_episode(index_select: int):
     """
     Downloads the selected episode.
 
-    Args:
+    Parameters:
         - index_select (int): Index of the episode to download.
     """
 
@@ -61,20 +62,17 @@ def download_episode(index_select: int):
         logging.error(f"Skip index: {index_select} cant find info with api.")
 
 
-def donwload_series(tv_id: int, tv_name: str):
+def donwload_series(select_title: MediaItem):
     """
     Function to download episodes of a TV series.
 
-    Args:
+    Parameters:
         - tv_id (int): The ID of the TV series.
         - tv_name (str): The name of the TV series.
     """
 
     # Set up video source
-    video_source.setup(
-        media_id = tv_id,
-        series_name = tv_name
-    )
+    video_source.setup(select_title.id, select_title.slug)
 
     # Get the count of episodes for the TV series
     episoded_count = video_source.get_count_episodes()
@@ -96,20 +94,17 @@ def donwload_series(tv_id: int, tv_name: str):
             download_episode(i_episode-1)
 
 
-def donwload_film(id_film: int, title_name: str):
+def donwload_film(select_title: MediaItem):
     """
     Function to download a film.
 
-    Args:
+    Parameters:
         - id_film (int): The ID of the film.
         - title_name (str): The title of the film.
     """
 
     # Set up video source
-    video_source.setup(
-        media_id = id_film,
-        series_name = title_name  
-    )
+    video_source.setup(select_title.id, select_title.slug)
     video_source.is_series = False
 
     # Start download

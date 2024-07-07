@@ -13,8 +13,8 @@ from Src.Lib.Downloader import MP4_downloader
 
 
 # Logic class
-from .Core.Player.lonelil import ApiManager
-from .Core.Class.SearchType import MediaItem
+from .Player.lonelil import ApiManager
+from ..Template.Class.SearchType import MediaItem
 from Src.Lib.Driver import WebAutomation
 
 
@@ -26,9 +26,9 @@ def download_film(media: MediaItem, main_driver: WebAutomation):
     """
     Downloads a media title using its API manager and WebAutomation driver.
 
-    Args:
-        media (MediaItem): The media item to be downloaded.
-        main_driver (WebAutomation): The web automation driver instance.
+    Parameters:
+        - media (MediaItem): The media item to be downloaded.
+        - main_driver (WebAutomation): The web automation driver instance.
     """
 
     start_message()

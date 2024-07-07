@@ -1,6 +1,5 @@
 # 09.06.24
 
-import sys
 import logging
 
 
@@ -38,7 +37,6 @@ def search():
 
         else:
             logging.error(f"Not supported: {select_title.type}")
-            sys.exit(0)
 
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

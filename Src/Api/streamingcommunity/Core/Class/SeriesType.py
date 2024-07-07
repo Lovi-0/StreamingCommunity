@@ -9,14 +9,10 @@ class Season:
         self.number: int = season_data.get('number')
         self.name: str = season_data.get('name')
         self.plot: str = season_data.get('plot')
-        self.release_date: str = season_data.get('release_date')
-        self.title_id: int = season_data.get('title_id')
-        self.created_at: str = season_data.get('created_at')
-        self.updated_at: str = season_data.get('updated_at')
         self.episodes_count: int = season_data.get('episodes_count')
 
     def __str__(self):
-        return f"Season(id={self.id}, number={self.number}, name='{self.name}', plot='{self.plot}', release_date='{self.release_date}', title_id={self.title_id}, created_at='{self.created_at}', updated_at='{self.updated_at}', episodes_count={self.episodes_count})"
+        return f"Season(id={self.id}, number={self.number}, name='{self.name}', plot='{self.plot}', episodes_count={self.episodes_count})"
 
 
 class SeasonManager:
@@ -27,24 +23,24 @@ class SeasonManager:
         """
         Add a new season to the manager.
 
-        Args:
+        Parameters:
             season_data (Dict[str, Union[int, str, None]]): A dictionary containing data for the new season.
         """
         season = Season(season_data)
         self.seasons.append(season)
 
-    def get_season_by_index(self, index: int) -> Season:
+    def get(self, index: int) -> Season:
         """
-        Get a season by its index.
+        Get a season item from the list by index.
 
-        Args:
-            index (int): Index of the season to retrieve.
+        Parameters:
+            index (int): The index of the seasons item to retrieve.
 
         Returns:
-            Season: The season object.
+            Season: The media item at the specified index.
         """
-        return self.seasons[index]
-    
+        return self.media_list[index]
+
     def get_length(self) -> int:
         """
         Get the number of seasons in the manager.
@@ -58,7 +54,7 @@ class SeasonManager:
         """
         This method clears the seasons list.
 
-        Args:
+        Parameters:
             self: The object instance.
         """
         self.seasons.clear()

@@ -22,7 +22,7 @@ class ProxyManager:
         """
         Initialize ProxyManager with a list of proxies and timeout.
         
-        Args:
+        Parameters:
             - proxy_list: List of proxy strings
             - timeout: Timeout for proxy requests
         """
@@ -35,7 +35,7 @@ class ProxyManager:
         """
         Check if a single proxy is working by making a request to Google.
 
-        Args:
+        Parameters:
             - proxy: Proxy string to be checked
 
         Returns:

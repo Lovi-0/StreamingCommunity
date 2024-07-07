@@ -16,9 +16,9 @@ from ..Template import manage_selection, map_episode_title
 
 
 # Logic class
-from .Core.Class.SearchType import MediaItem
-from .Core.Class.ScrapeSerie import GetSerieInfo
-from .Core.Player.ddl import VideoSource
+from ..Template.Class.SearchType import MediaItem
+from .Player.ScrapeSerie import GetSerieInfo
+from .Player.ddl import VideoSource
 
 
 # Variable
@@ -27,12 +27,11 @@ table_show_manager = TVShowManager()
 video_source = VideoSource()
 
 
-
 def donwload_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) -> None:
     """
     Download a single episode video.
 
-    Args:
+    Parameters:
         - tv_name (str): Name of the TV series.
         - index_episode_selected (int): Index of the selected episode.
     """

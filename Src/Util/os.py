@@ -46,7 +46,7 @@ def get_max_length_by_os(system: str) -> int:
     """
     Determines the maximum length for a base name based on the operating system.
 
-    Args:
+    Parameters:
         system (str): The operating system name.
 
     Returns:
@@ -65,7 +65,7 @@ def reduce_base_name(base_name: str) -> str:
     """
     Splits the file path into folder and base name, and reduces the base name based on the operating system.
 
-    Args:
+    Parameters:
         base_name (str): The name of the file.
 
     Returns:
@@ -97,7 +97,7 @@ def remove_special_characters(input_string):
     """
     Remove specified special characters from a string.
 
-    Args:
+    Parameters:
         - input_string (str): The input string containing special characters.
         - special_chars (list): List of special characters to be removed.
 
@@ -127,7 +127,7 @@ def create_folder(folder_name: str) -> None:
     """
     Create a directory if it does not exist, and log the result.
 
-    Args:
+    Parameters:
         folder_name (str): The path of the directory to be created.
     """
 
@@ -159,7 +159,7 @@ def check_file_existence(file_path):
     """
     Check if a file exists at the given file path.
 
-    Args:
+    Parameters:
         file_path (str): The path to the file.
 
     Returns:
@@ -183,7 +183,7 @@ def remove_folder(folder_path: str) -> None:
     """
     Remove a folder if it exists.
 
-    Args:
+    Parameters:
         - folder_path (str): The path to the folder to be removed.
     """
 
@@ -197,7 +197,7 @@ def delete_files_except_one(folder_path: str, keep_file: str) -> None:
     """
     Delete all files in a folder except for one specified file.
 
-    Args:
+    Parameters:
         - folder_path (str): The path to the folder containing the files.
         - keep_file (str): The filename to keep in the folder.
     """
@@ -225,7 +225,7 @@ def format_file_size(size_bytes: float) -> str:
     """
     Formats a file size from bytes into a human-readable string representation.
 
-    Args:
+    Parameters:
         size_bytes (float): Size in bytes to be formatted.
 
     Returns:
@@ -247,7 +247,7 @@ def format_transfer_speed(bytes: float) -> str:
     """
     Formats a transfer speed from bytes per second into a human-readable string representation.
 
-    Args:
+    Parameters:
         bytes (float): Speed in bytes per second to be formatted.
 
     Returns:
@@ -267,7 +267,7 @@ def compute_sha1_hash(input_string: str) -> str:
     """
     Computes the SHA-1 hash of the input string.
 
-    Args:
+    Parameters:
         - input_string (str): The string to be hashed.
 
     Returns:
@@ -368,7 +368,7 @@ def run_node_script(script_content: str) -> str:
     """
     Runs a Node.js script and returns its output.
 
-    Args:
+    Parameters:
         script_content (str): The content of the Node.js script to run.
 
     Returns:
@@ -400,7 +400,7 @@ def run_node_script_api(script_content: str) -> str:
     """
     Runs a Node.js script and returns its output.
 
-    Args:
+    Parameters:
         script_content (str): The content of the Node.js script to run.
 
     Returns:
@@ -494,7 +494,7 @@ def is_valid_filename(filename, system):
     """
     Validates if the given filename is valid for the specified system.
 
-    Args:
+    Parameters:
         - filename (str): The filename to validate.
         - system (str): The operating system, e.g., 'Windows', 'Darwin' (macOS), or others for Linux/Android.
 
@@ -533,7 +533,7 @@ def can_create_file(file_path):
     """
     Checks if a file can be created at the given file path.
 
-    Args:
+    Parameters:
         - file_path (str): The path where the file is to be created.
 
     Returns:
