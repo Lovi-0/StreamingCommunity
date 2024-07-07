@@ -149,7 +149,7 @@ def capture_ffmpeg_real_time(ffmpeg_command: list, description: str) -> None:
         process = subprocess.Popen(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
 
         # Start a thread to capture and print output
-        output_thread = threading.Thread(target=capture_output, Parameters=(process, description))
+        output_thread = threading.Thread(target=capture_output, args=(process, description))
         output_thread.start()
 
         try:
