@@ -15,6 +15,7 @@ You can chat, help improve this repo, or just hang around for some fun in the **
   * [Usage](#usage)
   * [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
   * [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux) 
+  * [Update](#update)
 * [CONFIGURATION](#Configuration)
 * [DOCKER](#docker)
 * [TUTORIAL](#tutorial)
@@ -51,6 +52,23 @@ python run.py
 
 ```bash
 python3 run.py
+```
+
+
+## Update
+
+Keep your script up to date with the latest features by running:
+
+#### On Windows:
+
+```powershell
+python update_version.py
+```
+
+#### On Linux/MacOS:
+
+```bash
+python3 update_version.py
 ```
 
 
