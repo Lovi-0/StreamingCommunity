@@ -138,14 +138,14 @@ class HLS_Downloader():
         Returns:
             str: The text content of the response.
         """
-
-        if "http" not in url or "https" not in url:
+    
+        if "http" not in str(url).lower().strip() or "https" not in str(url).lower().strip():
             logging.error(f"Invalid url: {url}")
             sys.exit(0)
 
         # Send a GET request to the provided URL
         logging.info(f"Test url: {url}")
-        response = httpx.get(url, headers=headers_index)
+        response = httpx.get(url, headers=headers_index, timeout=20)
 
         try:
             response.raise_for_status()
@@ -268,7 +268,7 @@ class HLS_Downloader():
             
             # Download the video segments
             self.expected_real_time = video_m3u8.expected_real_time
-            list_available_resolution_size = self.main_obj_parser._video.get_list_resolution_and_size(video_m3u8.expected_real_time_s)
+            #list_available_resolution_size = self.main_obj_parser._video.get_list_resolution_and_size(video_m3u8.expected_real_time_s)
             #console.print(f"[cyan]Estimate size [white]=> [red]{sorted(list_available_resolution_size, reverse=True)}")
 
             video_m3u8.download_streams(f"{Colors.MAGENTA}video")
@@ -406,6 +406,10 @@ class HLS_Downloader():
 
         if not os.path.exists(path_join_video):
 
+            # If codec not exist set to None
+            if not hasattr(self, 'codec'):
+                self.codec = None
+
             # Join the video segments into a single video file
             join_video(
                 video_path = self.downloaded_video[0].get('path'),
@@ -427,6 +431,10 @@ class HLS_Downloader():
         logging.info(f"JOIN audio path: {path_join_video_audio}")
 
         if not os.path.exists(path_join_video_audio):
+
+            # If codec not exist set to None
+            if not hasattr(self, 'codec'):
+                self.codec = None
 
             # Join the video with audio segments into a single video with audio file
             join_audios(

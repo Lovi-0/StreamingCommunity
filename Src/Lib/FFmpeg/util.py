@@ -68,8 +68,12 @@ def get_video_duration(file_path: str) -> float:
             probe_result = json.loads(stdout)
 
             # Extract duration from the video information
-            return float(probe_result['format']['duration'])
-    
+            try:
+                return float(probe_result['format']['duration'])
+            except:
+                logging.error("Cant get duration.")
+                return 1
+
     except Exception as e:
         logging.error(f"Error get video duration: {e}")
         sys.exit(0)

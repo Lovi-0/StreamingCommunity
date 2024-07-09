@@ -217,16 +217,16 @@ class M3U8_Segments:
 
                 with httpx.Client(proxies=proxy, verify=True) as client:  
                     if 'key_base_url' in self.__dict__:
-                        response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
+                        response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, follow_redirects=True)
                     else:
-                        response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT)
+                        response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, follow_redirects=True)
 
             else:
                 with httpx.Client(verify=True) as client_2:
                     if 'key_base_url' in self.__dict__:
-                        response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT)
+                        response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, follow_redirects=True)
                     else:
-                        response = client_2.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT)
+                        response = client_2.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, follow_redirects=True)
 
             # Get response content
             response.raise_for_status()
