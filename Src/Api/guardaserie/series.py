@@ -26,7 +26,7 @@ table_show_manager = TVShowManager()
 video_source = VideoSource()
 
 
-def donwload_video(scape_info_serie: GetSerieInfo, index_season_selected: int, index_episode_selected: int) -> None:
+def download_video(scape_info_serie: GetSerieInfo, index_season_selected: int, index_episode_selected: int) -> None:
     """
     Download a single episode video.
 
@@ -67,14 +67,14 @@ def donwload_video(scape_info_serie: GetSerieInfo, index_season_selected: int, i
     ).start()
 
 
-def donwload_episode(scape_info_serie: GetSerieInfo, index_season_selected: int, donwload_all: bool = False) -> None:
+def download_episode(scape_info_serie: GetSerieInfo, index_season_selected: int, download_all: bool = False) -> None:
     """
     Download all episodes of a season.
 
     Parameters:
         - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
-        - donwload_all (bool): Donwload all seasons episodes
+        - download_all (bool): Download all seasons episodes
     """
 
     # Start message and collect information about episodes
@@ -83,14 +83,14 @@ def donwload_episode(scape_info_serie: GetSerieInfo, index_season_selected: int,
     episodes_count = len(list_dict_episode)
 
     # Download all episodes wihtout ask
-    if donwload_all:
+    if download_all:
         for i_episode in range(1, episodes_count+1):
-            donwload_video(scape_info_serie, index_season_selected, i_episode)
+            download_video(scape_info_serie, index_season_selected, i_episode)
 
         console.print(f"\n[red]Download [yellow]season: [red]{index_season_selected}.")
 
     # If not download all episode but a single season
-    if not donwload_all:
+    if not download_all:
 
         # Display episodes list and manage user selection
         last_command = display_episodes_list(scape_info_serie.list_episodes)
@@ -98,12 +98,12 @@ def donwload_episode(scape_info_serie: GetSerieInfo, index_season_selected: int,
 
         # Download selected episodes
         if len(list_episode_select) == 1 and last_command != "*":
-            donwload_video(scape_info_serie, index_season_selected, list_episode_select[0])
+            download_video(scape_info_serie, index_season_selected, list_episode_select[0])
 
         # Download all other episodes selecter
         else:
             for i_episode in list_episode_select:
-                donwload_video(scape_info_serie, index_season_selected, i_episode)
+                download_video(scape_info_serie, index_season_selected, i_episode)
 
 
 def download_series(dict_serie: MediaItem) -> None:
@@ -125,23 +125,23 @@ def download_series(dict_serie: MediaItem) -> None:
 
     # Prompt user for season selection and download episodes
     console.print(f"\n[green]Season find: [red]{seasons_count}")
-    index_season_selected = str(msg.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]for a range of media"))
+    index_season_selected = msg.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
     list_season_select = manage_selection(index_season_selected, seasons_count)
 
     # Download selected episodes
     if len(list_season_select) == 1 and index_season_selected != "*":
         if 1 <= int(index_season_selected) <= seasons_count:
-            donwload_episode(scape_info_serie, list_season_select[0])
+            download_episode(scape_info_serie, list_season_select[0])
 
     # Dowload all seasons and episodes
     elif index_season_selected == "*":
         for i_season in list_season_select:
-            donwload_episode(scape_info_serie, i_season, True)
+            download_episode(scape_info_serie, i_season, True)
 
     # Download all other season selecter
     else:
         for i_season in list_season_select:
-            donwload_episode(scape_info_serie, i_season)
+            download_episode(scape_info_serie, i_season)
 
 
 def display_episodes_list(obj_episode_manager) -> str:

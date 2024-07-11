@@ -407,7 +407,7 @@ class M3U8_Subtitle:
                 })
 
             except Exception as e:
-                logging.error(f"Cant donwload: {obj_subtitle.get('name')}, error: {e}")
+                logging.error(f"Cant download: {obj_subtitle.get('name')}, error: {e}")
 
         return output
 

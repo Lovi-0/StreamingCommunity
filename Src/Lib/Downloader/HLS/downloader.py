@@ -12,7 +12,6 @@ from unidecode import unidecode
 
 
 # Internal utilities
-from Src.Util.headers import get_headers
 from Src.Util._jsonConfig import config_manager
 from Src.Util.console import console, Panel
 from Src.Util.color import Colors
@@ -116,7 +115,7 @@ class HLS_Downloader():
         os.makedirs(self.audio_segments_path, exist_ok=True)
         os.makedirs(self.subtitle_segments_path, exist_ok=True)
 
-        # Track subtitle, audio donwload
+        # Track subtitle, audio download
         self.downloaded_audio = []
         self.downloaded_subtitle = []
         self.downloaded_video = []
@@ -235,12 +234,15 @@ class HLS_Downloader():
         if self.codec is not None:
             console.print(f"[cyan]Codec [white]=> ([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white] ([green]b[white]: [yellow]{self.codec.video_bitrate // 1000}k[white]), [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white] ([green]b[white]: [yellow]{self.codec.audio_bitrate // 1000}k[white]))")
 
-    def __donwload_video__(self):
+    def download_video(self, server_ip: list = None):
         """
         Downloads and manages video segments.
 
         This method downloads video segments if necessary and updates
         the list of downloaded video segments.
+
+        Args:
+            - server_ip (list): A list of IP addresses to use in requests.
         """
 
         # Construct full path for the video segment directory
@@ -258,6 +260,7 @@ class HLS_Downloader():
             if self.is_index_url:
                 logging.info("Parse index by url.")
                 video_m3u8 = M3U8_Segments(self.m3u8_index, full_path_video, True)
+                video_m3u8.add_server_ip(server_ip)
 
             else:
                 logging.info("Parse index by text input.")
@@ -279,12 +282,15 @@ class HLS_Downloader():
         else:
             console.log("[cyan]Video [red]already exists.")
 
-    def __donwload_audio__(self):
+    def download_audio(self,  server_ip: list = None):
         """
         Downloads and manages audio segments.
 
         This method iterates over available audio tracks, downloads them if necessary, and updates
         the list of downloaded audio tracks.
+
+        Args:
+            - server_ip (list): A list of IP addresses to use in requests.
         """
 
         # Iterate over each available audio track
@@ -311,6 +317,7 @@ class HLS_Downloader():
 
                 # If the audio segment directory doesn't exist, download audio segments
                 audio_m3u8 = M3U8_Segments(obj_audio.get('uri'), full_path_audio)
+                audio_m3u8.add_server_ip(server_ip)
 
                 # Get information about the audio segments
                 audio_m3u8.get_info()
@@ -540,9 +547,12 @@ class HLS_Downloader():
         else:
             logging.info("Video file converted already exist.")
 
-    def start(self) -> None:
+    def start(self, server_ip: list = None):
         """
         Start the process of fetching, downloading, joining, and cleaning up the video.
+
+        Args:
+            - server_ip (list): A list of IP addresses to use in requests.
         """
 
         # Check if file already exist
@@ -581,9 +591,9 @@ class HLS_Downloader():
 
             # Start all download ...
             if DOWNLOAD_VIDEO:
-                self.__donwload_video__()
+                self.download_video(server_ip)
             if DOWNLOAD_AUDIO:
-                self.__donwload_audio__()
+                self.download_audio(server_ip)
             if DOWNLOAD_SUBTITLE:
                 self.__download_subtitle__()
 
@@ -673,7 +683,7 @@ class HLS_Downloader():
             self.m3u8_url_fixer.set_playlist(self.m3u8_index)
 
             # Start all download ...
-            self.__donwload_video__()
+            self.download_video()
 
             # Convert video
             converted_out_path = self.__join_video__()

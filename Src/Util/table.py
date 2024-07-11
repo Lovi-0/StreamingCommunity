@@ -105,7 +105,8 @@ class TVShowManager:
                 self.console.print(f"\n\n[yellow][INFO] [green]Press [red]Enter [green]to restart, or [red]'q' [green]to quit.")
 
                 if not force_int_input:
-                    key = Prompt.ask("[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]for a range of media")
+                    key = Prompt.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
+                    
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
                     choices.extend(["q", ""])
@@ -128,7 +129,8 @@ class TVShowManager:
             else:
                 self.console.print(f"\n\n[yellow][INFO] [red]You've reached the end. [green]Press [red]Enter [green]to restart, or [red]'q' [green]to quit.")
                 if not force_int_input:
-                    key = Prompt.ask("[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]for a range of media")
+                    key = Prompt.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
+
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
                     choices.extend(["q", ""])

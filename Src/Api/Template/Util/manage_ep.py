@@ -1,5 +1,6 @@
 # 19.06.24
 
+import sys
 import logging
 
 from typing import List
@@ -55,9 +56,29 @@ def manage_selection(cmd_insert: str, max_count: int) -> List[int]:
 
     # For a range (e.g., '[5-12]')
     elif "[" in cmd_insert:
-        start, end = map(int, cmd_insert[1:-1].split('-'))
-        list_season_select = list(range(start, end + 1))
 
+        # Extract the start and end parts
+        start, end = map(str.strip, cmd_insert[1:-1].split('-'))
+        start = int(start)
+
+        # If end is an integer, convert it
+        try:
+            end = int(end)
+
+        except ValueError:
+            # end remains a string if conversion fails
+            pass
+
+        # Generate the list_season_select based on the type of end
+        if isinstance(end, int):
+            list_season_select = list(range(start, end + 1))
+
+        elif end == "*":
+            list_season_select = list(range(start, max_count + 1))
+
+        else:
+            raise ValueError("Invalid end value")
+        
     # For all seasons
     elif cmd_insert == "*":
         list_season_select = list(range(1, max_count+1))

@@ -6,7 +6,7 @@ from Src.Util.console import console, msg
 
 # Logic class
 from .site import title_search, run_get_select_title
-from .anime import donwload_film, donwload_series
+from .anime import download_film, download_series
 
 
 # Variable
@@ -25,10 +25,10 @@ def search():
         select_title = run_get_select_title()
 
         if select_title.type == 'TV':
-            donwload_series(select_title)
+            download_series(select_title)
 
         else:
-            donwload_film(select_title)
+            download_film(select_title)
 
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

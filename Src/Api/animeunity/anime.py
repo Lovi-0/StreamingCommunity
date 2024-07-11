@@ -62,7 +62,7 @@ def download_episode(index_select: int):
         logging.error(f"Skip index: {index_select} cant find info with api.")
 
 
-def donwload_series(select_title: MediaItem):
+def download_series(select_title: MediaItem):
     """
     Function to download episodes of a TV series.
 
@@ -79,7 +79,7 @@ def donwload_series(select_title: MediaItem):
     console.log(f"[cyan]Episodes find: [red]{episoded_count}")
 
     # Prompt user to select an episode index
-    last_command = msg.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]for a range of media")
+    last_command = msg.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
 
     # Manage user selection
     list_episode_select = manage_selection(last_command, episoded_count)
@@ -94,7 +94,7 @@ def donwload_series(select_title: MediaItem):
             download_episode(i_episode-1)
 
 
-def donwload_film(select_title: MediaItem):
+def download_film(select_title: MediaItem):
     """
     Function to download a film.
 

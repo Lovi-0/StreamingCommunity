@@ -6,7 +6,7 @@ from Src.Util.console import console, msg
 
 # Logic class
 from .site import title_search, run_get_select_title
-from .serie import donwload_serie
+from .serie import download_serie
 
 
 
@@ -30,7 +30,7 @@ def search():
         select_title = run_get_select_title()
 
         # Download only TV
-        donwload_serie(select_title)
+        download_serie(select_title)
 
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

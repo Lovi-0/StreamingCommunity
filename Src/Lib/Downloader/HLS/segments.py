@@ -8,7 +8,7 @@ import logging
 import binascii
 import threading
 from queue import PriorityQueue
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, urlunparse
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -84,7 +84,21 @@ class M3U8_Segments:
         # Sync
         self.queue = PriorityQueue()
         self.stop_event = threading.Event()
-        
+
+        # Server ip
+        self.fake_proxy = False
+
+    def add_server_ip(self, list_ip: list):
+        """
+        Add server IP addresses 
+
+        Args:
+            list_ip (list): A list of IP addresses to be added.
+        """
+        if list_ip is not None:
+            self.fake_proxy = True
+            self.fake_proxy_ip = list_ip
+
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
         Retrieves the encryption key from the M3U8 playlist.
@@ -117,6 +131,24 @@ class M3U8_Segments:
         
         logging.info(f"Key: ('hex': {hex_content}, 'byte': {byte_content})")
         return byte_content
+    
+    def __gen_proxy__(self, url: str, url_index: int) -> str:
+        """
+        Change the IP address of the provided URL based on the given index.
+
+        Args:
+            - url (str): The original URL that needs its IP address replaced.
+            - url_index (int): The index used to select a new IP address from the list of FAKE_PROXY_IP.
+
+        Returns:
+            str: The modified URL with the new IP address.
+        """
+        new_ip_address = self.fake_proxy_ip[url_index % len(self.fake_proxy_ip)]
+
+        # Parse the original URL and replace the hostname with the new IP address
+        parsed_url = urlparse(url)._replace(netloc=new_ip_address)  
+
+        return urlunparse(parsed_url)
 
     def parse_data(self, m3u8_content: str) -> None:
         """
@@ -160,7 +192,7 @@ class M3U8_Segments:
 
         # Update segments for estimator
         self.class_ts_estimator.total_segments = len(self.segments)
-        logging.info(f"Segmnets to donwload: [{len(self.segments)}]")
+        logging.info(f"Segmnets to download: [{len(self.segments)}]")
 
         # Proxy
         if THERE_IS_PROXY_LIST:
@@ -170,6 +202,12 @@ class M3U8_Segments:
 
             if len(self.valid_proxy) == 0:
                 sys.exit(0)
+
+        # Server ip
+        if self.fake_proxy:
+            for i in range(len(self.segments)):
+                segment_url = self.segments[i]
+                self.segments[i] = self.__gen_proxy__(segment_url, self.segments.index(segment_url)) 
 
     def get_info(self) -> None:
         """
@@ -205,6 +243,12 @@ class M3U8_Segments:
             - index (int): The index of the segment.
             - progress_bar (tqdm): Progress counter for tracking download progress.
         """
+        need_verify = REQUEST_VERIFY
+
+        # Set to false for only fake proxy that use real ip of server
+        if self.fake_proxy:
+            need_verify = False
+
         try:
             start_time = time.time()
 
@@ -215,14 +259,14 @@ class M3U8_Segments:
                 proxy = self.valid_proxy[index % len(self.valid_proxy)]
                 logging.info(f"Use proxy: {proxy}")
 
-                with httpx.Client(proxies=proxy, verify=True) as client:  
+                with httpx.Client(proxies=proxy, verify=need_verify) as client:  
                     if 'key_base_url' in self.__dict__:
                         response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, follow_redirects=True)
                     else:
                         response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, follow_redirects=True)
 
             else:
-                with httpx.Client(verify=True) as client_2:
+                with httpx.Client(verify=need_verify) as client_2:
                     if 'key_base_url' in self.__dict__:
                         response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, follow_redirects=True)
                     else:

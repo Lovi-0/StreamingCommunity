@@ -27,7 +27,7 @@ table_show_manager = TVShowManager()
 video_source = VideoSource()
 
 
-def donwload_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) -> None:
+def download_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) -> None:
     """
     Download a single episode video.
 
@@ -91,12 +91,12 @@ def download_thread(dict_serie: MediaItem):
 
     # Download selected episodes
     if len(list_episode_select) == 1 and last_command != "*":
-        donwload_video(scape_info_serie, list_episode_select[0])
+        download_video(scape_info_serie, list_episode_select[0])
 
     # Download all other episodes selecter
     else:
         for i_episode in list_episode_select:
-            donwload_video(scape_info_serie, i_episode)
+            download_video(scape_info_serie, i_episode)
 
 
 def display_episodes_list(obj_episode_manager) -> str:
