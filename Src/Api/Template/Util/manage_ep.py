@@ -17,22 +17,21 @@ MAP_EPISODE = config_manager.get('DEFAULT', 'map_episode_name')
 
 def dynamic_format_number(n: int) -> str:
     """
-    Formats a number by adding a leading zero.
-    The width of the resulting string is dynamic, calculated as the number of digits in the number plus one.
+    Formats a number by adding a leading zero if it is less than 9.
+    The width of the resulting string is dynamic, calculated as the number of digits in the number plus one 
+    for numbers less than 9, otherwise the width remains the same.
     
     Parameters:
         - n (int): The number to format.
     
     Returns:
-        - str: The formatted number as a string with a leading zero.
-    
-    Examples:
-    >>> dynamic_format_number(1)
-    '01'
-    >>> dynamic_format_number(20)
-    '020'
+        - str: The formatted number as a string with a leading zero if the number is less than 9.
     """
-    width = len(str(n)) + 1
+    if n < 9:
+        width = len(str(n)) + 1
+    else:
+        width = len(str(n))
+
     return str(n).zfill(width)
 
 

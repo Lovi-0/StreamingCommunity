@@ -43,7 +43,8 @@ class TOR_downloader:
             - username (str): Username for logging into qBittorrent.
             - password (str): Password for logging into qBittorrent.
         """
-        self.qb = Client(f'http://{HOST}:{PORT}/')
+        try: self.qb = Client(f'http://{HOST}:{PORT}/')
+        except: logging.error("Start qbitorrent first.")
         self.username = USERNAME
         self.password = PASSWORD
         self.logged_in = False

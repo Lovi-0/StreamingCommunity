@@ -40,7 +40,7 @@ def MP4_downloader(url: str, path: str, referer: str = None):
         - referer (str): The referer header value to include in the HTTP request headers.
     """
 
-    if "http" not in url or "https" not in url:
+    if "http" not in str(url).lower().strip() or "https" not in str(url).lower().strip():
         logging.error(f"Invalid url: {url}")
         sys.exit(0)
     
