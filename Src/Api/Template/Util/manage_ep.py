@@ -27,7 +27,7 @@ def dynamic_format_number(n: int) -> str:
     Returns:
         - str: The formatted number as a string with a leading zero if the number is less than 9.
     """
-    if n < 9:
+    if n < 10:
         width = len(str(n)) + 1
     else:
         width = len(str(n))

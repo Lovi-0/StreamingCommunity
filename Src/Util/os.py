@@ -286,7 +286,7 @@ def check_internet():
     while True:
         try:
             # Attempt to open a connection to a website to check for internet connection
-            urllib.request.urlopen("http://www.google.com", timeout=1)
+            urllib.request.urlopen("https://www.google.com", timeout=3)
             console.log("[bold green]Internet is available![/bold green]")
             break
 
