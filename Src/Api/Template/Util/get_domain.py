@@ -26,13 +26,14 @@ AUTO_UPDATE_DOMAIN = config_manager.get_bool('DEFAULT', 'auto_update_domain')
 
 
 
-def check_url_for_content(url: str, content: str, timeout: int = 1) -> bool:
+def check_url_for_content(url: str, content: str, follow_redirects: bool = True, timeout: int = 1, ) -> bool:
     """
     Check if a URL contains specific content.
 
     Parameters:
         - url (str): The URL to check.
         - content (str): The content to search for in the response.
+        - follow_redirects (bool): To follow redirect url or not.
         - timeout (int): Timeout for the request in seconds.
 
     Returns:
@@ -40,7 +41,7 @@ def check_url_for_content(url: str, content: str, timeout: int = 1) -> bool:
     """
     try:
 
-        response = httpx.get(url, timeout=timeout, headers={'user-agent': get_headers()}, follow_redirects=True)
+        response = httpx.get(url, timeout=timeout, headers={'user-agent': get_headers()}, follow_redirects=follow_redirects)
         logging.info(f"Testing site to extract domain: {url}, response: {response.status_code}")
 
         # Raise an error if the status is not successful
@@ -62,7 +63,7 @@ def check_url_for_content(url: str, content: str, timeout: int = 1) -> bool:
     return False
 
 
-def get_top_level_domain(base_url: str, target_content: str, max_workers: int = os.cpu_count(), timeout: int = 2, retries: int = 1) -> str:
+def get_top_level_domain(base_url: str, target_content: str, max_workers: int = os.cpu_count(), timeout: int = 2, retries: int = 1, follow_redirects: bool = True) -> str:
     """
     Get the top-level domain (TLD) from a list of URLs.
 
@@ -72,6 +73,7 @@ def get_top_level_domain(base_url: str, target_content: str, max_workers: int = 
         - max_workers (int): Maximum number of threads.
         - timeout (int): Timeout for the request in seconds.
         - retries (int): Number of retries for failed requests.
+        - follow_redirects (bool): To follow redirect url or not.
 
     Returns:
         str: The found TLD, if any.
@@ -108,7 +110,7 @@ def get_top_level_domain(base_url: str, target_content: str, max_workers: int = 
             if stop_event.is_set():
                 return None
             
-            if check_url_for_content(url, target_content, timeout):
+            if check_url_for_content(url, target_content, follow_redirects, timeout):
                 stop_event.set()
                 progress_bar.update(1)
                 return url.split(".")[-1]
@@ -148,7 +150,7 @@ def get_top_level_domain(base_url: str, target_content: str, max_workers: int = 
         return None
     
 
-def search_domain(site_name: str, target_content: str, base_url: str):
+def search_domain(site_name: str, target_content: str, base_url: str, follow_redirects: bool = True):
     """
     Search for a valid domain for the given site name and base URL.
 
@@ -156,6 +158,7 @@ def search_domain(site_name: str, target_content: str, base_url: str):
         - site_name (str): The name of the site to search the domain for.
         - target_content (str): The content to search for in the response.
         - base_url (str): The base URL to construct complete URLs.
+        - follow_redirects (bool): To follow redirect url or not.
 
     Returns:
         tuple: The found domain and the complete URL.
@@ -169,7 +172,7 @@ def search_domain(site_name: str, target_content: str, base_url: str):
 
     try:
         # Test the current domain
-        response = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=5, follow_redirects=True)
+        response = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=5, follow_redirects=follow_redirects)
         console.print(f"[cyan]Test response site[white]: [red]{response.status_code}")
         response.raise_for_status()
 
@@ -185,7 +188,7 @@ def search_domain(site_name: str, target_content: str, base_url: str):
 
         if AUTO_UPDATE_DOMAIN:
             console.print("[red]Extract new DOMAIN from TLD list.")
-            new_domain = get_top_level_domain(base_url=base_url, target_content=target_content)
+            new_domain = get_top_level_domain(base_url=base_url, target_content=target_content, follow_redirects=follow_redirects)
 
             if new_domain is not None:
 

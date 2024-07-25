@@ -83,7 +83,7 @@ def get_version_and_domain():
     """
 
     # Find new domain if prev dont work
-    domain_to_use, base_url = search_domain(SITE_NAME, '<meta name="author" content="StreamingCommunity">', f"https://{SITE_NAME}")
+    domain_to_use, base_url = search_domain(SITE_NAME, '<meta name="author" content="StreamingCommunity">', f"https://{SITE_NAME}", False)
 
     # Extract version from the response
     version, list_title_top_10 = get_version(httpx.get(base_url, headers={'user-agent': get_headers()}).text)
