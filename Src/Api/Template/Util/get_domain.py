@@ -201,7 +201,7 @@ def search_domain(site_name: str, target_content: str, base_url: str, follow_red
                 return new_domain, f"{base_url}.{new_domain}"
             
             else:
-                logging.error(f"Failed to find a new domain for: {base_url}")
+                logging.error(f"Failed to find a new domain for: {base_url}\nChange it in config.json")
                 sys.exit(0)
 
         else:

@@ -60,7 +60,7 @@
         "streamingcommunity": {
             "video_workers": 2,
             "audio_workers": 2,
-            "domain": "love"
+            "domain": "photos"
         },
         "animeunity": {
             "video_workers": 2,
@@ -70,12 +70,12 @@
         "altadefinizione": {
             "video_workers": -1,
             "audio_workers": -1,
-            "domain": "vodka"
+            "domain": "my"
         },
         "guardaserie": {
             "video_workers": -1,
             "audio_workers": -1,
-            "domain": "ceo"
+            "domain": "my"
         },
         "ddlstreamitaly": {
             "domain": "co",
@@ -89,7 +89,7 @@
             "domain": "ru"
         },
         "uhdmovies": {
-            "domain": "tel"
+            "domain": "dad"
         },
         "bitsearch": {
             "domain": "to"
@@ -98,7 +98,7 @@
             "domain": "to"
         },
         "cb01": {
-            "domain": "church"
+            "domain": "ventures"
         }
     }
 }
