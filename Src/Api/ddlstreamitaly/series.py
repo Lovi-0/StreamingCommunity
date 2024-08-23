@@ -60,7 +60,6 @@ def download_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) 
     master_playlist = video_source.get_playlist()
     
     # Parse start page url
-    start_message()
     parsed_url = urlparse(obj_episode.get('url'))
 
     MP4_downloader(

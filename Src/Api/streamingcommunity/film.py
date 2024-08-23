@@ -8,7 +8,7 @@ import logging
 # Internal utilities
 from Src.Util.console import console
 from Src.Util.message import start_message
-from Src.Util.os import create_folder, can_create_file
+from Src.Util.os import create_folder, can_create_file, remove_special_characters
 from Src.Lib.Downloader import HLS_Downloader
 
 
@@ -44,9 +44,9 @@ def download_film(select_title: MediaItem, domain: str,  version: str):
     master_playlist = video_source.get_playlist()
 
     # Define the filename and path for the downloaded film
-    mp4_name = str(select_title.slug).replace("-", "_")
+    mp4_name = remove_special_characters(select_title.slug)
     mp4_format = (mp4_name) + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, str(select_title.slug))
+    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, remove_special_characters(select_title.slug))
 
     # Ensure the folder path exists
     create_folder(mp4_path)

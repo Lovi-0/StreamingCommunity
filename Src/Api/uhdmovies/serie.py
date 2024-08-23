@@ -19,6 +19,7 @@ from ..Template import manage_selection, map_episode_title
 from .Core.Player.episode_scraper import ApiManager
 from .Core.Player.driveleech import DownloadAutomation
 from ..Template.Class.SearchType import MediaItem
+from .film import download_film
 
 
 # Variable
@@ -133,25 +134,34 @@ def download_serie(media: MediaItem):
     api_manager.collect_season()
     seasons_count = api_manager.obj_season_manager.get_length()
 
-    # Prompt user for season selection and download episodes
-    console.print(f"\n[green]Season find: [red]{seasons_count}")
-    index_season_selected = msg.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
-    list_season_select = manage_selection(index_season_selected, seasons_count)
+    if seasons_count > 0:
 
-    # Download selected episodes
-    if len(list_season_select) == 1 and index_season_selected != "*":
-        if 1 <= int(index_season_selected) <= seasons_count:
-            download_episode(api_manager, list_season_select[0])
+        # Prompt user for season selection and download episodes
+        console.print(f"\n[green]Season find: [red]{seasons_count}")
+        
+        index_season_selected = msg.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
+        list_season_select = manage_selection(index_season_selected, seasons_count)
 
-    # Dowload all seasons and episodes
-    elif index_season_selected == "*":
-        for i_season in list_season_select:
-            download_episode(api_manager, i_season, True)
+        # Download selected episodes
+        if len(list_season_select) == 1 and index_season_selected != "*":
+            if 1 <= int(index_season_selected) <= seasons_count:
+                download_episode(api_manager, list_season_select[0])
 
-    # Download all other season selecter
+        # Dowload all seasons and episodes
+        elif index_season_selected == "*":
+            for i_season in list_season_select:
+                download_episode(api_manager, i_season, True)
+
+        # Download all other season selecter
+        else:
+            for i_season in list_season_select:
+                download_episode(api_manager, i_season)
+
     else:
-        for i_season in list_season_select:
-            download_episode(api_manager, i_season)
+
+        # If not seasons find is a film 
+        obj_film = api_manager.episode_scraper.info_site[0]
+        download_film(obj_film.get('name'), obj_film.get('url'))
 
 
 def display_episodes_list(api_manager: ApiManager) -> str:

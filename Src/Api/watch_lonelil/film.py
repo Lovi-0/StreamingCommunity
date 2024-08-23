@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 # Internal utilities
 from Src.Util.message import start_message
-from Src.Util.os import create_folder, can_create_file
+from Src.Util.os import create_folder, can_create_file, remove_special_characters
 from Src.Lib.Downloader import MP4_downloader
 
 
@@ -40,8 +40,8 @@ def download_film(media: MediaItem, main_driver: WebAutomation):
     url_playlist = api_manager.get_playlist()
 
     # Construct the MP4 file name and path
-    mp4_name = str(media.name).replace("-", "_") + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, media.name)
+    mp4_name = remove_special_characters(media.name) + ".mp4"
+    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, remove_special_characters(media.name))
 
     # Ensure the folder path exists
     create_folder(mp4_path)

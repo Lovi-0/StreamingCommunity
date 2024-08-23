@@ -7,7 +7,6 @@
         "clean_console": true,
         "root_path": "Video",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
-        "auto_update_domain": true,
         "config_qbit_tor": {
             "host": "192.168.1.125",
             "port": "8080",
@@ -25,7 +24,7 @@
         "proxy_start_max": 0.5
     },
     "BROWSER": {
-        "headless": true
+        "headless": false
     },
     "M3U8_DOWNLOAD": {
         "tqdm_delay": 0.01,
@@ -60,7 +59,7 @@
         "streamingcommunity": {
             "video_workers": 2,
             "audio_workers": 2,
-            "domain": "photos"
+            "domain": "buzz"
         },
         "animeunity": {
             "video_workers": 2,

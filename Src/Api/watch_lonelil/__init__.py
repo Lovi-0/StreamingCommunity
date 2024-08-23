@@ -15,7 +15,8 @@ from .film import download_film
 
 # Variable
 indice = 5
-_deprecate = False
+_deprecate = True
+# !! NOTE: 23.08.24 Seleniumbase cant bypass site
 
 
 def search():

@@ -38,7 +38,7 @@ def download_film(select_title: MediaItem):
 
     # Define output path
     title_name = remove_special_characters(select_title.name)
-    mp4_name = remove_special_characters(title_name.replace("-", "_") + ".mp4")
+    mp4_name = remove_special_characters(title_name) +".mp4"
     mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name)
 
     # Ensure the folder path exists

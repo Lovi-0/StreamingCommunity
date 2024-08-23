@@ -30,11 +30,13 @@ class WebAutomation:
             headless (bool, optional): Whether to run the browser in headless mode. Default is True.
         """
         logging.getLogger('seleniumbase').setLevel(logging.ERROR)
+
         self.driver = Driver(
             uc=True, 
             uc_cdp_events=True, 
             headless=USE_HEADLESS,
-            user_data_dir = tempfile.mkdtemp()
+            user_data_dir = tempfile.mkdtemp(),
+            chromium_arg="--disable-search-engine-choice-screen"
         )
     
     def quit(self):

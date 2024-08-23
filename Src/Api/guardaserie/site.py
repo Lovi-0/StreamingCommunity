@@ -34,7 +34,7 @@ def title_search(word_to_search: str) -> int:
     """
 
     # Find new domain if prev dont work
-    domain_to_use, _ = search_domain(SITE_NAME, '<meta name="generator" content="Guardaserie Streaming', f"https://{SITE_NAME}")
+    domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
 
     # Send request to search for titles
     response = httpx.get(f"https://guardaserie.{domain_to_use}/?story={unidecode(word_to_search)}&do=search&subaction=search", headers={'user-agent': get_headers()}, timeout=15)

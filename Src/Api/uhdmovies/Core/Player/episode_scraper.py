@@ -1,11 +1,8 @@
 # 29.06.24
 
 import re
-import sys
-import json
 import httpx
 import logging
-import urllib.parse
 
 
 from bs4 import BeautifulSoup
@@ -99,8 +96,9 @@ class EpisodeScraper:
                             'url': episode.get("href"),
                         })
 
-                    # Get obnly fist quality
+                    # Get only fist quality
                     break
+
                 break
 
         return info_site

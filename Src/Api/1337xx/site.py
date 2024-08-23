@@ -37,7 +37,7 @@ def title_search(word_to_search: str) -> int:
     """
 
     # Find new domain if prev dont work
-    domain_to_use, _ = search_domain(SITE_NAME, '<meta name="description" content="1337x', f"https://{SITE_NAME}")
+    domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
 
     # Construct the full site URL and load the search page
     response = httpx.get(f"https://{SITE_NAME}.{domain_to_use}/search/{unidecode(word_to_search)}/1/", headers={'user-agent': get_headers()}, follow_redirects=True)

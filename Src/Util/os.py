@@ -37,7 +37,7 @@ from .headers import get_headers
 special_chars_to_remove = [
     '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '[', ']', '{', '}', '<', 
     '>', '|', '`', '~', "'", '"', ';', ':', ',', '?', '\\', '/', '\t', ' ', '=', 
-    '+', '\n', '\r', '\0'
+    '+', '\n', '\r', '\0', ':'
 ]
 
 
@@ -72,7 +72,6 @@ def reduce_base_name(base_name: str) -> str:
         str: The reduced base name.
     """
 
-    
     # Determine the operating system
     system = platform.system().lower()
     

@@ -99,7 +99,7 @@ def title_search(title: str) -> int:
     """
 
     # Get token and session value from configuration
-    domain_to_use, _ = search_domain(SITE_NAME, '<meta name="author" content="AnimeUnity Staff">', f"https://www.{SITE_NAME}")
+    domain_to_use, _ = search_domain(SITE_NAME, f"https://www.{SITE_NAME}")
     data = get_token(SITE_NAME, domain_to_use)
 
     # Prepare cookies to be used in the request

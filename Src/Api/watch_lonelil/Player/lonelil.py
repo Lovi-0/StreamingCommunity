@@ -38,6 +38,7 @@ class ApiManager:
         """
 
         # Prepare the JSON payload
+        # !! NOTE: MISSING ALL OTHER PLAYER
         json_payload = {
             "0": {
                 "json": {

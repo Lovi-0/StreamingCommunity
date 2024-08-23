@@ -39,7 +39,7 @@ def title_search(word_to_search: str) -> int:
     try:
 
         # Find new domain if prev dont work
-        domain_to_use, _ = search_domain(SITE_NAME, '<meta property="og:site_name" content="CB01">', f"https://{SITE_NAME}")
+        domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
 
         # Send request to search for titles
         response = httpx.get(f"https://{SITE_NAME}.{domain_to_use}/?s={unidecode(word_to_search)}", headers={'user-agent': get_headers()}, follow_redirects=True)
@@ -52,7 +52,7 @@ def title_search(word_to_search: str) -> int:
 
             url = div_title.find("h3").find("a").get("href")
             title = div_title.find("h3").find("a").get_text(strip=True)
-            desc = div_title.find("span").find("strong").get_text(strip=True)
+            desc = div_title.find("p").find("strong").text
 
             title_info = {
                 'name': title,
