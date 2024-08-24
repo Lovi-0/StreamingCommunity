@@ -1,19 +1,21 @@
 # 11.03.24
 
 import os
+import sys
 import logging
 
 
 # Internal utilities
 from Src.Util.console import console, msg
-from Src.Lib.Downloader import HLS_Downloader
 from Src.Util.message import start_message
-from ..Template import manage_selection
+from Src.Util.os import create_folder, can_create_file
+from Src.Lib.Downloader import MP4_downloader
 
 
 # Logic class
-from .Core.Player.vixcloud import VideoSource
+from ..Template import manage_selection
 from ..Template.Class.SearchType import MediaItem
+from .Core.Player.vixcloud import VideoSource
 
 
 # Variable
@@ -38,11 +40,11 @@ def download_episode(index_select: int):
         start_message()
         console.print(f"[yellow]Download:  [red]EP_{obj_episode.number} \n")
 
-        # Get the embed URL for the episode
-        embed_url = video_source.get_embed(obj_episode.id)
+        # Get the js script from the episode
+        js_script = video_source.get_embed(obj_episode.id)
 
         # Parse parameter in embed text
-        video_source.parse_script(embed_url)
+        video_source.parse_script(js_script)
 
         # Create output path
         mp4_path = None
@@ -52,10 +54,16 @@ def download_episode(index_select: int):
         else:
             mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, video_source.series_name)
 
+        # Check if can create file output
+        create_folder(mp4_path)                                                                    
+        if not can_create_file(mp4_name):  
+            logging.error("Invalid mp4 name.")
+            sys.exit(0)
+
         # Start downloading
-        HLS_Downloader(
-            m3u8_playlist = video_source.get_playlist(),
-            output_filename = os.path.join(mp4_path, mp4_name)
+        MP4_downloader(
+            str(video_source.src_mp4).strip(),
+            os.path.join(mp4_path, mp4_name)
         ).start()
 
     else:

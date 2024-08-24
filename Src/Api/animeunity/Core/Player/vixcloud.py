@@ -119,10 +119,10 @@ class VideoSource:
             video_response = httpx.get(embed_url)
             video_response.raise_for_status()
 
-
             # Parse response with BeautifulSoup to get content of the scriot
             soup = BeautifulSoup(video_response.text, "html.parser")
             script = soup.find("body").find("script").text
+            self.src_mp4 = soup.find("body").find_all("script")[1].text.split(" = ")[1].replace("'", "")
 
             return script
         

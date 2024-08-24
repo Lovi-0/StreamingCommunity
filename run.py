@@ -16,7 +16,7 @@ from Src.Util.message import start_message
 from Src.Util.console import console, msg
 from Src.Util._jsonConfig import config_manager
 from Src.Upload.update import update as git_update
-from Src.Util.os import get_system_summary
+from Src.Util.os import get_system_summary, create_folder
 from Src.Lib.TMBD.tmbd import tmdb
 from Src.Util.logger import Logger
 
@@ -138,6 +138,10 @@ def initialize():
 
 def main():
 
+    # Create folder root path if not exist
+    folder_root_path = config_manager.get("DEFAULT", "root_path")
+    create_folder(folder_name=folder_root_path)
+
     # Load search functions
     search_functions = load_search_functions()
 
@@ -182,5 +186,5 @@ def main():
 
 
 if __name__ == '__main__':
-    initialize()
+    #initialize()
     main()
