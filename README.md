@@ -5,7 +5,7 @@
 
 This repository provide a simple script designed to facilitate the downloading of films and series from a popular streaming community platform. The script allows users to download individual films, entire series, or specific episodes, providing a seamless experience for content consumers.
 
-## Join us
+## Join us 🌟
 You can chat, help improve this repo, or just hang around for some fun in the **Git_StreamingCommunity** Discord [Server](https://discord.com/invite/8vV68UGRc7)
 
 # Table of Contents
@@ -22,7 +22,7 @@ You can chat, help improve this repo, or just hang around for some fun in the **
 * [TO DO](#to-do)
 
 
-## Requirement
+## Requirement 📋
 
 Make sure you have the following prerequisites installed on your system:
 
@@ -30,7 +30,7 @@ Make sure you have the following prerequisites installed on your system:
 * [ffmpeg](https://www.gyan.dev/ffmpeg/builds/)
 * [openssl](https://www.openssl.org) or [pycryptodome](https://pypi.org/project/pycryptodome/)
 
-## Installation
+## Installation ⚙️
 
 Install the required Python libraries using the following command:
 
@@ -38,7 +38,7 @@ Install the required Python libraries using the following command:
 pip install -r requirements.txt
 ```
 
-## Usage
+## Usage 📚
 
 Run the script with the following command:
 
@@ -72,7 +72,7 @@ python3 update_version.py
 ```
 
 
-## Configuration
+## Configuration ⚙️
 
 You can change some behaviors by tweaking the configuration file.
 
@@ -198,7 +198,7 @@ You can choose different vars:
 
 > NOTE: You don't need to add .mp4 at the end
 
-## Docker
+## Docker 🐳
 
 You can run the script in a docker container, to build the image just run
 
@@ -231,14 +231,14 @@ make LOCAL_DIR=/path/to/download run-container
 
 The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
 
-## Tutorial
+## Tutorial 📖
 
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
 Add [api_1](https://www.youtube.com/watch?v=3ylBSMyQlhM)
 Add [api_2](https://www.youtube.com/watch?v=ReEYUIbdbG4)
 
 
-## To do
+## To do 📝
 - GUI
 - Website api
 - Add other site

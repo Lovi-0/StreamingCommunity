@@ -17,6 +17,7 @@ from Src.Util.console import console, msg
 from Src.Util._jsonConfig import config_manager
 from Src.Upload.update import update as git_update
 from Src.Util.os import get_system_summary
+from Src.Lib.TMBD.tmbd import tmdb
 from Src.Util.logger import Logger
 
 
@@ -125,12 +126,15 @@ def initialize():
 
     # Attempting GitHub update
     try:
-        #git_update()
+        git_update()
         print()
     except:
         console.log("[red]Error with loading github.")
 
-
+    # Show trending film and series
+    tmdb.display_trending_films()
+    tmdb.display_trending_tv_shows()
+    
 
 def main():
 

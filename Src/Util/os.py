@@ -6,12 +6,10 @@ import os
 import sys
 import ssl
 import time
-import json
 import errno
 import shutil
 import hashlib
 import logging
-import zipfile
 import platform
 import importlib
 import subprocess
@@ -19,17 +17,12 @@ import contextlib
 import urllib.request
 import importlib.metadata
 
-from typing import List
-
-
 # External library
 import httpx
 import unicodedata
 
-
 # Internal utilities
 from .console import console
-from .headers import get_headers
 
 
 
@@ -284,14 +277,14 @@ def compute_sha1_hash(input_string: str) -> str:
 def check_internet():
     while True:
         try:
-            # Attempt to open a connection to a website to check for internet connection
-            urllib.request.urlopen("https://www.google.com", timeout=3)
+            httpx.get("https://www.google.com")
             console.log("[bold green]Internet is available![/bold green]")
             break
 
         except urllib.error.URLError:
             console.log("[bold red]Internet is not available. Waiting...[/bold red]")
             time.sleep(5)
+
     print()
 
 def get_executable_version(command):
