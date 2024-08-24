@@ -40,3 +40,6 @@ def search():
     
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")
+
+        # Retry
+        search()

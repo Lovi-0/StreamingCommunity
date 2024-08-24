@@ -12,6 +12,11 @@ from rich.console import Console
 from Src.Util.table import TVShowManager
 
 
+# Variable
+tv_show_manager = TVShowManager()
+api_key = "a800ed6c93274fb857ea61bd9e7256c5"
+
+
 class TheMovieDB:
     def __init__(self, api_key, tv_show_manager):
         """
@@ -204,11 +209,5 @@ class TheMovieDB:
         ]
         self._display_with_title(f"Search Results for: {title}", data, columns)
 
-
-
-# Create an instance of TVShowManager
-tv_show_manager = TVShowManager()
-
-# Replace with your actual API key
-api_key = "a800ed6c93274fb857ea61bd9e7256c5"
+# Output
 tmdb = TheMovieDB(api_key, tv_show_manager)
