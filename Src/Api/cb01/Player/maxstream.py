@@ -7,12 +7,12 @@ import logging
 
 # External libraries
 import httpx
+import jsbeautifier
 from bs4 import BeautifulSoup
 
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Util.os import run_node_script, run_node_script_api
 
 
 class VideoSource:
@@ -121,14 +121,14 @@ class VideoSource:
             for script in soup.find_all("script"):
                 if "eval(function(p,a,c,k,e,d)" in script.text:
 
-                    # Execute the script using the run_node_script_api function
-                    text_run_node_js = run_node_script_api(script.text)
+                    # Execute the script using
+                    data_js = jsbeautifier.beautify(script.text)
 
                     # Extract the .m3u8 URL from the script's output
-                    m3u8_match = re.search(r'src:"(https://.*?\.m3u8)"', text_run_node_js)
+                    match = re.search(r'sources:\s*\[\{\s*src:\s*"([^"]+)"', data_js)
 
-                    if m3u8_match:
-                        self.m3u8_url = m3u8_match.group(1)
+                    if match:
+                        self.m3u8_url = match.group(1)
                         logging.info(f"M3U8 URL: {self.m3u8_url}")
                         break
 

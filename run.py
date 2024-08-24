@@ -125,7 +125,7 @@ def initialize():
 
     # Attempting GitHub update
     try:
-        git_update()
+        #git_update()
         print()
     except:
         console.log("[red]Error with loading github.")

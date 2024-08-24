@@ -7,12 +7,12 @@ import logging
 
 # External libraries
 import httpx
+import jsbeautifier
 from bs4 import BeautifulSoup
 
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Util.os import run_node_script, run_node_script_api
 
 
 class VideoSource:
@@ -119,14 +119,7 @@ class VideoSource:
         """
         for script in soup.find_all("script"):
             if "eval" in str(script):
-
-                # WITH INSTALL NODE JS
-                #new_script = str(script.text).replace("eval", "var a = ")
-                #new_script = new_script.replace(")))", ")));console.log(a);")
-                #return run_node_script(new_script)
-
-                # WITH API
-                return run_node_script_api(script.text)
+                return jsbeautifier.beautify(script.text)
             
         return None
 
@@ -170,13 +163,14 @@ class VideoSource:
                 logging.error("Failed to fetch supervideo content.")
                 return None
 
-            result = self.get_result_node_js(supervideo_soup)
-            if not result:
-                logging.error("No video URL found in script.")
-                return None
+            # Find master playlist
+            data_js = self.get_result_node_js(supervideo_soup)
+
+            match = re.search(r'sources:\s*\[\{\s*file:\s*"([^"]+)"', data_js)
+            if match:
+                return match.group(1)
             
-            master_playlist = str(result).split(":")[3].split('"}')[0]
-            return f"https:{master_playlist}"
+            return None
 
         except Exception as e:
             logging.error(f"An error occurred: {e}")
