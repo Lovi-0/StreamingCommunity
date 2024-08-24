@@ -25,7 +25,6 @@ from Src.Util.logger import Logger
 CLOSE_CONSOLE = config_manager.get_bool('DEFAULT', 'not_close')
 
 
-
 def run_function(func: Callable[..., None], close_console: bool = False) -> None:
     """
     Run a given function indefinitely or once, depending on the value of close_console.
@@ -39,7 +38,6 @@ def run_function(func: Callable[..., None], close_console: bool = False) -> None
             func()
     else:
         func()
-
 
 
 def load_search_functions():
@@ -101,7 +99,6 @@ def load_search_functions():
             console.print(f"[red]Failed to load search function from module {module_name}: {str(e)}")
 
     return loaded_functions
-
 
 
 def initialize():
@@ -184,7 +181,6 @@ def main():
         sys.exit(0)
 
 
-
 if __name__ == '__main__':
-    #initialize()
+    initialize()
     main()
