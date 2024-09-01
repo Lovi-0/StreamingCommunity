@@ -102,7 +102,7 @@ class TVShowManager:
 
             # Handling user input for loading more items or quitting
             if self.slice_end < total_items:
-                self.console.print(f"\n\n[yellow][INFO] [green]Press [red]Enter [green]to restart, or [red]'q' [green]to quit.")
+                self.console.print(f"\n\n[yellow][INFO] [green]Press [red]Enter [green]for next page, or [red]'q' [green]to quit.")
 
                 if not force_int_input:
                     key = Prompt.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
@@ -118,8 +118,8 @@ class TVShowManager:
                     break
 
                 elif key == "":
-                    self.slice_start += self.slice_end
-                    self.slice_end += self.slice_end
+                    self.slice_start += self.step
+                    self.slice_end += self.step
                     if self.slice_end > total_items:
                         self.slice_end = total_items
 
@@ -127,7 +127,8 @@ class TVShowManager:
                     break
 
             else:
-                self.console.print(f"\n\n[yellow][INFO] [red]You've reached the end. [green]Press [red]Enter [green]to restart, or [red]'q' [green]to quit.")
+                # Last slice, ensure all remaining items are shown
+                self.console.print(f"\n\n[yellow][INFO] [red]You've reached the end. [green]Press [red]Enter [green]for next page, or [red]'q' [green]to quit.")
                 if not force_int_input:
                     key = Prompt.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
 
@@ -149,6 +150,6 @@ class TVShowManager:
                     break
             
         return last_command
-    
+
     def clear(self):
         self.tv_shows = []

@@ -23,6 +23,7 @@ from Src.Util.logger import Logger
 
 # Config
 CLOSE_CONSOLE = config_manager.get_bool('DEFAULT', 'not_close')
+SHOW_TRENDING = config_manager.get_bool('DEFAULT', 'show_trending')
 
 
 def run_function(func: Callable[..., None], close_console: bool = False) -> None:
@@ -129,9 +130,12 @@ def initialize():
         console.log("[red]Error with loading github.")
 
     # Show trending film and series
-    tmdb.display_trending_films()
-    tmdb.display_trending_tv_shows()
-    
+    if SHOW_TRENDING:
+        tmdb.display_trending_films()
+        print()
+        tmdb.display_trending_tv_shows()
+        print()
+        
 
 def main():
 

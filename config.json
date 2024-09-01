@@ -13,7 +13,8 @@
             "user": "admin",
             "pass": "adminadmin"
         },
-        "not_close": false
+        "not_close": false,
+        "show_trending": true
     },
     "REQUESTS": {
         "timeout": 10,

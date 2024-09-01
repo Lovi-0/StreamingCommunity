@@ -18,7 +18,7 @@ api_key = "a800ed6c93274fb857ea61bd9e7256c5"
 
 
 class TheMovieDB:
-    def __init__(self, api_key, tv_show_manager):
+    def __init__(self, api_key):
         """
         Initialize the class with the API key and TV show manager.
         
@@ -29,7 +29,6 @@ class TheMovieDB:
         self.api_key = api_key
         self.base_url = "https://api.themoviedb.org/3"
         self.console = Console()
-        self.tv_show_manager = tv_show_manager
         self.genres = self._fetch_genres()
 
     def _make_request(self, endpoint, params=None):
@@ -72,26 +71,27 @@ class TheMovieDB:
             - columns (list): A list of tuples, where each tuple contains the column name and the key to fetch the data from the dictionary.
         """
         # Define column styles with colors
+        tv_show_manager = TVShowManager()
         column_info = {
             col[0]: {'color': col[2] if len(col) > 2 else 'white'}
             for col in columns
         }
-        self.tv_show_manager.add_column(column_info)
+        tv_show_manager.add_column(column_info)
 
         # Add each item to the TV show manager, including rank
         for index, item in enumerate(data):
+            
             # Convert genre IDs to genre names
             genre_names = [self.genres.get(genre_id, 'Unknown') for genre_id in item.get('genre_ids', [])]
             tv_show = {
                 col[0]: str(item.get(col[1], 'N/A')) if col[1] != 'genre_ids' else ', '.join(genre_names)
-                for col in columns if col[0] != 'Rank'
+                for col in columns
             }
-            # Add rank manually
-            tv_show['Rank'] = str(index + 1)
-            self.tv_show_manager.add_tv_show(tv_show)
+
+            tv_show_manager.add_tv_show(tv_show)
         
         # Display the processed TV show data
-        self.tv_show_manager.display_data(self.tv_show_manager.tv_shows[self.tv_show_manager.slice_start:self.tv_show_manager.slice_end])
+        tv_show_manager.display_data(tv_show_manager.tv_shows[tv_show_manager.slice_start:tv_show_manager.slice_end])
 
     def _display_with_title(self, title: str, data, columns):
         """
@@ -111,13 +111,12 @@ class TheMovieDB:
         """
         data = self._make_request("trending/tv/week").get("results", [])
         columns = [
-            ("Rank", None, 'yellow'), 
             ("Title", "name", 'cyan'), 
             ("First Air Date", "first_air_date", 'green'), 
             ("Popularity", "popularity", 'magenta'),
             ("Genres", "genre_ids", 'blue'),
             ("Origin Country", "origin_country", 'red'),
-            ("Vote Average", "vote_average", 'white')
+            ("Vote Average", "vote_average", 'yellow')
         ]
         self._display_with_title("Trending TV Shows of the Week", data, columns)
 
@@ -127,87 +126,13 @@ class TheMovieDB:
         """
         data = self._make_request("trending/movie/week").get("results", [])
         columns = [
-            ("Rank", None, 'yellow'), 
             ("Title", "title", 'cyan'), 
             ("Release Date", "release_date", 'green'), 
             ("Popularity", "popularity", 'magenta'),
             ("Genres", "genre_ids", 'blue'),
-            ("Vote Average", "vote_average", 'white')
+            ("Vote Average", "vote_average", 'yellow')
         ]
         self._display_with_title("Trending Films of the Week", data, columns)
 
-    def display_recent_films(self):
-        """
-        Fetch and display the films released recently.
-        """
-        data = self._make_request("movie/now_playing").get("results", [])
-        columns = [
-            ("Rank", None, 'yellow'), 
-            ("Title", "title", 'cyan'), 
-            ("Release Date", "release_date", 'green'), 
-            ("Popularity", "popularity", 'magenta'),
-            ("Genres", "genre_ids", 'blue'),
-            ("Vote Average", "vote_average", 'white')
-        ]
-        self._display_with_title("Recently Released Films", data, columns)
-
-    def display_recent_tv_shows(self):
-        """
-        Fetch and display the TV shows airing recently.
-        """
-        data = self._make_request("tv/on_the_air").get("results", [])
-        columns = [
-            ("Rank", None, 'yellow'), 
-            ("Title", "name", 'cyan'), 
-            ("First Air Date", "first_air_date", 'green'), 
-            ("Popularity", "popularity", 'magenta'),
-            ("Genres", "genre_ids", 'blue'),
-            ("Origin Country", "origin_country", 'red'),
-            ("Vote Average", "vote_average", 'white')
-        ]
-        self._display_with_title("Recently Aired TV Shows", data, columns)
-
-    def search_by_genre(self, genre_id):
-        """
-        Fetch and display TV shows based on genre.
-        
-        Parameters:
-            - genre_id (int): The genre ID to filter the results.
-        """
-        endpoint = "discover/tv"
-        params = {"with_genres": genre_id, "sort_by": "popularity.desc"}
-        data = self._make_request(endpoint, params).get("results", [])
-        columns = [
-            ("Rank", None, 'yellow'), 
-            ("Title", "name", 'cyan'), 
-            ("First Air Date", "first_air_date", 'green'), 
-            ("Popularity", "popularity", 'magenta'),
-            ("Genres", "genre_ids", 'blue'),
-            ("Origin Country", "origin_country", 'red'),
-            ("Vote Average", "vote_average", 'white')
-        ]
-        self._display_with_title(f"TV Shows by Genre {genre_id}", data, columns)
-
-    def search_by_title(self, title):
-        """
-        Search and display TV shows by title.
-        
-        Parameters:
-            - title (str): The title to search for.
-        """
-        endpoint = "search/tv"
-        params = {"query": title}
-        data = self._make_request(endpoint, params).get("results", [])
-        columns = [
-            ("Rank", None, 'yellow'), 
-            ("Title", "name", 'cyan'), 
-            ("First Air Date", "first_air_date", 'green'), 
-            ("Popularity", "popularity", 'magenta'),
-            ("Genres", "genre_ids", 'blue'),
-            ("Origin Country", "origin_country", 'red'),
-            ("Vote Average", "vote_average", 'white')
-        ]
-        self._display_with_title(f"Search Results for: {title}", data, columns)
-
 # Output
-tmdb = TheMovieDB(api_key, tv_show_manager)
+tmdb = TheMovieDB(api_key)
