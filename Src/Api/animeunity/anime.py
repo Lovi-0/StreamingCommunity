@@ -64,7 +64,7 @@ def download_episode(index_select: int):
         MP4_downloader(
             str(video_source.src_mp4).strip(),
             os.path.join(mp4_path, mp4_name)
-        ).start()
+        )
 
     else:
         logging.error(f"Skip index: {index_select} cant find info with api.")
