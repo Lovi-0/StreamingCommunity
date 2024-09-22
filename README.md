@@ -82,18 +82,6 @@ You can change some behaviors by tweaking the configuration file.
   * **debug**: Enables or disables debug mode.
     - **Default Value**: `false`
 
-  * **log_file**: The file where logs will be written.
-    - **Default Value**: `app.log`
-
-  * **log_to_file**: Whether to log messages to a file.
-    - **Default Value**: `true`
-
-  * **show_message**: Whether to show messages.
-    - **Default Value**: `false`
-
-  * **clean_console**: Clears the console before the script runs.
-    - **Default Value**: `false`
-
   * **root_path**: Path where the script will add movies and TV series folders (see [Path Examples](#Path-examples)).
     - **Default Value**: `Video`
 
@@ -144,28 +132,6 @@ You can change some behaviors by tweaking the configuration file.
     - **Example Value**: `['ara', 'baq', 'cat', 'chi', 'cze', 'dan', 'dut', 'eng', 'fil', 'fin', 'forced-ita', 'fre', 'ger', 'glg', 'gre', 'heb', 'hin', 'hun', 'ind', 'ita', 'jpn', 'kan', 'kor', 'mal', 'may', 'nob', 'nor', 'pol', 'por', 'rum', 'rus', 'spa', 'swe', 'tam', 'tel', 'tha', 'tur', 'ukr', 'vie']`
 
   * **cleanup_tmp_folder**: Upon final conversion, ensures the removal of all unformatted audio, video tracks, and subtitles from the temporary folder, thereby maintaining cleanliness and efficiency.
-    - **Default Value**: `false`
-
-  * **create_report**: When enabled, saves the name of the series or movie being downloaded along with the date and file size in a CSV file, providing a log of downloaded content.
-    - **Default Value**: `false`
-
-</details>
-
-<details>
-  <summary><strong>M3U8_CONVERSION</strong></summary>
-
-  * **use_codec**: Whether to use a specific codec for processing.
-    - **Default Value**: `false`
-    - **Example Value**: `libx264`
-
-  * **use_gpu**: Whether to use GPU acceleration.
-    - **Default Value**: `false`
-
-  * **default_preset**: The default preset for ffmpeg conversion.
-    - **Default Value**: `ultrafast`
-    - **Example Value**: `slow`
-
-  * **check_output_after_ffmpeg**: Verify if the conversion run by ffmpeg is free from corruption.
     - **Default Value**: `false`
 
 </details>

@@ -36,34 +36,30 @@ def title_search(word_to_search: str) -> int:
     Returns:
         - int: The number of titles found.
     """
-    try:
 
-        # Find new domain if prev dont work
-        domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+    # Find new domain if prev dont work
+    domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
 
-        # Send request to search for titles
-        response = httpx.get(f"https://{SITE_NAME}.{domain_to_use}/?s={unidecode(word_to_search)}", headers={'user-agent': get_headers()}, follow_redirects=True)
-        response.raise_for_status()
+    # Send request to search for titles
+    response = httpx.get(f"https://{SITE_NAME}.{domain_to_use}/?s={unidecode(word_to_search)}", headers={'user-agent': get_headers()}, follow_redirects=True)
+    response.raise_for_status()
 
-        # Create soup and find table
-        soup = BeautifulSoup(response.text, "html.parser")
+    # Create soup and find table
+    soup = BeautifulSoup(response.text, "html.parser")
 
-        for div_title in soup.find_all("div", class_ = "card"):
+    for div_title in soup.find_all("div", class_ = "card"):
 
-            url = div_title.find("h3").find("a").get("href")
-            title = div_title.find("h3").find("a").get_text(strip=True)
-            desc = div_title.find("p").find("strong").text
+        url = div_title.find("h3").find("a").get("href")
+        title = div_title.find("h3").find("a").get_text(strip=True)
+        desc = div_title.find("p").find("strong").text
 
-            title_info = {
-                'name': title,
-                'desc': desc,
-                'url': url
-            }
+        title_info = {
+            'name': title,
+            'desc': desc,
+            'url': url
+        }
 
-            media_search_manager.add_media(title_info)
-
-    except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        media_search_manager.add_media(title_info)
 
     # Return the number of titles found
     return media_search_manager.get_length()

@@ -37,54 +37,39 @@ def dynamic_format_number(n: int) -> str:
 
 def manage_selection(cmd_insert: str, max_count: int) -> List[int]:
     """
-    Manage user selection for seasons to download.
+    Manage user selection for seasons or episodes to download.
 
     Parameters:
-        - cmd_insert (str): User input for season selection.
-        - max_count (int): Maximum count of seasons available.
+        - cmd_insert (str): User input for selection.
+        - max_count (int): Maximum count available.
 
     Returns:
-        list_season_select (List[int]): List of selected seasons.
+        list_selection (List[int]): List of selected items.
     """
-    list_season_select = []
+    list_selection = []
     logging.info(f"Command insert: {cmd_insert}, end index: {max_count + 1}")
 
     # For a single number (e.g., '5')
     if cmd_insert.isnumeric():
-        list_season_select.append(int(cmd_insert))
+        list_selection.append(int(cmd_insert))
 
-    # For a range (e.g., '[5-12]')
-    elif "[" in cmd_insert:
-
-        # Extract the start and end parts
-        start, end = map(str.strip, cmd_insert[1:-1].split('-'))
+    # For a range (e.g., '5-12')
+    elif "-" in cmd_insert:
+        start, end = map(str.strip, cmd_insert.split('-'))
         start = int(start)
+        end = int(end) if end.isnumeric() else max_count
 
-        # If end is an integer, convert it
-        try:
-            end = int(end)
-
-        except ValueError:
-            # end remains a string if conversion fails
-            pass
-
-        # Generate the list_season_select based on the type of end
-        if isinstance(end, int):
-            list_season_select = list(range(start, end + 1))
-
-        elif end == "*":
-            list_season_select = list(range(start, max_count + 1))
-
-        else:
-            raise ValueError("Invalid end value")
+        list_selection = list(range(start, end + 1))
         
-    # For all seasons
+    # For all items ('*')
     elif cmd_insert == "*":
-        list_season_select = list(range(1, max_count+1))
+        list_selection = list(range(1, max_count + 1))
 
-    # Return list of selected seasons)
-    logging.info(f"List return: {list_season_select}")
-    return list_season_select
+    else:
+        raise ValueError("Invalid input format")
+
+    logging.info(f"List return: {list_selection}")
+    return list_selection
 
 
 def map_episode_title(tv_name: str, number_season: int, episode_number: int, episode_name: str) -> str:
@@ -111,3 +96,51 @@ def map_episode_title(tv_name: str, number_season: int, episode_number: int, epi
 
     logging.info(f"Map episode string return: {map_episode_temp}")
     return map_episode_temp
+
+
+# --> for season
+def validate_selection(list_season_select: List[int], seasons_count: int) -> List[int]:
+    """
+    Validates and adjusts the selected seasons based on the available seasons.
+
+    Parameters:
+        - list_season_select (List[int]): List of seasons selected by the user.
+        - seasons_count (int): Total number of available seasons.
+
+    Returns:
+        - List[int]: Adjusted list of valid season numbers.
+    """
+
+    # Remove any seasons greater than the available seasons
+    valid_seasons = [season for season in list_season_select if 1 <= season <= seasons_count]
+
+    # If the list is empty, the input was completely invalid
+    if not valid_seasons:
+        print()
+        raise ValueError(f"Invalid selection: The selected seasons are outside the available range (1-{seasons_count}).")
+
+    return valid_seasons
+
+
+# --> for episode
+def validate_episode_selection(list_episode_select: List[int], episodes_count: int) -> List[int]:
+    """
+    Validates and adjusts the selected episodes based on the available episodes.
+
+    Parameters:
+        - list_episode_select (List[int]): List of episodes selected by the user.
+        - episodes_count (int): Total number of available episodes in the season.
+
+    Returns:
+        - List[int]: Adjusted list of valid episode numbers.
+    """
+
+    # Remove any episodes greater than the available episodes
+    valid_episodes = [episode for episode in list_episode_select if 1 <= episode <= episodes_count]
+
+    # If the list is empty, the input was completely invalid
+    if not valid_episodes:
+        print()
+        raise ValueError(f"Invalid selection: The selected episodes are outside the available range (1-{episodes_count}).")
+
+    return valid_episodes

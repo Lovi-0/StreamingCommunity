@@ -75,10 +75,12 @@ class TVShowManager:
 
         # Add rows dynamically based on available TV show data
         for entry in data_slice:
-            row_data = [entry[col_name] for col_name in self.column_info.keys()]
+            # Create row data while handling missing keys
+            row_data = [entry.get(col_name, '') for col_name in self.column_info.keys()]
             table.add_row(*row_data)
 
         self.console.print(table)  # Use self.console.print instead of print
+
 
     def run(self, force_int_input: bool = False, max_int_input: int = 0) -> str:
         """
@@ -105,7 +107,10 @@ class TVShowManager:
                 self.console.print(f"\n\n[yellow][INFO] [green]Press [red]Enter [green]for next page, or [red]'q' [green]to quit.")
 
                 if not force_int_input:
-                    key = Prompt.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
+                    key = Prompt.ask(
+                        "\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
+                        "[yellow](e.g., 1-2) [cyan]for a range of media, or [yellow](e.g., 3-*) [cyan]to download from a specific index to the end"
+                    )
                     
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
@@ -130,7 +135,11 @@ class TVShowManager:
                 # Last slice, ensure all remaining items are shown
                 self.console.print(f"\n\n[yellow][INFO] [red]You've reached the end. [green]Press [red]Enter [green]for next page, or [red]'q' [green]to quit.")
                 if not force_int_input:
-                    key = Prompt.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
+                    key = Prompt.ask(
+                        "\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
+                        "[yellow](e.g., 1-2) [cyan]for a range of media, or [yellow](e.g., 3-*) [cyan]to download from a specific index to the end"
+                    )
+
 
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]

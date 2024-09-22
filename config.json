@@ -58,13 +58,11 @@
     },
     "SITE": {
         "streamingcommunity": {
-            "video_workers": 2,
-            "audio_workers": 2,
+            "video_workers": 6,
+            "audio_workers": 6,
             "domain": "buzz"
         },
         "animeunity": {
-            "video_workers": 2,
-            "audio_workers": 2,
             "domain": "to"
         },
         "altadefinizione": {
@@ -75,7 +73,7 @@
         "guardaserie": {
             "video_workers": -1,
             "audio_workers": -1,
-            "domain": "my"
+            "domain": "dev"
         },
         "ddlstreamitaly": {
             "domain": "co",
@@ -89,7 +87,7 @@
             "domain": "ru"
         },
         "uhdmovies": {
-            "domain": "dad"
+            "domain": "mov"
         },
         "bitsearch": {
             "domain": "to"
@@ -98,7 +96,12 @@
             "domain": "to"
         },
         "cb01": {
-            "domain": "software"
+            "domain": "broker"
+        },
+        "mostraguarda": {
+            "video_workers": -1,
+            "audio_workers": -1,
+            "domain": "stream"
         }
     }
 }

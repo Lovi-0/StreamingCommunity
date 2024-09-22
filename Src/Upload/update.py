@@ -62,3 +62,4 @@ def update():
         [cyan]Help the repository grow today by leaving a [yellow]star [cyan]and [yellow]sharing [cyan]it with others online!")
     
     console.print("\n")
+    time.sleep(4)

@@ -1,14 +1,12 @@
 # 18.06.24
 
-import os
 import sys
-import time
-import logging
 from urllib.parse import urlparse
 
 
 # External libraries
 import httpx
+from googlesearch import search
 
 
 # Internal utilities
@@ -17,6 +15,46 @@ from Src.Util.console import console
 from Src.Util._jsonConfig import config_manager
 
 
+def google_search(query):
+    """
+    Perform a Google search and return the first result.
+
+    Args:
+        query (str): The search query to execute on Google.
+
+    Returns:
+        str: The first URL result from the search, or None if no result is found.
+    """
+    # Perform the search on Google and limit to 1 result
+    search_results = search(query, num_results=1)
+    
+    # Extract the first result
+    first_result = next(search_results, None)
+    
+    if not first_result:
+        console.print("[red]No results found.[/red]")
+    
+    return first_result
+
+def get_final_redirect_url(initial_url):
+    """
+    Follow redirects from the initial URL and return the final URL after all redirects.
+
+    Args:
+        initial_url (str): The URL to start with and follow redirects.
+
+    Returns:
+        str: The final URL after all redirects are followed.
+    """
+
+    # Create a client with redirects enabled
+    with httpx.Client(follow_redirects=True) as client:
+        response = client.get(initial_url)
+        
+        # Capture the final URL after all redirects
+        final_url = response.url
+    
+    return final_url
 
 def search_domain(site_name: str, base_url: str):
     """
@@ -35,10 +73,27 @@ def search_domain(site_name: str, base_url: str):
     domain = str(config_manager.get_dict("SITE", site_name)['domain'])
     console.print(f"[cyan]Test site[white]: [red]{base_url}.{domain}")
 
-    # Test the current domain
-    response_follow = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=5, follow_redirects=True)
-    #console.print(f"[cyan]Test response site[white]: [red]{response_follow.status_code}")
-    response_follow.raise_for_status()
+    try:
+
+        # Test the current domain
+        response_follow = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=2)
+        console.print(f"[cyan]Response site[white]: [red]{response_follow.status_code}")
+        response_follow.raise_for_status()
+
+    except Exception as e:
+        console.print(f"[cyan]Change domain for site[white]: [red]{base_url}.{domain}, [cyan]error[white]: [red]{e}")
+
+        query = base_url.split("/")[-1]
+        first_url = google_search(query)
+
+        if first_url:
+            final_url = get_final_redirect_url(first_url)
+            console.print(f"\n[bold yellow]Suggestion:[/bold yellow] [white](Experimental)\n"
+                        f"[cyan]New final URL[white]: [green]{final_url}")
+        else:
+            console.print("[bold red]No valid URL to follow redirects.[/bold red]")
+
+        sys.exit(0)
 
     # Ensure the URL is in string format before parsing
     parsed_url = urlparse(str(response_follow.url))
@@ -52,5 +107,5 @@ def search_domain(site_name: str, base_url: str):
         config_manager.write_config()
 
     # Return config domain
-    console.print(f"[cyan]Use domain: [red]{tld} \n")
+    console.print(f"[cyan]Return domain: [red]{tld} \n")
     return tld, f"{base_url}.{tld}"

@@ -12,7 +12,7 @@ from Src.Util.message import start_message
 from Src.Util.os import create_folder, can_create_file
 from Src.Util.table import TVShowManager
 from Src.Lib.Downloader import MP4_downloader
-from ..Template import manage_selection, map_episode_title
+from ..Template import manage_selection, map_episode_title, validate_selection, validate_episode_selection
 
 
 # Logic class
@@ -25,6 +25,7 @@ from .film import download_film
 # Variable
 from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER
 table_show_manager = TVShowManager()
+
 
 
 def download_video(api_manager: ApiManager, index_season_selected: int, index_episode_selected: int) -> None:
@@ -87,34 +88,32 @@ def download_episode(api_manager: ApiManager, index_season_selected: int, downlo
     season_name = api_manager.obj_season_manager.seasons[index_season_selected-1].name
 
     # Collect all best episode
+    start_message()
     api_manager.collect_episode(season_name)
     episodes_count = api_manager.obj_episode_manager.get_length()
 
-    # Start message
-    start_message()
-
-    # Download all episodes wihtout ask
     if download_all:
-        for i_episode in range(1, episodes_count+1):
+
+        # Download all episodes without asking
+        for i_episode in range(1, episodes_count + 1):
             download_video(api_manager, index_season_selected, i_episode)
+        console.print(f"\n[red]End downloaded [yellow]season: [red]{index_season_selected}.")
 
-        console.print(f"\n[red]Download [yellow]season: [red]{index_season_selected}.")
-
-    # If not download all episode but a single season
-    if not download_all:
+    else:
 
         # Display episodes list and manage user selection
-        last_command = display_episodes_list(api_manager)
+        last_command = display_episodes_list()
         list_episode_select = manage_selection(last_command, episodes_count)
 
-        # Download selected episodes
-        if len(list_episode_select) == 1 and last_command != "*":
-            download_video(api_manager, index_season_selected, list_episode_select[0])
+        try:
+            list_episode_select = validate_episode_selection(list_episode_select, episodes_count)
+        except ValueError as e:
+            console.print(f"[red]{str(e)}")
+            return
 
-        # Download all other episodes selecter
-        else:
-            for i_episode in list_episode_select:
-                download_video(api_manager, index_season_selected, i_episode)
+        # Download selected episodes
+        for i_episode in list_episode_select:
+            download_video(api_manager, index_season_selected, i_episode)
 
 
 def download_serie(media: MediaItem):
@@ -137,25 +136,31 @@ def download_serie(media: MediaItem):
     if seasons_count > 0:
 
         # Prompt user for season selection and download episodes
-        console.print(f"\n[green]Season find: [red]{seasons_count}")
+        console.print(f"\n[green]Seasons found: [red]{seasons_count}")
+        index_season_selected = msg.ask(
+            "\n[cyan]Insert season number [yellow](e.g., 1), [red]* [cyan]to download all seasons, "
+            "[yellow](e.g., 1-2) [cyan]for a range of seasons, or [yellow](e.g., 3-*) [cyan]to download from a specific season to the end"
+        )
         
-        index_season_selected = msg.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
+        # Manage and validate the selection
         list_season_select = manage_selection(index_season_selected, seasons_count)
 
-        # Download selected episodes
-        if len(list_season_select) == 1 and index_season_selected != "*":
-            if 1 <= int(index_season_selected) <= seasons_count:
-                download_episode(api_manager, list_season_select[0])
+        try:
+            list_season_select = validate_selection(list_season_select, seasons_count)
+        except ValueError as e:
+            console.print(f"[red]{str(e)}")
+            return
 
-        # Dowload all seasons and episodes
-        elif index_season_selected == "*":
-            for i_season in list_season_select:
-                download_episode(api_manager, i_season, True)
+        # Loop through the selected seasons and download episodes
+        for i_season in list_season_select:
+            if len(list_season_select) > 1 or index_season_selected == "*":
 
-        # Download all other season selecter
-        else:
-            for i_season in list_season_select:
-                download_episode(api_manager, i_season)
+                # Download all episodes if multiple seasons are selected or if '*' is used
+                download_episode(api_manager, i_season, download_all=True)
+            else:
+
+                # Otherwise, let the user select specific episodes for the single season
+                download_episode(api_manager, i_season, download_all=False)
 
     else:
 

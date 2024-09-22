@@ -1,6 +1,4 @@
-﻿urllib3
-certifi
-httpx
+﻿httpx
 bs4
 rich
 tqdm
@@ -12,3 +10,4 @@ seleniumbase
 fake-useragent
 qbittorrent-api
 python-qbittorrent 
+googlesearch-python

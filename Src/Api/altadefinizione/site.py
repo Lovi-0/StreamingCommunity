@@ -38,8 +38,8 @@ def title_search(title_search: str) -> int:
     # Find new domain if prev dont work
     domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
     
-    # Send request to search for titles
-    response = httpx.get(f"https://{SITE_NAME}.{domain_to_use}/page/1/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", headers={'user-agent': get_headers()}, follow_redirects=True)
+    # Send request to search for title
+    response = httpx.get(f"https://{SITE_NAME}.{domain_to_use}/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", headers={'user-agent': get_headers()})
     response.raise_for_status()
 
     # Create soup and find table

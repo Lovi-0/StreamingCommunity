@@ -10,7 +10,7 @@ from Src.Util.console import console, msg
 from Src.Util.message import start_message
 from Src.Util.table import TVShowManager
 from Src.Lib.Downloader import HLS_Downloader
-from ..Template import manage_selection, map_episode_title
+from ..Template import manage_selection, map_episode_title, validate_selection, validate_episode_selection
 
 
 # Logic class
@@ -23,7 +23,8 @@ from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER
 video_source = VideoSource()
 table_show_manager = TVShowManager()
 
-# download_video
+
+
 def download_video(tv_name: str, index_season_selected: int, index_episode_selected: int) -> None:
     """
     Download a single episode video.
@@ -59,54 +60,55 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
 
 def download_episode(tv_name: str, index_season_selected: int, download_all: bool = False) -> None:
     """
-    Download all episodes of a season.
+    Download episodes of a selected season.
 
     Parameters:
         - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
-        - download_all (bool): Download all seasons episodes
+        - download_all (bool): Download all episodes in the season.
     """
 
-    # Clean memory of all episodes and get the number of the season (some dont follow rule of [1,2,3,4,5] but [1,2,3,145,5,6,7]).
+    # Clean memory of all episodes and get the number of the season
     video_source.obj_episode_manager.clear()
-    season_number = (video_source.obj_season_manager.seasons[index_season_selected-1].number)
+    season_number = video_source.obj_season_manager.seasons[index_season_selected - 1].number
 
     # Start message and collect information about episodes
     start_message()
     video_source.collect_title_season(season_number)
     episodes_count = video_source.obj_episode_manager.get_length()
 
-    # Download all episodes wihtout ask
     if download_all:
-        for i_episode in range(1, episodes_count+1):
+
+        # Download all episodes without asking
+        for i_episode in range(1, episodes_count + 1):
             download_video(tv_name, index_season_selected, i_episode)
+        console.print(f"\n[red]End downloaded [yellow]season: [red]{index_season_selected}.")
 
-        console.print(f"\n[red]Download [yellow]season: [red]{index_season_selected}.")
-
-    # If not download all episode but a single season
-    if not download_all:
+    else:
 
         # Display episodes list and manage user selection
         last_command = display_episodes_list()
         list_episode_select = manage_selection(last_command, episodes_count)
 
-        # Download selected episodes
-        if len(list_episode_select) == 1 and last_command != "*":
-            download_video(tv_name, index_season_selected, list_episode_select[0])
+        try:
+            list_episode_select = validate_episode_selection(list_episode_select, episodes_count)
+        except ValueError as e:
+            console.print(f"[red]{str(e)}")
+            return
 
-        # Download all other episodes selecter
-        else:
-            for i_episode in list_episode_select:
-                download_video(tv_name, index_season_selected, i_episode)
+        # Download selected episodes
+        for i_episode in list_episode_select:
+            download_video(tv_name, index_season_selected, i_episode)
 
 
 def download_series(select_title: MediaItem, domain: str, version: str) -> None:
     """
-    Download all episodes of a TV series.
+    Download episodes of a TV series based on user selection.
 
     Parameters:
-        - version (str): Version of site.
+        - select_title (MediaItem): Selected media item (TV series).
         - domain (str): Domain from which to download.
+        - version (str): Version of the site.
     """
 
     # Start message and set up video source
@@ -120,24 +122,31 @@ def download_series(select_title: MediaItem, domain: str, version: str) -> None:
     seasons_count = video_source.obj_season_manager.get_length()
 
     # Prompt user for season selection and download episodes
-    console.print(f"\n[green]Season find: [red]{seasons_count}")
-    index_season_selected = msg.ask("\n[cyan]Insert media [red]index [yellow]or [red](*) [cyan]to download all media [yellow]or [red][1-2] [cyan]or [red][3-*] [cyan]for a range of media")
+    console.print(f"\n[green]Seasons found: [red]{seasons_count}")
+    index_season_selected = msg.ask(
+        "\n[cyan]Insert season number [yellow](e.g., 1), [red]* [cyan]to download all seasons, "
+        "[yellow](e.g., 1-2) [cyan]for a range of seasons, or [yellow](e.g., 3-*) [cyan]to download from a specific season to the end"
+    )
+    
+    # Manage and validate the selection
     list_season_select = manage_selection(index_season_selected, seasons_count)
 
-    # Download selected episodes
-    if len(list_season_select) == 1 and index_season_selected != "*":
-        if 1 <= int(index_season_selected) <= seasons_count:
-            download_episode(select_title.slug, list_season_select[0])
+    try:
+        list_season_select = validate_selection(list_season_select, seasons_count)
+    except ValueError as e:
+        console.print(f"[red]{str(e)}")
+        return
 
-    # Dowload all seasons and episodes
-    elif index_season_selected == "*":
-        for i_season in list_season_select:
-            download_episode(select_title.slug, i_season, True)
+    # Loop through the selected seasons and download episodes
+    for i_season in list_season_select:
+        if len(list_season_select) > 1 or index_season_selected == "*":
 
-    # Download all other season selecter
-    else:
-        for i_season in list_season_select:
-            download_episode(select_title.slug, i_season)
+            # Download all episodes if multiple seasons are selected or if '*' is used
+            download_episode(select_title.slug, i_season, download_all=True)
+        else:
+
+            # Otherwise, let the user select specific episodes for the single season
+            download_episode(select_title.slug, i_season, download_all=False)
 
 
 def display_episodes_list() -> str:

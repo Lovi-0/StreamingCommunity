@@ -6,11 +6,11 @@ import logging
 
 
 # External library
-import fake_useragent
+from fake_useragent import UserAgent
 
 
 # Variable
-useragent = fake_useragent.UserAgent()
+ua = UserAgent()
 
 
 def extract_versions(user_agent):
@@ -95,7 +95,7 @@ def random_headers(referer: str = None):
     Returns:
         dict: Generated HTTP headers.
     """
-    user_agent = useragent.random
+    user_agent = ua.random
     versions = extract_versions(user_agent)
     platform = get_platform(user_agent)
     model = get_model(user_agent)
@@ -145,4 +145,4 @@ def get_headers() -> str:
     """
     
     # Get a random user agent string from the user agent rotator
-    return useragent.random
+    return str(ua.chrome)

@@ -12,7 +12,7 @@ from Src.Util.message import start_message
 from Src.Util.os import create_folder, can_create_file
 from Src.Util.table import TVShowManager
 from Src.Lib.Downloader import MP4_downloader
-from ..Template import manage_selection, map_episode_title
+from ..Template import manage_selection, map_episode_title, validate_episode_selection
 
 
 # Logic class
@@ -25,6 +25,7 @@ from .Player.ddl import VideoSource
 from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER
 table_show_manager = TVShowManager()
 video_source = VideoSource()
+
 
 
 def download_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) -> None:
@@ -85,17 +86,19 @@ def download_thread(dict_serie: MediaItem):
     episodes_count = len(list_dict_episode)
 
     # Display episodes list and manage user selection
-    last_command = display_episodes_list(list_dict_episode)
+    last_command = display_episodes_list()
     list_episode_select = manage_selection(last_command, episodes_count)
 
-    # Download selected episodes
-    if len(list_episode_select) == 1 and last_command != "*":
-        download_video(scape_info_serie, list_episode_select[0])
+    try:
+        list_episode_select = validate_episode_selection(list_episode_select, episodes_count)
+    except ValueError as e:
+        console.print(f"[red]{str(e)}")
+        return
 
-    # Download all other episodes selecter
-    else:
-        for i_episode in list_episode_select:
-            download_video(scape_info_serie, i_episode)
+    # Download selected episodes
+    for i_episode in list_episode_select:
+        download_video(scape_info_serie, i_episode)
+
 
 
 def display_episodes_list(obj_episode_manager) -> str:

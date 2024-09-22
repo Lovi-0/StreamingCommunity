@@ -17,7 +17,7 @@ from Src.Util.console import console, msg
 from Src.Util._jsonConfig import config_manager
 from Src.Upload.update import update as git_update
 from Src.Util.os import get_system_summary, create_folder
-from Src.Lib.TMBD.tmbd import tmdb
+from Src.Lib.TMBD import tmdb
 from Src.Util.logger import Logger
 
 

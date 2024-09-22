@@ -254,7 +254,7 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
     # Add subtitle maps and metadata
     for idx, subtitle in enumerate(subtitles_list):
         ffmpeg_cmd += ["-map", f"{idx + 1}:s"]
-        ffmpeg_cmd += ["-metadata:s:s:{}".format(idx), "title={}".format(subtitle['name'])]
+        ffmpeg_cmd += ["-metadata:s:s:{}".format(idx), "title={}".format(subtitle['language'])]
 
     # Add output Parameters
     if USE_CODEC:

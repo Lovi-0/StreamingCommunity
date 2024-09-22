@@ -36,12 +36,6 @@ from ...M3U8 import (
 )
 from .proxyes import main_test_proxy
 
-
-# Warning
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-
 # Config
 TQDM_DELAY_WORKER = config_manager.get_float('M3U8_DOWNLOAD', 'tqdm_delay')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
@@ -300,7 +294,7 @@ class M3U8_Segments:
             progress_bar.update(1)
 
         except Exception as e:
-            console.print(f"Failed to download '{ts_url}', status error: {e}.")
+            console.print(f"Failed download: '{ts_url}' with error: {e}")
 
     def write_segments_to_file(self):
         """
