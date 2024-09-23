@@ -1,4 +1,28 @@
 @echo off
+:: BatchGotAdmin
+::-------------------------------------
+REM  --> Check for permissions
+>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+
+REM --> If error flag set, we do not have admin.
+if '%errorlevel%' NEQ '0' (
+    echo Requesting administrative privileges...
+    goto UACPrompt
+) else ( goto gotAdmin )
+
+:UACPrompt
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    set params = %*:"="
+    echo UAC.ShellExecute "cmd.exe", "/c %~s0 %params%", "", "runas", 1 >> "%temp%\getadmin.vbs"
+
+    "%temp%\getadmin.vbs"
+    del "%temp%\getadmin.vbs"
+    exit /B
+
+:gotAdmin
+    pushd "%CD%"
+    CD /D "%~dp0"
+::--------------------------------------
 REM Check if running in PowerShell
 @REM Check and install python
 @REM where /q python >nul 2>nul
@@ -63,11 +87,12 @@ if !PYTHON_MAJOR! LSS !REQUIRED_MAJOR! (
 echo Python version %PYTHON_VERSION% is >= %REQUIRED_VERSION%. Continuing...
 
 if exist ".venv\" (
-    echo .venv exists.
+    echo .venv exists. Installing requirements.txt.
+    .venv\Scripts\python -m pip install -r requirements.txt
 ) else (
-    echo Making .venv and installing requirements.txt.
+    echo Making .venv and installing requirements.txt...
     python -m venv .venv
-    .venv\Scripts\pip install -r requirements.txt
+    .venv\Scripts\python -m pip install -r requirements.txt
 )
 
 where /q ffmpeg >nul 2>nul
@@ -118,7 +143,6 @@ if "%choice%"=="2" (
     echo Installing pycryptodome.
     .venv\Scripts\pip install pycryptodome
 ) else (
-    call (exit /b 0)
     echo Installing openssl.
     echo Checking for Chocolatey...
 
@@ -142,3 +166,4 @@ setlocal enabledelayedexpansion & set "tempfile=%temp%\tempfile.txt" & (echo #^^
 
 echo Everything is installed^^!
 echo Run StreamingCommunity with '.\run.py'
+pause
