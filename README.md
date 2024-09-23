@@ -48,7 +48,6 @@ You can chat, help improve this repo, or just hang around for some fun in the **
 ### Installation ⚙️
 Run the following command inside the main directory:
 #### On Windows:
-
 ```powershell
 .\win_install.sh
 ```
@@ -62,7 +61,13 @@ sudo chmod +x unix_install.sh && ./unix_install.sh
 ### Usage 📚
 
 Run the script with the following command:
+#### On Windows:
+```powershell
+.\run.py
 ```
+
+#### On Linux/MacOS/BSD:
+```bash
 ./run.py
 ```
 
