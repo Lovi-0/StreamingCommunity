@@ -34,7 +34,7 @@ You can chat, help improve this repo, or just hang around for some fun in the **
 - Not tested ⏳
 - Not supported ❌
 
-| OS                  |        Support       |
+| OS                  |       Automatic Installation Support       |
 |:--------------------|:--------------------:|
 | Windows 10/11       |          ✔️          |
 | Windows 7           |          ❌          |
