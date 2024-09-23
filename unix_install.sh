@@ -44,6 +44,34 @@ install_on_macos() {
 
 set -e
 
+# Check and install Python3
+# if command_exists python3 > /dev/null 2>&1; then
+#     echo "Checking Python..."
+# else
+#     # Detect the platform and install Python3 accordingly
+#     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+#         # Detect the package manager
+#         if command_exists apt; then
+#             install_on_debian "python3"
+#         elif command_exists yum; then
+#             install_on_redhat "python3"
+#         elif command_exists pacman; then
+#             install_on_arch "python-pip"
+#         else
+#             echo "Unsupported Linux distribution."
+#             exit 1
+#         fi
+#     elif [[ "$OSTYPE" == "bsd"* ]]; then
+#         echo "Detected BSD-based system."
+#         install_on_bsd "python39"
+#     elif [[ "$OSTYPE" == "darwin"* ]]; then
+#         install_on_macos "python"
+#     else
+#         echo "Unsupported operating system."
+#         exit 1
+#     fi
+# fi
+
 # Get the Python version
 PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')
 
