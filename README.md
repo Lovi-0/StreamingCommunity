@@ -47,9 +47,17 @@ You can chat, help improve this repo, or just hang around for some fun in the **
 
 ### Installation ⚙️
 Run the following command inside the main directory:
+#### On Windows:
+
+```powershell
+.\win_install.sh
 ```
+
+#### On Linux/MacOS/BSD:
+```bash
 sudo chmod +x unix_install.sh && ./unix_install.sh
 ```
+
 <a id="usage-automatic"></a>
 ### Usage 📚
 
