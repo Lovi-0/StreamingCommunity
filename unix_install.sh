@@ -86,9 +86,10 @@ else
 fi
 
 if [ -d ".venv/" ]; then
-    echo ".venv exists."
+    echo ".venv exists. Installing requirements.txt. ..."
+    .venv/bin/pip install -r requirements.txt
 else
-    echo "Making .venv and installing requirements.txt."
+    echo "Making .venv and installing requirements.txt. ..."
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
        # Detect the package manager
        if command_exists apt; then
