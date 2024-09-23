@@ -11,18 +11,56 @@ You can chat, help improve this repo, or just hang around for some fun in the **
 # Table of Contents
 
 * [INSTALLATION](#installation)
-  * [Requirement](#requirement)
-  * [Usage](#usage)
-  * [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
-  * [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux) 
+  * [Automatic Installation](#automatic-installation)
+    * [Usage](#usage-automatic)
+    * [Supported OSs for Automatic Installation](#automatic-installation-os)
+  * [Manual Installation](#manual-installation)
+    * [Requirement](#requirement)
+    * [Usage](#usage-manual)
+    * [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
+    * [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux) 
   * [Update](#update)
-* [CONFIGURATION](#Configuration)
+* [CONFIGURATION](#configuration)
 * [DOCKER](#docker)
 * [TUTORIAL](#tutorial)
 * [TO DO](#to-do)
 
+# INSTALLATION
 
-## Requirement 📋
+## Automatic Installation
+<a id="automatic-installation-os"></a>
+### Supported OSs for Automatic Installation 💿
+- Supported ✔️
+- Not tested ⏳
+- Not supported ❌
+
+| OS                  |        Support       |
+|:--------------------|:--------------------:|
+| Windows 10/11       |          ✔️          |
+| Windows 7           |          ❌          |
+| Debian Linux        |          ✔️          |
+| Arch Linux          |          ✔️          |
+| CentOS Stream 9     |          ✔️          |
+| FreeBSD             |          ⏳           |
+| MacOS               |          ✔️          |
+| Termux              |          ❌          |
+
+### Installation ⚙️
+Run the following command inside the main directory:
+```
+sudo chmod +x unix_install.sh && ./unix_install.sh
+```
+<a id="usage-automatic"></a>
+### Usage 📚
+
+Run the script with the following command:
+```
+./run.py
+```
+
+## Manual Installation
+<a id="requirement"></a>
+### Requirement 📋
 
 Make sure you have the following prerequisites installed on your system:
 
@@ -30,7 +68,7 @@ Make sure you have the following prerequisites installed on your system:
 * [ffmpeg](https://www.gyan.dev/ffmpeg/builds/)
 * [openssl](https://www.openssl.org) or [pycryptodome](https://pypi.org/project/pycryptodome/)
 
-## Installation ⚙️
+### Installation ⚙️
 
 Install the required Python libraries using the following command:
 
@@ -38,7 +76,8 @@ Install the required Python libraries using the following command:
 pip install -r requirements.txt
 ```
 
-## Usage 📚
+<a id="usage-manual"></a>
+### Usage 📚
 
 Run the script with the following command:
 
@@ -71,7 +110,7 @@ python update_version.py
 python3 update_version.py
 ```
 
-
+<a id="configuration"></a>
 ## Configuration ⚙️
 
 You can change some behaviors by tweaking the configuration file.
@@ -164,6 +203,7 @@ You can choose different vars:
 
 > NOTE: You don't need to add .mp4 at the end
 
+<a id="docker"></a>
 ## Docker 🐳
 
 You can run the script in a docker container, to build the image just run
@@ -197,13 +237,14 @@ make LOCAL_DIR=/path/to/download run-container
 
 The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
 
+<a id="tutorial"></a>
 ## Tutorial 📖
 
 For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
 Add [api_1](https://www.youtube.com/watch?v=3ylBSMyQlhM)
 Add [api_2](https://www.youtube.com/watch?v=ReEYUIbdbG4)
 
-
+<a id="to-do"></a>
 ## To do 📝
 - GUI
 - Website api
