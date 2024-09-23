@@ -116,3 +116,4 @@ if "%choice%"=="2" (
 setlocal enabledelayedexpansion & set "tempfile=%temp%\tempfile.txt" & (echo #^^!.venv\Scripts\python & type run.py | more +1) > "!tempfile!" & move /Y "!tempfile!" run.py >nul 2>nul
 
 echo Everything is installed^^!
+echo Run StreamingCommunity with '.\run.py'
