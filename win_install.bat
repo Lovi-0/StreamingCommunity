@@ -1,4 +1,24 @@
 @echo off
+@REM Check and install python
+@REM where /Q python >nul 2>nul
+@REM if %errorlevel% neq 1 (
+@REM     echo Checking Python...
+@REM ) else (
+@REM     echo python not found. Checking for Chocolatey...
+@REM     REM Check if Chocolatey is installed
+@REM     where /Q choco >nul 2>nul
+@REM     if %errorlevel% neq 1 (
+@REM         echo Installing python using Chocolatey...
+@REM         choco install python -y
+@REM     ) else (
+@REM         echo Chocolatey is not installed.
+@REM         echo Please install Chocolatey first from https://chocolatey.org/install
+@REM         echo After installing Chocolatey, you can run this script again to install ffmpeg.
+@REM         echo Alternatively, you can install python manually from https://www.python.org/
+@REM         exit /b 1
+@REM     )
+@REM )
+
 REM Get the Python version
 for /f "delims=" %%v in ('python -c "import sys; print('.'.join(map(str, sys.version_info[:3])))"') do set PYTHON_VERSION=%%v
 
