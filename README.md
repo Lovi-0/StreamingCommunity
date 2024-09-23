@@ -65,6 +65,10 @@ Run the script with the following command:
 ```powershell
 .\run.py
 ```
+or
+```powershell
+.venv\Scripts\python .\run.py
+```
 
 #### On Linux/MacOS/BSD:
 ```bash
