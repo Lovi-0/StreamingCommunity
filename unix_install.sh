@@ -5,28 +5,34 @@ command_exists() {
     command -v "$1" &> /dev/null
 }
 
-# Install OpenSSL on Debian/Ubuntu-based systems
+# Install on Debian/Ubuntu-based systems
 install_on_debian() {
-    echo "Detected Debian-based system. Installing $1..."
+    echo "Installing $1..."
     sudo apt update
     sudo apt install -y $1
 }
 
-# Install OpenSSL on Red Hat/CentOS/Fedora-based systems
+# Install on Red Hat/CentOS/Fedora-based systems
 install_on_redhat() {
-    echo "Detected Red Hat-based system. Installing $1..."
+    echo "Installing $1..."
     sudo yum install -y $1
 }
 
-# Install OpenSSL on Arch-based systems
+# Install on Arch-based systems
 install_on_arch() {
-    echo "Detected Arch-based system. Installing $1..."
+    echo "Installing $1..."
     sudo pacman -Sy --noconfirm $1
 }
 
-# Install OpenSSL on macOS
+# Install on BSD-based systems
+install_on_bsd() {
+    echo "Installing $1..."
+    env ASSUME_ALWAYS_YES=yes pkg install -y $1
+}
+
+# Install on macOS
 install_on_macos() {
-    echo "Detected macOS. Installing $1..."
+    echo "Installing $1..."
     if command_exists brew; then
         brew install $1
     else
@@ -35,6 +41,8 @@ install_on_macos() {
         brew install $1
     fi
 }
+
+set -e
 
 # Get the Python version
 PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')
@@ -53,27 +61,58 @@ if [ -d ".venv/" ]; then
     echo ".venv exists."
 else
     echo "Making .venv and installing requirements.txt."
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+       # Detect the package manager
+       if command_exists apt; then
+           echo "Detected Debian-based system. Checking python3-venv."
+           if dpkg -l | grep -q "python3-venv"; then
+                echo "python3-venv found."
+           else
+               echo "python3-venv not found, installing..."
+               install_on_debian "python3-venv"
+           fi
+       fi
+    fi
     python3 -m venv .venv
     .venv/bin/pip install -r requirements.txt
+
 fi
 
-if command -v ffmpeg > /dev/null 2>&1; then
+if command_exists ffmpeg > /dev/null 2>&1; then
     echo "ffmpeg exists."
 else
+    echo "ffmpeg does no exists."
     # Detect the platform and install ffmpeg accordingly
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         # Detect the package manager
         if command_exists apt; then
+            echo "Detected Debian-based system."
             install_on_debian "ffmpeg"
         elif command_exists yum; then
+            echo "Detected Red Hat-based system."
+            echo "Installing needed repos for ffmpeg..."
+            echo "Enabling crb..."
+            sudo yum config-manager --set-enabled crb > /dev/null 2>&1
+            echo "crb enabled."
+            echo "Installig epel..."
+            sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm https://dl.fedoraproject.org/pub/epel/epel-next-release-latest-$(rpm -E %rhel).noarch.rpm > /dev/null 2>&1
+            echo "epel installed."
+            echo "Adding ffmpeg repos..."
+            sudo yum install -y --nogpgcheck https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E %rhel).noarch.rpm > /dev/null 2>&1
+            echo "ffmpeg repos added."
             install_on_redhat "ffmpeg"
         elif command_exists pacman; then
+            echo "Detected Arch-based system."
             install_on_arch "ffmpeg"
         else
             echo "Unsupported Linux distribution."
             exit 1
         fi
+    elif [[ "$OSTYPE" == "bsd"* ]]; then
+        echo "Detected BSD-based system."
+        install_on_bsd "ffmpeg"
     elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "Detected macOS."
         install_on_macos "ffmpeg"
     else
         echo "Unsupported operating system."
@@ -81,7 +120,7 @@ else
     fi
 fi
 
-if command -v openssl > /dev/null 2>&1 || .venv/bin/pip list | grep -q "pycryptodome"; then
+if command_exists openssl > /dev/null 2>&1 || .venv/bin/pip list | grep -q "pycryptodome"; then
     echo "openssl or pycryptodome exists."
 else
     echo "Please choose an option:"
@@ -94,7 +133,6 @@ else
             .venv/bin/pip install pycryptodome
             ;;
         *)
-            echo "Installing openssl."
             # Detect the platform and install OpenSSL accordingly
             if [[ "$OSTYPE" == "linux-gnu"* ]]; then
                 # Detect the package manager
@@ -108,6 +146,9 @@ else
                     echo "Unsupported Linux distribution."
                     exit 1
                 fi
+            elif [[ "$OSTYPE" == "bsd"* ]]; then
+                echo "Detected BSD-based system."
+                install_on_bsd "openssl"
             elif [[ "$OSTYPE" == "darwin"* ]]; then
                 install_on_macos "openssl"
             else
@@ -119,4 +160,6 @@ else
 fi
 
 sed -i.bak "1s|.*|#!.venv/bin/python3|" run.py
+sudo chmod +x run.py
 echo "Everything is installed!"
+echo "Run StreamingCommunity with './run.py'"
