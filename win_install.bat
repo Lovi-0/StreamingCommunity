@@ -1,12 +1,14 @@
 @echo off
+REM Check if running in PowerShell
 @REM Check and install python
-@REM where /Q python >nul 2>nul
+@REM where /q python >nul 2>nul
 @REM if %errorlevel% neq 1 (
 @REM     echo Checking Python...
 @REM ) else (
+@REM     call (exit /b 0)
 @REM     echo python not found. Checking for Chocolatey...
 @REM     REM Check if Chocolatey is installed
-@REM     where /Q choco >nul 2>nul
+@REM     where /q choco >nul 2>nul
 @REM     if %errorlevel% neq 1 (
 @REM         echo Installing python using Chocolatey...
 @REM         choco install python -y
@@ -58,7 +60,7 @@ if !PYTHON_MAJOR! LSS !REQUIRED_MAJOR! (
     )
 )
 
-echo Python version !PYTHON_VERSION! is >= !REQUIRED_VERSION!. Continuing...
+echo Python version %PYTHON_VERSION% is >= %REQUIRED_VERSION%. Continuing...
 
 if exist ".venv\" (
     echo .venv exists.
@@ -68,14 +70,14 @@ if exist ".venv\" (
     .venv\Scripts\pip install -r requirements.txt
 )
 
-where /Q ffmpeg >nul 2>nul
+where /q ffmpeg >nul 2>nul
 if %errorlevel% neq 1 (
     echo ffmpeg exists.
 ) else (
+    call (exit /b 0)
     echo ffmpeg not found. Checking for Chocolatey...
-
     REM Check if Chocolatey is installed
-    where /Q choco >nul 2>nul
+    where /q choco >nul 2>nul
     if %errorlevel% neq 1 (
         echo Installing ffmpeg using Chocolatey...
         choco install ffmpeg -y
@@ -90,11 +92,12 @@ if %errorlevel% neq 1 (
 
 
 REM Check if OpenSSL exists
-where /Q openssl >nul 2>nul
+where /q openssl >nul 2>nul
 if %errorlevel% neq 1 (
     echo openssl exists.
     goto end
 )
+call (exit /b 0)
 
 REM Check if pycryptodome is installed
 .venv\Scripts\pip list | findstr /i "pycryptodome" >nul
@@ -102,6 +105,7 @@ if %errorlevel% equ 0 (
     echo pycryptodome exists.
     goto end
 )
+call (exit /b 0)
 
 REM Prompt for installation option
 echo Please choose an option:
@@ -114,11 +118,12 @@ if "%choice%"=="2" (
     echo Installing pycryptodome.
     .venv\Scripts\pip install pycryptodome
 ) else (
+    call (exit /b 0)
     echo Installing openssl.
     echo Checking for Chocolatey...
 
     REM Check if Chocolatey is installed
-    where /Q choco >nul 2>nul
+    where /q choco >nul 2>nul
     if %errorlevel% neq 1 (
         echo Installing openssl using Chocolatey...
         choco install openssl -y
