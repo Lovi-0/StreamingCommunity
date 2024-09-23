@@ -137,10 +137,13 @@ else
             if [[ "$OSTYPE" == "linux-gnu"* ]]; then
                 # Detect the package manager
                 if command_exists apt; then
+                    echo "Detected Debian-based system."
                     install_on_debian "openssl"
                 elif command_exists yum; then
+                    echo "Detected Red Hat-based system."
                     install_on_redhat "openssl"
                 elif command_exists pacman; then
+                    echo "Detected Arch-based system."
                     install_on_arch "openssl"
                 else
                     echo "Unsupported Linux distribution."
@@ -150,6 +153,7 @@ else
                 echo "Detected BSD-based system."
                 install_on_bsd "openssl"
             elif [[ "$OSTYPE" == "darwin"* ]]; then
+                echo "Detected macOS."
                 install_on_macos "openssl"
             else
                 echo "Unsupported operating system."
