@@ -49,7 +49,7 @@ You can chat, help improve this repo, or just hang around for some fun in the **
 Run the following command inside the main directory:
 #### On Windows:
 ```powershell
-.\win_install.sh
+.\win_install.bat
 ```
 
 #### On Linux/MacOS/BSD:
