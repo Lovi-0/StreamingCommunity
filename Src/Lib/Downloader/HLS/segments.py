@@ -277,12 +277,7 @@ class M3U8_Segments:
             if response_size == 0:
                 response_size = int(len(response.content))
 
-            # Check length segments
-            """
-            expected_length = int(response.headers.get('Content-Length', 0))
-            if not (expected_length != 0 and len(response.content) == expected_length):
-                console.print(f"Incomplete download for '{ts_url}' (received {len(response.content)} bytes, expected {expected_length}).")
-            """
+            # Update progress bar with custom Class
             self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
 
             # Decrypt the segment content if decryption is needed
