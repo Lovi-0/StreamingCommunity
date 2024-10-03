@@ -11,7 +11,7 @@ from googlesearch import search
 
 # Internal utilities
 from Src.Util.headers import get_headers
-from Src.Util.console import console
+from Src.Util.console import console, msg
 from Src.Util._jsonConfig import config_manager
 
 
@@ -90,10 +90,31 @@ def search_domain(site_name: str, base_url: str):
             final_url = get_final_redirect_url(first_url)
             console.print(f"\n[bold yellow]Suggestion:[/bold yellow] [white](Experimental)\n"
                         f"[cyan]New final URL[white]: [green]{final_url}")
+            
+            def extract_domain(url):
+                parsed_url = urlparse(url)
+                domain = parsed_url.netloc
+                return domain.split(".")[-1]
+
+            new_domain_extract = extract_domain(str(final_url))
+
+            if msg.ask(f"[red]Do you want to auto update config.json - '[green]{site_name}[red]' with domain: [green]{new_domain_extract}", choices=["y", "n"], default="y").lower() == "y":
+                
+                # Update domain in config.json
+                config_manager.config['SITE'][site_name]['domain'] = new_domain_extract
+                config_manager.write_config()
+
+                # Return config domain
+                console.print(f"[cyan]Return domain: [red]{new_domain_extract} \n")
+                return new_domain_extract, f"{base_url}.{new_domain_extract}"
+            
+            else:
+                console.print("[bold red]\nManually change the domain in the JSON file.[/bold red]")
+                sys.exit(0)
+
         else:
             console.print("[bold red]No valid URL to follow redirects.[/bold red]")
-
-        sys.exit(0)
+            sys.exit(0)
 
     # Ensure the URL is in string format before parsing
     parsed_url = urlparse(str(response_follow.url))

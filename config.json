@@ -60,7 +60,7 @@
         "streamingcommunity": {
             "video_workers": 6,
             "audio_workers": 6,
-            "domain": "buzz"
+            "domain": "computer"
         },
         "animeunity": {
             "domain": "to"
