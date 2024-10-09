@@ -52,21 +52,9 @@ def get_version(text: str):
 
         # Extract version
         version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
-        sliders = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['props']['sliders']
-
-        title_top_10 = sliders[2]
-
-        # Collect info about only top 10 title
-        list_title_top_10 = []
-        for title in title_top_10['titles']:
-            list_title_top_10.append({
-                'name': title['name'],
-                'type': title['type']
-            })
-
         console.print(f"[cyan]Get version [white]=> [red]{version} \n")
 
-        return version, list_title_top_10
+        return version
     
     except Exception as e:
         logging.error(f"Error extracting version: {e}")
@@ -86,7 +74,7 @@ def get_version_and_domain():
     domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}")
 
     # Extract version from the response
-    version, list_title_top_10 = get_version(httpx.get(base_url, headers={'user-agent': get_headers()}).text)
+    version = get_version(httpx.get(base_url, headers={'user-agent': get_headers()}).text)
 
     return version, domain_to_use
 

@@ -58,12 +58,9 @@
     },
     "SITE": {
         "streamingcommunity": {
-            "video_workers": 6,
-            "audio_workers": 6,
+            "video_workers": 4,
+            "audio_workers": 4,
             "domain": "computer"
-        },
-        "animeunity": {
-            "domain": "to"
         },
         "altadefinizione": {
             "video_workers": -1,
@@ -75,6 +72,11 @@
             "audio_workers": -1,
             "domain": "dev"
         },
+        "mostraguarda": {
+            "video_workers": -1,
+            "audio_workers": -1,
+            "domain": "stream"
+        },
         "ddlstreamitaly": {
             "domain": "co",
             "cookie": {
@@ -82,6 +84,9 @@
                 "ips4_member_id": "",
                 "ips4_login_key": ""
             }
+        },
+        "animeunity": {
+            "domain": "to"
         },
         "watch_lonelil": {
             "domain": "ru"
@@ -97,11 +102,6 @@
         },
         "cb01": {
             "domain": "broker"
-        },
-        "mostraguarda": {
-            "video_workers": -1,
-            "audio_workers": -1,
-            "domain": "stream"
         }
     }
 }
