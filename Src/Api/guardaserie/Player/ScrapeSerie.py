@@ -1,6 +1,5 @@
 # 13.06.24
 
-import sys
 import logging
 
 from typing import List, Dict
@@ -20,7 +19,6 @@ from ...Template.Class.SearchType import MediaItem
 
 
 class GetSerieInfo:
-
     def __init__(self, dict_serie: MediaItem) -> None:
         """
         Initializes the GetSerieInfo object with default values.

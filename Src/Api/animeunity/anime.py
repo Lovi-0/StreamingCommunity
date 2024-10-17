@@ -23,7 +23,6 @@ from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER, MOVIE_FOLDER
 video_source = VideoSource()
 
 
-
 def download_episode(index_select: int):
     """
     Downloads the selected episode.

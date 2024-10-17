@@ -1,7 +1,6 @@
 # 19.06.24
 
 import sys
-import logging
 
 
 # Internal utilities

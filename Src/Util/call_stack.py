@@ -19,6 +19,7 @@ def get_call_stack():
             - script (str): The name of the script file containing the function.
             - line (int): The line number in the script where the function is defined.
     """
+    
     stack = inspect.stack()
     call_stack = []
 

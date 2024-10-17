@@ -8,13 +8,13 @@
         "root_path": "Video",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
         "config_qbit_tor": {
-            "host": "192.168.1.125",
+            "host": "192.168.1.58",
             "port": "8080",
             "user": "admin",
             "pass": "adminadmin"
         },
         "not_close": false,
-        "show_trending": true
+        "show_trending": false
     },
     "REQUESTS": {
         "timeout": 10,

@@ -2,7 +2,6 @@
 
 from rich.console import Console
 from rich.table import Table
-from rich.text import Text
 from rich.prompt import Prompt
 from rich.style import Style
 from typing import Dict, List, Any

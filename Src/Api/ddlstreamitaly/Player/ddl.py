@@ -1,6 +1,5 @@
 # 14.06.24
 
-import sys
 import logging
 
 

@@ -1,7 +1,6 @@
 # 17.09.24
 
-import json
-from typing import List, Dict, Optional
+from typing import Dict
 
 
 class Json_film:

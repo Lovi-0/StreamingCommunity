@@ -1,7 +1,6 @@
 # 05.07.24
 
 import re
-import sys
 import logging
 
 

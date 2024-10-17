@@ -2,7 +2,6 @@
 
 import re
 import random
-import logging
 
 
 # External library

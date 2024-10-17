@@ -13,13 +13,12 @@ from bs4 import BeautifulSoup
 # Internal utilities
 from Src.Util.message import start_message
 from Src.Util.console import console
-from Src.Util.os import create_folder, can_create_file, remove_special_characters
+from Src.Util.os import can_create_file, remove_special_characters
 from Src.Util.headers import get_headers
 from Src.Lib.Downloader import HLS_Downloader
 
 
 # Logic class
-from ..Template.Class.SearchType import MediaItem
 from ..guardaserie.Player.supervideo import VideoSource
 from Src.Lib.TMBD import Json_film
 
@@ -47,9 +46,14 @@ def download_film(movie_details: Json_film):
     response.raise_for_status()
 
     # Extract supervideo url
-    soup = BeautifulSoup(response.text, "html.parser")
-    player_links = soup.find("ul", class_ = "_player-mirrors").find_all("li")
-    supervideo_url = "https:" + player_links[0].get("data-link")
+    try:
+        soup = BeautifulSoup(response.text, "html.parser")
+        player_links = soup.find("ul", class_ = "_player-mirrors").find_all("li")
+        supervideo_url = "https:" + player_links[0].get("data-link")
+
+    except:
+        logging.error("Not found in the server.")
+        sys.exit(0)
     
     # Set domain and media ID for the video source
     video_source = VideoSource()

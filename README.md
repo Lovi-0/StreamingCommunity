@@ -63,11 +63,11 @@ sudo chmod +x unix_install.sh && ./unix_install.sh
 Run the script with the following command:
 #### On Windows:
 ```powershell
-.\run.py
+python .\run.py
 ```
 or
 ```powershell
-.venv\Scripts\python .\run.py
+source .venv/bin/activate && python run.py && deactivate
 ```
 
 #### On Linux/MacOS/BSD:
@@ -257,9 +257,8 @@ The `run-container` command mounts also the `config.json` file, so any change to
 <a id="tutorial"></a>
 ## Tutorial 📖
 
-For a detailed walkthrough, refer to the [video tutorial](https://www.youtube.com/watch?v=Ok7hQCgxqLg&ab_channel=Nothing)
-Add [api_1](https://www.youtube.com/watch?v=3ylBSMyQlhM)
-Add [api_2](https://www.youtube.com/watch?v=ReEYUIbdbG4)
+[win]("https://www.youtube.com/watch?v=mZGqK4wdN-k")
+[linux]("https://www.youtube.com/watch?v=0qUNXPE_mTg")
 
 <a id="to-do"></a>
 ## To do 📝

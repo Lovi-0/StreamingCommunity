@@ -20,7 +20,6 @@ from ..Template.Class.SearchType import MediaItem
 # Config
 from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
 
-  
 
 def download_film(select_title: MediaItem):
     """

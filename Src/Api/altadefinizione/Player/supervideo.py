@@ -1,7 +1,6 @@
 # 26.05.24
 
 import re
-import sys
 import logging
 
 
@@ -175,4 +174,3 @@ class VideoSource:
         except Exception as e:
             logging.error(f"An error occurred: {e}")
             return None
-        

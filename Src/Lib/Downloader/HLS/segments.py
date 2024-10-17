@@ -14,7 +14,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 # External libraries
 import httpx
-from httpx import HTTPTransport
 from tqdm import tqdm
 
 
@@ -81,17 +80,6 @@ class M3U8_Segments:
 
         # Server ip
         self.fake_proxy = False
-
-    def add_server_ip(self, list_ip: list):
-        """
-        Add server IP addresses 
-
-        Args:
-            list_ip (list): A list of IP addresses to be added.
-        """
-        if list_ip is not None:
-            self.fake_proxy = True
-            self.fake_proxy_ip = list_ip
 
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
@@ -289,7 +277,7 @@ class M3U8_Segments:
             progress_bar.update(1)
 
         except Exception as e:
-            console.print(f"Failed download: '{ts_url}' with error: {e}")
+            console.print(f"\nFailed to download: '{ts_url}' with error: {e}")
 
     def write_segments_to_file(self):
         """

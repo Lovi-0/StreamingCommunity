@@ -24,7 +24,6 @@ from ..costant import COOKIE
 
 
 class GetSerieInfo:
-
     def __init__(self, dict_serie: MediaItem) -> None:
         """
         Initializes the GetSerieInfo object with default values.
@@ -49,7 +48,6 @@ class GetSerieInfo:
             List[Dict[str, str]]: List of dictionaries containing episode information.
         """
 
-        # Make an HTTP request to the series URL
         try:
             response = httpx.get(self.url + "?area=online", cookies=self.cookies, headers=self.headers, timeout=10)
             response.raise_for_status()

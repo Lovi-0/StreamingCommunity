@@ -70,4 +70,4 @@ def run_get_select_title():
     """
     Display a selection of titles and prompt the user to choose one.
     """
-    return get_select_title(table_show_manager, media_search_manager) 
+    return get_select_title(table_show_manager, media_search_manager)

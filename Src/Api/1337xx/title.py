@@ -26,7 +26,6 @@ from ..Template.Class.SearchType import MediaItem
 from .costant import ROOT_PATH, DOMAIN_NOW, SITE_NAME, MOVIE_FOLDER
 
 
-
 def download_title(select_title: MediaItem):
     """
     Downloads a media item and saves it as an MP4 file.

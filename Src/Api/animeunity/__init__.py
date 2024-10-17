@@ -13,6 +13,7 @@ from .anime import download_film, download_series
 indice = 1
 _deprecate = False
 
+
 def search():
 
     # Make request to site to get content that corrsisponde to that string

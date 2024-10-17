@@ -1,9 +1,5 @@
 # 01.07.24
 
-import sys
-import logging
-
-
 # External libraries
 import httpx
 from bs4 import BeautifulSoup
@@ -24,7 +20,6 @@ from ..Template.Class.SearchType import MediaManager
 from .costant import SITE_NAME
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
-
 
 
 def title_search(word_to_search: str) -> int:

@@ -1,6 +1,5 @@
 # 19.06.24
 
-import sys
 import logging
 
 from typing import List

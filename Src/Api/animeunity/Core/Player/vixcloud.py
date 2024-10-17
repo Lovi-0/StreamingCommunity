@@ -1,6 +1,5 @@
 # 01.03.24
 
-import sys
 import logging
 from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
 

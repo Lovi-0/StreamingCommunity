@@ -17,13 +17,14 @@ import contextlib
 import urllib.request
 import importlib.metadata
 
+
 # External library
 import httpx
 import unicodedata
 
+
 # Internal utilities
 from .console import console
-
 
 
 # --> OS FILE ASCII
@@ -32,7 +33,6 @@ special_chars_to_remove = [
     '>', '|', '`', '~', "'", '"', ';', ':', ',', '?', '\\', '/', '\t', ' ', '=', 
     '+', '\n', '\r', '\0', ':'
 ]
-
 
 
 def get_max_length_by_os(system: str) -> int:
