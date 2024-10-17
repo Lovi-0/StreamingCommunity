@@ -257,8 +257,8 @@ The `run-container` command mounts also the `config.json` file, so any change to
 <a id="tutorial"></a>
 ## Tutorial 📖
 
-[win]("https://www.youtube.com/watch?v=mZGqK4wdN-k")
-[linux]("https://www.youtube.com/watch?v=0qUNXPE_mTg")
+[win](https://www.youtube.com/watch?v=mZGqK4wdN-k)
+[linux](https://www.youtube.com/watch?v=0qUNXPE_mTg)
 
 <a id="to-do"></a>
 ## To do 📝
