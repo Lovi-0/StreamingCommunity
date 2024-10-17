@@ -1,9 +1,9 @@
 @echo off
-:: Controlla se lo script è in esecuzione come amministratore
+:: Check if the script is running as administrator
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Eseguendo come amministratore...
-    :: Riavvia lo script con privilegi di amministratore
+    echo Running as administrator...
+    :: Restart the script with administrator privileges
     powershell -Command "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
@@ -11,124 +11,124 @@ if %errorlevel% neq 0 (
 chcp 65001 > nul
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-echo Inizio dello script...
+echo Script starting...
 
-:: Controlla se Chocolatey è già installato
+:: Check if Chocolatey is already installed
 :check_choco
-echo Verifica se Chocolatey è installato...
+echo Checking if Chocolatey is installed...
 choco --version >nul 2>&1
 IF %ERRORLEVEL% EQU 0 (
-    echo Chocolatey è già installato. Salto l'installazione.
+    echo Chocolatey is already installed. Skipping installation.
     goto install_python
 ) ELSE (
-    echo Installazione di Chocolatey...
+    echo Installing Chocolatey...
     @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" || (
-        echo Errore durante l'installazione di Chocolatey.
+        echo Error during Chocolatey installation.
         exit /b 1
     )
-    echo Chocolatey installato con successo.
+    echo Chocolatey installed successfully.
     call choco --version
     echo.
 )
 
-:: Controlla se Python è già installato
+:: Check if Python is already installed
 :install_python
-echo Verifica se Python è installato...
+echo Checking if Python is installed...
 python -V >nul 2>&1
 IF %ERRORLEVEL% EQU 0 (
-    echo Python è già installato. Salto l'installazione.
+    echo Python is already installed. Skipping installation.
     goto install_openssl
 ) ELSE (
-    echo Installazione di Python...
+    echo Installing Python...
     choco install python --confirm --params="'/NoStore'" --allow-downgrade || (
-        echo Errore durante l'installazione di Python.
+        echo Error during Python installation.
         exit /b 1
     )
-    echo Python installato con successo.
+    echo Python installed successfully.
     call python -V
     echo.
 )
 
-:: Chiedi di riavviare il terminale
-echo Si prega di riavviare il terminale per continuare...
+:: Ask to restart the terminal
+echo Please restart the terminal to continue...
 pause
 exit /b
 
-:: Controlla se OpenSSL è già installato
+:: Check if OpenSSL is already installed
 :install_openssl
-echo Verifica se OpenSSL è installato...
+echo Checking if OpenSSL is installed...
 openssl version -a >nul 2>&1
 IF %ERRORLEVEL% EQU 0 (
-    echo OpenSSL è già installato. Salto l'installazione.
+    echo OpenSSL is already installed. Skipping installation.
     goto install_ffmpeg
 ) ELSE (
-    echo Installazione di OpenSSL...
+    echo Installing OpenSSL...
     choco install openssl --confirm || (
-        echo Errore durante l'installazione di OpenSSL.
+        echo Error during OpenSSL installation.
         exit /b 1
     )
-    echo OpenSSL installato con successo.
+    echo OpenSSL installed successfully.
     call openssl version -a
     echo.
 )
 
-:: Controlla se FFmpeg è già installato
+:: Check if FFmpeg is already installed
 :install_ffmpeg
-echo Verifica se FFmpeg è installato...
+echo Checking if FFmpeg is installed...
 ffmpeg -version >nul 2>&1
 IF %ERRORLEVEL% EQU 0 (
-    echo FFmpeg è già installato. Salto l'installazione.
+    echo FFmpeg is already installed. Skipping installation.
     goto create_venv
 ) ELSE (
-    echo Installazione di FFmpeg...
+    echo Installing FFmpeg...
     choco install ffmpeg --confirm || (
-        echo Errore durante l'installazione di FFmpeg.
+        echo Error during FFmpeg installation.
         exit /b 1
     )
-    echo FFmpeg installato con successo.
+    echo FFmpeg installed successfully.
     call ffmpeg -version
     echo.
 )
 
-:: Verifica delle installazioni
+:: Verify installations
 :verifica_installazioni
-echo Verifica delle installazioni...
+echo Verifying installations...
 call choco --version
 call python -V
 call openssl version -a
 call ffmpeg -version
 
-echo Tutti i programmi sono stati installati e verificati con successo.
+echo All programs have been successfully installed and verified.
 
-:: Crea un ambiente virtuale .venv
+:: Create a virtual environment .venv
 :create_venv
-echo Verifica se l'ambiente virtuale .venv esiste già...
+echo Checking if the .venv virtual environment already exists...
 if exist .venv (
-    echo L'ambiente virtuale .venv esiste già. Salto la creazione.
+    echo The .venv virtual environment already exists. Skipping creation.
 ) ELSE (
-    echo Creazione dell'ambiente virtuale .venv...
+    echo Creating the .venv virtual environment...
     python -m venv .venv || (
-        echo Errore durante la creazione dell'ambiente virtuale.
+        echo Error during virtual environment creation.
         exit /b 1
     )
-    echo Ambiente virtuale creato con successo.
+    echo Virtual environment created successfully.
 )
 
-:: Attiva l'ambiente virtuale e installa i requisiti
-echo Installazione dei requisiti...
+:: Activate the virtual environment and install requirements
+echo Installing requirements...
 call .venv\Scripts\activate.bat
 pip install -r requirements.txt || (
-    echo Errore durante l'installazione dei requisiti.
+    echo Error during requirements installation.
     exit /b 1
 )
 
-:: Esegui run.py
-echo Esecuzione di run.py...
+:: Run run.py
+echo Running run.py...
 call .venv\Scripts\python .\run.py || (
-    echo Errore durante l'esecuzione di run.py.
+    echo Error during run.py execution.
     exit /b 1
 )
 
-echo Fine dello script.
+echo End of script.
 
 ENDLOCAL
