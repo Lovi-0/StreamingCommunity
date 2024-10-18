@@ -91,7 +91,7 @@ class PathManager:
 
 
 class HttpClient:
-    def __init__(self, headers: str):
+    def __init__(self, headers: str = None):
         """
         Initializes the HttpClient with specified headers.
         """
