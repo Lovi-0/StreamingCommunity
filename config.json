@@ -42,8 +42,7 @@
             "eng",
             "spa"
         ],
-        "cleanup_tmp_folder": true,
-        "create_report": false
+        "cleanup_tmp_folder": true
     },
     "M3U8_CONVERSION": {
         "use_codec": false,
@@ -58,23 +57,23 @@
     },
     "SITE": {
         "streamingcommunity": {
-            "video_workers": 4,
-            "audio_workers": 4,
+            "video_workers": 6,
+            "audio_workers": 6,
             "domain": "computer"
         },
         "altadefinizione": {
-            "video_workers": -1,
-            "audio_workers": -1,
+            "video_workers": 12,
+            "audio_workers": 12,
             "domain": "my"
         },
         "guardaserie": {
-            "video_workers": -1,
-            "audio_workers": -1,
+            "video_workers": 12,
+            "audio_workers": 12,
             "domain": "dev"
         },
         "mostraguarda": {
-            "video_workers": -1,
-            "audio_workers": -1,
+            "video_workers": 12,
+            "audio_workers": 12,
             "domain": "stream"
         },
         "ddlstreamitaly": {
@@ -87,12 +86,6 @@
         },
         "animeunity": {
             "domain": "to"
-        },
-        "watch_lonelil": {
-            "domain": "ru"
-        },
-        "uhdmovies": {
-            "domain": "mov"
         },
         "bitsearch": {
             "domain": "to"

@@ -164,6 +164,13 @@ class M3U8_Codec:
         else:
             logging.warning("No bandwidth provided. Bitrates cannot be calculated.")
 
+    def __str__(self):
+        return (f"M3U8_Codec(bandwidth={self.bandwidth}, "
+                f"codecs='{self.codecs}', "
+                f"audio_codec='{self.audio_codec}', "
+                f"video_codec='{self.video_codec}', "
+                f"audio_codec_name='{self.audio_codec_name}', "
+                f"video_codec_name='{self.video_codec_name}')")
 
 
 class M3U8_Video:

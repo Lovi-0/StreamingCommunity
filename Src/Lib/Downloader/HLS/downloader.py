@@ -111,8 +111,8 @@ class HttpClient:
             return response.text  # Return the response text
 
         except Exception as e:
-            logging.error(f"Request to {url} failed: {e}")
-            return None
+            logging.error(f"Request to {url} failed: {response.status_code} when get text.")
+            return 404
 
     def get_content(self, url, timeout=20):
         """
@@ -128,7 +128,7 @@ class HttpClient:
             return response.content  # Return the raw response content
 
         except Exception as e:
-            logging.error(f"Request to {url} failed: {e}")
+            logging.error(f"Request to {url} failed: {response.status_code} when get content.")
             return None
 
 
@@ -179,13 +179,14 @@ class ContentExtractor:
             result = list(set(available_languages) & set(set_language))
 
             # Create a formatted table to display audio info
-            table = Table(show_header=False, box=None)
-            table.add_row(f"[cyan]Available languages:", f"[purple]{', '.join(available_languages)}")
-            table.add_row(f"[red]Set audios:", f"[purple]{', '.join(set_language)}")
-            table.add_row(f"[green]Downloadable:", f"[purple]{', '.join(result)}")
+            if len(available_languages) > 0:
+                table = Table(show_header=False, box=None)
+                table.add_row(f"[cyan]Available languages:", f"[purple]{', '.join(available_languages)}")
+                table.add_row(f"[red]Set audios:", f"[purple]{', '.join(set_language)}")
+                table.add_row(f"[green]Downloadable:", f"[purple]{', '.join(result)}")
 
-            console.rule("[bold green] AUDIO ", style="bold red")
-            console.print(table)
+                console.rule("[bold green] AUDIO ", style="bold red")
+                console.print(table)
 
         else:
             console.log("[red]Can't find a list of audios")
@@ -207,13 +208,14 @@ class ContentExtractor:
             result = list(set(available_languages) & set(set_language))
 
             # Create a formatted table to display subtitle info
-            table = Table(show_header=False, box=None)
-            table.add_row(f"[cyan]Available languages:", f"[purple]{', '.join(available_languages)}")
-            table.add_row(f"[red]Set subtitles:", f"[purple]{', '.join(set_language)}")
-            table.add_row(f"[green]Downloadable:", f"[purple]{', '.join(result)}")
+            if len(available_languages) > 0:
+                table = Table(show_header=False, box=None)
+                table.add_row(f"[cyan]Available languages:", f"[purple]{', '.join(available_languages)}")
+                table.add_row(f"[red]Set subtitles:", f"[purple]{', '.join(set_language)}")
+                table.add_row(f"[green]Downloadable:", f"[purple]{', '.join(result)}")
 
-            console.rule("[bold green] SUBTITLE ", style="bold red")
-            console.print(table)
+                console.rule("[bold green] SUBTITLE ", style="bold red")
+                console.print(table)
 
         else:
             console.log("[red]Can't find a list of subtitles")
@@ -242,7 +244,10 @@ class ContentExtractor:
         table.add_row(f"[green]Downloadable:", f"[purple]{video_res[0]}x{video_res[1]}")
 
         if self.codec is not None:
-            table.add_row(f"[green]Codec:", f"([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white] ([green]b[white]: [yellow]{self.codec.video_bitrate // 1000}k[white]), [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white] ([green]b[white]: [yellow]{self.codec.audio_bitrate // 1000}k[white]))")
+            if config_manager.get_bool("M3U8_CONVERSION", "use_codec"):
+                table.add_row(f"[green]Codec:", f"([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white] ([green]b[white]: [yellow]{self.codec.video_bitrate // 1000}k[white]), [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white] ([green]b[white]: [yellow]{self.codec.audio_bitrate // 1000}k[white]))")
+            else:
+                table.add_row(f"[green]Codec:", "[purple]copy")
 
         console.rule("[bold green] VIDEO ", style="bold red")
         console.print(table)
@@ -387,8 +392,7 @@ class ContentDownloader:
             video_m3u8.download_streams(f"{Colors.MAGENTA}video")
 
             # Print duration information of the downloaded video
-            print_duration_table(downloaded_video[0].get('path'))
-            print("")
+            #print_duration_table(downloaded_video[0].get('path'))
 
         else:
             console.log("[cyan]Video [red]already exists.")
@@ -416,7 +420,7 @@ class ContentDownloader:
                 audio_m3u8.download_streams(f"{Colors.MAGENTA}audio {Colors.RED}{obj_audio.get('language')}")
 
                 # Print duration information of the downloaded audio
-                print_duration_table(obj_audio.get('path'))
+                #print_duration_table(obj_audio.get('path'))
 
             else:
                 console.log(f"[cyan]Audio [white]([green]{obj_audio.get('language')}[white]) [red]already exists.")
@@ -444,7 +448,7 @@ class ContentDownloader:
             )
 
             # Print the status of the subtitle download
-            console.print(f"[cyan]Downloading subtitle: [red]{sub_language.lower()}")
+            #console.print(f"[cyan]Downloading subtitle: [red]{sub_language.lower()}")
 
             # Write the content to the specified file
             with open(obj_subtitle.get("path"), "wb") as f:
@@ -461,7 +465,7 @@ class ContentJoiner:
         """
         self.path_manager: PathManager = path_manager
 
-    def setup(self, downloaded_video, downloaded_audio, downloaded_subtitle):
+    def setup(self, downloaded_video, downloaded_audio, downloaded_subtitle, codec = None):
         """
         Sets up the content joiner with downloaded media files.
 
@@ -473,21 +477,26 @@ class ContentJoiner:
         self.downloaded_video = downloaded_video
         self.downloaded_audio = downloaded_audio
         self.downloaded_subtitle = downloaded_subtitle
+        self.codec = codec
         
         # Initialize flags to check if media is available
         self.converted_out_path = None
-        self.there_is_video = (len(downloaded_video) > 0)
-        self.there_is_audio = (len(downloaded_audio) > 0)
-        self.there_is_subtitle = (len(downloaded_subtitle) > 0)
+        self.there_is_video = len(downloaded_video) > 0
+        self.there_is_audio = len(downloaded_audio) > 0
+        self.there_is_subtitle = len(downloaded_subtitle) > 0
 
-        # Display the status of available media
-        table = Table(show_header=False, box=None)
-        table.add_row(f"[green]Video - audio:", f"[yellow]{self.there_is_audio}")
-        table.add_row(f"[green]Video - Subtitle:", f"[yellow]{self.there_is_subtitle}")
+        if self.there_is_audio or self.there_is_subtitle:
 
-        console.rule("[bold green] JOIN ", style="bold red")
-        console.print(table)
-        print("")
+            # Display the status of available media
+            table = Table(show_header=False, box=None)
+
+            table.add_row(f"[green]Video - audio", f"[yellow]{self.there_is_audio}")
+            table.add_row(f"[green]Video - Subtitle", f"[yellow]{self.there_is_subtitle}")
+
+            print("")
+            console.rule("[bold green] JOIN ", style="bold red")
+            console.print(table)
+            print("")
 
         # Start the joining process
         self.conversione()
@@ -575,8 +584,8 @@ class ContentJoiner:
         if not os.path.exists(path_join_video):
 
             # Set codec to None if not defined in class
-            if not hasattr(self, 'codec'):
-                self.codec = None
+            #if not hasattr(self, 'codec'):
+            #    self.codec = None
 
             # Join the video segments into a single video file
             join_video(
@@ -604,8 +613,8 @@ class ContentJoiner:
         if not os.path.exists(path_join_video_audio):
 
             # Set codec to None if not defined in class
-            if not hasattr(self, 'codec'):
-                self.codec = None
+            #if not hasattr(self, 'codec'):
+            #    self.codec = None
 
             # Join the video with audio segments
             join_audios(
@@ -661,7 +670,6 @@ class HLS_Downloader:
         self.output_filename = self._generate_output_filename(output_filename, m3u8_playlist, m3u8_index)
         self.path_manager = PathManager(self.output_filename)
         self.download_tracker = DownloadTracker(self.path_manager)
-        self.http_client = HttpClient(headers_index)
         self.content_extractor = ContentExtractor()
         self.content_downloader = ContentDownloader()
         self.content_joiner = ContentJoiner(self.path_manager)
@@ -728,7 +736,10 @@ class HLS_Downloader:
 
         # Determine whether to process a playlist or index
         if self.m3u8_playlist:
-            self._process_playlist()
+            r_proc = self._process_playlist()
+
+            if r_proc == 404:
+                return 404
 
         elif self.m3u8_index:
             self._process_index()
@@ -780,6 +791,7 @@ class HLS_Downloader:
                     missing_ts = True
 
             # Prepare the report panel content
+            print("")
             panel_content = (
                 f"[bold green]Download completed![/bold green]\n"
                 f"[cyan]File size: [bold red]{formatted_size}[/bold red]\n"
@@ -815,8 +827,14 @@ class HLS_Downloader:
 
         # Retrieve the m3u8 playlist content
         if self.is_playlist_url: 
-            m3u8_playlist_text = HttpClient(headers=headers_index).get(self.m3u8_playlist)
-            m3u8_url_fixer.set_playlist(self.m3u8_playlist)
+            response_text = HttpClient(headers=headers_index).get(self.m3u8_playlist)
+
+            if response_text != 404:
+                m3u8_playlist_text = response_text
+                m3u8_url_fixer.set_playlist(self.m3u8_playlist)
+
+            else:
+                return 404
 
         else:
             m3u8_playlist_text = self.m3u8_playlist
@@ -849,7 +867,7 @@ class HLS_Downloader:
             self.content_downloader.download_subtitle(self.download_tracker.downloaded_subtitle)
 
         # Join downloaded content
-        self.content_joiner.setup(self.download_tracker.downloaded_video, self.download_tracker.downloaded_audio, self.download_tracker.downloaded_subtitle)
+        self.content_joiner.setup(self.download_tracker.downloaded_video, self.download_tracker.downloaded_audio, self.download_tracker.downloaded_subtitle, self.content_extractor.codec)
 
         # Clean up temporary files and directories
         self._clean(self.content_joiner.converted_out_path)
@@ -862,7 +880,8 @@ class HLS_Downloader:
 
         # Download video
         self.download_tracker.add_video(self.m3u8_index)
-
+        self.content_downloader.download_video(self.download_tracker.downloaded_video)
+        
         # Join video
         self.content_joiner.setup(self.download_tracker.downloaded_video, [], [])
 

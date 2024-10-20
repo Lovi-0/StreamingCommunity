@@ -8,7 +8,7 @@ import logging
 import binascii
 import threading
 from queue import PriorityQueue
-from urllib.parse import urljoin, urlparse, urlunparse
+from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -78,9 +78,6 @@ class M3U8_Segments:
         self.queue = PriorityQueue()
         self.stop_event = threading.Event()
 
-        # Server ip
-        self.fake_proxy = False
-
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
         Retrieves the encryption key from the M3U8 playlist.
@@ -111,27 +108,8 @@ class M3U8_Segments:
         hex_content = binascii.hexlify(response.content).decode('utf-8')
         byte_content = bytes.fromhex(hex_content)
         
-        logging.info(f"Key: ('hex': {hex_content}, 'byte': {byte_content})")
         return byte_content
     
-    def __gen_proxy__(self, url: str, url_index: int) -> str:
-        """
-        Change the IP address of the provided URL based on the given index.
-
-        Args:
-            - url (str): The original URL that needs its IP address replaced.
-            - url_index (int): The index used to select a new IP address from the list of FAKE_PROXY_IP.
-
-        Returns:
-            str: The modified URL with the new IP address.
-        """
-        new_ip_address = self.fake_proxy_ip[url_index % len(self.fake_proxy_ip)]
-
-        # Parse the original URL and replace the hostname with the new IP address
-        parsed_url = urlparse(url)._replace(netloc=new_ip_address)  
-
-        return urlunparse(parsed_url)
-
     def parse_data(self, m3u8_content: str) -> None:
         """
         Parses the M3U8 content to extract segment information.
@@ -185,12 +163,6 @@ class M3U8_Segments:
             if len(self.valid_proxy) == 0:
                 sys.exit(0)
 
-        # Server ip
-        if self.fake_proxy:
-            for i in range(len(self.segments)):
-                segment_url = self.segments[i]
-                self.segments[i] = self.__gen_proxy__(segment_url, self.segments.index(segment_url)) 
-
     def get_info(self) -> None:
         """
         Makes a request to the index M3U8 file to get information about segments.
@@ -214,70 +186,78 @@ class M3U8_Segments:
         else:
 
             # Parser data of content of index pass in input to class
-            self.parse_data(self.url)  
+            self.parse_data(self.url)
 
-    def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm) -> None:
+    def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm, retries: int = 3, backoff_factor: float = 1.5) -> None:
         """
-        Downloads a TS segment and adds it to the segment queue.
+        Downloads a TS segment and adds it to the segment queue with retry logic.
 
         Parameters:
             - ts_url (str): The URL of the TS segment.
             - index (int): The index of the segment.
             - progress_bar (tqdm): Progress counter for tracking download progress.
+            - retries (int): The number of times to retry on failure (default is 3).
+            - backoff_factor (float): The backoff factor for exponential backoff (default is 1.5 seconds).
         """
         need_verify = REQUEST_VERIFY
 
-        # Set to false for only fake proxy that use real ip of server
-        if self.fake_proxy:
-            need_verify = False
+        for attempt in range(retries):
+            try:
+                start_time = time.time()
 
-        try:
-            start_time = time.time()
+                # Make request to get content
+                if THERE_IS_PROXY_LIST:
 
-            # Make request to get content
-            if THERE_IS_PROXY_LIST:
+                    # Get proxy from list
+                    proxy = self.valid_proxy[index % len(self.valid_proxy)]
+                    logging.info(f"Use proxy: {proxy}")
 
-                # Get proxy from list
-                proxy = self.valid_proxy[index % len(self.valid_proxy)]
-                logging.info(f"Use proxy: {proxy}")
+                    with httpx.Client(proxies=proxy, verify=need_verify) as client:  
+                        if 'key_base_url' in self.__dict__:
+                            response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, follow_redirects=True)
+                        else:
+                            response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, follow_redirects=True)
 
-                with httpx.Client(proxies=proxy, verify=need_verify) as client:  
-                    if 'key_base_url' in self.__dict__:
-                        response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, follow_redirects=True)
-                    else:
-                        response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, follow_redirects=True)
+                else:
+                    with httpx.Client(verify=need_verify) as client_2:
+                        if 'key_base_url' in self.__dict__:
+                            response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, follow_redirects=True)
+                        else:
+                            response = client_2.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, follow_redirects=True)
 
-            else:
-                with httpx.Client(verify=need_verify) as client_2:
-                    if 'key_base_url' in self.__dict__:
-                        response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, follow_redirects=True)
-                    else:
-                        response = client_2.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, follow_redirects=True)
+                # Get response content
+                response.raise_for_status()  # Raise exception for HTTP errors
+                duration = time.time() - start_time
+                segment_content = response.content
 
-            # Get response content
-            response.raise_for_status()
-            duration = time.time() - start_time
-            segment_content = response.content
+                # Update bar
+                response_size = int(response.headers.get('Content-Length', 0)) or len(segment_content)
 
-            # Update bar
-            response_size = int(response.headers.get('Content-Length', 0))
+                # Update progress bar with custom Class
+                self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
 
-            if response_size == 0:
-                response_size = int(len(response.content))
+                # Decrypt the segment content if decryption is needed
+                if self.decryption is not None:
+                    segment_content = self.decryption.decrypt(segment_content)
 
-            # Update progress bar with custom Class
-            self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
+                # Add the segment to the queue
+                self.queue.put((index, segment_content))
+                progress_bar.update(1)
 
-            # Decrypt the segment content if decryption is needed
-            if self.decryption is not None:
-                segment_content = self.decryption.decrypt(segment_content)
+                # Break out of the loop on success
+                return
 
-            # Add the segment to the queue
-            self.queue.put((index, segment_content))
-            progress_bar.update(1)
-
-        except Exception as e:
-            console.print(f"\nFailed to download: '{ts_url}' with error: {e}")
+            except (httpx.RequestError, httpx.HTTPStatusError) as e:
+                console.print(f"\nAttempt {attempt + 1} failed for '{ts_url}' with error: {e}")
+                
+                if attempt + 1 == retries:
+                    console.print(f"\nFailed after {retries} attempts. Skipping '{ts_url}'")
+                    break
+                
+                # Exponential backoff before retrying
+                sleep_time = backoff_factor * (2 ** attempt)
+                console.print(f"Retrying in {sleep_time} seconds...")
+                time.sleep(sleep_time)
 
     def write_segments_to_file(self):
         """
@@ -393,7 +373,6 @@ class M3U8_Segments:
             delay = TQDM_DELAY_WORKER
 
         # Start all workers
-        logging.info(f"Worker to use: {max_workers}")
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             for index, segment_url in enumerate(self.segments):
                 time.sleep(delay)

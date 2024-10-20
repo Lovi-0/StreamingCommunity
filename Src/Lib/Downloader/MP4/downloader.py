@@ -29,7 +29,7 @@ REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 
 
 
-def MP4_downloader(url: str, path: str, referer: str = None):
+def MP4_downloader(url: str, path: str, referer: str = None, headers_: str = None):
 
     """
     Downloads an MP4 video from a given URL using the specified referer header.
@@ -40,55 +40,63 @@ def MP4_downloader(url: str, path: str, referer: str = None):
         - referer (str): The referer header value to include in the HTTP request headers.
     """
 
+    headers = None
+
     if "http" not in str(url).lower().strip() or "https" not in str(url).lower().strip():
         logging.error(f"Invalid url: {url}")
         sys.exit(0)
     
-    # Make request to get content of video
-    logging.info(f"Make request to fetch mp4 from: {url}")
-
     if referer != None:
         headers = {'Referer': referer, 'user-agent': get_headers()}
-    else:
+    if headers == None:
         headers = {'user-agent': get_headers()}
+    else:
+        headers = headers_
     
+    # Make request to get content of video
     with httpx.Client(verify=REQUEST_VERIFY, timeout=REQUEST_TIMEOUT) as client:
         with client.stream("GET", url, headers=headers, timeout=10) as response:
             total = int(response.headers.get('content-length', 0))
 
-            # Create bar format
-            if TQDM_USE_LARGE_BAR:
-                bar_format = (f"{Colors.YELLOW}[MP4] {Colors.WHITE}({Colors.CYAN}video{Colors.WHITE}): "
-                              f"{Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ "
-                              f"{Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] "
-                              f"{Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}} {Colors.WHITE}| "
-                              f"{Colors.YELLOW}{{rate_fmt}}{{postfix}} {Colors.WHITE}]")
+            if total != 0:
+
+                # Create bar format
+                if TQDM_USE_LARGE_BAR:
+                    bar_format = (f"{Colors.YELLOW}[MP4] {Colors.WHITE}({Colors.CYAN}video{Colors.WHITE}): "
+                                f"{Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ "
+                                f"{Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] "
+                                f"{Colors.YELLOW}{{elapsed}} {Colors.WHITE}< {Colors.CYAN}{{remaining}} {Colors.WHITE}| "
+                                f"{Colors.YELLOW}{{rate_fmt}}{{postfix}} {Colors.WHITE}]")
+                else:
+                    bar_format = (f"{Colors.YELLOW}Proc{Colors.WHITE}: {Colors.RED}{{percentage:.2f}}% "
+                                f"{Colors.WHITE}| {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]")
+
+                # Create progress bar
+                progress_bar = tqdm(
+                    total=total,
+                    ascii='░▒█',
+                    bar_format=bar_format,
+                    unit_scale=True,
+                    unit_divisor=1024,
+                    mininterval=0.05
+                )
+
+                # Download file
+                with open(path, 'wb') as file, progress_bar as bar:
+                    for chunk in response.iter_bytes(chunk_size=1024):
+                        if chunk:
+                            size = file.write(chunk)
+                            bar.update(size)
+
             else:
-                bar_format = (f"{Colors.YELLOW}Proc{Colors.WHITE}: {Colors.RED}{{percentage:.2f}}% "
-                              f"{Colors.WHITE}| {Colors.CYAN}{{remaining}}{{postfix}} {Colors.WHITE}]")
+                console.print("[red]Cant find any stream.")
 
-            # Create progress bar
-            progress_bar = tqdm(
-                total=total,
-                ascii='░▒█',
-                bar_format=bar_format,
-                unit_scale=True,
-                unit_divisor=1024,
-                mininterval=0.05
-            )
-
-            # Download file
-            with open(path, 'wb') as file, progress_bar as bar:
-                for chunk in response.iter_bytes(chunk_size=1024):
-                    if chunk:
-                        size = file.write(chunk)
-                        bar.update(size)
-
-    # Get summary
-    console.print(Panel(
-        f"[bold green]Download completed![/bold green]\n"
-        f"[cyan]File size: [bold red]{format_file_size(os.path.getsize(path))}[/bold red]\n"
-        f"[cyan]Duration: [bold]{print_duration_table(path, description=False, return_string=True)}[/bold]", 
-        title=f"{os.path.basename(path.replace('.mp4', ''))}", 
-        border_style="green"
-    ))
+        # Get summary
+        if total != 0:
+            console.print(Panel(
+                f"[bold green]Download completed![/bold green]\n"
+                f"[cyan]File size: [bold red]{format_file_size(os.path.getsize(path))}[/bold red]\n"
+                f"[cyan]Duration: [bold]{print_duration_table(path, description=False, return_string=True)}[/bold]", 
+                title=f"{os.path.basename(path.replace('.mp4', ''))}", 
+                border_style="green"
+            ))

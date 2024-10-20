@@ -55,7 +55,7 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
 
     # Enabled the use of gpu
     if USE_GPU:
-        ffmpeg_cmd.extend(['-hwaccel', 'cuda', '-hwaccel_output_format', 'cuda'])
+        ffmpeg_cmd.extend(['-hwaccel', 'cuda'])
 
     # Add mpegts to force to detect input file as ts file
     if need_to_force_to_ts(video_path):
@@ -67,7 +67,7 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
     ffmpeg_cmd.extend(['-i', video_path])
 
     # Add output Parameters
-    if USE_CODEC:
+    if USE_CODEC and codec != None:
         if USE_VCODEC:
             if codec.video_codec_name: 
                 if not USE_GPU: 
@@ -76,6 +76,10 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
                     ffmpeg_cmd.extend(['-c:v', 'h264_nvenc'])
             else: 
                 console.log("[red]Cant find vcodec for 'join_audios'")
+        else:
+            if USE_GPU:
+                ffmpeg_cmd.extend(['-c:v', 'h264_nvenc'])
+
 
         if USE_ACODEC:
             if codec.audio_codec_name: 
@@ -98,7 +102,6 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
 
     # Overwrite
     ffmpeg_cmd += [out_path, "-y"]
-    logging.info(f"FFmpeg command: {ffmpeg_cmd}")
 
     # Run join
     if DEBUG_MODE:
@@ -143,7 +146,7 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
 
     # Enabled the use of gpu
     if USE_GPU:
-        ffmpeg_cmd.extend(['-hwaccel', 'cuda', '-hwaccel_output_format', 'cuda'])
+        ffmpeg_cmd.extend(['-hwaccel', 'cuda'])
 
     # Insert input video path
     ffmpeg_cmd.extend(['-i', video_path])
@@ -173,6 +176,9 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
                     ffmpeg_cmd.extend(['-c:v', 'h264_nvenc'])
             else: 
                 console.log("[red]Cant find vcodec for 'join_audios'")
+        else:
+            if USE_GPU:
+                ffmpeg_cmd.extend(['-c:v', 'h264_nvenc'])
 
         if USE_ACODEC:
             if codec.audio_codec_name: 
@@ -195,12 +201,11 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
 
     # Use shortest input path for video and audios
     if not video_audio_same_duration:
-        console.log("[red]Use shortest input.")
+        logging.info("[red]Use shortest input.")
         ffmpeg_cmd.extend(['-shortest', '-strict', 'experimental'])
 
     # Overwrite
     ffmpeg_cmd += [out_path, "-y"]
-    logging.info(f"FFmpeg command: {ffmpeg_cmd}")
 
     # Run join
     if DEBUG_MODE:

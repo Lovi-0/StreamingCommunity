@@ -2,15 +2,16 @@
 
 import os
 import sys
-import logging
+import time
 
 
 # Internal utilities
 from Src.Util.console import console, msg
 from Src.Util.message import start_message
+from Src.Util.call_stack import get_call_stack
 from Src.Util.table import TVShowManager
 from Src.Lib.Downloader import HLS_Downloader
-from ..Template import manage_selection, map_episode_title, validate_selection, validate_episode_selection
+from ..Template import manage_selection, map_episode_title, validate_selection, validate_episode_selection, execute_search
 
 
 # Logic class
@@ -52,11 +53,13 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
     master_playlist = video_source.get_playlist()
     
     # Download the episode
-    HLS_Downloader(
-        m3u8_playlist = master_playlist,
-        output_filename = os.path.join(mp4_path, mp4_name)
-    ).start()
+    if HLS_Downloader(os.path.join(mp4_path, mp4_name), master_playlist).start() == 404:
+        time.sleep(2)
 
+        # Re call search function
+        if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
+            frames = get_call_stack()
+            execute_search(frames[-4])
 
 def download_episode(tv_name: str, index_season_selected: int, download_all: bool = False) -> None:
     """

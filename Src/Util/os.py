@@ -164,7 +164,6 @@ def check_file_existence(file_path):
             return True
         
         else:
-            logging.warning(f"The file '{file_path}' does not exist.")
             return False
         
     except Exception as e:

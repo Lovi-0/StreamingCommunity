@@ -2,16 +2,16 @@
 
 import os
 import sys
-import logging
+import time
 
 
 # Internal utilities
 from Src.Util.console import console, msg
-from Src.Util.os import create_folder, can_create_file
 from Src.Util.message import start_message
+from Src.Util.call_stack import get_call_stack
 from Src.Util.table import TVShowManager
 from Src.Lib.Downloader import HLS_Downloader
-from ..Template import manage_selection, map_episode_title, validate_selection, validate_episode_selection
+from ..Template import manage_selection, map_episode_title, validate_selection, validate_episode_selection, execute_search
 
 
 # Logic class
@@ -48,24 +48,19 @@ def download_video(scape_info_serie: GetSerieInfo, index_season_selected: int, i
     mp4_name = f"{map_episode_title(scape_info_serie.tv_name, index_season_selected, index_episode_selected, obj_episode.get('name'))}.mp4"
     mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, scape_info_serie.tv_name, f"S{index_season_selected}")
 
-    # Ensure the folder path exists
-    create_folder(mp4_path)
-
-    # Check if the MP4 file can be created
-    if not can_create_file(mp4_name):
-        logging.error("Invalid mp4 name.")
-        sys.exit(0)
-
     # Setup video source
     video_source.setup(obj_episode.get('url'))
 
     # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()
     
-    HLS_Downloader(
-        m3u8_playlist = master_playlist,
-        output_filename = os.path.join(mp4_path, mp4_name)
-    ).start()
+    if HLS_Downloader(os.path.join(mp4_path, mp4_name), master_playlist).start() == 404:
+        time.sleep(2)
+
+        # Re call search function
+        if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
+            frames = get_call_stack()
+            execute_search(frames[-4])
 
 
 def download_episode(scape_info_serie: GetSerieInfo, index_season_selected: int, download_all: bool = False) -> None:
