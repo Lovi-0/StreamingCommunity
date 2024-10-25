@@ -76,7 +76,7 @@ def search_domain(site_name: str, base_url: str):
     try:
 
         # Test the current domain
-        response_follow = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=2)
+        response_follow = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=4, follow_redirects=True)
         console.print(f"[cyan]Response site[white]: [red]{response_follow.status_code}")
         response_follow.raise_for_status()
 
