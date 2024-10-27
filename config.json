@@ -94,7 +94,7 @@
             "domain": "to"
         },
         "cb01": {
-            "domain": "broker"
+            "domain": "nexus"
         }
     }
 }
