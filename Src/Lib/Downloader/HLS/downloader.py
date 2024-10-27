@@ -55,6 +55,7 @@ FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolutio
 
 
 # Variable
+max_timeout = config_manager.get_int("REQUESTS", "timeout")
 headers_index = config_manager.get_dict('REQUESTS', 'user-agent')
 m3u8_url_fixer = M3U8_UrlFix()
 
@@ -97,7 +98,7 @@ class HttpClient:
         """
         self.headers = headers
 
-    def get(self, url: str, timeout: int=20):
+    def get(self, url: str):
         """
         Sends a GET request to the specified URL and returns the response as text.
 
@@ -105,7 +106,11 @@ class HttpClient:
             str: The response body as text if the request is successful, None otherwise.
         """
         try:
-            response = httpx.get(url, headers=self.headers, timeout=timeout)
+            response = httpx.get(
+                url=url, 
+                headers=self.headers, 
+                timeout=max_timeout
+            )
 
             response.raise_for_status()
             return response.text  # Return the response text
@@ -114,7 +119,7 @@ class HttpClient:
             logging.error(f"Request to {url} failed: {response.status_code} when get text.")
             return 404
 
-    def get_content(self, url, timeout=20):
+    def get_content(self, url):
         """
         Sends a GET request to the specified URL and returns the raw response content.
 
@@ -122,7 +127,11 @@ class HttpClient:
             bytes: The response content as bytes if the request is successful, None otherwise.
         """
         try:
-            response = httpx.get(url, headers=self.headers, timeout=timeout)
+            response = httpx.get(
+                url=url, 
+                headers=self.headers, 
+                timeout=max_timeout
+            )
 
             response.raise_for_status()
             return response.content  # Return the raw response content

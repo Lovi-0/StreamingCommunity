@@ -14,6 +14,7 @@ from .series import download_thread
 
 # Variable
 indice = 3
+_use_for = "serie"
 _deprecate = False
 
 

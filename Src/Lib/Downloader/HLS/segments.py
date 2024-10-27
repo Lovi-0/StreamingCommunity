@@ -38,7 +38,6 @@ from .proxyes import main_test_proxy
 # Config
 TQDM_DELAY_WORKER = config_manager.get_float('M3U8_DOWNLOAD', 'tqdm_delay')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
-REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 REQUEST_MAX_RETRY = config_manager.get_int('REQUESTS', 'max_retry')
 REQUEST_VERIFY = config_manager.get_bool('REQUESTS', 'verify_ssl')
 THERE_IS_PROXY_LIST = check_file_existence("list_proxy.txt")
@@ -48,6 +47,7 @@ PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
 
 # Variable
 headers_index = config_manager.get_dict('REQUESTS', 'user-agent')
+max_timeout = config_manager.get_int("REQUESTS", "timeout")
 
 
 
@@ -98,7 +98,11 @@ class M3U8_Segments:
 
         # Make request to get porxy
         try:
-            response = httpx.get(key_uri, headers=headers_index)
+            response = httpx.get(
+                url=key_uri, 
+                headers=headers_index,
+                timeout=max_timeout
+            )
             response.raise_for_status()
 
         except Exception as e:
@@ -214,16 +218,38 @@ class M3U8_Segments:
 
                     with httpx.Client(proxies=proxy, verify=need_verify) as client:  
                         if 'key_base_url' in self.__dict__:
-                            response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, follow_redirects=True)
+                            response = client.get(
+                                url=ts_url, 
+                                headers=random_headers(self.key_base_url), 
+                                timeout=max_timeout, 
+                                follow_redirects=True
+                            )
+
                         else:
-                            response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, follow_redirects=True)
+                            response = client.get(
+                                url=ts_url, 
+                                headers={'user-agent': get_headers()}, 
+                                timeout=max_timeout, 
+                                follow_redirects=True
+                            )
 
                 else:
                     with httpx.Client(verify=need_verify) as client_2:
                         if 'key_base_url' in self.__dict__:
-                            response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=REQUEST_TIMEOUT, follow_redirects=True)
+                            response = client_2.get(
+                                url=ts_url, 
+                                headers=random_headers(self.key_base_url), 
+                                timeout=max_timeout, 
+                                follow_redirects=True
+                            )
+
                         else:
-                            response = client_2.get(ts_url, headers={'user-agent': get_headers()}, timeout=REQUEST_TIMEOUT, follow_redirects=True)
+                            response = client_2.get(
+                                url=ts_url, 
+                                headers={'user-agent': get_headers()}, 
+                                timeout=max_timeout, 
+                                follow_redirects=True
+                            )
 
                 # Get response content
                 response.raise_for_status()  # Raise exception for HTTP errors

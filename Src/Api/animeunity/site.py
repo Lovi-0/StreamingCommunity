@@ -10,6 +10,8 @@ from unidecode import unidecode
 
 
 # Internal utilities
+from Src.Util.console import console
+from Src.Util._jsonConfig import config_manager
 from Src.Util.table import TVShowManager
 from ..Template import search_domain, get_select_title
 
@@ -99,7 +101,9 @@ def title_search(title: str) -> int:
     """
 
     # Get token and session value from configuration
+    max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain_to_use, _ = search_domain(SITE_NAME, f"https://www.{SITE_NAME}")
+    
     data = get_token(SITE_NAME, domain_to_use)
 
     # Prepare cookies to be used in the request
@@ -121,8 +125,18 @@ def title_search(title: str) -> int:
     }
 
     # Send a POST request to the API endpoint for live search
-    response = httpx.post(f'https://www.{SITE_NAME}.{domain_to_use}/livesearch', cookies=cookies, headers=headers, json=json_data)
-    response.raise_for_status()
+    try:
+        response = httpx.post(
+            url=f'https://www.{SITE_NAME}.{domain_to_use}/livesearch', 
+            cookies=cookies, 
+            headers=headers, 
+            json=json_data,
+            timeout=max_timeout
+        )
+        response.raise_for_status()
+
+    except Exception as e:
+        console.print(f"Site: {SITE_NAME}, request search error: {e}")
 
     # Process each record returned in the response
     for dict_title in response.json()['records']:

@@ -55,7 +55,7 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: str = Non
     
     # Make request to get content of video
     with httpx.Client(verify=REQUEST_VERIFY, timeout=REQUEST_TIMEOUT) as client:
-        with client.stream("GET", url, headers=headers, timeout=10) as response:
+        with client.stream("GET", url, headers=headers, timeout=REQUEST_TIMEOUT) as response:
             total = int(response.headers.get('content-length', 0))
 
             if total != 0:

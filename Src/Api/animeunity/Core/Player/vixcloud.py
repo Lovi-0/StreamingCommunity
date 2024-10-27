@@ -21,6 +21,7 @@ from ..Class.WindowType import WindowVideo, WindowParameter, DynamicJSONConverte
 
 # Variable
 from ...costant import SITE_NAME
+max_timeout = config_manager.get_int("REQUESTS", "timeout")
 
 
 class VideoSource:
@@ -57,7 +58,11 @@ class VideoSource:
         """
         try:
 
-            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/", headers=self.headers)
+            response = httpx.get(
+                url=f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/", 
+                headers=self.headers, 
+                timeout=max_timeout
+            )
             response.raise_for_status()
 
             # Parse JSON response and return episode count
@@ -84,7 +89,12 @@ class VideoSource:
                 "end_range": index_ep + 1
             }
 
-            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/{index_ep}", headers=self.headers, params=params, timeout=5)
+            response = httpx.get(
+                url=f"https://www.{self.base_name}.{self.domain}/info_api/{self.media_id}/{index_ep}", 
+                headers=self.headers, 
+                params=params, 
+                timeout=max_timeout
+            )
             response.raise_for_status()
 
             # Return information about the episode
@@ -107,7 +117,11 @@ class VideoSource:
         """
         try:
 
-            response = httpx.get(f"https://www.{self.base_name}.{self.domain}/embed-url/{episode_id}", headers=self.headers)
+            response = httpx.get(
+                url=f"https://www.{self.base_name}.{self.domain}/embed-url/{episode_id}", 
+                headers=self.headers, 
+                timeout=max_timeout
+            )
             response.raise_for_status()
 
             # Extract and clean embed URL
@@ -182,8 +196,8 @@ class VideoSource:
             final_params["h"] = "1" 
 
         # Construct the new query string and final URL
-        new_query = urlencode(final_params)         # Encode final_params into a query string
-        new_url = m._replace(query=new_query)       # Replace the old query string with the new one
-        final_url = urlunparse(new_url)             # Construct the final URL from the modified parts
+        new_query = urlencode(final_params)
+        new_url = m._replace(query=new_query)
+        final_url = urlunparse(new_url)
 
         return final_url

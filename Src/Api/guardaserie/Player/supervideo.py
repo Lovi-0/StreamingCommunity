@@ -11,7 +11,12 @@ from bs4 import BeautifulSoup
 
 
 # Internal utilities
+from Src.Util._jsonConfig import config_manager
 from Src.Util.headers import get_headers
+
+
+# Variable
+max_timeout = config_manager.get_int("REQUESTS", "timeout")
 
 
 class VideoSource:
@@ -45,7 +50,12 @@ class VideoSource:
         """
 
         try:
-            response = httpx.get(url, headers=self.headers, follow_redirects=True, timeout=10)
+            response = httpx.get(
+                url=url, 
+                headers=self.headers, 
+                follow_redirects=True, 
+                timeout=max_timeout
+            )
             response.raise_for_status()
             return response.text
         

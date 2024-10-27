@@ -11,6 +11,7 @@ from .anime import download_film, download_series
 
 # Variable
 indice = 1
+_use_for = "anime"
 _deprecate = False
 
 

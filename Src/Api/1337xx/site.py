@@ -7,6 +7,8 @@ from unidecode import unidecode
 
 
 # Internal utilities
+from Src.Util.console import console
+from Src.Util._jsonConfig import config_manager
 from Src.Util.headers import get_headers
 from Src.Util.table import TVShowManager
 from ..Template import search_domain, get_select_title
@@ -33,11 +35,21 @@ def title_search(word_to_search: str) -> int:
     """
 
     # Find new domain if prev dont work
+    max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
 
     # Construct the full site URL and load the search page
-    response = httpx.get(f"https://{SITE_NAME}.{domain_to_use}/search/{unidecode(word_to_search)}/1/", headers={'user-agent': get_headers()}, follow_redirects=True)
-    response.raise_for_status()
+    try:
+        response = httpx.get(
+            url=f"https://{SITE_NAME}.{domain_to_use}/search/{unidecode(word_to_search)}/1/", 
+            headers={'user-agent': get_headers()}, 
+            follow_redirects=True,
+            timeout=max_timeout
+        )
+        response.raise_for_status()
+
+    except Exception as e:
+        console.print(f"Site: {SITE_NAME}, request search error: {e}")
 
     # Create soup and find table
     soup = BeautifulSoup(response.text, "html.parser")

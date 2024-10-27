@@ -12,8 +12,9 @@ from unidecode import unidecode
 
 
 # Internal utilities
-from Src.Util.headers import get_headers
 from Src.Util.console import console
+from Src.Util._jsonConfig import config_manager
+from Src.Util.headers import get_headers
 from Src.Util.table import TVShowManager
 from ..Template import search_domain, get_select_title
 
@@ -90,10 +91,20 @@ def title_search(title_search: str, domain: str) -> int:
     Returns:
         int: The number of titles found.
     """
+
+    max_timeout = config_manager.get_int("REQUESTS", "timeout")
     
     # Send request to search for titles ( replace à to a and space to "+" )
-    response = httpx.get(f"https://{SITE_NAME}.{domain}/api/search?q={unidecode(title_search.replace(' ', '+'))}", headers={'user-agent': get_headers()})
-    response.raise_for_status()
+    try:
+        response = httpx.get(
+            url=f"https://{SITE_NAME}.{domain}/api/search?q={unidecode(title_search.replace(' ', '+'))}", 
+            headers={'user-agent': get_headers()}, 
+            timeout=max_timeout
+        )
+        response.raise_for_status()
+
+    except Exception as e:
+        console.print(f"Site: {SITE_NAME}, request search error: {e}")
 
     # Add found titles to media search manager
     for dict_title in response.json()['data']:

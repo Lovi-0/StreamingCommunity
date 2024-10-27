@@ -17,7 +17,7 @@
         "show_trending": false
     },
     "REQUESTS": {
-        "timeout": 10,
+        "timeout": 15,
         "max_retry": 3,
         "verify_ssl": true,
         "user-agent": "",

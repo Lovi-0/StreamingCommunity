@@ -9,11 +9,13 @@ from bs4 import BeautifulSoup
 
 
 # Internal utilities
+from Src.Util._jsonConfig import config_manager
 from Src.Util.headers import get_headers
 
 
 # Variable
 from ..costant import COOKIE
+max_timeout = config_manager.get_int("REQUESTS", "timeout")
 
 
 class VideoSource:
@@ -44,7 +46,12 @@ class VideoSource:
             - str: The response content if successful, None otherwise.
         """
         try:
-            response = httpx.get(url, headers=self.headers, cookies=self.cookie)
+            response = httpx.get(
+                url=url, 
+                headers=self.headers, 
+                cookies=self.cookie,
+                timeout=max_timeout
+            )
             response.raise_for_status()
 
             return response.text

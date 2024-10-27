@@ -12,6 +12,7 @@ from .series import download_series
 
 # Variable
 indice = 0
+_use_for = "film_serie"
 _deprecate = False
 
 

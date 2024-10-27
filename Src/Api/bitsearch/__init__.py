@@ -11,6 +11,7 @@ from .title import download_title
 
 # Variable
 indice = 7
+_use_for = "film_serie"
 _deprecate = False
 
 

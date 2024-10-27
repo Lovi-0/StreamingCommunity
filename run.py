@@ -42,7 +42,6 @@ def run_function(func: Callable[..., None], close_console: bool = False) -> None
 
 
 def load_search_functions():
-
     modules = []
     loaded_functions = {}
 
@@ -53,10 +52,8 @@ def load_search_functions():
     logging.info(f"Base folder path: {api_dir}")
     logging.info(f"Api module path: {init_files}")
 
-
     # Retrieve modules and their indices
     for init_file in init_files:
-
         # Get folder name as module name
         module_name = os.path.basename(os.path.dirname(init_file))
         logging.info(f"Load module name: {module_name}")
@@ -64,14 +61,13 @@ def load_search_functions():
         try:
             # Dynamically import the module
             mod = importlib.import_module(f'Src.Api.{module_name}')
-
             # Get 'indice' from the module
             indice = getattr(mod, 'indice', 0)
             is_deprecate = bool(getattr(mod, '_deprecate', True))
+            use_for = getattr(mod, '_use_for', 'other')
 
-            # Add module and indice to the list
             if not is_deprecate:
-                modules.append((module_name, indice))
+                modules.append((module_name, indice, use_for))
 
         except Exception as e:
             console.print(f"[red]Failed to import module {module_name}: {str(e)}")
@@ -80,13 +76,14 @@ def load_search_functions():
     modules.sort(key=lambda x: x[1])
 
     # Load search functions in the sorted order
-    for module_name, _ in modules:
+    for module_name, _, use_for in modules:
 
         # Construct a unique alias for the module
         module_alias = f'{module_name}_search'
         logging.info(f"Module alias: {module_alias}")
 
         try:
+
             # Dynamically import the module
             mod = importlib.import_module(f'Src.Api.{module_name}')
 
@@ -94,7 +91,7 @@ def load_search_functions():
             search_function = getattr(mod, 'search')
 
             # Add the function to the loaded functions dictionary
-            loaded_functions[module_alias] = search_function
+            loaded_functions[module_alias] = (search_function, use_for)
 
         except Exception as e:
             console.print(f"[red]Failed to load search function from module {module_name}: {str(e)}")
@@ -149,17 +146,25 @@ def main():
     # Create dynamic argument parser
     parser = argparse.ArgumentParser(description='Script to download film and series from the internet.')
 
+    color_map = {
+        "anime": "red",
+        "film_serie": "yellow",
+        "film": "blue",
+        "serie": "green",
+        "other": "white"
+    }
+
     # Add dynamic arguments based on loaded search modules
-    for alias in search_functions.keys():
-        short_option = alias[:3].upper()                # Take the first three letters of the alias in uppercase
-        long_option = alias                             # Use the full alias as the full option name
+    for alias, (_, use_for) in search_functions.items():
+        short_option = alias[:3].upper()
+        long_option = alias
         parser.add_argument(f'-{short_option}', f'--{long_option}', action='store_true', help=f'Search for {alias.split("_")[0]} on streaming platforms.')
 
     # Parse command line arguments
     args = parser.parse_args()
 
     # Mapping command-line arguments to functions
-    arg_to_function = {alias: search_functions[alias] for alias in search_functions.keys()}
+    arg_to_function = {alias: func for alias, (func, _) in search_functions.items()}
 
     # Check which argument is provided and run the corresponding function
     for arg, func in arg_to_function.items():
@@ -168,14 +173,22 @@ def main():
             return
 
     # Mapping user input to functions
-    input_to_function = {str(i): search_functions[alias] for i, alias in enumerate(search_functions.keys())}
+    input_to_function = {str(i): func for i, (alias, (func, _)) in enumerate(search_functions.items())}
 
     # Create dynamic prompt message and choices
-    choice_labels = {str(i): alias.split("_")[0].capitalize() for i, alias in enumerate(search_functions.keys())}
-    prompt_message = f"[green]Insert category [white]({', '.join([f'[red]{key}: [magenta]{label}' for key, label in choice_labels.items()])}[white]): "
+    choice_labels = {str(i): (alias.split("_")[0].capitalize(), use_for) for i, (alias, (_, use_for)) in enumerate(search_functions.items())}
+
+    # Display the category legend in a single line
+    legend_text = " | ".join([f"[{color}]{category.capitalize()}[/{color}]" for category, color in color_map.items()])
+    console.print(f"[bold green]Category Legend:[/bold green] {legend_text}")
+
+    # Construct the prompt message with color-coded site names
+    prompt_message = "[green]Insert category [white](" + ", ".join(
+        [f"{key}: [{color_map[label[1]]}]{label[0]}[/{color_map[label[1]]}]" for key, label in choice_labels.items()]
+    ) + "[white])"
 
     # Ask the user for input
-    category = msg.ask(prompt_message, choices=list(choice_labels.keys()), default="0")
+    category = msg.ask(prompt_message, choices=list(choice_labels.keys()), default="0", show_choices=False, show_default=False)
 
     # Run the corresponding function based on user input
     if category in input_to_function:

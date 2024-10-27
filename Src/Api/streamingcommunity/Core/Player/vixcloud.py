@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 
 
 # Internal utilities
+from Src.Util._jsonConfig import config_manager
 from Src.Util.headers import get_headers
 from Src.Util.console import console, Panel
 
@@ -23,6 +24,7 @@ from ..Class.WindowType import WindowVideo, WindowParameter, DynamicJSONConverte
 
 # Variable
 from ...costant import SITE_NAME
+max_timeout = config_manager.get_int("REQUESTS", "timeout")
 
 
 class VideoSource:
@@ -66,7 +68,11 @@ class VideoSource:
 
         try:
 
-            response = httpx.get(f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", headers=self.headers, timeout=15)
+            response = httpx.get(
+                url=f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", 
+                headers=self.headers, 
+                timeout=max_timeout
+            )
             response.raise_for_status()
 
             # Extract JSON response if available
@@ -90,7 +96,11 @@ class VideoSource:
         try:
 
             # Make a request to collect information about a specific season
-            response = httpx.get(f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', headers=self.headers, timeout=15)
+            response = httpx.get(
+                url=f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', 
+                headers=self.headers, 
+                timeout=max_timeout
+            )
             response.raise_for_status()
 
             # Extract JSON response if available
@@ -122,7 +132,11 @@ class VideoSource:
         try:
 
             # Make a request to get iframe source
-            response = httpx.get(f"https://{self.base_name}.{self.domain}/iframe/{self.media_id}", params=params, timeout=15)
+            response = httpx.get(
+                url=f"https://{self.base_name}.{self.domain}/iframe/{self.media_id}", 
+                params=params, 
+                timeout=max_timeout
+            )
             response.raise_for_status()
 
             # Parse response with BeautifulSoup to get iframe source
@@ -164,7 +178,11 @@ class VideoSource:
 
                 # Make a request to get content
                 try:
-                    response = httpx.get(self.iframe_src, headers=self.headers, timeout=15)
+                    response = httpx.get(
+                        url=self.iframe_src, 
+                        headers=self.headers, 
+                        timeout=max_timeout
+                    )
                     response.raise_for_status()
 
                 except Exception as e:
@@ -172,14 +190,12 @@ class VideoSource:
                     console.print(Panel("[red bold]Coming soon", title="Notification", title_align="left", border_style="yellow"))
                     sys.exit(0)
 
-                if response.status_code == 200:
+                # Parse response with BeautifulSoup to get content
+                soup = BeautifulSoup(response.text, "html.parser")
+                script = soup.find("body").find("script").text
 
-                    # Parse response with BeautifulSoup to get content
-                    soup = BeautifulSoup(response.text, "html.parser")
-                    script = soup.find("body").find("script").text
-
-                    # Parse script to get video information
-                    self.parse_script(script_text=script)
+                # Parse script to get video information
+                self.parse_script(script_text=script)
 
         except Exception as e:
             logging.error(f"Error getting content: {e}")

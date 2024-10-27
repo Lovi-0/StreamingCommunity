@@ -153,7 +153,7 @@ You can change some behaviors by tweaking the configuration file.
   <summary><strong>REQUESTS</strong></summary>
 
   * **timeout**: The timeout value for requests.
-    - **Default Value**: `10`
+    - **Default Value**: `15`
 
   * **verify_ssl**: Whether to verify SSL certificates.
     - **Default Value**: `false`
@@ -165,21 +165,9 @@ You can change some behaviors by tweaking the configuration file.
 <details>
   <summary><strong>M3U8_DOWNLOAD</strong></summary>
 
-  * **tdqm_workers**: The number of workers that will cooperate to download .ts files. **A high value may slow down your PC**
-    - **Default Value**: `30`
-
   * **tqdm_use_large_bar**: Whether to use large progress bars during downloads (Downloading %desc: %percentage:.2f %bar %elapsed < %remaining %postfix
     - **Default Value**: `true`
     - **Example Value**: `false` with Proc: %percentage:.2f %remaining %postfix
-
-  * **download_video**: Whether to download video streams.
-    - **Default Value**: `true`
-
-  * **download_audio**: Whether to download audio streams.
-    - **Default Value**: `true`
-
-  * **download_sub**: Whether to download subtitle streams.
-    - **Default Value**: `true`
 
   * **specific_list_audio**: A list of specific audio languages to download.
     - **Example Value**: `['ita']`

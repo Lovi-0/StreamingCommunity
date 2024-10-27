@@ -11,6 +11,7 @@ from .film import download_film
 
 # Variable
 indice = 2
+_use_for = "film"
 _deprecate = False
 
 
