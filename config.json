@@ -2,11 +2,12 @@
     "DEFAULT": {
         "debug": false,
         "log_file": "app.log",
-        "log_to_file": true,
-        "show_message": true,
-        "clean_console": true,
+        "log_to_file": false,
+        "show_message": false,
+        "clean_console": false,
         "root_path": "Video",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
+        "special_chars_to_remove": "!@#$%^&*()[]{}<>|`~'\";:,.?=+\u00e2\u20ac\u00a6",
         "config_qbit_tor": {
             "host": "192.168.1.58",
             "port": "8080",
@@ -53,7 +54,8 @@
         "default_preset": "ultrafast"
     },
     "M3U8_PARSER": {
-        "force_resolution": -1
+        "force_resolution": -1,
+        "get_only_link": false
     },
     "SITE": {
         "streamingcommunity": {
@@ -64,12 +66,12 @@
         "altadefinizione": {
             "video_workers": 12,
             "audio_workers": 12,
-            "domain": "my"
+            "domain": "now"
         },
         "guardaserie": {
             "video_workers": 12,
             "audio_workers": 12,
-            "domain": "dev"
+            "domain": "academy"
         },
         "mostraguarda": {
             "video_workers": 12,
@@ -94,7 +96,7 @@
             "domain": "to"
         },
         "cb01": {
-            "domain": "nexus"
+            "domain": "vet"
         }
     }
 }

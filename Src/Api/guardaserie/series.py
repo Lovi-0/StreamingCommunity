@@ -54,13 +54,21 @@ def download_video(scape_info_serie: GetSerieInfo, index_season_selected: int, i
     # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()
     
-    if HLS_Downloader(os.path.join(mp4_path, mp4_name), master_playlist).start() == 404:
+    # Download the film using the m3u8 playlist, and output filename
+    r_proc = HLS_Downloader(m3u8_playlist = master_playlist, output_filename = os.path.join(mp4_path, mp4_name)).start()
+
+    if r_proc == 404:
         time.sleep(2)
 
         # Re call search function
         if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
             frames = get_call_stack()
             execute_search(frames[-4])
+
+    if r_proc != None:
+        console.print("[green]Result: ")
+        console.print(r_proc)
+
 
 
 def download_episode(scape_info_serie: GetSerieInfo, index_season_selected: int, download_all: bool = False) -> None:

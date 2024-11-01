@@ -187,6 +187,9 @@ You can change some behaviors by tweaking the configuration file.
     - **Default Value**: `-1`
     - **Example Value**: `1080`
 
+  * **get_only_link**: Print hls m3u8 link and path file.
+  - **Default Value**: `false`
+
 </details>
 
 > [!IMPORTANT]

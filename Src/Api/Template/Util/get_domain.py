@@ -36,7 +36,7 @@ def google_search(query):
     
     return first_result
 
-def get_final_redirect_url(initial_url):
+def get_final_redirect_url(initial_url, max_timeout):
     """
     Follow redirects from the initial URL and return the final URL after all redirects.
 
@@ -48,13 +48,19 @@ def get_final_redirect_url(initial_url):
     """
 
     # Create a client with redirects enabled
-    with httpx.Client(follow_redirects=True) as client:
-        response = client.get(initial_url)
+    try:
+        with httpx.Client(follow_redirects=True, timeout=max_timeout, headers={'user-agent': get_headers()}) as client:
+            response = client.get(initial_url)
+            response.raise_for_status()
+            
+            # Capture the final URL after all redirects
+            final_url = response.url
         
-        # Capture the final URL after all redirects
-        final_url = response.url
+        return final_url
     
-    return final_url
+    except Exception as e:
+        console.print(f"[cyan]Test url[white]: [red]{initial_url}, [cyan]error[white]: [red]{e}")
+        return None
 
 def search_domain(site_name: str, base_url: str):
     """
@@ -72,7 +78,7 @@ def search_domain(site_name: str, base_url: str):
     # Extract config domain
     max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain = str(config_manager.get_dict("SITE", site_name)['domain'])
-    console.print(f"[cyan]Test site[white]: [red]{base_url}.{domain}")
+    #console.print(f"[cyan]Test site[white]: [red]{base_url}.{domain}")
 
     try:
 
@@ -82,32 +88,35 @@ def search_domain(site_name: str, base_url: str):
         response_follow.raise_for_status()
 
     except Exception as e:
-        console.print(f"[cyan]Change domain for site[white]: [red]{base_url}.{domain}, [cyan]error[white]: [red]{e}")
+        console.print(f"[cyan]Test url[white]: [red]{base_url}.{domain}, [cyan]error[white]: [red]{e}")
 
         query = base_url.split("/")[-1]
         first_url = google_search(query)
+        console.print(f"[green]First url from google seach[white]: [red]{first_url}")
 
         if first_url:
-            final_url = get_final_redirect_url(first_url)
-            console.print(f"\n[bold yellow]Suggestion:[/bold yellow] [white](Experimental)\n"
-                        f"[cyan]New final URL[white]: [green]{final_url}")
-            
-            def extract_domain(url):
-                parsed_url = urlparse(url)
-                domain = parsed_url.netloc
-                return domain.split(".")[-1]
+            final_url = get_final_redirect_url(first_url, max_timeout)
 
-            new_domain_extract = extract_domain(str(final_url))
-
-            if msg.ask(f"[red]Do you want to auto update config.json - '[green]{site_name}[red]' with domain: [green]{new_domain_extract}", choices=["y", "n"], default="y").lower() == "y":
+            if final_url != None:
+                console.print(f"\n[bold yellow]Suggestion:[/bold yellow] [white](Experimental)\n"
+                            f"[cyan]New final URL[white]: [green]{final_url}")
                 
-                # Update domain in config.json
-                config_manager.config['SITE'][site_name]['domain'] = new_domain_extract
-                config_manager.write_config()
+                def extract_domain(url):
+                    parsed_url = urlparse(url)
+                    domain = parsed_url.netloc
+                    return domain.split(".")[-1]
 
-                # Return config domain
-                console.print(f"[cyan]Return domain: [red]{new_domain_extract} \n")
-                return new_domain_extract, f"{base_url}.{new_domain_extract}"
+                new_domain_extract = extract_domain(str(final_url))
+
+                if msg.ask(f"[red]Do you want to auto update config.json - '[green]{site_name}[red]' with domain: [green]{new_domain_extract}", choices=["y", "n"], default="y").lower() == "y":
+                    
+                    # Update domain in config.json
+                    config_manager.config['SITE'][site_name]['domain'] = new_domain_extract
+                    config_manager.write_config()
+
+                    # Return config domain
+                    console.print(f"[cyan]Return domain: [red]{new_domain_extract} \n")
+                    return new_domain_extract, f"{base_url}.{new_domain_extract}"
             
             else:
                 console.print("[bold red]\nManually change the domain in the JSON file.[/bold red]")

@@ -52,6 +52,7 @@ DOWNLOAD_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'download_sub')
 MERGE_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_subs')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_DOWNLOAD', 'cleanup_tmp_folder')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
+GET_ONLY_LINK = config_manager.get_bool('M3U8_PARSER', 'get_only_link')
 
 
 # Variable
@@ -736,7 +737,8 @@ class HLS_Downloader:
     def start(self):
         """
         Initiates the downloading process. Checks if the output file already exists and proceeds with processing the playlist or index.
-        """
+        """            
+
         if os.path.exists(self.output_filename):
             console.log("[red]Output file already exists.")
             return
@@ -745,13 +747,30 @@ class HLS_Downloader:
 
         # Determine whether to process a playlist or index
         if self.m3u8_playlist:
-            r_proc = self._process_playlist()
+            if not GET_ONLY_LINK:
+                r_proc = self._process_playlist()
 
-            if r_proc == 404:
-                return 404
+                if r_proc == 404:
+                    return 404
+                else:
+                    return None    
+            
+            else:
+                return {
+                    'path': self.output_filename,
+                    'url': self.m3u8_playlist
+                }
 
         elif self.m3u8_index:
-            self._process_index()
+            if not GET_ONLY_LINK:
+                self._process_index()
+                return None
+
+            else:
+                return {
+                    'path': self.output_filename,
+                    'url': self.m3u8_index
+                }
 
     def _clean(self, out_path: str) -> None:
         """

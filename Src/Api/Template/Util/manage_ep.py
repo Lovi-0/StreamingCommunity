@@ -90,9 +90,6 @@ def map_episode_title(tv_name: str, number_season: int, episode_number: int, epi
     map_episode_temp = map_episode_temp.replace("%(episode)", dynamic_format_number(episode_number))
     map_episode_temp = map_episode_temp.replace("%(episode_name)", remove_special_characters(episode_name))
 
-    # Additional fix
-    map_episode_temp = map_episode_temp.replace(".", "_")
-
     logging.info(f"Map episode string return: {map_episode_temp}")
     return map_episode_temp
 

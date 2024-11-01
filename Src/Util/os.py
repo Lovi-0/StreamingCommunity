@@ -25,14 +25,11 @@ import unicodedata
 
 # Internal utilities
 from .console import console
+from ._jsonConfig import config_manager
 
 
 # --> OS FILE ASCII
-special_chars_to_remove = [
-    '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '[', ']', '{', '}', '<', 
-    '>', '|', '`', '~', "'", '"', ';', ':', ',', '?', '\\', '/', '\t', ' ', '=', 
-    '+', '\n', '\r', '\0', ':'
-]
+special_chars_to_remove = config_manager.get("DEFAULT", "special_chars_to_remove")
 
 
 def get_max_length_by_os(system: str) -> int:
@@ -91,13 +88,12 @@ def remove_special_characters(input_string):
 
     Parameters:
         - input_string (str): The input string containing special characters.
-        - special_chars (list): List of special characters to be removed.
 
     Returns:
         str: A new string with specified special characters removed.
     """
     # Compile regular expression pattern to match special characters
-    pattern = re.compile('[' + re.escape(''.join(special_chars_to_remove)) + ']')
+    pattern = re.compile('[' + re.escape(special_chars_to_remove) + ']')
 
     # Use compiled pattern to replace special characters with an empty string
     cleaned_string = pattern.sub('', input_string)
@@ -322,7 +318,7 @@ def get_system_summary():
     ffprobe_version = get_executable_version(['ffprobe', '-version'])
 
     console.print(f"[cyan]Exe versions[white]: [bold red]ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}[/bold red]")
-    logging.info(f"Exe versions: ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}")
+    logging.info(f"Dependencies: ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}")
 
     # Optional libraries versions
     optional_libraries = [line.strip() for line in open('requirements.txt', 'r', encoding='utf-8-sig')]
