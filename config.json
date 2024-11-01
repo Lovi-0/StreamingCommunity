@@ -2,9 +2,9 @@
     "DEFAULT": {
         "debug": false,
         "log_file": "app.log",
-        "log_to_file": false,
-        "show_message": false,
-        "clean_console": false,
+        "log_to_file": true,
+        "show_message": true,
+        "clean_console": true,
         "root_path": "Video",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
         "special_chars_to_remove": "!@#$%^&*()[]{}<>|`~'\";:,.?=+\u00e2\u20ac\u00a6",
