@@ -7,7 +7,7 @@
         "clean_console": true,
         "root_path": "Video",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
-        "special_chars_to_remove": "!@#$%^&*()[]{}<>|`~'\";:,.?=+\u00e2\u20ac\u00a6",
+        "special_chars_to_remove": "!@#$%^&*()[]{}<>|`~'\";:,?=+\u00e2\u20ac\u00a6",
         "config_qbit_tor": {
             "host": "192.168.1.58",
             "port": "8080",
@@ -18,7 +18,7 @@
         "show_trending": false
     },
     "REQUESTS": {
-        "timeout": 15,
+        "timeout": 20,
         "max_retry": 3,
         "verify_ssl": true,
         "user-agent": "",
@@ -59,8 +59,8 @@
     },
     "SITE": {
         "streamingcommunity": {
-            "video_workers": 6,
-            "audio_workers": 6,
+            "video_workers": 7,
+            "audio_workers": 7,
             "domain": "computer"
         },
         "altadefinizione": {

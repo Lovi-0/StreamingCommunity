@@ -77,6 +77,7 @@ class M3U8_Segments:
         # Sync
         self.queue = PriorityQueue()
         self.stop_event = threading.Event()
+        self.downloaded_segments = set()
 
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
@@ -176,13 +177,16 @@ class M3U8_Segments:
         if self.is_index_url:
 
             # Send a GET request to retrieve the index M3U8 file
-            response = httpx.get(self.url, headers=headers_index)
+            response = httpx.get(
+                self.url, 
+                headers=headers_index, 
+                timeout=max_timeout
+            )
             response.raise_for_status()
 
             # Save the M3U8 file to the temporary folder
-            if response.status_code == 200:
-                path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
-                open(path_m3u8_file, "w+").write(response.text) 
+            path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
+            open(path_m3u8_file, "w+").write(response.text) 
 
             # Parse the text from the M3U8 index file
             self.parse_data(response.text)  
@@ -204,115 +208,122 @@ class M3U8_Segments:
             - backoff_factor (float): The backoff factor for exponential backoff (default is 1.5 seconds).
         """
         need_verify = REQUEST_VERIFY
+        min_segment_size = 100  # Minimum acceptable size for a TS segment in bytes
 
         for attempt in range(retries):
             try:
                 start_time = time.time()
-
+                
                 # Make request to get content
                 if THERE_IS_PROXY_LIST:
-
-                    # Get proxy from list
                     proxy = self.valid_proxy[index % len(self.valid_proxy)]
                     logging.info(f"Use proxy: {proxy}")
 
                     with httpx.Client(proxies=proxy, verify=need_verify) as client:  
                         if 'key_base_url' in self.__dict__:
-                            response = client.get(
-                                url=ts_url, 
-                                headers=random_headers(self.key_base_url), 
-                                timeout=max_timeout, 
-                                follow_redirects=True
-                            )
-
+                            response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=max_timeout, follow_redirects=True)
                         else:
-                            response = client.get(
-                                url=ts_url, 
-                                headers={'user-agent': get_headers()}, 
-                                timeout=max_timeout, 
-                                follow_redirects=True
-                            )
-
+                            response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=max_timeout, follow_redirects=True)
                 else:
                     with httpx.Client(verify=need_verify) as client_2:
                         if 'key_base_url' in self.__dict__:
-                            response = client_2.get(
-                                url=ts_url, 
-                                headers=random_headers(self.key_base_url), 
-                                timeout=max_timeout, 
-                                follow_redirects=True
-                            )
-
+                            response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=max_timeout, follow_redirects=True)
                         else:
-                            response = client_2.get(
-                                url=ts_url, 
-                                headers={'user-agent': get_headers()}, 
-                                timeout=max_timeout, 
-                                follow_redirects=True
-                            )
+                            response = client_2.get(ts_url, headers={'user-agent': get_headers()}, timeout=max_timeout, follow_redirects=True)
 
-                # Get response content
-                response.raise_for_status()  # Raise exception for HTTP errors
-                duration = time.time() - start_time
+                # Validate response and content
+                response.raise_for_status()
                 segment_content = response.content
+                content_size = len(segment_content)
 
-                # Update bar
-                response_size = int(response.headers.get('Content-Length', 0)) or len(segment_content)
+                # Check if segment is too small (possibly corrupted or empty)
+                if content_size < min_segment_size:
+                    raise httpx.RequestError(f"Segment {index} too small ({content_size} bytes)")
 
-                # Update progress bar with custom Class
-                self.class_ts_estimator.update_progress_bar(response_size, duration, progress_bar)
+                duration = time.time() - start_time
 
-                # Decrypt the segment content if decryption is needed
+                # Decrypt if needed and verify decrypted content
                 if self.decryption is not None:
-                    segment_content = self.decryption.decrypt(segment_content)
+                    try:
+                        segment_content = self.decryption.decrypt(segment_content)
+                        if len(segment_content) < min_segment_size:
+                            raise Exception(f"Decrypted segment {index} too small ({len(segment_content)} bytes)")
+                    except Exception as e:
+                        logging.error(f"Decryption failed for segment {index}: {str(e)}")
+                        raise
 
-                # Add the segment to the queue
+                # Update progress and queue
+                self.class_ts_estimator.update_progress_bar(content_size, duration, progress_bar)
                 self.queue.put((index, segment_content))
+                self.downloaded_segments.add(index)  # Track successfully downloaded segments
                 progress_bar.update(1)
-
-                # Break out of the loop on success
                 return
 
-            except (httpx.RequestError, httpx.HTTPStatusError) as e:
-                console.print(f"\nAttempt {attempt + 1} failed for '{ts_url}' with error: {e}")
+            except Exception as e:
+                #logging.error(f"Attempt {attempt + 1} failed for segment {index} - '{ts_url}': {e}")
                 
                 if attempt + 1 == retries:
-                    console.print(f"\nFailed after {retries} attempts. Skipping '{ts_url}'")
+                    #logging.error(f"Final retry failed for segment {index}")
+                    self.queue.put((index, None))  # Marker for failed segment
+                    progress_bar.update(1)
                     break
                 
-                # Exponential backoff before retrying
                 sleep_time = backoff_factor * (2 ** attempt)
-                console.print(f"Retrying in {sleep_time} seconds...")
+                logging.info(f"Retrying segment {index} in {sleep_time} seconds...")
                 time.sleep(sleep_time)
 
     def write_segments_to_file(self):
         """
-        Writes downloaded segments to a file in the correct order.
+        Writes segments to file with additional verification.
         """
         with open(self.tmp_file_path, 'wb') as f:
             expected_index = 0
             buffer = {}
+            total_written = 0
+            segments_written = set()
 
             while not self.stop_event.is_set() or not self.queue.empty():
                 try:
                     index, segment_content = self.queue.get(timeout=1)
 
+                    # Handle failed segments
+                    if segment_content is None:
+                        if index == expected_index:
+                            expected_index += 1
+                        continue
+
+                    # Write segment if it's the next expected one
                     if index == expected_index:
                         f.write(segment_content)
+                        total_written += len(segment_content)
+                        segments_written.add(index)
                         f.flush()
                         expected_index += 1
 
-                        # Write any buffered segments in order
+                        # Write any buffered segments that are now in order
                         while expected_index in buffer:
-                            f.write(buffer.pop(expected_index))
-                            f.flush()
+                            next_segment = buffer.pop(expected_index)
+                            if next_segment is not None:
+                                f.write(next_segment)
+                                total_written += len(next_segment)
+                                segments_written.add(expected_index)
+                                f.flush()
                             expected_index += 1
                     else:
                         buffer[index] = segment_content
 
                 except queue.Empty:
+                    if self.stop_event.is_set():
+                        break
+                    continue
+                except Exception as e:
+                    logging.error(f"Error writing segment {index}: {str(e)}")
                     continue
 
+            # Final verification
+            if total_written == 0:
+                raise Exception("No data written to file")
+    
     def download_streams(self, add_desc):
         """
         Downloads all TS segments in parallel and writes them to a file.
@@ -375,37 +386,63 @@ class M3U8_Segments:
             mininterval=0.05
         )
 
-        # Start a separate thread to write segments to the file
+        # Start writer thread
         writer_thread = threading.Thread(target=self.write_segments_to_file)
+        writer_thread.daemon = True
         writer_thread.start()
 
-        # Ff proxy avaiable set max_workers to number of proxy
-        # else set max_workers to TQDM_MAX_WORKER
+        # Configure workers and delay
         max_workers = len(self.valid_proxy) if THERE_IS_PROXY_LIST else TQDM_MAX_WORKER
+        delay = max(PROXY_START_MIN, min(PROXY_START_MAX, 1 / (len(self.valid_proxy) + 1))) if THERE_IS_PROXY_LIST else TQDM_DELAY_WORKER
 
-        # if proxy avaiable set timeout to variable time
-        # else set timeout to TDQM_DELAY_WORKER
-        if THERE_IS_PROXY_LIST:
-            num_proxies = len(self.valid_proxy)
-            self.working_proxy_list = self.valid_proxy
-
-            if num_proxies > 0:
-                # calculate delay based on number of proxies
-                # dalay should be between 0.5 and 1
-                delay = max(PROXY_START_MIN, min(PROXY_START_MAX, 1 / (num_proxies + 1)))
-            else:
-                delay = TQDM_DELAY_WORKER
-        else:
-            delay = TQDM_DELAY_WORKER
-
-        # Start all workers
+        # Download segments with completion verification
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = []
             for index, segment_url in enumerate(self.segments):
                 time.sleep(delay)
-                executor.submit(self.make_requests_stream, segment_url, index, progress_bar)
+                futures.append(executor.submit(self.make_requests_stream, segment_url, index, progress_bar))
 
-        # Wait for all tasks to complete
-        executor.shutdown(wait=True)
+            # Wait for all futures to complete
+            for future in futures:
+                try:
+                    future.result()
+                except Exception as e:
+                    logging.error(f"Error in download thread: {str(e)}")
+
+            # Verify completion and retry missing segments
+            total_segments = len(self.segments)
+            completed_segments = len(self.downloaded_segments)
+            
+            if completed_segments < total_segments:
+                missing_segments = set(range(total_segments)) - self.downloaded_segments
+                logging.warning(f"Missing segments: {sorted(missing_segments)}")
+                
+                # Retry missing segments
+                for index in missing_segments:
+                    if self.stop_event.is_set():
+                        break
+                    try:
+                        self.make_requests_stream(self.segments[index], index, progress_bar)
+                    except Exception as e:
+                        logging.error(f"Failed to retry segment {index}: {str(e)}")
+
+        # Clean up
         self.stop_event.set()
-        writer_thread.join()
+        writer_thread.join(timeout=30)
         progress_bar.close()
+
+        # Final verification
+        final_completion = (len(self.downloaded_segments) / total_segments) * 100
+        if final_completion < 99.9:  # Less than 99.9% complete
+            missing = set(range(total_segments)) - self.downloaded_segments
+            raise Exception(f"Download incomplete ({final_completion:.1f}%). Missing segments: {sorted(missing)}")
+
+        # Verify output file
+        if not os.path.exists(self.tmp_file_path):
+            raise Exception("Output file missing")
+        
+        file_size = os.path.getsize(self.tmp_file_path)
+        if file_size == 0:
+            raise Exception("Output file is empty")
+        
+        logging.info(f"Download completed. File size: {file_size} bytes")

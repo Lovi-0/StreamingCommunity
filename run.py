@@ -136,10 +136,6 @@ def initialize():
 
 def main():
 
-    # Create folder root path if not exist
-    folder_root_path = config_manager.get("DEFAULT", "root_path")
-    create_folder(folder_name=folder_root_path)
-
     # Load search functions
     search_functions = load_search_functions()
 
