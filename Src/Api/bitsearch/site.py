@@ -55,17 +55,23 @@ def title_search(word_to_search: str) -> int:
     soup = BeautifulSoup(response.text, "html.parser")
 
     for title_div in soup.find_all("li", class_ = "card"):
+        try:
+            div_stats = title_div.find("div", class_ = "stats")
 
-        title_info = {
-            'name': title_div.find("a").get_text(strip=True),
-            'url': title_div.find_all("a")[-1].get("href"),
-            'size': title_div.find_all("div")[-5].get_text(strip=True),
-            'seader': title_div.find_all("div")[-4].get_text(strip=True),
-            'leacher': title_div.find_all("div")[-3].get_text(strip=True),
-            'date': title_div.find_all("div")[-2].get_text(strip=True)
-        }
+            title_info = {
+                'name': title_div.find("a").get_text(strip=True),
+                'url': title_div.find_all("a")[-1].get("href"),
+                #'nDownload': div_stats.find_all("div")[0].get_text(strip=True),
+                'size': div_stats.find_all("div")[1].get_text(strip=True),
+                'seader': div_stats.find_all("div")[2].get_text(strip=True),
+                'leacher': div_stats.find_all("div")[3].get_text(strip=True),
+                'date': div_stats.find_all("div")[4].get_text(strip=True)
+            }
 
-        media_search_manager.add_media(title_info)
+            media_search_manager.add_media(title_info)
+            
+        except:
+            pass
 
     # Return the number of titles found
     return media_search_manager.get_length()
