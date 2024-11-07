@@ -444,7 +444,6 @@ class M3U8_Parser:
             - m3u8_content (str): The content of the M3U8 file.
         """
 
-
         # Get obj of the m3u8 text content download, dictionary with video, audio, segments, subtitles
         m3u8_obj = loads(raw_content, uri)
 

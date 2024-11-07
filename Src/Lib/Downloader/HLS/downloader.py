@@ -114,10 +114,10 @@ class HttpClient:
             )
 
             response.raise_for_status()
-            return response.text  # Return the response text
+            return response.text
 
         except Exception as e:
-            logging.error(f"Request to {url} failed: {response.status_code} when get text.")
+            logging.info(f"Request to {url} failed with error: {e}")
             return 404
 
     def get_content(self, url):
@@ -740,50 +740,60 @@ class HLS_Downloader:
         
         # Determine whether to process a playlist or index
         if self.m3u8_playlist:
+            if self.m3u8_playlist is not None:
 
-            # Parse data from url and get if is a master playlist
-            self.instace_parserClass.parse_data(uri=self.m3u8_playlist, raw_content=HttpClient().get(self.m3u8_playlist))
-            is_masterPlaylist = self.instace_parserClass.is_master_playlist
+                # Parse data from url and check if is a master playlist
+                test_raw_content = HttpClient().get(self.m3u8_playlist)
+                if test_raw_content != 404:
+                    self.instace_parserClass.parse_data(uri=self.m3u8_playlist, raw_content=test_raw_content)
+                    is_masterPlaylist = self.instace_parserClass.is_master_playlist
 
-            # Check if it's a real master playlist
-            if is_masterPlaylist:
-                if not GET_ONLY_LINK:
-                    r_proc = self._process_playlist()
+                    # Check if it's a real master playlist
+                    if is_masterPlaylist:
+                        if not GET_ONLY_LINK:
+                            r_proc = self._process_playlist()
 
-                    if r_proc == 404:
-                        return 404
-                    else:
-                        return None    
-                
+                            if r_proc == 404:
+                                return 404
+                            else:
+                                return None    
+                        
+                        else:
+                            return {
+                                'path': self.output_filename,
+                                'url': self.m3u8_playlist
+                            }
+                    
                 else:
-                    return {
-                        'path': self.output_filename,
-                        'url': self.m3u8_playlist
-                    }
-                
+                    console.log("[red]Error: URL passed to M3U8_Parser is an index playlist; expected a master playlist. Crucimorfo strikes again!")
             else:
-                console.log("[red]Error: URL passed to M3U8_Parser is an index playlist; expected a master playlist. Crucimorfo strikes again!")
+                console.log("[red]Error: m3u8_playlist is None")
 
         elif self.m3u8_index:
+            if self.m3u8_index is not None:
 
-            # Parse data from url and get if is a master playlist
-            self.instace_parserClass.parse_data(uri=self.m3u8_index, raw_content=HttpClient().get(self.m3u8_playlist))
-            is_masterPlaylist = self.instace_parserClass.is_master_playlist
+                # Parse data from url and check if is a master playlist
+                test_raw_content = HttpClient().get(self.m3u8_index)
+                if test_raw_content != 404:
+                    self.instace_parserClass.parse_data(uri=self.m3u8_index, raw_content=test_raw_content)
+                    is_masterPlaylist = self.instace_parserClass.is_master_playlist
 
-            # Check if it's a real index playlist
-            if not is_masterPlaylist:
-                if not GET_ONLY_LINK:
-                    self._process_index()
-                    return None
+                    # Check if it's a real index playlist
+                    if not is_masterPlaylist:
+                        if not GET_ONLY_LINK:
+                            self._process_index()
+                            return None
 
+                        else:
+                            return {
+                                'path': self.output_filename,
+                                'url': self.m3u8_index
+                            }
+                    
                 else:
-                    return {
-                        'path': self.output_filename,
-                        'url': self.m3u8_index
-                    }
-                
+                    console.log("[red]Error: URL passed to M3U8_Parser is an master playlist; expected a index playlist. Crucimorfo strikes again!")
             else:
-                console.log("[red]Error: URL passed to M3U8_Parser is an master playlist; expected a index playlist. Crucimorfo strikes again!")
+                console.log("[red]Error: m3u8_index is None")
 
 
     def _clean(self, out_path: str) -> None:
