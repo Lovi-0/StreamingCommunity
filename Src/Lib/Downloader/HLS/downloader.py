@@ -149,23 +149,15 @@ class ContentExtractor:
         """
         pass
 
-    def start(self, url, m3u8_playlist_text: str):
+    def start(self, obj_parse: M3U8_Parser):
         """
         Starts the extraction process by parsing the M3U8 playlist and collecting audio, subtitle, and video data.
 
         Args:
-            url (str): The URL of the M3U8 playlist.
-            m3u8_playlist_text (str): The raw text content of the M3U8 playlist.
+            obj_parse (str): The M3U8_Parser obj of the M3U8 playlist.
         """
 
-        # Create an instance of the M3U8_Parser class
-        self.obj_parse = M3U8_Parser()
-
-        # Extract information about the M3U8 playlist
-        self.obj_parse.parse_data(
-            uri=url,
-            raw_content=m3u8_playlist_text
-        )
+        self.obj_parse = obj_parse
 
         # Collect audio, subtitle, and video information
         self._collect_audio()
@@ -689,6 +681,7 @@ class HLS_Downloader:
         self.is_playlist_url = is_playlist_url
         self.is_index_url = is_index_url
         self.expected_real_time = None
+        self.instace_parserClass = M3U8_Parser()
 
     def _generate_output_filename(self, output_filename, m3u8_playlist, m3u8_index):
         """
@@ -733,7 +726,7 @@ class HLS_Downloader:
             new_filename = unidecode(new_filename)
 
         return new_filename
-
+    
     def start(self):
         """
         Initiates the downloading process. Checks if the output file already exists and proceeds with processing the playlist or index.
@@ -744,33 +737,54 @@ class HLS_Downloader:
             return
         
         self.path_manager.create_directories()
-
+        
         # Determine whether to process a playlist or index
         if self.m3u8_playlist:
-            if not GET_ONLY_LINK:
-                r_proc = self._process_playlist()
 
-                if r_proc == 404:
-                    return 404
+            # Parse data from url and get if is a master playlist
+            self.instace_parserClass.parse_data(uri=self.m3u8_playlist, raw_content=HttpClient().get(self.m3u8_playlist))
+            is_masterPlaylist = self.instace_parserClass.is_master_playlist
+
+            # Check if it's a real master playlist
+            if is_masterPlaylist:
+                if not GET_ONLY_LINK:
+                    r_proc = self._process_playlist()
+
+                    if r_proc == 404:
+                        return 404
+                    else:
+                        return None    
+                
                 else:
-                    return None    
-            
+                    return {
+                        'path': self.output_filename,
+                        'url': self.m3u8_playlist
+                    }
+                
             else:
-                return {
-                    'path': self.output_filename,
-                    'url': self.m3u8_playlist
-                }
+                console.log("[red]Error: URL passed to M3U8_Parser is an index playlist; expected a master playlist. Crucimorfo strikes again!")
 
         elif self.m3u8_index:
-            if not GET_ONLY_LINK:
-                self._process_index()
-                return None
 
+            # Parse data from url and get if is a master playlist
+            self.instace_parserClass.parse_data(uri=self.m3u8_index, raw_content=HttpClient().get(self.m3u8_playlist))
+            is_masterPlaylist = self.instace_parserClass.is_master_playlist
+
+            # Check if it's a real index playlist
+            if not is_masterPlaylist:
+                if not GET_ONLY_LINK:
+                    self._process_index()
+                    return None
+
+                else:
+                    return {
+                        'path': self.output_filename,
+                        'url': self.m3u8_index
+                    }
+                
             else:
-                return {
-                    'path': self.output_filename,
-                    'url': self.m3u8_index
-                }
+                console.log("[red]Error: URL passed to M3U8_Parser is an master playlist; expected a index playlist. Crucimorfo strikes again!")
+
 
     def _clean(self, out_path: str) -> None:
         """
@@ -877,7 +891,7 @@ class HLS_Downloader:
 
         # Collect information about the playlist
         if self.is_playlist_url:
-            self.content_extractor.start(self.m3u8_playlist, m3u8_playlist_text)
+            self.content_extractor.start(self.instace_parserClass)
         else:
             self.content_extractor.start("https://fake.com", m3u8_playlist_text)
 

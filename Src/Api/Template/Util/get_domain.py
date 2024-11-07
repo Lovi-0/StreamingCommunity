@@ -84,11 +84,11 @@ def search_domain(site_name: str, base_url: str):
 
         # Test the current domain
         response_follow = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=max_timeout, follow_redirects=True)
-        console.print(f"[cyan]Response site[white]: [red]{response_follow.status_code}")
+        #console.print(f"[cyan]Response site[white]: [red]{response_follow.status_code}")
         response_follow.raise_for_status()
 
     except Exception as e:
-        console.print(f"[cyan]Test url[white]: [red]{base_url}.{domain}, [cyan]error[white]: [red]{e}")
+        #console.print(f"[cyan]Test url[white]: [red]{base_url}.{domain}, [cyan]error[white]: [red]{e}")
 
         query = base_url.split("/")[-1]
         first_url = google_search(query)
@@ -115,16 +115,15 @@ def search_domain(site_name: str, base_url: str):
                     config_manager.write_config()
 
                     # Return config domain
-                    console.print(f"[cyan]Return domain: [red]{new_domain_extract} \n")
+                    #console.print(f"[cyan]Return domain: [red]{new_domain_extract} \n")
                     return new_domain_extract, f"{base_url}.{new_domain_extract}"
             
             else:
                 console.print("[bold red]\nManually change the domain in the JSON file.[/bold red]")
-                sys.exit(0)
+                raise
 
         else:
             console.print("[bold red]No valid URL to follow redirects.[/bold red]")
-            sys.exit(0)
 
     # Ensure the URL is in string format before parsing
     parsed_url = urlparse(str(response_follow.url))
@@ -138,5 +137,5 @@ def search_domain(site_name: str, base_url: str):
         config_manager.write_config()
 
     # Return config domain
-    console.print(f"[cyan]Return domain: [red]{tld} \n")
+    #console.print(f"[cyan]Return domain: [red]{tld} \n")
     return tld, f"{base_url}.{tld}"

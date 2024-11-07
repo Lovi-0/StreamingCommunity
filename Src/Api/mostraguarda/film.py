@@ -44,19 +44,20 @@ def download_film(movie_details: Json_film):
     console.print(f"[yellow]Download:  [red]{movie_details.title} \n")
 
     # Make request to main site
-    url = f"https://{SITE_NAME}.{DOMAIN_NOW}/set-movie-a/{movie_details.imdb_id}"
-    response = httpx.get(url, headers={'User-Agent': get_headers()})
-    response.raise_for_status()
-
-    # Extract supervideo url
     try:
-        soup = BeautifulSoup(response.text, "html.parser")
-        player_links = soup.find("ul", class_ = "_player-mirrors").find_all("li")
-        supervideo_url = "https:" + player_links[0].get("data-link")
+        url = f"https://{SITE_NAME}.{DOMAIN_NOW}/set-movie-a/{movie_details.imdb_id}"
+        response = httpx.get(url, headers={'User-Agent': get_headers()})
+        response.raise_for_status()
 
     except:
-        logging.error("Not found in the server.")
-        sys.exit(0)
+        logging.error(f"Not found in the server. Dict: {movie_details}")
+        raise
+
+    # Extract supervideo url
+    soup = BeautifulSoup(response.text, "html.parser")
+    player_links = soup.find("ul", class_ = "_player-mirrors").find_all("li")
+    supervideo_url = "https:" + player_links[0].get("data-link")
+
     
     # Set domain and media ID for the video source
     video_source = VideoSource()

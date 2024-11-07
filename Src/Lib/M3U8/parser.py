@@ -421,6 +421,7 @@ class M3U8_Subtitle:
 
 class M3U8_Parser:
     def __init__(self):
+        self.is_master_playlist = None
         self.segments = []
         self.video_playlist = []
         self.keys = None
@@ -450,6 +451,7 @@ class M3U8_Parser:
         self.__parse_video_info__(m3u8_obj)
         self.__parse_subtitles_and_audio__(m3u8_obj)
         self.__parse_segments__(m3u8_obj)
+        self.is_master_playlist = self.__is_master__(m3u8_obj)
 
     @staticmethod
     def extract_resolution(uri: str) -> int:
@@ -475,6 +477,28 @@ class M3U8_Parser:
         logging.warning("No resolution found with custom parsing.")
         return (0, 0)
 
+    def __is_master__(self, m3u8_obj) -> bool:
+        """
+        Determines if the given M3U8 object is a master playlist.
+
+        Parameters:
+            - m3u8_obj (m3u8.M3U8): The parsed M3U8 object.
+
+        Returns:
+            - bool: True if it's a master playlist, False if it's a media playlist, None if unknown.
+        """
+        
+        # Check if the playlist contains variants (master playlist)
+        if m3u8_obj.is_variant:
+            return True
+        
+        # Check if the playlist contains segments directly (media playlist)
+        elif m3u8_obj.segments:
+            return False
+        
+        # Return None if the playlist type is undetermined
+        return None
+        
     def __parse_video_info__(self, m3u8_obj) -> None:
         """
         Extracts video information from the M3U8 object.

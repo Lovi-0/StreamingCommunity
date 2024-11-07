@@ -11,20 +11,28 @@ from .film import download_film
 
 # Variable
 indice = 9
-_use_for = "film"
+_useFor = "film"
 _deprecate = False
+_priority = 2
+_engineDownload = "hls"
 
 
-def search():
+def search(string_to_search: str = None, get_onylDatabase:bool = False):
     """
     Main function of the application for film and series.
     """
 
-    # Make request to site to get content that corrsisponde to that string
-    string_to_search = msg.ask("\n[purple]Insert word to search in all site").strip()
+    if string_to_search is None:
+        string_to_search = msg.ask("\n[purple]Insert word to search in all site").strip()
+
+    # Not available for the moment
+    if get_onylDatabase:
+        return 0
+
+    # Search on database
     movie_id = tmdb.search_movie(string_to_search)
 
-    if movie_id:
+    if movie_id is not None:
         movie_details: Json_film = tmdb.get_movie_details(tmdb_id=movie_id)
 
         # Download only film

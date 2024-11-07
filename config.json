@@ -9,7 +9,7 @@
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
         "special_chars_to_remove": "!@#$%^&*()[]{}<>|`~'\";:,?=+\u00e2\u20ac\u00a6",
         "config_qbit_tor": {
-            "host": "192.168.1.58",
+            "host": "192.168.1.59",
             "port": "8080",
             "user": "admin",
             "pass": "adminadmin"
@@ -34,6 +34,8 @@
         "download_video": true,
         "download_audio": true,
         "merge_audio": true,
+        "default_video_workser": 12,
+        "default_audio_workser": 12,
         "specific_list_audio": [
             "ita"
         ],
@@ -64,18 +66,12 @@
             "domain": "computer"
         },
         "altadefinizione": {
-            "video_workers": 12,
-            "audio_workers": 12,
             "domain": "now"
         },
         "guardaserie": {
-            "video_workers": 12,
-            "audio_workers": 12,
             "domain": "academy"
         },
         "mostraguarda": {
-            "video_workers": 12,
-            "audio_workers": 12,
             "domain": "stream"
         },
         "ddlstreamitaly": {
@@ -95,8 +91,8 @@
         "1337xx": {
             "domain": "to"
         },
-        "cb01": {
-            "domain": "vet"
+        "piratebays": {
+            "domain": "to"
         }
     }
 }

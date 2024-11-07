@@ -5,24 +5,32 @@ from Src.Util.console import console, msg
 
 
 # Logic class
-from .site import title_search, run_get_select_title
+from .site import title_search, run_get_select_title, media_search_manager
 from .title import download_title
 
 
 # Variable
 indice = 7
-_use_for = "film_serie"
+_useFor = "film_serie"
 _deprecate = False
+_priority = 2
+_engineDownload = "tor"
 
 
-def search():
+def search(string_to_search: str = None, get_onylDatabase:bool = False):
     """
     Main function of the application for film and series.
     """
 
-    # Make request to site to get content that corrsisponde to that string
-    string_to_search = msg.ask("\n[purple]Insert word to search in all site").strip()
+    if string_to_search is None:
+        string_to_search = msg.ask("\n[purple]Insert word to search in all site").strip()
+    
+    # Search on database
     len_database = title_search(string_to_search)
+
+    # Return list of elements
+    if get_onylDatabase:
+        return media_search_manager
 
     if len_database > 0:
 

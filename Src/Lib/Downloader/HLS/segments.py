@@ -43,6 +43,8 @@ REQUEST_VERIFY = config_manager.get_bool('REQUESTS', 'verify_ssl')
 THERE_IS_PROXY_LIST = check_file_existence("list_proxy.txt")
 PROXY_START_MIN = config_manager.get_float('REQUESTS', 'proxy_start_min')
 PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
+DEFAULT_VIDEO_WORKERS = config_manager.get_int('M3U8_DOWNLOAD', 'default_video_workser')
+DEFAULT_AUDIO_WORKERS = config_manager.get_int('M3U8_DOWNLOAD', 'default_audio_workser')
 
 
 # Variable
@@ -216,20 +218,45 @@ class M3U8_Segments:
                 
                 # Make request to get content
                 if THERE_IS_PROXY_LIST:
+
+                    # Get proxy from list
                     proxy = self.valid_proxy[index % len(self.valid_proxy)]
                     logging.info(f"Use proxy: {proxy}")
 
                     with httpx.Client(proxies=proxy, verify=need_verify) as client:  
                         if 'key_base_url' in self.__dict__:
-                            response = client.get(ts_url, headers=random_headers(self.key_base_url), timeout=max_timeout, follow_redirects=True)
+                             response = client.get(
+                                url=ts_url, 
+                                headers=random_headers(self.key_base_url), 
+                                timeout=max_timeout, 
+                                follow_redirects=True
+                            )
+                             
                         else:
-                            response = client.get(ts_url, headers={'user-agent': get_headers()}, timeout=max_timeout, follow_redirects=True)
+                            response = client.get(
+                                url=ts_url, 
+                                headers={'user-agent': get_headers()}, 
+                                timeout=max_timeout, 
+                                follow_redirects=True
+                            )
+
                 else:
                     with httpx.Client(verify=need_verify) as client_2:
                         if 'key_base_url' in self.__dict__:
-                            response = client_2.get(ts_url, headers=random_headers(self.key_base_url), timeout=max_timeout, follow_redirects=True)
+                            response = client_2.get(
+                                url=ts_url, 
+                                headers=random_headers(self.key_base_url), 
+                                timeout=max_timeout, 
+                                follow_redirects=True
+                            )
+
                         else:
-                            response = client_2.get(ts_url, headers={'user-agent': get_headers()}, timeout=max_timeout, follow_redirects=True)
+                            response = client_2.get(
+                                url=ts_url, 
+                                headers={'user-agent': get_headers()}, 
+                                timeout=max_timeout, 
+                                follow_redirects=True
+                            )
 
                 # Validate response and content
                 response.raise_for_status()
@@ -248,15 +275,22 @@ class M3U8_Segments:
                         segment_content = self.decryption.decrypt(segment_content)
                         if len(segment_content) < min_segment_size:
                             raise Exception(f"Decrypted segment {index} too small ({len(segment_content)} bytes)")
+                        
                     except Exception as e:
                         logging.error(f"Decryption failed for segment {index}: {str(e)}")
                         raise
 
                 # Update progress and queue
                 self.class_ts_estimator.update_progress_bar(content_size, duration, progress_bar)
+
+                # Add the segment to the queue
                 self.queue.put((index, segment_content))
-                self.downloaded_segments.add(index)  # Track successfully downloaded segments
+
+                # Track successfully downloaded segments
+                self.downloaded_segments.add(index)  
                 progress_bar.update(1)
+
+                # Break out of the loop on success
                 return
 
             except Exception as e:
@@ -344,15 +378,15 @@ class M3U8_Segments:
         # Select audio workers from folder of frames stack prev call.
         try:
             VIDEO_WORKERS = int(config_manager.get_dict('SITE', config_site)['video_workers'])
-            if VIDEO_WORKERS == -1: VIDEO_WORKERS = os.cpu_count()
         except:
-            VIDEO_WORKERS = os.cpu_count()
+            #VIDEO_WORKERS = os.cpu_count()
+            VIDEO_WORKERS = DEFAULT_VIDEO_WORKERS
 
         try:
             AUDIO_WORKERS = int(config_manager.get_dict('SITE', config_site)['audio_workers'])
-            if AUDIO_WORKERS == -1: AUDIO_WORKERS = os.cpu_count()
         except:
-            AUDIO_WORKERS = os.cpu_count()
+            #AUDIO_WORKERS = os.cpu_count()
+            AUDIO_WORKERS = DEFAULT_AUDIO_WORKERS
 
         # Differnt workers for audio and video
         if "video" in str(add_desc):

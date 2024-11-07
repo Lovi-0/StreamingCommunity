@@ -16,7 +16,7 @@ from Src.Util.message import start_message
 from Src.Util.console import console, msg
 from Src.Util._jsonConfig import config_manager
 from Src.Upload.update import update as git_update
-from Src.Util.os import get_system_summary, create_folder
+from Src.Util.os import get_system_summary
 from Src.Lib.TMBD import tmdb
 from Src.Util.logger import Logger
 
@@ -64,7 +64,7 @@ def load_search_functions():
             # Get 'indice' from the module
             indice = getattr(mod, 'indice', 0)
             is_deprecate = bool(getattr(mod, '_deprecate', True))
-            use_for = getattr(mod, '_use_for', 'other')
+            use_for = getattr(mod, '_useFor', 'other')
 
             if not is_deprecate:
                 modules.append((module_name, indice, use_for))

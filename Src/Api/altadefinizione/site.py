@@ -47,6 +47,7 @@ def title_search(title_search: str) -> int:
 
     except Exception as e:
         console.print(f"Site: {SITE_NAME}, request search error: {e}")
+        raise
 
     # Create soup and find table
     soup = BeautifulSoup(response.text, "html.parser")

@@ -1,7 +1,6 @@
 # 23.06.24
 
 # Fix import
-import time
 import sys
 import os
 src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
