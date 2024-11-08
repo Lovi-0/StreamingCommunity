@@ -31,7 +31,6 @@ REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 
 
 
-
 class TOR_downloader:
     def __init__(self):
         """
@@ -88,7 +87,6 @@ class TOR_downloader:
 
         except Exception as e:
             logging.error(f"Failed to add magnet link: {str(e)}")
-
 
     def start_download(self):
         """
@@ -190,14 +188,16 @@ class TOR_downloader:
         Moves downloaded files of the latest torrent to another location.
 
         Parameters:
-        - save_path (str): Current save path (output directory) of the torrent.
-        - destination (str, optional): Destination directory to move files. If None, moves to current directory.
+            - save_path (str): Current save path (output directory) of the torrent.
+            - destination (str, optional): Destination directory to move files. If None, moves to current directory.
 
         Returns:
-        - bool: True if files are moved successfully, False otherwise.
+            - bool: True if files are moved successfully, False otherwise.
         """
-        time.sleep(2)
 
+        video_extensions = {'.mp4', '.mkv', 'avi'}
+        time.sleep(2)
+        
         # List directories in the save path
         dirs = [d for d in os.listdir(self.save_path) if os.path.isdir(os.path.join(self.save_path, d))]
         
@@ -205,9 +205,18 @@ class TOR_downloader:
             if self.torrent_name.split(" ")[0] in dir_name:
                 dir_path = os.path.join(self.save_path, dir_name)
 
-                shutil.move(dir_path, destination)
-                logging.info(f"Moved directory {dir_name} to {destination}")
-                break
-        
+                # Ensure destination is set; if not, use current directory
+                destination = destination or os.getcwd()
+
+                # Move only video files
+                for file_name in os.listdir(dir_path):
+                    file_path = os.path.join(dir_path, file_name)
+                    
+                    # Check if it's a file and if it has a video extension
+                    if os.path.isfile(file_path) and os.path.splitext(file_name)[1] in video_extensions:
+                        shutil.move(file_path, os.path.join(destination, file_name))
+                        logging.info(f"Moved file {file_name} to {destination}")
+
+        time.sleep(2)
         self.qb.delete_permanently(self.qb.torrents()[-1]['hash'])
         return True
