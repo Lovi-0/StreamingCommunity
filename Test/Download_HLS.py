@@ -14,6 +14,6 @@ from Src.Lib.Downloader import HLS_Downloader
 
 # Test
 HLS_Downloader(
-    output_filename=r".\Video\undefined.mp4",
-    m3u8_index=""
+    output_filename="",
+    m3u8_playlist=""
 ).start()

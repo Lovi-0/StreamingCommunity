@@ -92,6 +92,9 @@ def remove_special_characters(input_string):
     Returns:
         str: A new string with specified special characters removed.
     """
+    if input_string is None:
+        return "None"
+
     # Compile regular expression pattern to match special characters
     pattern = re.compile('[' + re.escape(special_chars_to_remove) + ']')
 

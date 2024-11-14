@@ -264,7 +264,8 @@ class ContentExtractor:
 
             # Check if a valid HTTPS URL is obtained
             if self.m3u8_index is not None and "https" in self.m3u8_index:
-                console.print(f"[cyan]Found m3u8 index [white]=> [red]{self.m3u8_index}")
+                #console.print(f"[cyan]Found m3u8 index [white]=> [red]{self.m3u8_index}")
+                print()
 
             else:
                 logging.error("[download_m3u8] Can't find a valid m3u8 index")
@@ -695,14 +696,16 @@ class HLS_Downloader:
         Returns:
             str: The generated output filename.
         """
+        root_path = config_manager.get('DEFAULT', 'root_path')  
         new_filename = None
+        new_folder = os.path.join(root_path, "undefined")
 
         # Auto-generate output file name if not present
-        if output_filename is None:
+        if (output_filename is None) or ("mp4" not in output_filename):
             if m3u8_playlist is not None:
-                new_filename = os.path.join("missing", compute_sha1_hash(m3u8_playlist))
+                new_filename = os.path.join(new_folder, compute_sha1_hash(m3u8_playlist) + ".mp4")
             else:
-                new_filename = os.path.join("missing", compute_sha1_hash(m3u8_index))
+                new_filename = os.path.join(new_folder, compute_sha1_hash(m3u8_index) + ".mp4")
 
         else:
 
@@ -711,7 +714,7 @@ class HLS_Downloader:
             
             # If no folder is specified, default to 'undefined'
             if not folder:
-                folder = "undefined"
+                folder = new_folder
 
             # Sanitize base name
             base_name = reduce_base_name(remove_special_characters(base_name))
@@ -724,14 +727,13 @@ class HLS_Downloader:
             # Parse to only ASCII for compatibility across platforms
             new_filename = os.path.join(folder, base_name)
             new_filename = unidecode(new_filename)
-
+    
         return new_filename
     
     def start(self):
         """
         Initiates the downloading process. Checks if the output file already exists and proceeds with processing the playlist or index.
         """            
-
         if os.path.exists(self.output_filename):
             console.log("[red]Output file already exists.")
             return
