@@ -29,8 +29,6 @@ You can chat, help improve this repo, or just hang around for some fun in the **
 
 ## Automatic Installation
 
-`<a id="automatic-installation-os"></a>`
-
 ### Supported OSs for Automatic Installation 💿
 
 - Supported ✔️
