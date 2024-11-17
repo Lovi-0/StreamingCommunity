@@ -28,7 +28,12 @@ class VideoSource:
             - url (str): The URL of the video.
         """
         self.url = url
-        self.headers = {'user-agent': get_headers()}
+        self.headers = {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+            'User-Agent': get_headers()
+        }
+        self.client = httpx.Client()
 
     def setup(self, url: str) -> None:
         """
@@ -51,7 +56,7 @@ class VideoSource:
         """
 
         try:
-            response = httpx.get(url, headers=self.headers, follow_redirects=True, timeout=max_timeout)
+            response = self.client.get(url, headers=self.headers, follow_redirects=True, timeout=max_timeout)
             response.raise_for_status()
 
             return response.text

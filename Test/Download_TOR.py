@@ -9,10 +9,14 @@ sys.path.append(src_path)
 
 
 # Import
+from Src.Util.message import start_message
+from Src.Util.logger import Logger
 from Src.Lib.Downloader import TOR_downloader
 
 
 # Test
+start_message()
+logger = Logger()
 manager = TOR_downloader()
 
 magnet_link = "magnet:?x"

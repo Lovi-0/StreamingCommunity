@@ -9,11 +9,15 @@ sys.path.append(src_path)
 
 
 # Import
+from Src.Util.message import start_message
+from Src.Util.logger import Logger
 from Src.Lib.Downloader import HLS_Downloader
 
 
 # Test
-HLS_Downloader(
+start_message()
+logger = Logger()
+print("Return: ", HLS_Downloader(
     output_filename="",
-    m3u8_playlist=""
-).start()
+    m3u8_index=""
+).start())

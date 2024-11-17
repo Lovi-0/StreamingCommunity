@@ -16,7 +16,7 @@ from ..Template.Class.SearchType import MediaManager
 
 
 # Variable
-from .costant import SITE_NAME
+from .costant import SITE_NAME, DOMAIN_NOW
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 
@@ -31,16 +31,21 @@ def title_search(title_search: str) -> int:
     Returns:
         int: The number of titles found.
     """
+    client = httpx.Client()
 
     # Find new domain if prev dont work
     max_timeout = config_manager.get_int("REQUESTS", "timeout")
-    domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+    #domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
     
     # Send request to search for title
     try:
-        response = httpx.get(
-            url=f"https://{SITE_NAME}.{domain_to_use}/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", 
-            headers={'user-agent': get_headers()},
+        response = client.get(
+            url=f"https://{SITE_NAME}.{DOMAIN_NOW}/?story={unidecode(title_search.replace(' ', '+'))}&do=search&subaction=search&titleonly=3", 
+            headers={
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+                'User-Agent': get_headers()
+            },
             timeout=max_timeout
         )
         response.raise_for_status()

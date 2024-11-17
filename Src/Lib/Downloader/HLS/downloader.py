@@ -74,6 +74,7 @@ class PathManager:
         
         # Create the base path by removing the '.mp4' extension from the output filename
         self.base_path = str(output_filename).replace(".mp4", "")
+        logging.info(f"class 'PathManager'; set base path: {self.base_path}")
         
         # Define the path for a temporary directory where segments will be stored
         self.base_temp = os.path.join(self.base_path, "tmp")
@@ -106,6 +107,7 @@ class HttpClient:
         Returns:
             str: The response body as text if the request is successful, None otherwise.
         """
+        logging.info(f"class 'HttpClient'; make request: {url}")
         try:
             response = httpx.get(
                 url=url, 
@@ -127,6 +129,7 @@ class HttpClient:
         Returns:
             bytes: The response content as bytes if the request is successful, None otherwise.
         """
+        logging.info(f"class 'HttpClient'; make request: {url}")
         try:
             response = httpx.get(
                 url=url, 
@@ -168,6 +171,7 @@ class ContentExtractor:
         """
         It checks for available audio languages and the specific audio tracks to download.
         """
+        logging.info(f"class 'ContentExtractor'; call _collect_audio()")
 
         # Collect available audio tracks and their corresponding URIs and names
         self.list_available_audio = self.obj_parse._audio.get_all_uris_and_names()
@@ -197,6 +201,7 @@ class ContentExtractor:
         """
         It checks for available subtitle languages and the specific subtitles to download.
         """
+        logging.info(f"class 'ContentExtractor'; call _collect_subtitle()")
 
         # Collect available subtitles and their corresponding URIs and names
         self.list_available_subtitles = self.obj_parse._subtitle.get_all_uris_and_names()
@@ -226,6 +231,7 @@ class ContentExtractor:
         """
         It identifies the best video quality and displays relevant information to the user.
         """
+        logging.info(f"class 'ContentExtractor'; call _collect_video()")
 
         # Collect custom quality video if a specific resolution is set
         if FILTER_CUSTOM_REOLUTION != -1:
@@ -297,6 +303,8 @@ class DownloadTracker:
         Args:
             available_video (str): The URL of the video to be downloaded.
         """
+        logging.info(f"class 'DownloadTracker'; call add_video() with parameter: {available_video}")
+
         self.downloaded_video.append({
             'type': 'video',
             'url': available_video,
@@ -310,6 +318,8 @@ class DownloadTracker:
         Args:
             list_available_audio (list): A list of available audio track objects.
         """
+        logging.info(f"class 'DownloadTracker'; call add_audio() with parameter: {list_available_audio}")
+
         for obj_audio in list_available_audio:
 
             # Check if specific audio languages are set for download
@@ -337,6 +347,7 @@ class DownloadTracker:
         Args:
             list_available_subtitles (list): A list of available subtitle objects.
         """
+        logging.info(f"class 'DownloadTracker'; call add_subtitle() with parameter: {list_available_subtitles}")
 
         for obj_subtitle in list_available_subtitles:
 
@@ -377,6 +388,7 @@ class ContentDownloader:
         Args:
             downloaded_video (list): A list containing information about the video to download.
         """
+        logging.info(f"class 'ContentDownloader'; call download_video() with parameter: {downloaded_video}")
 
         # Check if the video file already exists
         if not os.path.exists(downloaded_video[0].get('path')):
@@ -407,6 +419,8 @@ class ContentDownloader:
         Args:
             downloaded_audio (list): A list containing information about audio tracks to download.
         """
+        logging.info(f"class 'ContentDownloader'; call download_audio() with parameter: {downloaded_audio}")
+
         for obj_audio in downloaded_audio:
             folder_name = os.path.dirname(obj_audio.get('path'))
 
@@ -435,6 +449,8 @@ class ContentDownloader:
         Args:
             downloaded_subtitle (list): A list containing information about subtitles to download.
         """
+        logging.info(f"class 'ContentDownloader'; call download_subtitle() with parameter: {downloaded_subtitle}")
+
         for obj_subtitle in downloaded_subtitle:
             sub_language = obj_subtitle.get('language')
 
@@ -670,6 +686,10 @@ class HLS_Downloader:
             is_playlist_url (bool): Flag indicating if the m3u8_playlist is a URL.
             is_index_url (bool): Flag indicating if the m3u8_index is a URL.
         """
+        if ((m3u8_playlist == None or m3u8_playlist == "") and output_filename is None) or ((m3u8_index == None or m3u8_index == "") and output_filename is None):
+            logging.info(f"class 'HLS_Downloader'; call __init__(); no parameter")
+            sys.exit(0)
+
         self.output_filename = self._generate_output_filename(output_filename, m3u8_playlist, m3u8_index)
         self.path_manager = PathManager(self.output_filename)
         self.download_tracker = DownloadTracker(self.path_manager)
@@ -683,6 +703,13 @@ class HLS_Downloader:
         self.is_index_url = is_index_url
         self.expected_real_time = None
         self.instace_parserClass = M3U8_Parser()
+
+        self.request_m3u8_playlist = None
+        self.request_m3u8_index = None
+        if (m3u8_playlist == None or m3u8_playlist == ""):
+            self.request_m3u8_index = HttpClient().get(self.m3u8_index)
+        if (m3u8_index == None or m3u8_index == ""):
+            self.request_m3u8_playlist = HttpClient().get(self.m3u8_playlist)
 
     def _generate_output_filename(self, output_filename, m3u8_playlist, m3u8_index):
         """
@@ -699,6 +726,7 @@ class HLS_Downloader:
         root_path = config_manager.get('DEFAULT', 'root_path')  
         new_filename = None
         new_folder = os.path.join(root_path, "undefined")
+        logging.info(f"class 'HLS_Downloader'; call _generate_output_filename(); destination folder: {new_folder}")
 
         # Auto-generate output file name if not present
         if (output_filename is None) or ("mp4" not in output_filename):
@@ -727,7 +755,8 @@ class HLS_Downloader:
             # Parse to only ASCII for compatibility across platforms
             new_filename = os.path.join(folder, base_name)
             new_filename = unidecode(new_filename)
-    
+
+        logging.info(f"class 'HLS_Downloader'; call _generate_output_filename(); return path: {new_filename}")
         return new_filename
     
     def start(self):
@@ -736,18 +765,17 @@ class HLS_Downloader:
         """            
         if os.path.exists(self.output_filename):
             console.log("[red]Output file already exists.")
-            return
+            return 400
         
         self.path_manager.create_directories()
         
         # Determine whether to process a playlist or index
         if self.m3u8_playlist:
             if self.m3u8_playlist is not None:
+                if self.request_m3u8_playlist != 404:
+                    logging.info(f"class 'HLS_Downloader'; call start(); parse m3u8 data")
 
-                # Parse data from url and check if is a master playlist
-                test_raw_content = HttpClient().get(self.m3u8_playlist)
-                if test_raw_content != 404:
-                    self.instace_parserClass.parse_data(uri=self.m3u8_playlist, raw_content=test_raw_content)
+                    self.instace_parserClass.parse_data(uri=self.m3u8_playlist, raw_content=self.request_m3u8_playlist)
                     is_masterPlaylist = self.instace_parserClass.is_master_playlist
 
                     # Check if it's a real master playlist
@@ -766,18 +794,19 @@ class HLS_Downloader:
                                 'url': self.m3u8_playlist
                             }
                     
+                    else:
+                        console.log("[red]Error: URL passed to M3U8_Parser is an index playlist; expected a master playlist. Crucimorfo strikes again!")
                 else:
-                    console.log("[red]Error: URL passed to M3U8_Parser is an index playlist; expected a master playlist. Crucimorfo strikes again!")
+                    console.log("[red]Error: m3u8_playlist failed request")
             else:
                 console.log("[red]Error: m3u8_playlist is None")
 
         elif self.m3u8_index:
             if self.m3u8_index is not None:
+                if self.request_m3u8_index != 404:
+                    logging.info(f"class 'HLS_Downloader'; call start(); parse m3u8 data")
 
-                # Parse data from url and check if is a master playlist
-                test_raw_content = HttpClient().get(self.m3u8_index)
-                if test_raw_content != 404:
-                    self.instace_parserClass.parse_data(uri=self.m3u8_index, raw_content=test_raw_content)
+                    self.instace_parserClass.parse_data(uri=self.m3u8_index, raw_content=self.request_m3u8_index)
                     is_masterPlaylist = self.instace_parserClass.is_master_playlist
 
                     # Check if it's a real index playlist
@@ -792,11 +821,12 @@ class HLS_Downloader:
                                 'url': self.m3u8_index
                             }
                     
+                    else:
+                        console.log("[red]Error: URL passed to M3U8_Parser is an master playlist; expected a index playlist. Crucimorfo strikes again!")
                 else:
-                    console.log("[red]Error: URL passed to M3U8_Parser is an master playlist; expected a index playlist. Crucimorfo strikes again!")
+                    console.log("[red]Error: m3u8_index failed request")
             else:
                 console.log("[red]Error: m3u8_index is None")
-
 
     def _clean(self, out_path: str) -> None:
         """
@@ -874,20 +904,20 @@ class HLS_Downloader:
         else:
             logging.info("Video file converted already exists.")
 
-    def _process_playlist(self):
+    def _valida_playlist(self):
         """
-        Processes the m3u8 playlist to download video, audio, and subtitles.
+        Validates the m3u8 playlist content, saves it to a temporary file, and collects playlist information.
         """
+        logging.info("class 'HLS_Downloader'; call _valida_playlist()")
 
         # Retrieve the m3u8 playlist content
         if self.is_playlist_url: 
-            response_text = HttpClient(headers=headers_index).get(self.m3u8_playlist)
-
-            if response_text != 404:
-                m3u8_playlist_text = response_text
+            if self.request_m3u8_playlist  != 404:
+                m3u8_playlist_text = self.request_m3u8_playlist
                 m3u8_url_fixer.set_playlist(self.m3u8_playlist)
 
             else:
+                logging.info(f"class 'HLS_Downloader'; call _process_playlist(); return 404")
                 return 404
 
         else:
@@ -906,6 +936,12 @@ class HLS_Downloader:
             self.content_extractor.start(self.instace_parserClass)
         else:
             self.content_extractor.start("https://fake.com", m3u8_playlist_text)
+
+    def _process_playlist(self):
+        """
+        Processes the m3u8 playlist to download video, audio, and subtitles.
+        """
+        self._valida_playlist()
 
         # Add downloaded elements to the tracker
         self.download_tracker.add_video(self.content_extractor.m3u8_index)
@@ -941,4 +977,3 @@ class HLS_Downloader:
 
         # Clean up temporary files and directories
         self._clean(self.content_joiner.converted_out_path)
-    

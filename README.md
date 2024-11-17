@@ -2,10 +2,10 @@
     <img src="./Src/Assets/min_logo.png">
 </p>
 
-
-This repository provide a simple script designed to facilitate the downloading of films and series from a popular streaming community platform. The script allows users to download individual films, entire series, or specific episodes, providing a seamless experience for content consumers.
+This repository provide a simple script designed to downloading films and series from a variety of supported streaming platforms. [SITE](#website-status-)
 
 ## Join us 🌟
+
 You can chat, help improve this repo, or just hang around for some fun in the **Git_StreamingCommunity** Discord [Server](https://discord.com/invite/8vV68UGRc7)
 
 # Table of Contents
@@ -18,7 +18,7 @@ You can chat, help improve this repo, or just hang around for some fun in the **
     * [Requirement](#requirement)
     * [Usage](#usage-manual)
     * [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
-    * [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux) 
+    * [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux)
   * [Update](#update)
 * [CONFIGURATION](#configuration)
 * [DOCKER](#docker)
@@ -28,55 +28,70 @@ You can chat, help improve this repo, or just hang around for some fun in the **
 # INSTALLATION
 
 ## Automatic Installation
-<a id="automatic-installation-os"></a>
+
+`<a id="automatic-installation-os"></a>`
+
 ### Supported OSs for Automatic Installation 💿
+
 - Supported ✔️
 - Not tested ⏳
 - Not supported ❌
 
-| OS                  |       Automatic Installation Support       |
-|:--------------------|:--------------------:|
-| Windows 10/11       |          ✔️          |
-| Windows 7           |          ❌          |
-| Debian Linux        |          ✔️          |
-| Arch Linux          |          ✔️          |
-| CentOS Stream 9     |          ✔️          |
-| FreeBSD             |          ⏳           |
-| MacOS               |          ✔️          |
-| Termux              |          ❌          |
+| OS              | Automatic Installation Support |
+| :-------------- | :----------------------------: |
+| Windows 10/11   |              ✔️              |
+| Windows 7       |               ❌               |
+| Debian Linux    |              ✔️              |
+| Arch Linux      |              ✔️              |
+| CentOS Stream 9 |              ✔️              |
+| FreeBSD         |               ⏳               |
+| MacOS           |              ✔️              |
+| Termux          |               ❌               |
 
 ### Installation ⚙️
+
 Run the following command inside the main directory:
+
 #### On Windows:
+
 ```powershell
 .\win_install.bat
 ```
 
 #### On Linux/MacOS/BSD:
+
 ```bash
 sudo chmod +x unix_install.sh && ./unix_install.sh
 ```
 
-<a id="usage-automatic"></a>
+`<a id="usage-automatic"></a>`
+
 ### Usage 📚
 
 Run the script with the following command:
+
 #### On Windows:
+
 ```powershell
 python .\run.py
 ```
+
 or
+
 ```powershell
 source .venv/bin/activate && python run.py && deactivate
 ```
 
 #### On Linux/MacOS/BSD:
+
 ```bash
 ./run.py
 ```
 
 ## Manual Installation
-<a id="requirement"></a>
+
+`<a id="requirement"></a>`
+
 ### Requirement 📋
 
 Make sure you have the following prerequisites installed on your system:
@@ -93,7 +108,6 @@ Install the required Python libraries using the following command:
 pip install -r requirements.txt
 ```
 
-<a id="usage-manual"></a>
 ### Usage 📚
 
 Run the script with the following command:
@@ -110,8 +124,7 @@ python run.py
 python3 run.py
 ```
 
-
-## Update
+### Update
 
 Keep your script up to date with the latest features by running:
 
@@ -127,91 +140,150 @@ python update_version.py
 python3 update_version.py
 ```
 
-<a id="configuration"></a>
 ## Configuration ⚙️
 
 You can change some behaviors by tweaking the configuration file.
 
-<details>
-  <summary><strong>DEFAULT</strong></summary>
+The configuration file is divided into several main sections:
 
-  * **debug**: Enables or disables debug mode.
-    - **Default Value**: `false`
+### DEFAULT Settings
 
-  * **root_path**: Path where the script will add movies and TV series folders (see [Path Examples](#Path-examples)).
-    - **Default Value**: `Video`
+```json
+{
+    "root_path": "Video",
+    "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
+    "special_chars_to_remove": "!@#$%^&*()[]{}<>|`~'\";:,?=+\u00e2\u20ac\u00a6",
+    "not_close": false,
+    "show_trending": false
+}
+```
 
-  * **map_episode_name**: Mapping to choose the name of all episodes of TV Shows (see [Episode Name Usage](#Episode-name-usage)).
-    - **Default Value**: `%(tv_name)_S%(season)E%(episode)_%(episode_name)`
+- `root_path`: Directory where all videos will be saved
 
-  * **not_close**: When activated, prevents the script from closing after its initial execution, allowing it to restart automatically after completing the first run.
-    - **Default Value**: `false`
+  #### Path examples:
 
-</details>
 
-<details>
-  <summary><strong>REQUESTS</strong></summary>
+  * Windows: `C:\\MyLibrary\\Folder` or `\\\\MyServer\\MyLibrary` (if you want to use a network folder)
+  * Linux/MacOS: `Desktop/MyLibrary/Folder`
+    `<br/><br/>`
+- `map_episode_name`: Template for TV series episode filenames
 
-  * **timeout**: The timeout value for requests.
-    - **Default Value**: `15`
+  #### Episode name usage:
 
-  * **verify_ssl**: Whether to verify SSL certificates.
-    - **Default Value**: `false`
+  You can choose different vars:
 
-  * **proxy**: To use proxy create a file with name list_proxy.txt and copy ip and port like "122.114.232.137:8080". They need to be http 
 
-</details>
+  * `%(tv_name)` : Is the name of TV Show
+  * `%(season)` : Is the number of the season
+  * `%(episode)` : Is the number of the episode
+  * `%(episode_name)` : Is the name of the episode
+    `<br/><br/>`
+- `special_chars_to_remove`: Special characters to be removed from filenames
+- `not_close`: If true, continues running after downloading
+- `show_trending`: Display trending content on startup
 
-<details>
-  <summary><strong>M3U8_DOWNLOAD</strong></summary>
+#### qBittorrent Configuration
 
-  * **tqdm_use_large_bar**: Whether to use large progress bars during downloads (Downloading %desc: %percentage:.2f %bar %elapsed < %remaining %postfix
-    - **Default Value**: `true`
-    - **Example Value**: `false` with Proc: %percentage:.2f %remaining %postfix
+```json
+{
+    "config_qbit_tor": {
+        "host": "192.168.1.59",
+        "port": "8080",
+        "user": "admin",
+        "pass": "adminadmin"
+    }
+}
+```
 
-  * **specific_list_audio**: A list of specific audio languages to download.
-    - **Example Value**: `['ita']`
+To enable qBittorrent integration, follow the setup guide [here](https://github.com/lgallard/qBittorrent-Controller/wiki/How-to-enable-the-qBittorrent-Web-UI).
 
-  * **specific_list_subtitles**: A list of specific subtitle languages to download.
-    - **Example Value**: `['ara', 'baq', 'cat', 'chi', 'cze', 'dan', 'dut', 'eng', 'fil', 'fin', 'forced-ita', 'fre', 'ger', 'glg', 'gre', 'heb', 'hin', 'hun', 'ind', 'ita', 'jpn', 'kan', 'kor', 'mal', 'may', 'nob', 'nor', 'pol', 'por', 'rum', 'rus', 'spa', 'swe', 'tam', 'tel', 'tha', 'tur', 'ukr', 'vie']`
+### REQUESTS Settings
 
-  * **cleanup_tmp_folder**: Upon final conversion, ensures the removal of all unformatted audio, video tracks, and subtitles from the temporary folder, thereby maintaining cleanliness and efficiency.
-    - **Default Value**: `false`
+```json
+{
+    "timeout": 20,
+    "max_retry": 3
+}
+```
 
-</details>
+- `timeout`: Maximum timeout (in seconds) for each request
+- `max_retry`: Number of retry attempts per segment during M3U8 index download
 
-<details>
-  <summary><strong>M3U8_PARSER</strong></summary>
+### BROWSER Settings
 
-  * **force_resolution**: Forces the use of a specific resolution. `-1` means no forced resolution.
-    - **Default Value**: `-1`
-    - **Example Value**: `1080`
+```json
+{
+    "headless": false
+}
+```
 
-  * **get_only_link**: Print hls m3u8 link and path file.
-  - **Default Value**: `false`
+- `headless`: Controls whether to run browser in headless mode
 
-</details>
+### M3U8_DOWNLOAD Settings
+
+```json
+{
+    "tqdm_delay": 0.01,
+    "tqdm_use_large_bar": true,
+    "default_video_workser": 12,
+    "default_audio_workser": 12,
+    "cleanup_tmp_folder": true
+}
+```
+
+- `tqdm_delay`: Delay between progress bar updates
+- `tqdm_use_large_bar`: Use detailed progress bar (recommended for desktop) set to false for mobile
+- `default_video_workser`: Number of threads for video download
+- `default_audio_workser`: Number of threads for audio download
+- `cleanup_tmp_folder`: Remove temporary .ts files after download
+
+#### Language Settings
+
+The following codes can be used for `specific_list_audio` and `specific_list_subtitles`:
+
+```
+ara - Arabic       eng - English      ita - Italian     por - Portuguese
+baq - Basque       fil - Filipino     jpn - Japanese    rum - Romanian
+cat - Catalan      fin - Finnish      kan - Kannada     rus - Russian
+chi - Chinese      fre - French       kor - Korean      spa - Spanish
+cze - Czech        ger - German       mal - Malayalam   swe - Swedish
+dan - Danish       glg - Galician     may - Malay       tam - Tamil
+dut - Dutch        gre - Greek        nob - Norw. Bokm  tel - Telugu
+                   heb - Hebrew       nor - Norwegian    tha - Thai
+forced-ita         hin - Hindi        pol - Polish      tur - Turkish
+                   hun - Hungarian                       ukr - Ukrainian
+                   ind - Indonesian                      vie - Vietnamese
+```
 
 > [!IMPORTANT]
-> If you're on **Windows** you'll need to use double back slash. On Linux/MacOS, one slash is fine.
+> Language code availability may vary by site. Some platforms might:
+>
+> - Use different language codes
+> - Support only a subset of these languages
+> - Offer additional languages not listed here
+>
+> Check the specific site's available options if downloads fail.
 
-#### Path examples:
+> [!TIP]
+> You can configure multiple languages by adding them to the lists:
+>
+> ```json
+> "specific_list_audio": ["ita", "eng", "spa"],
+> "specific_list_subtitles": ["ita", "eng", "spa"]
+> ```
 
-* Windows: `C:\\MyLibrary\\Folder` or `\\\\MyServer\\MyLibrary` (if you want to use a network folder).
-* Linux/MacOS: `Desktop/MyLibrary/Folder`
+### M3U8_PARSER Settings
 
-#### Episode name usage:
+```json
+{
+    "force_resolution": -1,
+    "get_only_link": false
+}
+```
 
-You can choose different vars:
+- `force_resolution`: Force specific resolution (-1 for best available, or specify 1080, 720, 360)
+- `get_only_link`: Return M3U8 playlist/index URL instead of downloading
 
-* `%(tv_name)` : Is the name of TV Show
-* `%(season)` : Is the number of the season
-* `%(episode)` : Is the number of the episode
-* `%(episode_name)` : Is the name of the episode
-
-> NOTE: You don't need to add .mp4 at the end
-
-<a id="docker"></a>
 ## Docker 🐳
 
 You can run the script in a docker container, to build the image just run
@@ -245,14 +317,31 @@ make LOCAL_DIR=/path/to/download run-container
 
 The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
 
-<a id="tutorial"></a>
+### Website Status 🌐
+
+- Working ✅
+- Not Working ❌
+
+| Website            | Status |
+| :----------------- | :----: |
+| 1337xx             |   ✅   |
+| Altadefinizione    |   ❌   |
+| AnimeUnity         |   ✅   |
+| BitSearch          |   ✅   |
+| CB01New            |   ✅   |
+| DDLStreamItaly     |   ✅   |
+| GuardaSerie        |   ✅   |
+| MostraGuarda       |   ✅   |
+| PirateBays         |   ✅   |
+| StreamingCommunity |   ✅   |
+
 ## Tutorial 📖
 
 [win](https://www.youtube.com/watch?v=mZGqK4wdN-k)
 [linux](https://www.youtube.com/watch?v=0qUNXPE_mTg)
 
-<a id="to-do"></a>
 ## To do 📝
+
 - GUI
 - Website api
 - Add other site

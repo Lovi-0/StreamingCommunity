@@ -609,7 +609,6 @@ class M3U8_Parser:
         """
 
         try:
-            
             for segment in m3u8_obj.segments:
 
                 # Parse key
