@@ -325,7 +325,7 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | Website            | Status |
 | :----------------- | :----: |
 | 1337xx             |   ✅   |
-| Altadefinizione    |   ❌   |
+| Altadefinizione    |   ✅   |
 | AnimeUnity         |   ✅   |
 | BitSearch          |   ✅   |
 | CB01New            |   ✅   |
