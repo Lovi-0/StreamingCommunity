@@ -95,13 +95,23 @@ def remove_special_characters(input_string):
     if input_string is None:
         return "None"
 
+    # Check if the string ends with '.mp4'
+    # If it does, we temporarily remove the '.mp4' extension for processing
+    ends_with_mp4 = input_string.endswith('.mp4')
+    if ends_with_mp4:
+        input_string = input_string[:-4]            # Remove the last 4 characters ('.mp4')
+
     # Compile regular expression pattern to match special characters
     pattern = re.compile('[' + re.escape(special_chars_to_remove) + ']')
 
     # Use compiled pattern to replace special characters with an empty string
     cleaned_string = pattern.sub('', input_string)
 
-    return cleaned_string
+    # If the original string had the '.mp4' extension, re-add it to the cleaned string
+    if ends_with_mp4:
+        cleaned_string += '.mp4'
+
+    return cleaned_string.strip()
 
 
 
