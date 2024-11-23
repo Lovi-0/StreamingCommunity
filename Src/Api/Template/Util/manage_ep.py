@@ -1,7 +1,6 @@
 # 19.06.24
 
 import logging
-
 from typing import List
 
 

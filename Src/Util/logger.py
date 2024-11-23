@@ -15,6 +15,10 @@ class Logger:
         self.DEBUG_MODE = config_manager.get_bool("DEFAULT", "debug")
         self.log_to_file = config_manager.get_bool("DEFAULT", "log_to_file")
         self.log_file = config_manager.get("DEFAULT", "log_file") if self.log_to_file else None
+
+        logging.getLogger("httpx").setLevel(logging.WARNING)
+        logging.getLogger("httpcore").setLevel(logging.WARNING)
+
         
         # Setting logging level based on DEBUG_MODE
         if self.DEBUG_MODE:

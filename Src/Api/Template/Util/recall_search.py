@@ -21,7 +21,7 @@ def execute_search(info):
     # Attempt to import the specified function from the module
     try:
         # Construct the import statement dynamically
-        module_path = f"Src.Api.{info['folder_base']}"
+        module_path = f"Src.Api.Site{info['folder_base']}"
         exec(f"from {module_path} import {info['function']}")
 
         # Call the specified function

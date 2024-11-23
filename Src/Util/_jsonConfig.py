@@ -3,7 +3,6 @@
 import os
 import json
 import logging
-
 from typing import Any, List
 
 
@@ -23,9 +22,11 @@ class ConfigManager:
         try:
 
             logging.info(f"Read file: {self.file_path}")
+            
             if os.path.exists(self.file_path):
                 with open(self.file_path, 'r') as f:
                     self.config = json.load(f)
+
         except Exception as e:
             print(f"Error reading configuration file: {e}")
 
@@ -160,10 +161,12 @@ class ConfigManager:
         try:
             if section not in self.config:
                 self.config[section] = {}
+
             self.config[section][key] = value
             cache_key = f"{section}.{key}"
             self.cache[cache_key] = value
             self.write_config()
+
         except Exception as e:
             print(f"Error setting key '{key}' in section '{section}': {e}")
 

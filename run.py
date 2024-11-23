@@ -2,12 +2,12 @@
 
 import os
 import sys
+import time
 import glob
 import logging
 import platform
 import argparse
 import importlib
-
 from typing import Callable
 
 
@@ -46,21 +46,20 @@ def load_search_functions():
     loaded_functions = {}
 
     # Traverse the Api directory
-    api_dir = os.path.join(os.path.dirname(__file__), 'Src', 'Api')
+    api_dir = os.path.join(os.path.dirname(__file__), 'Src', 'Api', 'Site')
     init_files = glob.glob(os.path.join(api_dir, '*', '__init__.py'))
     
-    logging.info(f"Base folder path: {api_dir}")
-    logging.info(f"Api module path: {init_files}")
-
     # Retrieve modules and their indices
     for init_file in init_files:
+
         # Get folder name as module name
         module_name = os.path.basename(os.path.dirname(init_file))
         logging.info(f"Load module name: {module_name}")
 
         try:
             # Dynamically import the module
-            mod = importlib.import_module(f'Src.Api.{module_name}')
+            mod = importlib.import_module(f'Src.Api.Site.{module_name}')
+
             # Get 'indice' from the module
             indice = getattr(mod, 'indice', 0)
             is_deprecate = bool(getattr(mod, '_deprecate', True))
@@ -80,12 +79,11 @@ def load_search_functions():
 
         # Construct a unique alias for the module
         module_alias = f'{module_name}_search'
-        logging.info(f"Module alias: {module_alias}")
 
         try:
 
             # Dynamically import the module
-            mod = importlib.import_module(f'Src.Api.{module_name}')
+            mod = importlib.import_module(f'Src.Api.Site.{module_name}')
 
             # Get the search function from the module (assuming the function is named 'search' and defined in __init__.py)
             search_function = getattr(mod, 'search')
@@ -103,9 +101,6 @@ def initialize():
 
     # Get start message
     start_message()
-
-    # Create logger
-    log_not = Logger()
 
     # Get system info
     os_summary.get_system_summary()
@@ -136,8 +131,15 @@ def initialize():
 
 def main():
 
+    start = time.time()
+
+    # Create logger
+    log_not = Logger()
+
     # Load search functions
+    
     search_functions = load_search_functions()
+    logging.info(f"Load module in: {time.time() - start} s")
 
     # Create dynamic argument parser
     parser = argparse.ArgumentParser(description='Script to download film and series from the internet.')

@@ -78,17 +78,14 @@ def search_domain(site_name: str, base_url: str):
     # Extract config domain
     max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain = str(config_manager.get_dict("SITE", site_name)['domain'])
-    #console.print(f"[cyan]Test site[white]: [red]{base_url}.{domain}")
 
     try:
 
         # Test the current domain
         response_follow = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=max_timeout, follow_redirects=True)
-        #console.print(f"[cyan]Response site[white]: [red]{response_follow.status_code}")
         response_follow.raise_for_status()
 
     except Exception as e:
-        #console.print(f"[cyan]Test url[white]: [red]{base_url}.{domain}, [cyan]error[white]: [red]{e}")
 
         query = base_url.split("/")[-1]
         first_url = google_search(query)
@@ -137,5 +134,4 @@ def search_domain(site_name: str, base_url: str):
         config_manager.write_config()
 
     # Return config domain
-    #console.print(f"[cyan]Return domain: [red]{tld} \n")
     return tld, f"{base_url}.{tld}"

@@ -23,6 +23,7 @@ from ...FFmpeg import print_duration_table
 
 
 # Config
+GET_ONLY_LINK = config_manager.get_bool('M3U8_PARSER', 'get_only_link')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_VERIFY = config_manager.get_float('REQUESTS', 'verify_ssl')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
@@ -39,6 +40,8 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: str = Non
         - path (str): The local path where the downloaded MP4 file will be saved.
         - referer (str): The referer header value to include in the HTTP request headers.
     """
+    if GET_ONLY_LINK:
+        return {'path': path, 'url': url}
 
     headers = None
 
