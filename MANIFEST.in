@@ -1,0 +1,6 @@
+include README.md
+include LICENSE
+include requirements.txt
+include config.py
+recursive-include Test/ *
+recursive-include StreamingCommunity/ *.py

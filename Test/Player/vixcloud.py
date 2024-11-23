@@ -9,9 +9,9 @@ sys.path.append(src_path)
 
 
 # Import
-from Src.Util.message import start_message
-from Src.Util.logger import Logger
-from Src.Api.Player.vixcloud import VideoSource
+from StreamingCommunity.Src.Util.message import start_message
+from StreamingCommunity.Src.Util.logger import Logger
+from StreamingCommunity.Src.Api.Player.vixcloud import VideoSource
 
 
 # Test

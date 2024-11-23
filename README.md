@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./Src/Assets/min_logo.png">
+    <img src="https://i.ibb.co/f4h5Y2m/min-logo.png">
 </p>
 
 This repository provide a simple script designed to downloading films and series from a variety of supported streaming platforms. [SITE](#website-status-)

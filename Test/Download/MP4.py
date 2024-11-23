@@ -9,9 +9,9 @@ sys.path.append(src_path)
 
 
 # Import
-from Src.Util.message import start_message
-from Src.Util.logger import Logger
-from Src.Lib.Downloader import MP4_downloader
+from StreamingCommunity.Src.Util.message import start_message
+from StreamingCommunity.Src.Util.logger import Logger
+from StreamingCommunity.Src.Lib.Downloader import MP4_downloader
 
 
 # Test
