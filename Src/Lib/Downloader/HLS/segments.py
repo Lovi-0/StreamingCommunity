@@ -22,7 +22,7 @@ from Src.Util.console import console
 from Src.Util.headers import get_headers, random_headers
 from Src.Util.color import Colors
 from Src.Util._jsonConfig import config_manager
-from Src.Util.os import check_file_existence
+from Src.Util.os import os_manager
 from Src.Util.call_stack import get_call_stack
 
 
@@ -40,7 +40,7 @@ TQDM_DELAY_WORKER = config_manager.get_float('M3U8_DOWNLOAD', 'tqdm_delay')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_MAX_RETRY = config_manager.get_int('REQUESTS', 'max_retry')
 REQUEST_VERIFY = config_manager.get_bool('REQUESTS', 'verify_ssl')
-THERE_IS_PROXY_LIST = check_file_existence("list_proxy.txt")
+THERE_IS_PROXY_LIST = os_manager.check_file("list_proxy.txt")
 PROXY_START_MIN = config_manager.get_float('REQUESTS', 'proxy_start_min')
 PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
 DEFAULT_VIDEO_WORKERS = config_manager.get_int('M3U8_DOWNLOAD', 'default_video_workser')

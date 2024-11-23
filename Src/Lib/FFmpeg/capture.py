@@ -8,7 +8,7 @@ import subprocess
 
 # Internal utilities
 from Src.Util.console import console
-from Src.Util.os import format_file_size
+from Src.Util.os import internet_manager
 
 
 # Variable
@@ -61,7 +61,7 @@ def capture_output(process: subprocess.Popen, description: str) -> None:
                         # Construct the progress string with formatted output information
                         progress_string = (f"[yellow][FFmpeg] [white][{description}[white]]: "
                                            f"([green]'speed': [yellow]{data.get('speed', 'N/A')}[white], "
-                                           f"[green]'size': [yellow]{format_file_size(byte_size)}[white])")
+                                           f"[green]'size': [yellow]{internet_manager.format_file_size(byte_size)}[white])")
                         max_length = max(max_length, len(progress_string))
 
                         # Print the progress string to the console, overwriting the previous line

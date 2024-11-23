@@ -15,7 +15,7 @@ from Src.Util.headers import get_headers
 from Src.Util.color import Colors
 from Src.Util.console import console, Panel
 from Src.Util._jsonConfig import config_manager
-from Src.Util.os import format_file_size
+from Src.Util.os import internet_manager
 
 
 # Logic class
@@ -95,7 +95,7 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: str = Non
         if total != 0:
             console.print(Panel(
                 f"[bold green]Download completed![/bold green]\n"
-                f"[cyan]File size: [bold red]{format_file_size(os.path.getsize(path))}[/bold red]\n"
+                f"[cyan]File size: [bold red]{internet_manager.format_file_size(os.path.getsize(path))}[/bold red]\n"
                 f"[cyan]Duration: [bold]{print_duration_table(path, description=False, return_string=True)}[/bold]", 
                 title=f"{os.path.basename(path.replace('.mp4', ''))}", 
                 border_style="green"

@@ -16,7 +16,7 @@ from Src.Util.message import start_message
 from Src.Util.console import console, msg
 from Src.Util._jsonConfig import config_manager
 from Src.Upload.update import update as git_update
-from Src.Util.os import get_system_summary
+from Src.Util.os import os_summary
 from Src.Lib.TMBD import tmdb
 from Src.Util.logger import Logger
 
@@ -108,7 +108,7 @@ def initialize():
     log_not = Logger()
 
     # Get system info
-    get_system_summary()
+    os_summary.get_system_summary()
 
     # Set terminal size for win 7
     if platform.system() == "Windows" and "7" in platform.version():

@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 # Internal utilities
 from Src.Util.console import console
 from Src.Util.message import start_message
-from Src.Util.os import create_folder, can_create_file
+from Src.Util.os import os_manager
 from Src.Util.table import TVShowManager
 from Src.Lib.Downloader import MP4_downloader
 from ..Template import manage_selection, map_episode_title, validate_episode_selection
@@ -45,14 +45,13 @@ def download_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) 
     print()
 
     # Define filename and path for the downloaded video
-    mp4_name = f"{map_episode_title(scape_info_serie.tv_name, None, index_episode_selected, obj_episode.get('name'))}.mp4"
+    title_name = os_manager.get_sanitize_file(
+        f"{map_episode_title(scape_info_serie.tv_name, None, index_episode_selected, obj_episode.get('name'))}.mp4"
+    )
     mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, scape_info_serie.tv_name)
 
-    # Check if can create file output
-    create_folder(mp4_path)                                                                    
-    if not can_create_file(mp4_name):  
-        logging.error("Invalid mp4 name.")
-        sys.exit(0)
+    # Create output folder
+    os_manager.create_path(mp4_path)
 
     # Setup video source
     video_source.setup(obj_episode.get('url'))
@@ -65,7 +64,7 @@ def download_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) 
 
     MP4_downloader(
         url = master_playlist, 
-        path = os.path.join(mp4_path, mp4_name),
+        path = os.path.join(mp4_path, title_name),
         referer = f"{parsed_url.scheme}://{parsed_url.netloc}/",
     )
 

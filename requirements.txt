@@ -6,6 +6,7 @@ m3u8
 psutil
 unidecode
 jsbeautifier
+pathvalidate
 fake-useragent
 qbittorrent-api
 python-qbittorrent 

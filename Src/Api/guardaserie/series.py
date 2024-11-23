@@ -55,7 +55,10 @@ def download_video(scape_info_serie: GetSerieInfo, index_season_selected: int, i
     master_playlist = video_source.get_playlist()
     
     # Download the film using the m3u8 playlist, and output filename
-    r_proc = HLS_Downloader(m3u8_playlist = master_playlist, output_filename = os.path.join(mp4_path, mp4_name)).start()
+    r_proc = HLS_Downloader(
+        m3u8_playlist=master_playlist, 
+        output_filename=os.path.join(mp4_path, mp4_name)
+    ).start()
 
     if r_proc == 404:
         time.sleep(2)

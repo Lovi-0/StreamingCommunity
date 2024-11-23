@@ -7,8 +7,8 @@ import logging
 
 # Internal utilities
 from Src.Util.console import console, msg
+from Src.Util.os import os_manager
 from Src.Util.message import start_message
-from Src.Util.os import create_folder, can_create_file
 from Src.Lib.Downloader import MP4_downloader
 
 
@@ -46,23 +46,24 @@ def download_episode(index_select: int):
         video_source.parse_script(js_script)
 
         # Create output path
-        mp4_path = None
-        mp4_name = f"{obj_episode.number}.mp4"
-        if video_source.is_series:
-            mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, video_source.series_name)
-        else:
-            mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, video_source.series_name)
+        title_name = f"{obj_episode.number}.mp4"
 
-        # Check if can create file output
-        create_folder(mp4_path)                                                                    
-        if not can_create_file(mp4_name):  
-            logging.error("Invalid mp4 name.")
-            sys.exit(0)
+        if video_source.is_series:
+            mp4_path = os_manager.get_sanitize_path(
+                os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, video_source.series_name)
+            )
+        else:
+            mp4_path = os_manager.get_sanitize_path(
+                os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, video_source.series_name)
+            )
+
+        # Create output folder
+        os_manager.create_path(mp4_path)                                                            
 
         # Start downloading
         MP4_downloader(
-            str(video_source.src_mp4).strip(),
-            os.path.join(mp4_path, mp4_name)
+            url = str(video_source.src_mp4).strip(),
+            path = os.path.join(mp4_path, title_name)
         )
 
     else:

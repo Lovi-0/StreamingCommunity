@@ -6,7 +6,7 @@ import logging
 
 # Internal utilities
 from m3u8 import loads
-from Src.Util.os import format_file_size
+from Src.Util.os import internet_manager
 
 
 # External libraries
@@ -250,7 +250,7 @@ class M3U8_Video:
         result = []
 
         for video in self.video_playlist:
-            video_size = format_file_size((video['bandwidth'] * duration) / 8)
+            video_size = internet_manager.format_file_size((video['bandwidth'] * duration) / 8)
             result.append((video_size))
 
         return result

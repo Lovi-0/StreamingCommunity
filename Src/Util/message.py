@@ -1,6 +1,5 @@
 # 3.12.23
 
-import warnings
 import os
 import platform
 

@@ -10,7 +10,7 @@ from typing import List, Dict
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
-from Src.Util.os import check_file_existence, suppress_output
+from Src.Util.os import os_manager, suppress_output
 from Src.Util.console import console
 from .util import need_to_force_to_ts, check_duration_v_a
 from .capture import capture_ffmpeg_real_time
@@ -46,7 +46,7 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
         - force_ts (bool): Force video path to be mpegts as input.
     """
 
-    if not check_file_existence(video_path):
+    if not os_manager.check_file(video_path):
         logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
@@ -119,7 +119,7 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
                 print()
 
     time.sleep(0.5)
-    if not check_file_existence(out_path):
+    if not os_manager.check_file(out_path):
         logging.error("Missing output video for ffmpeg conversion video.")
         sys.exit(0)
 
@@ -135,7 +135,7 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
         - out_path (str): The path to save the output file.
     """
 
-    if not check_file_existence(video_path):
+    if not os_manager.check_file(video_path):
         logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
@@ -153,7 +153,7 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
 
     # Add audio tracks as input
     for i, audio_track in enumerate(audio_tracks):
-        if check_file_existence(audio_track.get('path')):
+        if os_manager.check_file(audio_track.get('path')):
             ffmpeg_cmd.extend(['-i', audio_track.get('path')])
         else:
             logging.error(f"Skip audio join: {audio_track.get('path')} dont exist")
@@ -223,7 +223,7 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
                 print()
 
     time.sleep(0.5)
-    if not check_file_existence(out_path):
+    if not os_manager.check_file(out_path):
         logging.error("Missing output video for ffmpeg conversion audio.")
         sys.exit(0)
 
@@ -239,7 +239,7 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
         - out_path (str): The path to save the output file.
     """
 
-    if not check_file_existence(video_path):
+    if not os_manager.check_file(video_path):
         logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
@@ -248,7 +248,7 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
 
     # Add subtitle input files first
     for subtitle in subtitles_list:
-        if check_file_existence(subtitle.get('path')):
+        if os_manager.check_file(subtitle.get('path')):
             ffmpeg_cmd += ["-i", subtitle['path']]
         else:
             logging.error(f"Skip subtitle join: {subtitle.get('path')} doesn't exist")
@@ -288,6 +288,6 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
                 print()
 
     time.sleep(0.5)
-    if not check_file_existence(out_path):
+    if not os_manager.check_file(out_path):
         logging.error("Missing output video for ffmpeg conversion subtitle.")
         sys.exit(0)

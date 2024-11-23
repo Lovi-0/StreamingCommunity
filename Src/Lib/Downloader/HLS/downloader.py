@@ -7,7 +7,6 @@ import logging
 
 # External libraries
 import httpx
-from unidecode import unidecode
 
 
 # Internal utilities
@@ -15,16 +14,10 @@ from Src.Util._jsonConfig import config_manager
 from Src.Util.console import console, Panel, Table
 from Src.Util.color import Colors
 from Src.Util.os import (
-    remove_folder,
-    delete_files_except_one,
     compute_sha1_hash,
-    format_file_size,
-    create_folder, 
-    reduce_base_name, 
-    remove_special_characters,
-    can_create_file
+    os_manager,
+    internet_manager
 )
-
 
 # Logic class
 from ...FFmpeg import (
@@ -744,17 +737,13 @@ class HLS_Downloader:
             if not folder:
                 folder = new_folder
 
-            # Sanitize base name
-            base_name = reduce_base_name(remove_special_characters(base_name))
-            create_folder(folder)
-
-            if not can_create_file(base_name):
-                logging.error("Invalid mp4 name.")
-                sys.exit(0)
+            # Sanitize base name and folder
+            folder = os_manager.get_sanitize_path(folder)
+            base_name = os_manager.get_sanitize_file(base_name)
+            os_manager.create_path(folder)
 
             # Parse to only ASCII for compatibility across platforms
             new_filename = os.path.join(folder, base_name)
-            new_filename = unidecode(new_filename)
 
         logging.info(f"class 'HLS_Downloader'; call _generate_output_filename(); return path: {new_filename}")
         return new_filename
@@ -857,7 +846,7 @@ class HLS_Downloader:
             end_output_time = print_duration_table(self.output_filename, description=False, return_string=False)
 
             # Calculate file size and duration for reporting
-            formatted_size = format_file_size(os.path.getsize(self.output_filename))
+            formatted_size = internet_manager.format_file_size(os.path.getsize(self.output_filename))
             formatted_duration = print_duration_table(self.output_filename, description=False, return_string=True)
             
             expected_real_seconds = dict_to_seconds(self.content_downloader.expected_real_time)
@@ -895,11 +884,11 @@ class HLS_Downloader:
                 os.rename(self.output_filename, self.output_filename.replace(".mp4", "_failed.mp4"))
 
             # Delete all temporary files except for the output file
-            delete_files_except_one(self.path_manager.base_path, os.path.basename(self.output_filename.replace(".mp4", "_failed.mp4")))
+            os_manager.remove_files_except_one(self.path_manager.base_path, os.path.basename(self.output_filename.replace(".mp4", "_failed.mp4")))
 
             # Remove the base folder if specified
             if REMOVE_SEGMENTS_FOLDER:
-                remove_folder(self.path_manager.base_path)
+                os_manager.remove_folder(self.path_manager.base_path)
 
         else:
             logging.info("Video file converted already exists.")

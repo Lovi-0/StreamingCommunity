@@ -9,7 +9,7 @@ import logging
 
 # Internal utilities
 from Src.Util.color import Colors
-from Src.Util.os import format_file_size, format_transfer_speed
+from Src.Util.os import internet_manager
 from Src.Util._jsonConfig import config_manager
 
 
@@ -146,14 +146,14 @@ class TOR_downloader:
                     downloaded_size = torrent_info['total_downloaded']
 
                     # Format variable
-                    downloaded_size_str = format_file_size(downloaded_size)
+                    downloaded_size_str = internet_manager.format_file_size(downloaded_size)
                     downloaded_size = downloaded_size_str.split(' ')[0]
 
-                    total_size_str = format_file_size(total_size)
+                    total_size_str = internet_manager.format_file_size(total_size)
                     total_size = total_size_str.split(' ')[0]
                     total_size_unit = total_size_str.split(' ')[1]
 
-                    average_internet_str = format_transfer_speed(download_speed)
+                    average_internet_str = internet_manager.format_transfer_speed(download_speed)
                     average_internet = average_internet_str.split(' ')[0]
                     average_internet_unit = average_internet_str.split(' ')[1]
 

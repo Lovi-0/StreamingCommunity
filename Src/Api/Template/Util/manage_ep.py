@@ -7,7 +7,7 @@ from typing import List
 
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
-from Src.Util.os import remove_special_characters
+from Src.Util.os import os_manager
 
 
 # Config
@@ -85,10 +85,10 @@ def map_episode_title(tv_name: str, number_season: int, episode_number: int, epi
         str: The mapped episode title.
     """
     map_episode_temp = MAP_EPISODE
-    map_episode_temp = map_episode_temp.replace("%(tv_name)", remove_special_characters(tv_name))
+    map_episode_temp = map_episode_temp.replace("%(tv_name)", os_manager.get_sanitize_file(tv_name))
     map_episode_temp = map_episode_temp.replace("%(season)", dynamic_format_number(number_season))
     map_episode_temp = map_episode_temp.replace("%(episode)", dynamic_format_number(episode_number))
-    map_episode_temp = map_episode_temp.replace("%(episode_name)", remove_special_characters(episode_name))
+    map_episode_temp = map_episode_temp.replace("%(episode_name)", os_manager.get_sanitize_file(episode_name))
 
     logging.info(f"Map episode string return: {map_episode_temp}")
     return map_episode_temp

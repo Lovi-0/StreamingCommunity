@@ -53,7 +53,10 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
     master_playlist = video_source.get_playlist()
     
     # Download the episode
-    r_proc = HLS_Downloader(os.path.join(mp4_path, mp4_name), master_playlist).start()
+    r_proc = HLS_Downloader(
+        master_playlist=master_playlist,
+        output_filename=os.path.join(mp4_path, mp4_name)
+    ).start()
     
     if r_proc == 404:
         time.sleep(2)

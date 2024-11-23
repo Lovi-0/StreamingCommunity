@@ -13,7 +13,7 @@ import httpx
 # Internal utilities
 from Src.Util._jsonConfig import config_manager
 from Src.Util.headers import get_headers
-from Src.Util.os import check_file_existence
+from Src.Util.os import os_manager
 
 
 class ProxyManager:
@@ -84,7 +84,7 @@ def main_test_proxy(url_test):
 
     path_file_proxt_list = "list_proxy.txt"
 
-    if check_file_existence(path_file_proxt_list):
+    if os_manager.check_file(path_file_proxt_list):
 
         # Read file
         with open(path_file_proxt_list, 'r') as file:

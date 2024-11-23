@@ -6,7 +6,7 @@ import time
 
 # Internal utilities
 from Src.Util.console import console, msg
-from Src.Util.os import remove_special_characters
+from Src.Util.os import os_manager
 from Src.Util.message import start_message
 from Src.Util.call_stack import get_call_stack
 from Src.Lib.Downloader import HLS_Downloader
@@ -45,11 +45,14 @@ def download_film(select_title: MediaItem, domain: str,  version: str):
     master_playlist = video_source.get_playlist()
 
     # Define the filename and path for the downloaded film
-    mp4_format = remove_special_characters(select_title.slug) + ".mp4"
+    title_name = os_manager.get_sanitize_file(select_title.slug) + ".mp4"
     mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, select_title.slug)
 
     # Download the film using the m3u8 playlist, and output filename
-    r_proc = HLS_Downloader(m3u8_playlist = master_playlist, output_filename = os.path.join(mp4_path, mp4_format)).start()
+    r_proc = HLS_Downloader(
+        m3u8_playlist=master_playlist, 
+        output_filename=os.path.join(mp4_path, title_name)
+    ).start()
 
     if r_proc == 404:
         time.sleep(2)

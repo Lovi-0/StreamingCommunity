@@ -1,14 +1,12 @@
 # 01.07.24
 
 import os
-import sys
-import logging
 
 
 # Internal utilities
 from Src.Util.console import console
 from Src.Util.message import start_message
-from Src.Util.os import create_folder, can_create_file, remove_special_characters
+from Src.Util.os import os_manager
 from Src.Lib.Downloader import TOR_downloader
 
 
@@ -34,15 +32,13 @@ def download_title(select_title: MediaItem):
     print()
 
     # Define output path
-    title_name = remove_special_characters(select_title.name)
-    mp4_name = title_name.replace("-", "_") + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, remove_special_characters(title_name.replace(".mp4", "")))
-    
-    # Check if can create file output
-    create_folder(mp4_path)                                                                    
-    if not can_create_file(mp4_name):  
-        logging.error("Invalid mp4 name.")
-        sys.exit(0)
+    title_name = os_manager.get_sanitize_file(select_title.name.replace("-", "_") + ".mp4")
+    mp4_path = os_manager.get_sanitize_path(
+        os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name.replace(".mp4", ""))
+    )
+
+    # Create output folder
+    os_manager.create_path(mp4_path)
 
     # Tor manager
     manager = TOR_downloader()

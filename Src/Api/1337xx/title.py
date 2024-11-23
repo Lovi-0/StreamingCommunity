@@ -1,8 +1,6 @@
 # 02.07.24
 
 import os
-import sys
-import logging
 
 
 # External libraries
@@ -12,9 +10,9 @@ from bs4 import BeautifulSoup
 
 # Internal utilities
 from Src.Util.console import console
+from Src.Util.os import os_manager
 from Src.Util.message import start_message
 from Src.Util.headers import get_headers
-from Src.Util.os import create_folder, can_create_file, remove_special_characters
 from Src.Lib.Downloader import TOR_downloader
 
 
@@ -39,19 +37,23 @@ def download_title(select_title: MediaItem):
     print() 
 
     # Define output path
-    title_name = remove_special_characters(select_title.name)
-    mp4_name = title_name.replace("-", "_") + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, remove_special_characters(title_name.replace(".mp4", "")))
+    title_name = os_manager.get_sanitize_file(select_title.name)
+    mp4_path = os_manager.get_sanitize_path(
+        os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name.replace(".mp4", ""))
+    )
     
-    # Check if can create file output
-    create_folder(mp4_path)                                                                    
-    if not can_create_file(mp4_name):  
-        logging.error("Invalid mp4 name.")
-        sys.exit(0)
+    # Create output folder
+    os_manager.create_path(mp4_path)                                                                    
 
     # Make request to page with magnet
     full_site_name = f"{SITE_NAME}.{DOMAIN_NOW}"
-    response = httpx.get("https://" + full_site_name + select_title.url, headers={'user-agent': get_headers()}, follow_redirects=True)
+    response = httpx.get(
+        url="https://" + full_site_name + select_title.url, 
+        headers={
+            'user-agent': get_headers()
+        }, 
+        follow_redirects=True
+    )
 
     # Create soup and find table
     soup = BeautifulSoup(response.text, "html.parser")

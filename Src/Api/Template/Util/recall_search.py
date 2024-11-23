@@ -11,10 +11,10 @@ def execute_search(info):
         info (dict): A dictionary containing the function name, folder, and module information.
     """
 
-    # Step 1: Define the project path using the folder from the info dictionary
+    # Define the project path using the folder from the info dictionary
     project_path = os.path.dirname(info['folder'])  # Get the base path for the project
 
-    # Step 2: Add the project path to sys.path
+    # Add the project path to sys.path
     if project_path not in sys.path:
         sys.path.append(project_path)
 
@@ -29,7 +29,9 @@ def execute_search(info):
 
     except ModuleNotFoundError as e:
         print(f"ModuleNotFoundError: {e}")
+
     except ImportError as e:
         print(f"ImportError: {e}")
+
     except Exception as e:
         print(f"An error occurred: {e}")

@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 # Internal utilities
 from Src.Util.color import Colors
-from Src.Util.os import format_file_size, format_transfer_speed
+from Src.Util.os import internet_manager
 from Src.Util._jsonConfig import config_manager
 
 
@@ -86,8 +86,8 @@ class M3U8_Ts_Estimator:
                 download_speed = (new_value.bytes_recv - old_value.bytes_recv) / interval
 
                 self.speed = {
-                    "upload": format_transfer_speed(upload_speed),
-                    "download": format_transfer_speed(download_speed)
+                    "upload": internet_manager.format_transfer_speed(upload_speed),
+                    "download": internet_manager.format_transfer_speed(download_speed)
                 }
 
     def get_average_speed(self) -> float:
@@ -115,7 +115,7 @@ class M3U8_Ts_Estimator:
             mean_size = total_size / len(self.ts_file_sizes)
 
             # Return formatted mean size
-            return format_file_size(mean_size)
+            return internet_manager.format_file_size(mean_size)
 
         except ZeroDivisionError as e:
             logging.error("Division by zero error occurred: %s", e)
@@ -132,7 +132,7 @@ class M3U8_Ts_Estimator:
         Returns:
             str: The total downloaded size as a human-readable string.
         """
-        return format_file_size(self.now_downloaded_size)
+        return internet_manager.format_file_size(self.now_downloaded_size)
 
     def update_progress_bar(self, total_downloaded: int, duration: float, progress_counter: tqdm) -> None:
         """
