@@ -57,7 +57,7 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
     
     # Download the episode
     r_proc = HLS_Downloader(
-        master_playlist=master_playlist,
+        m3u8_playlist=master_playlist,
         output_filename=os.path.join(mp4_path, mp4_name)
     ).start()
     
