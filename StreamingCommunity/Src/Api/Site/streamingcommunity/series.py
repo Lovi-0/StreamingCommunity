@@ -14,6 +14,7 @@ from StreamingCommunity.Src.Lib.Downloader import HLS_Downloader
 
 
 # Logic class
+from .util.ScrapeSerie import ScrapeSerie
 from StreamingCommunity.Src.Api.Template.Util import manage_selection, map_episode_title, validate_selection, validate_episode_selection, execute_search
 from StreamingCommunity.Src.Api.Template.Class.SearchType import MediaItem
 
@@ -24,7 +25,8 @@ from StreamingCommunity.Src.Api.Player.vixcloud import VideoSource
 
 # Variable
 from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER
-video_source = VideoSource(site_name=SITE_NAME)
+scrape_serie = ScrapeSerie(SITE_NAME)
+video_source = VideoSource(SITE_NAME, True)
 table_show_manager = TVShowManager()
 
 
@@ -42,7 +44,7 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
     start_message()
 
     # Get info about episode
-    obj_episode = video_source.obj_episode_manager.episodes[index_episode_selected - 1]
+    obj_episode = scrape_serie.obj_episode_manager.episodes[index_episode_selected - 1]
     console.print(f"[yellow]Download: [red]{index_season_selected}:{index_episode_selected} {obj_episode.name}")
     print()
 
@@ -84,13 +86,13 @@ def download_episode(tv_name: str, index_season_selected: int, download_all: boo
     """
 
     # Clean memory of all episodes and get the number of the season
-    video_source.obj_episode_manager.clear()
-    season_number = video_source.obj_season_manager.seasons[index_season_selected - 1].number
+    scrape_serie.obj_episode_manager.clear()
+    season_number = scrape_serie.obj_season_manager.seasons[index_season_selected - 1].number
 
     # Start message and collect information about episodes
     start_message()
-    video_source.collect_title_season(season_number)
-    episodes_count = video_source.obj_episode_manager.get_length()
+    scrape_serie.collect_title_season(season_number)
+    episodes_count = scrape_serie.obj_episode_manager.get_length()
 
     if download_all:
 
@@ -115,13 +117,12 @@ def download_episode(tv_name: str, index_season_selected: int, download_all: boo
         for i_episode in list_episode_select:
             download_video(tv_name, index_season_selected, i_episode)
 
-
-def download_series(select_title: MediaItem, domain: str, version: str) -> None:
+def download_series(select_season: MediaItem, version: str) -> None:
     """
     Download episodes of a TV series based on user selection.
 
     Parameters:
-        - select_title (MediaItem): Selected media item (TV series).
+        - select_season (MediaItem): Selected media item (TV series).
         - domain (str): Domain from which to download.
         - version (str): Version of the site.
     """
@@ -130,11 +131,12 @@ def download_series(select_title: MediaItem, domain: str, version: str) -> None:
     start_message()
 
     # Setup video source
-    video_source.setup(version, domain, select_title.id, select_title.slug)
+    scrape_serie.setup(version, select_season.id, select_season.slug)
+    video_source.setup(select_season.id)
 
     # Collect information about seasons
-    video_source.collect_info_seasons()
-    seasons_count = video_source.obj_season_manager.get_length()
+    scrape_serie.collect_info_seasons()
+    seasons_count = scrape_serie.obj_season_manager.get_length()
 
     # Prompt user for season selection and download episodes
     console.print(f"\n[green]Seasons found: [red]{seasons_count}")
@@ -157,11 +159,11 @@ def download_series(select_title: MediaItem, domain: str, version: str) -> None:
         if len(list_season_select) > 1 or index_season_selected == "*":
 
             # Download all episodes if multiple seasons are selected or if '*' is used
-            download_episode(select_title.slug, i_season, download_all=True)
+            download_episode(select_season.slug, i_season, download_all=True)
         else:
 
             # Otherwise, let the user select specific episodes for the single season
-            download_episode(select_title.slug, i_season, download_all=False)
+            download_episode(select_season.slug, i_season, download_all=False)
 
 
 def display_episodes_list() -> str:
@@ -184,7 +186,7 @@ def display_episodes_list() -> str:
     table_show_manager.add_column(column_info)
 
     # Populate the table with episodes information
-    for i, media in enumerate(video_source.obj_episode_manager.episodes):
+    for i, media in enumerate(scrape_serie.obj_episode_manager.episodes):
         table_show_manager.add_tv_show({
             'Index': str(media.number),
             'Name': media.name,

@@ -9,7 +9,7 @@ from StreamingCommunity.Src.Util.console import console, msg
 
 # Logic class
 from .site import title_search, run_get_select_title, media_search_manager
-from .anime import download_film, download_series
+from .film_serie import download_film, download_series
 
 
 # Variable
@@ -34,10 +34,10 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
 
     if len_database > 0:
 
-        # Select title from list
+        # Select title from list (type: TV \ Movie \ OVA)
         select_title = run_get_select_title()
 
-        if select_title.type == 'Movie':
+        if select_title.type == 'Movie' or select_title.type == 'OVA':
             download_film(select_title)
 
         else:

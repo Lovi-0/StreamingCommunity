@@ -356,7 +356,6 @@ class OsSummary():
         Includes:
             - Python version and implementation details.
             - Operating system and architecture.
-            - OpenSSL and glibc versions.
             - Versions of `ffmpeg` and `ffprobe` executables.
             - Installed Python libraries as listed in `requirements.txt`.
         """
@@ -370,11 +369,10 @@ class OsSummary():
         python_implementation = platform.python_implementation()
         arch = platform.machine()
         os_info = platform.platform()
-        openssl_version = ssl.OPENSSL_VERSION
         glibc_version = 'glibc ' + '.'.join(map(str, platform.libc_ver()[1]))
         
-        console.print(f"[cyan]Python[white]: [bold red]{python_version} ({python_implementation} {arch}) - {os_info} ({openssl_version}, {glibc_version})[/bold red]")
-        logging.info(f"Python: {python_version} ({python_implementation} {arch}) - {os_info} ({openssl_version}, {glibc_version})")
+        console.print(f"[cyan]Python[white]: [bold red]{python_version} ({python_implementation} {arch}) - {os_info} ({glibc_version})[/bold red]")
+        logging.info(f"Python: {python_version} ({python_implementation} {arch}) - {os_info} ({glibc_version})")
         
         # ffmpeg and ffprobe versions
         ffmpeg_version = self.get_executable_version(['ffmpeg', '-version'])

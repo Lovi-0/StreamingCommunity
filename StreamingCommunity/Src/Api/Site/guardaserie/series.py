@@ -19,7 +19,7 @@ from StreamingCommunity.Src.Api.Template.Class.SearchType import MediaItem
 
 
 # Player
-from .Player.ScrapeSerie import GetSerieInfo
+from .util.ScrapeSerie import GetSerieInfo
 from StreamingCommunity.Src.Api.Player.supervideo import VideoSource
 
 

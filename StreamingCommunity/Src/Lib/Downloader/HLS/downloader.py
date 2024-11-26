@@ -786,7 +786,7 @@ class HLS_Downloader:
                     else:
                         console.log("[red]Error: URL passed to M3U8_Parser is an index playlist; expected a master playlist. Crucimorfo strikes again!")
                 else:
-                    console.log("[red]Error: m3u8_playlist failed request")
+                    console.log(f"[red]Error: m3u8_playlist failed request for: {self.m3u8_playlist}")
             else:
                 console.log("[red]Error: m3u8_playlist is None")
 

@@ -135,9 +135,9 @@ def main():
 
     # Create logger
     log_not = Logger()
+    #initialize()
 
     # Load search functions
-    
     search_functions = load_search_functions()
     logging.info(f"Load module in: {time.time() - start} s")
 
@@ -194,11 +194,3 @@ def main():
     else:
         console.print("[red]Invalid category.")
         sys.exit(0)
-
-
-def run():
-    initialize()
-    main()
-
-if __name__ == '__main__':
-    run()

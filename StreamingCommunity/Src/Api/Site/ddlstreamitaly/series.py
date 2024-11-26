@@ -19,7 +19,7 @@ from StreamingCommunity.Src.Api.Template.Util import manage_selection, map_episo
 
 
 # Player
-from .Player.ScrapeSerie import GetSerieInfo
+from .util.ScrapeSerie import GetSerieInfo
 from StreamingCommunity.Src.Api.Player.ddl import VideoSource
 
 
@@ -92,7 +92,7 @@ def download_thread(dict_serie: MediaItem):
     episodes_count = len(list_dict_episode)
 
     # Display episodes list and manage user selection
-    last_command = display_episodes_list()
+    last_command = display_episodes_list(scape_info_serie.list_episodes)
     list_episode_select = manage_selection(last_command, episodes_count)
 
     try:

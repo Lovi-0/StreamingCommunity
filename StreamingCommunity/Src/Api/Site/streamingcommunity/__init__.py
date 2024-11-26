@@ -43,10 +43,10 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
         select_title = run_get_select_title()
         
         if select_title.type == 'tv':
-            download_series(select_title, domain, site_version)
+            download_series(select_title, site_version)
         
         else:
-            download_film(select_title, domain, site_version)
+            download_film(select_title)
     
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

@@ -99,7 +99,7 @@ class TheMovieDB:
         self.api_key = api_key
         self.base_url = "https://api.themoviedb.org/3"
         self.console = Console()
-        self.genres = self._fetch_genres()
+        #self.genres = self._fetch_genres()
 
     def _make_request(self, endpoint, params=None):
         """

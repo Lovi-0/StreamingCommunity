@@ -1,74 +1,89 @@
-<p align="center">
-    <img src="https://i.ibb.co/f4h5Y2m/min-logo.png">
-</p>
+# StreamingCommunity Downloader 🎬
 
-This repository provide a simple script designed to downloading films and series from a variety of supported streaming platforms. [SITE](#website-status-)
+![Project Logo](https://i.ibb.co/f4h5Y2m/min-logo.png)
 
-## Join us 🌟
+A versatile script designed to download films and series from various supported streaming platforms.
 
-You can chat, help improve this repo, or just hang around for some fun in the **Git_StreamingCommunity** Discord [Server](https://discord.com/invite/8vV68UGRc7)
+## 🤝 Join our Community 
 
-# Table of Contents
+Chat, contribute, and have fun in our **Git_StreamingCommunity** Discord [Server](https://discord.com/invite/8vV68UGRc7)
 
-* [INSTALLATION](#installation)
-  * [Automatic Installation](#automatic-installation)
-    * [Usage](#usage-automatic)
-    * [Supported OSs for Automatic Installation](#automatic-installation-os)
-  * [Manual Installation](#manual-installation)
-    * [Requirement](#requirement)
-    * [Usage](#usage-manual)
-    * [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
-    * [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux)
-  * [Update](#update)
-* [CONFIGURATION](#configuration)
-* [DOCKER](#docker)
-* [TUTORIAL](#tutorial)
-* [TO DO](#to-do)
+## 📋 Table of Contents
 
-# INSTALLATION
+- [Installation](#installation)
+    - [PyPI Installation](#pypi-installation)
+    - [Automatic Installation](#automatic-installation)
+    - [Manual Installation](#manual-installation)
+        - [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
+        - [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux)
+- [Configuration](#configuration)
+- [Tutorial](#tutorial)
+- [To Do](#to-do)
 
-## Automatic Installation
+## 💻 Installation
 
-### Supported OSs for Automatic Installation 💿
+### 1. PyPI Installation
 
-- Supported ✔️
-- Not tested ⏳
-- Not supported ❌
+Install directly from PyPI:
+
+```bash
+pip install StreamingCommunity
+```
+
+#### Creating a Run Script
+
+Create `run_streaming.py`:
+
+```python
+from StreamingCommunity.run import main
+
+if __name__ == "__main__":
+    main()
+```
+
+Run the script:
+```bash
+python run_streaming.py
+```
+
+#### Updating via PyPI
+
+```bash
+pip install --upgrade StreamingCommunity
+```
+
+### 2. Automatic Installation
+
+#### Supported Operating Systems 💿
 
 | OS              | Automatic Installation Support |
-| :-------------- | :----------------------------: |
+|:----------------|:------------------------------:|
 | Windows 10/11   |              ✔️              |
-| Windows 7       |               ❌               |
+| Windows 7       |              ❌              |
 | Debian Linux    |              ✔️              |
 | Arch Linux      |              ✔️              |
 | CentOS Stream 9 |              ✔️              |
-| FreeBSD         |               ⏳               |
+| FreeBSD         |              ⏳              |
 | MacOS           |              ✔️              |
-| Termux          |               ❌               |
+| Termux          |              ❌              |
 
-### Installation ⚙️
+#### Installation Steps
 
-Run the following command inside the main directory:
-
-#### On Windows:
+##### On Windows:
 
 ```powershell
 .\win_install.bat
 ```
 
-#### On Linux/MacOS/BSD:
+##### On Linux/MacOS/BSD:
 
 ```bash
 sudo chmod +x unix_install.sh && ./unix_install.sh
 ```
 
-`<a id="usage-automatic"></a>`
+#### Usage
 
-### Usage 📚
-
-Run the script with the following command:
-
-#### On Windows:
+##### On Windows:
 
 ```powershell
 python .\run.py
@@ -80,43 +95,35 @@ or
 source .venv/bin/activate && python run.py && deactivate
 ```
 
-#### On Linux/MacOS/BSD:
+##### On Linux/MacOS/BSD:
 
 ```bash
 ./run.py
 ```
 
-## Manual Installation
+### 3. Manual Installation
 
-`<a id="requirement"></a>`
+#### Requirements 📋
 
-### Requirement 📋
+Prerequisites:
+* [Python](https://www.python.org/downloads/) > 3.8
+* [FFmpeg](https://www.gyan.dev/ffmpeg/builds/)
 
-Make sure you have the following prerequisites installed on your system:
+#### Install Python Dependencies
 
-* [python](https://www.python.org/downloads/) > 3.8
-* [ffmpeg](https://www.gyan.dev/ffmpeg/builds/)
-* [openssl](https://www.openssl.org) or [pycryptodome](https://pypi.org/project/pycryptodome/)
-
-### Installation ⚙️
-
-Install the required Python libraries using the following command:
-
-```
+```bash
 pip install -r requirements.txt
 ```
 
-### Usage 📚
+#### Usage
 
-Run the script with the following command:
-
-#### On Windows:
+##### On Windows:
 
 ```powershell
 python run.py
 ```
 
-#### On Linux/MacOS:
+##### On Linux/MacOS:
 
 ```bash
 python3 run.py
@@ -129,13 +136,13 @@ Keep your script up to date with the latest features by running:
 #### On Windows:
 
 ```powershell
-python update_version.py
+python update.py
 ```
 
 #### On Linux/MacOS:
 
 ```bash
-python3 update_version.py
+python3 update.py
 ```
 
 ## Configuration ⚙️
@@ -150,7 +157,6 @@ The configuration file is divided into several main sections:
 {
     "root_path": "Video",
     "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
-    "special_chars_to_remove": "!@#$%^&*()[]{}<>|`~'\";:,?=+\u00e2\u20ac\u00a6",
     "not_close": false,
     "show_trending": false
 }
@@ -176,7 +182,7 @@ The configuration file is divided into several main sections:
   * `%(episode)` : Is the number of the episode
   * `%(episode_name)` : Is the name of the episode
     `<br/><br/>`
-- `special_chars_to_remove`: Special characters to be removed from filenames
+    
 - `not_close`: If true, continues running after downloading
 - `show_trending`: Display trending content on startup
 
@@ -282,46 +288,11 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
 - `force_resolution`: Force specific resolution (-1 for best available, or specify 1080, 720, 360)
 - `get_only_link`: Return M3U8 playlist/index URL instead of downloading
 
-## Docker 🐳
 
-You can run the script in a docker container, to build the image just run
-
-```
-docker build -t streaming-community-api .
-```
-
-and to run it use
-
-```
-docker run -it -p 8000:8000 streaming-community-api
-```
-
-By default the videos will be saved in `/app/Video` inside the container, if you want to to save them in your machine instead of the container just run
-
-```
-docker run -it -p 8000:8000 -v /path/to/download:/app/Video streaming-community-api
-```
-
-### Docker quick setup with Make
-
-Inside the Makefile (install `make`) are already configured two commands to build and run the container:
-
-```
-make build-container
-
-# set your download directory as ENV variable
-make LOCAL_DIR=/path/to/download run-container
-```
-
-The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
-
-### Website Status 🌐
-
-- Working ✅
-- Not Working ❌
+## 🌐 Website Status 
 
 | Website            | Status |
-| :----------------- | :----: |
+|:-------------------|:------:|
 | 1337xx             |   ✅   |
 | Altadefinizione    |   ✅   |
 | AnimeUnity         |   ✅   |
@@ -333,13 +304,20 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | PirateBays         |   ✅   |
 | StreamingCommunity |   ✅   |
 
-## Tutorial 📖
+## 📖 Tutorials 
 
-[win](https://www.youtube.com/watch?v=mZGqK4wdN-k)
-[linux](https://www.youtube.com/watch?v=0qUNXPE_mTg)
+- [Windows Tutorial](https://www.youtube.com/watch?v=mZGqK4wdN-k)
+- [Linux Tutorial](https://www.youtube.com/watch?v=0qUNXPE_mTg)
 
-## To do 📝
+## 📝 To Do 
 
-- GUI
-- Website api
-- Add other site
+- Create website API
+
+## 🤝 Contributing
+
+Contributions are welcome! Steps:
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request

@@ -7,9 +7,10 @@ import queue
 import logging
 import binascii
 import threading
+import signal
 from queue import PriorityQueue
 from urllib.parse import urljoin, urlparse
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 # External libraries
@@ -80,6 +81,10 @@ class M3U8_Segments:
         self.queue = PriorityQueue()
         self.stop_event = threading.Event()
         self.downloaded_segments = set()
+
+        # Stopping
+        self.interrupt_flag = threading.Event()
+        self.download_interrupted = False
 
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
@@ -197,6 +202,19 @@ class M3U8_Segments:
 
             # Parser data of content of index pass in input to class
             self.parse_data(self.url)
+    
+    def setup_interrupt_handler(self):
+        """
+        Set up a signal handler for graceful interruption.
+        """
+        def interrupt_handler(signum, frame):
+            if not self.interrupt_flag.is_set():
+                console.log("\n[red] Stopping download gracefully...")
+                self.interrupt_flag.set()
+                self.download_interrupted = True
+                self.stop_event.set()
+
+        signal.signal(signal.SIGINT, interrupt_handler)
 
     def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm, retries: int = 3, backoff_factor: float = 1.5) -> None:
         """
@@ -209,10 +227,16 @@ class M3U8_Segments:
             - retries (int): The number of times to retry on failure (default is 3).
             - backoff_factor (float): The backoff factor for exponential backoff (default is 1.5 seconds).
         """
+        if self.interrupt_flag.is_set():
+            return
+        
         need_verify = REQUEST_VERIFY
         min_segment_size = 100  # Minimum acceptable size for a TS segment in bytes
 
         for attempt in range(retries):
+            if self.interrupt_flag.is_set():
+                return
+            
             try:
                 start_time = time.time()
                 
@@ -317,6 +341,10 @@ class M3U8_Segments:
             segments_written = set()
 
             while not self.stop_event.is_set() or not self.queue.empty():
+                
+                if self.interrupt_flag.is_set():
+                    break
+                
                 try:
                     index, segment_content = self.queue.get(timeout=1)
 
@@ -365,6 +393,7 @@ class M3U8_Segments:
         Parameters:
             - add_desc (str): Additional description for the progress bar.
         """
+        self.setup_interrupt_handler()
 
         # Get config site from prev stack
         frames = get_call_stack()
@@ -420,45 +449,74 @@ class M3U8_Segments:
             mininterval=0.05
         )
 
-        # Start writer thread
-        writer_thread = threading.Thread(target=self.write_segments_to_file)
-        writer_thread.daemon = True
-        writer_thread.start()
+        try:
 
-        # Configure workers and delay
-        max_workers = len(self.valid_proxy) if THERE_IS_PROXY_LIST else TQDM_MAX_WORKER
-        delay = max(PROXY_START_MIN, min(PROXY_START_MAX, 1 / (len(self.valid_proxy) + 1))) if THERE_IS_PROXY_LIST else TQDM_DELAY_WORKER
+            # Start writer thread
+            writer_thread = threading.Thread(target=self.write_segments_to_file)
+            writer_thread.daemon = True
+            writer_thread.start()
 
-        # Download segments with completion verification
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = []
-            for index, segment_url in enumerate(self.segments):
-                time.sleep(delay)
-                futures.append(executor.submit(self.make_requests_stream, segment_url, index, progress_bar))
+            # Configure workers and delay
+            max_workers = len(self.valid_proxy) if THERE_IS_PROXY_LIST else TQDM_MAX_WORKER
+            delay = max(PROXY_START_MIN, min(PROXY_START_MAX, 1 / (len(self.valid_proxy) + 1))) if THERE_IS_PROXY_LIST else TQDM_DELAY_WORKER
 
-            # Wait for all futures to complete
-            for future in futures:
-                try:
-                    future.result()
-                except Exception as e:
-                    logging.error(f"Error in download thread: {str(e)}")
+            # Download segments with completion verification
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = []
+                for index, segment_url in enumerate(self.segments):
+                    # Check for interrupt before submitting each task
+                    if self.interrupt_flag.is_set():
+                        break
 
-            # Verify completion and retry missing segments
-            total_segments = len(self.segments)
-            completed_segments = len(self.downloaded_segments)
-            
-            if completed_segments < total_segments:
-                missing_segments = set(range(total_segments)) - self.downloaded_segments
-                logging.warning(f"Missing segments: {sorted(missing_segments)}")
-                
-                # Retry missing segments
-                for index in missing_segments:
-                    if self.stop_event.is_set():
+                    time.sleep(delay)
+                    futures.append(executor.submit(self.make_requests_stream, segment_url, index, progress_bar))
+
+                # Wait for futures with interrupt handling
+                for future in as_completed(futures):
+                    if self.interrupt_flag.is_set():
                         break
                     try:
-                        self.make_requests_stream(self.segments[index], index, progress_bar)
+                        future.result()
                     except Exception as e:
-                        logging.error(f"Failed to retry segment {index}: {str(e)}")
+                        logging.error(f"Error in download thread: {str(e)}")
+
+                # Interrupt handling for missing segments
+                if not self.interrupt_flag.is_set():
+                    total_segments = len(self.segments)
+                    completed_segments = len(self.downloaded_segments)
+                    
+                    if completed_segments < total_segments:
+                        missing_segments = set(range(total_segments)) - self.downloaded_segments
+                        logging.warning(f"Missing segments: {sorted(missing_segments)}")
+                        
+                        # Retry missing segments with interrupt check
+                        for index in missing_segments:
+                            if self.interrupt_flag.is_set():
+                                break
+                            try:
+                                self.make_requests_stream(self.segments[index], index, progress_bar)
+                            except Exception as e:
+                                logging.error(f"Failed to retry segment {index}: {str(e)}")
+
+        except Exception as e:
+            logging.error(f"Download failed: {str(e)}")
+            raise
+
+        finally:
+
+            # Clean up resources
+            self.stop_event.set()
+            writer_thread.join(timeout=30)
+            progress_bar.close()
+
+            # Check if download was interrupted
+            if self.download_interrupted:
+                console.log("[red] Download was manually stopped.")
+
+                # Optional: Delete partial download
+                if os.path.exists(self.tmp_file_path):
+                    os.remove(self.tmp_file_path)
+                sys.exit(0)
 
         # Clean up
         self.stop_event.set()
