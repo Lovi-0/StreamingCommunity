@@ -23,7 +23,7 @@ import httpx
 
 
 # Internal utilities
-from StreamingCommunity.Src.Util.console import console
+from StreamingCommunity.Src.Util.console import console, msg
 
 
 # Variable
@@ -318,9 +318,6 @@ class OsSummary():
 
         Returns:
             str: The version string of the executable.
-
-        Raises:
-            SystemExit: If the command is not found or fails to execute.
         """
 
         try:
@@ -328,7 +325,7 @@ class OsSummary():
             return version_output.split(" ")[2]
         
         except (FileNotFoundError, subprocess.CalledProcessError):
-            print(f"{command[0]} not found")
+            console.print(f"{command[0]} not found", style="bold red")
             sys.exit(0)
 
     def get_library_version(self, lib_name: str):
@@ -341,7 +338,6 @@ class OsSummary():
         Returns:
             str: The library name followed by its version, or `-not installed` if not found.
         """
-
         try:
             version = importlib.metadata.version(lib_name)
             return f"{lib_name}-{version}"
@@ -349,7 +345,62 @@ class OsSummary():
         except importlib.metadata.PackageNotFoundError:
             return f"{lib_name}-not installed"
 
-    def get_system_summary(self):
+    async def download_requirements(self, url: str, filename: str):
+        """
+        Download the requirements.txt file from the specified URL if not found locally using httpx.
+
+        Args:
+            url (str): The URL to download the requirements file from.
+            filename (str): The local filename to save the requirements file as.
+        """
+        try:
+            async with httpx.AsyncClient() as client:
+                console.print(f"{filename} not found locally. Downloading from {url}...", style="bold yellow")
+                response = await client.get(url)
+
+                if response.status_code == 200:
+                    with open(filename, 'wb') as f:
+                        f.write(response.content)
+
+                    console.print(f"{filename} successfully downloaded.", style="bold green")
+                
+                else:
+                    console.print(f"Failed to download {filename}. HTTP Status code: {response.status_code}", style="bold red")
+                    sys.exit(1)
+
+        except Exception as e:
+            console.print(f"Failed to download {filename}: {e}", style="bold red")
+            sys.exit(1)
+
+    def install_library(self, lib_name: str):
+        """
+        Install a Python library using pip.
+
+        Args:
+            lib_name (str): The name of the library to install.
+        """
+        try:
+            console.print(f"Installing {lib_name}...", style="bold yellow")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", lib_name])
+            console.print(f"{lib_name} installed successfully!", style="bold green")
+            
+        except subprocess.CalledProcessError as e:
+            console.print(f"Failed to install {lib_name}: {e}", style="bold red")
+            sys.exit(1)
+
+    def check_python_version(self):
+        """
+        Check if the installed Python is the official CPython distribution.
+        Exits with a message if not the official version.
+        """
+        python_implementation = platform.python_implementation()
+
+        if python_implementation != "CPython":
+            console.print(f"[bold red]Warning: You are using a non-official Python distribution: {python_implementation}.[/bold red]")
+            console.print("Please install the official Python from [bold blue]https://www.python.org[/bold blue] and try again.", style="bold yellow")
+            sys.exit(0)
+
+    async def get_system_summary(self):
         """
         Generate a summary of the system environment.
 
@@ -360,6 +411,9 @@ class OsSummary():
             - Installed Python libraries as listed in `requirements.txt`.
         """
         
+        # Check if Python is the official CPython
+        self.check_python_version()
+
         # Check internet connectivity
         InternManager().check_internet()
         console.print("[bold blue]System Summary[/bold blue][white]:")
@@ -381,12 +435,32 @@ class OsSummary():
         console.print(f"[cyan]Exe versions[white]: [bold red]ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}[/bold red]")
         logging.info(f"Dependencies: ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}")
 
-        # Optional libraries versions
-        """optional_libraries = [line.strip() for line in open('requirements.txt', 'r', encoding='utf-8-sig')]
-        optional_libs_versions = [self.get_library_version(lib) for lib in optional_libraries]
+        # Check if requirements.txt exists, if not download it
+        requirements_file = 'requirements.txt'
+        if not os.path.exists(requirements_file):
+            await self.download_requirements(
+                'https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/refs/heads/main/requirements.txt',
+                requirements_file
+            )
+
+        # Read the optional libraries from the requirements file
+        optional_libraries = [line.strip() for line in open(requirements_file, 'r', encoding='utf-8-sig')]
         
-        console.print(f"[cyan]Libraries[white]: [bold red]{', '.join(optional_libs_versions)}[/bold red]\n")
-        logging.info(f"Libraries: {', '.join(optional_libs_versions)}")"""
+        # Check if libraries are installed and prompt to install missing ones
+        for lib in optional_libraries:
+            installed_version = self.get_library_version(lib)
+            if 'not installed' in installed_version:
+                # Prompt user to install missing library using Prompt.ask()
+                user_response = msg.ask(f"{lib} is not installed. Do you want to install it? (yes/no)", default="y")
+
+                if user_response.lower().strip() in ["yes", "y"]:
+                    self.install_library(lib)
+            else:
+                #console.print(f"[cyan]Library[white]: [bold red]{installed_version}[/bold red]")
+                logging.info(f"Library: {installed_version}")
+        
+        console.print(f"[cyan]Libraries[white]: [bold red]{', '.join([self.get_library_version(lib) for lib in optional_libraries])}[/bold red]\n")
+        logging.info(f"Libraries: {', '.join([self.get_library_version(lib) for lib in optional_libraries])}")
 
 
 

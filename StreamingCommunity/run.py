@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import glob
+import asyncio
 import logging
 import platform
 import argparse
@@ -16,7 +17,7 @@ from StreamingCommunity.Src.Util.message import start_message
 from StreamingCommunity.Src.Util.console import console, msg
 from StreamingCommunity.Src.Util._jsonConfig import config_manager
 from StreamingCommunity.Src.Upload.update import update as git_update
-from StreamingCommunity.Src.Util.os import os_summary
+from StreamingCommunity.Src.Util.os import OsSummary
 from StreamingCommunity.Src.Lib.TMBD import tmdb
 from StreamingCommunity.Src.Util.logger import Logger
 
@@ -103,7 +104,8 @@ def initialize():
     start_message()
 
     # Get system info
-    os_summary.get_system_summary()
+    os_summary = OsSummary()
+    asyncio.run(os_summary.get_system_summary())
 
     # Set terminal size for win 7
     if platform.system() == "Windows" and "7" in platform.version():

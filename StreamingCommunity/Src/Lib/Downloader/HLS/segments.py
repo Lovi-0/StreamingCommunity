@@ -55,7 +55,7 @@ max_timeout = config_manager.get_int("REQUESTS", "timeout")
 
 
 class M3U8_Segments:
-    def __init__(self, url: str, tmp_folder: str, is_index_url: bool = True):
+    def __init__(self, url: str, tmp_folder: str, is_index_url: bool = True, base_timeout=1.0, max_timeout=5.0):
         """
         Initializes the M3U8_Segments object.
 
@@ -81,6 +81,9 @@ class M3U8_Segments:
         self.queue = PriorityQueue()
         self.stop_event = threading.Event()
         self.downloaded_segments = set()
+        self.base_timeout = base_timeout
+        self.max_timeout = max_timeout
+        self.current_timeout = base_timeout
 
         # Stopping
         self.interrupt_flag = threading.Event()
@@ -226,13 +229,7 @@ class M3U8_Segments:
             - progress_bar (tqdm): Progress counter for tracking download progress.
             - retries (int): The number of times to retry on failure (default is 3).
             - backoff_factor (float): The backoff factor for exponential backoff (default is 1.5 seconds).
-        """
-        if self.interrupt_flag.is_set():
-            return
-        
-        need_verify = REQUEST_VERIFY
-        min_segment_size = 100  # Minimum acceptable size for a TS segment in bytes
-
+        """       
         for attempt in range(retries):
             if self.interrupt_flag.is_set():
                 return
@@ -247,7 +244,7 @@ class M3U8_Segments:
                     proxy = self.valid_proxy[index % len(self.valid_proxy)]
                     logging.info(f"Use proxy: {proxy}")
 
-                    with httpx.Client(proxies=proxy, verify=need_verify) as client:  
+                    with httpx.Client(proxies=proxy, verify=REQUEST_VERIFY) as client:  
                         if 'key_base_url' in self.__dict__:
                              response = client.get(
                                 url=ts_url, 
@@ -265,7 +262,7 @@ class M3U8_Segments:
                             )
 
                 else:
-                    with httpx.Client(verify=need_verify) as client_2:
+                    with httpx.Client(verify=REQUEST_VERIFY) as client_2:
                         if 'key_base_url' in self.__dict__:
                             response = client_2.get(
                                 url=ts_url, 
@@ -286,19 +283,12 @@ class M3U8_Segments:
                 response.raise_for_status()
                 segment_content = response.content
                 content_size = len(segment_content)
-
-                # Check if segment is too small (possibly corrupted or empty)
-                if content_size < min_segment_size:
-                    raise httpx.RequestError(f"Segment {index} too small ({content_size} bytes)")
-
                 duration = time.time() - start_time
 
                 # Decrypt if needed and verify decrypted content
                 if self.decryption is not None:
                     try:
                         segment_content = self.decryption.decrypt(segment_content)
-                        if len(segment_content) < min_segment_size:
-                            raise Exception(f"Decrypted segment {index} too small ({len(segment_content)} bytes)")
                         
                     except Exception as e:
                         logging.error(f"Decryption failed for segment {index}: {str(e)}")
@@ -334,19 +324,20 @@ class M3U8_Segments:
         """
         Writes segments to file with additional verification.
         """
+        buffer = {}
+        expected_index = 0
+        segments_written = set()
+        
         with open(self.tmp_file_path, 'wb') as f:
-            expected_index = 0
-            buffer = {}
-            total_written = 0
-            segments_written = set()
-
             while not self.stop_event.is_set() or not self.queue.empty():
-                
                 if self.interrupt_flag.is_set():
                     break
                 
                 try:
-                    index, segment_content = self.queue.get(timeout=1)
+                    index, segment_content = self.queue.get(timeout=self.current_timeout)
+
+                    # Successful queue retrieval: reduce timeout
+                    self.current_timeout = max(self.base_timeout, self.current_timeout / 2)
 
                     # Handle failed segments
                     if segment_content is None:
@@ -357,7 +348,6 @@ class M3U8_Segments:
                     # Write segment if it's the next expected one
                     if index == expected_index:
                         f.write(segment_content)
-                        total_written += len(segment_content)
                         segments_written.add(index)
                         f.flush()
                         expected_index += 1
@@ -365,26 +355,25 @@ class M3U8_Segments:
                         # Write any buffered segments that are now in order
                         while expected_index in buffer:
                             next_segment = buffer.pop(expected_index)
+
                             if next_segment is not None:
                                 f.write(next_segment)
-                                total_written += len(next_segment)
                                 segments_written.add(expected_index)
                                 f.flush()
+
                             expected_index += 1
+                    
                     else:
                         buffer[index] = segment_content
 
                 except queue.Empty:
+                    self.current_timeout = min(self.max_timeout, self.current_timeout * 1.5)
+
                     if self.stop_event.is_set():
                         break
-                    continue
+
                 except Exception as e:
                     logging.error(f"Error writing segment {index}: {str(e)}")
-                    continue
-
-            # Final verification
-            if total_written == 0:
-                raise Exception("No data written to file")
     
     def download_streams(self, add_desc):
         """

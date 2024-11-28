@@ -65,18 +65,21 @@ class M3U8_Ts_Estimator:
             try:
                 io_counters = psutil.net_io_counters()
                 return io_counters
+            
             except Exception as e:
                 logging.warning(f"Unable to access network I/O counters: {e}")
                 return None
 
         while True:
             old_value = get_network_io()
+
             if old_value is None:  # If psutil is not available, continue with default values
                 time.sleep(interval)
                 continue
 
             time.sleep(interval)
             new_value = get_network_io()
+            
             if new_value is None:  # Handle again if psutil fails in the next call
                 time.sleep(interval)
                 continue
