@@ -6,7 +6,7 @@ sys.path.append(src_path)
 
 
 # Import
-from urllib.parse import urlparse, urlencode, urlunparse
+import json
 from StreamingCommunity.Src.Api.Player.Helper.Vixcloud.js_parser import JavaScriptParser
 from StreamingCommunity.Src.Api.Player.Helper.Vixcloud.util import WindowVideo, WindowParameter, StreamsCollection
 
@@ -28,11 +28,13 @@ script_text = '''
 
 # Test
 converter = JavaScriptParser.parse(js_string=str(script_text))
+json_string = json.dumps(converter, indent=2)
+print("Converted json: ", json_string, "\n")
 
 window_video = WindowVideo(converter.get('video'))
 window_streams = StreamsCollection(converter.get('streams'))
 window_parameter = WindowParameter(converter.get('masterPlaylist'))
 
-print(window_video, "\n")
-print(window_streams, "\n")
-print(window_parameter, "\n")
+print(window_video)
+print(window_streams)
+print(window_parameter)

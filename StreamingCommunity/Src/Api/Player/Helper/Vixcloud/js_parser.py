@@ -136,5 +136,8 @@ class JavaScriptParser:
             else:
                 result[var_name] = cls.parse_value(value)
         
-        return result
+        can_play_fhd_match = re.search(r'window\.canPlayFHD\s*=\s*(\w+);?', js_string)
+        if can_play_fhd_match:
+            result['canPlayFHD'] = cls.parse_value(can_play_fhd_match.group(1))
         
+        return result

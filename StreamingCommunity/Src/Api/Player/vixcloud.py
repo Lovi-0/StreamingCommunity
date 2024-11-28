@@ -2,7 +2,7 @@
 
 import sys
 import logging
-from urllib.parse import urlparse, urlencode, urlunparse
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 
 # External libraries
@@ -89,6 +89,7 @@ class VideoSource:
             converter = JavaScriptParser.parse(js_string=str(script_text))
 
             # Create window video, streams and parameter objects
+            self.canPlayFHD = bool(converter.get('canPlayFHD'))
             self.window_video = WindowVideo(converter.get('video'))
             self.window_streams = StreamsCollection(converter.get('streams'))
             self.window_parameter = WindowParameter(converter.get('masterPlaylist'))
@@ -137,25 +138,36 @@ class VideoSource:
     def get_playlist(self) -> str:
         """
         Generate authenticated playlist URL.
-        
+
         Returns:
             str: Fully constructed playlist URL with authentication parameters
         """
+        # Initialize parameters dictionary
         params = {}
 
-        if self.window_video.quality == 1080:
+        # Add 'h' parameter if video quality is 1080p
+        if self.canPlayFHD:
             params['h'] = 1
 
-        if "b=1" in self.window_parameter.url:
+        # Parse the original URL
+        parsed_url = urlparse(self.window_parameter.url)
+        query_params = parse_qs(parsed_url.query)
+
+        # Check specifically for 'b=1' in the query parameters
+        if 'b' in query_params and query_params['b'] == ['1']:
             params['b'] = 1
 
+        # Add authentication parameters (token and expiration)
         params.update({
             "token": self.window_parameter.token,
             "expires": self.window_parameter.expires
         })
 
+        # Build the updated query string
         query_string = urlencode(params)
-        return urlunparse(urlparse(self.window_parameter.url)._replace(query=query_string))
+
+        # Construct the new URL with updated query parameters
+        return urlunparse(parsed_url._replace(query=query_string))
 
 
 class VideoSourceAnime(VideoSource):
