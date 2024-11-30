@@ -17,6 +17,7 @@ Chat, contribute, and have fun in our **Git_StreamingCommunity** Discord [Server
         - [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
         - [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux)
 - [Configuration](#configuration)
+- [DOCKER](#docker)
 - [Tutorial](#tutorial)
 - [To Do](#to-do)
 
@@ -275,6 +276,39 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
 > "specific_list_audio": ["ita", "eng", "spa"],
 > "specific_list_subtitles": ["ita", "eng", "spa"]
 > ```
+
+## Docker 🐳
+
+You can run the script in a docker container, to build the image just run
+
+```
+docker build -t streaming-community-api .
+```
+
+and to run it use
+
+```
+docker run -it -p 8000:8000 streaming-community-api
+```
+
+By default the videos will be saved in `/app/Video` inside the container, if you want to to save them in your machine instead of the container just run
+
+```
+docker run -it -p 8000:8000 -v /path/to/download:/app/Video streaming-community-api
+```
+
+### Docker quick setup with Make
+
+Inside the Makefile (install `make`) are already configured two commands to build and run the container:
+
+```
+make build-container
+
+# set your download directory as ENV variable
+make LOCAL_DIR=/path/to/download run-container
+```
+
+The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
 
 ### M3U8_PARSER Settings
 

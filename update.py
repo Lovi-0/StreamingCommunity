@@ -16,9 +16,10 @@ from rich.table import Table
 
 
 # Variable
+max_timeout = 20
 console = Console()
 local_path = os.path.join(".")
-from StreamingCommunity.Src.Upload.version import __author__, __title__
+from StreamingCommunity.Upload.version import __author__, __title__
 
 
 def move_content(source: str, destination: str):
@@ -125,7 +126,7 @@ def download_and_extract_latest_commit():
             'Accept': 'application/vnd.github.v3+json',
             'User-Agent': f'{__title__}-updater'
         }
-        response = httpx.get(api_url, headers=headers, timeout=10)
+        response = httpx.get(api_url, headers=headers, timeout=max_timeout)
 
         if response.status_code == 200:
             commit_info = response.json()[0]
@@ -138,7 +139,7 @@ def download_and_extract_latest_commit():
             console.log("[green]Downloading latest commit zip file...")
 
             # Download the zipball
-            response = httpx.get(zipball_url, follow_redirects=True, timeout=10)
+            response = httpx.get(zipball_url, follow_redirects=True, timeout=max_timeout)
             temp_path = os.path.join(os.path.dirname(os.getcwd()), 'temp_extracted')
 
             # Extract the content of the zipball into a temporary folder

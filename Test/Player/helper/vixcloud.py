@@ -7,8 +7,8 @@ sys.path.append(src_path)
 
 # Import
 import json
-from StreamingCommunity.Src.Api.Player.Helper.Vixcloud.js_parser import JavaScriptParser
-from StreamingCommunity.Src.Api.Player.Helper.Vixcloud.util import WindowVideo, WindowParameter, StreamsCollection
+from StreamingCommunity.Api.Player.Helper.Vixcloud.js_parser import JavaScriptParser
+from StreamingCommunity.Api.Player.Helper.Vixcloud.util import WindowVideo, WindowParameter, StreamsCollection
 
 
 # Data

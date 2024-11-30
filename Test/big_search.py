@@ -15,7 +15,7 @@ from rich.console import Console
 
 
 # Other import
-from StreamingCommunity.Src.Api.Template.Class.SearchType import MediaManager
+from StreamingCommunity.Api.Template.Class.SearchType import MediaManager
 
 
 # Variable
@@ -27,7 +27,7 @@ def load_search_functions():
     loaded_functions = {}
 
     # Traverse the Api directory
-    api_dir = os.path.join(os.path.dirname(__file__), '..', 'StreamingCommunity', 'Src', 'Api', 'Site')
+    api_dir = os.path.join(os.path.dirname(__file__), '..', 'StreamingCommunity',  'Api', 'Site')
     init_files = glob.glob(os.path.join(api_dir, '*', '__init__.py'))
     
     logging.info(f"Base folder path: {api_dir}")
@@ -42,7 +42,7 @@ def load_search_functions():
 
         try:
             # Dynamically import the module
-            mod = importlib.import_module(f'StreamingCommunity.Src.Api.Site.{module_name}')
+            mod = importlib.import_module(f'StreamingCommunity.Api.Site.{module_name}')
 
             # Get 'indice' from the module
             indice = getattr(mod, 'indice', 0)
@@ -67,7 +67,7 @@ def load_search_functions():
 
         try:
             # Dynamically import the module
-            mod = importlib.import_module(f'StreamingCommunity.Src.Api.Site.{module_name}')
+            mod = importlib.import_module(f'StreamingCommunity.Api.Site.{module_name}')
 
             # Get the search function from the module (assuming the function is named 'search' and defined in __init__.py)
             search_function = getattr(mod, 'search')

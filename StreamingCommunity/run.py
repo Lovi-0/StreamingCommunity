@@ -13,13 +13,13 @@ from typing import Callable
 
 
 # Internal utilities
-from StreamingCommunity.Src.Util.message import start_message
-from StreamingCommunity.Src.Util.console import console, msg
-from StreamingCommunity.Src.Util._jsonConfig import config_manager
-from StreamingCommunity.Src.Upload.update import update as git_update
-from StreamingCommunity.Src.Util.os import OsSummary
-from StreamingCommunity.Src.Lib.TMBD import tmdb
-from StreamingCommunity.Src.Util.logger import Logger
+from StreamingCommunity.Util.message import start_message
+from StreamingCommunity.Util.console import console, msg
+from StreamingCommunity.Util._jsonConfig import config_manager
+from StreamingCommunity.Upload.update import update as git_update
+from StreamingCommunity.Util.os import OsSummary
+from StreamingCommunity.Lib.TMBD import tmdb
+from StreamingCommunity.Util.logger import Logger
 
 
 # Config
@@ -46,8 +46,13 @@ def load_search_functions():
     modules = []
     loaded_functions = {}
 
-    # Traverse the Api directory
-    api_dir = os.path.join(os.path.dirname(__file__), 'Src', 'Api', 'Site')
+    # Find api home directory
+    if getattr(sys, 'frozen', False):  # Modalità PyInstaller
+        base_path = os.path.join(sys._MEIPASS, "StreamingCommunity")
+    else:
+        base_path = os.path.dirname(__file__)
+
+    api_dir = os.path.join(base_path, 'Api', 'Site')
     init_files = glob.glob(os.path.join(api_dir, '*', '__init__.py'))
     
     # Retrieve modules and their indices
@@ -59,7 +64,7 @@ def load_search_functions():
 
         try:
             # Dynamically import the module
-            mod = importlib.import_module(f'StreamingCommunity.Src.Api.Site.{module_name}')
+            mod = importlib.import_module(f'StreamingCommunity.Api.Site.{module_name}')
 
             # Get 'indice' from the module
             indice = getattr(mod, 'indice', 0)
@@ -84,7 +89,7 @@ def load_search_functions():
         try:
 
             # Dynamically import the module
-            mod = importlib.import_module(f'StreamingCommunity.Src.Api.Site.{module_name}')
+            mod = importlib.import_module(f'StreamingCommunity.Api.Site.{module_name}')
 
             # Get the search function from the module (assuming the function is named 'search' and defined in __init__.py)
             search_function = getattr(mod, 'search')
