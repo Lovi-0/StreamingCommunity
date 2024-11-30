@@ -441,35 +441,36 @@ class OsSummary():
         console.print(f"[cyan]Path[white]: [red]ffmpeg [bold yellow]'{ffmpeg_path}'[/bold yellow][white], [red]ffprobe '[bold yellow]{ffprobe_path}'[/bold yellow]")
         console.print(f"[cyan]Exe versions[white]: [bold red]ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}[/bold red]")
 
-        # Check if requirements.txt exists, if not download it
-        requirements_file = 'requirements.txt'
-        if not os.path.exists(requirements_file):
-            await self.download_requirements(
-                'https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/refs/heads/main/requirements.txt',
-                requirements_file
-            )
+        # Check if requirements.txt exists, if not on pyinstaller
+        if not getattr(sys, 'frozen', False):
+            requirements_file = 'requirements.txt'
+            if not os.path.exists(requirements_file):
+                await self.download_requirements(
+                    'https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/refs/heads/main/requirements.txt',
+                    requirements_file
+                )
 
-        # Read the optional libraries from the requirements file
-        optional_libraries = [line.strip() for line in open(requirements_file, 'r', encoding='utf-8-sig')]
-        
-        # Check if libraries are installed and prompt to install missing ones
-        for lib in optional_libraries:
-            installed_version = self.get_library_version(lib)
+            # Read the optional libraries from the requirements file
+            optional_libraries = [line.strip() for line in open(requirements_file, 'r', encoding='utf-8-sig')]
+            
+            # Check if libraries are installed and prompt to install missing ones
+            for lib in optional_libraries:
+                installed_version = self.get_library_version(lib)
 
-            if 'not installed' in installed_version:
-                
-                # Prompt user to install missing library using Prompt.ask()
-                user_response = msg.ask(f"{lib} is not installed. Do you want to install it? (yes/no)", default="y")
-
-                if user_response.lower().strip() in ["yes", "y"]:
-                    self.install_library(lib)
+                if 'not installed' in installed_version:
                     
-            else:
-                #console.print(f"[cyan]Library[white]: [bold red]{installed_version}[/bold red]")
-                logging.info(f"Library: {installed_version}")
-        
-        console.print(f"[cyan]Libraries[white]: [bold red]{', '.join([self.get_library_version(lib) for lib in optional_libraries])}[/bold red]\n")
-        logging.info(f"Libraries: {', '.join([self.get_library_version(lib) for lib in optional_libraries])}")
+                    # Prompt user to install missing library using Prompt.ask()
+                    user_response = msg.ask(f"{lib} is not installed. Do you want to install it? (yes/no)", default="y")
+
+                    if user_response.lower().strip() in ["yes", "y"]:
+                        self.install_library(lib)
+                        
+                else:
+                    #console.print(f"[cyan]Library[white]: [bold red]{installed_version}[/bold red]")
+                    logging.info(f"Library: {installed_version}")
+            
+            console.print(f"[cyan]Libraries[white]: [bold red]{', '.join([self.get_library_version(lib) for lib in optional_libraries])}[/bold red]\n")
+            logging.info(f"Libraries: {', '.join([self.get_library_version(lib) for lib in optional_libraries])}")
 
 
 

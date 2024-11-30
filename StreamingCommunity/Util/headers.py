@@ -9,7 +9,7 @@ from fake_useragent import UserAgent
 
 
 # Variable
-ua = UserAgent()
+ua = UserAgent(use_external_data=True)
 
 
 def extract_versions(user_agent):
