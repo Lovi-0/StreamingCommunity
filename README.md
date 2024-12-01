@@ -357,7 +357,7 @@ The `run-container` command mounts also the `config.json` file, so any change to
 
 - [Windows Tutorial](https://www.youtube.com/watch?v=mZGqK4wdN-k)
 - [Linux Tutorial](https://www.youtube.com/watch?v=0qUNXPE_mTg)
-- [Pypy Tutorial](https://www.youtube.com/watch?v=3j_1efmpVGY)
+- [Pypy Tutorial](https://www.youtube.com/watch?v=C6m9ZKOK0p4)
 - [Compiled .exe Tutorial](https://www.youtube.com/watch?v=pm4lqsxkTVo)
 
 ## 📝 To Do 
