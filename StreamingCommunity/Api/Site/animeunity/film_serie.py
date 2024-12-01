@@ -24,11 +24,10 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSourceAnime
 
 # Variable
 from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER, MOVIE_FOLDER
-scrape_serie = ScrapeSerieAnime(SITE_NAME)
-video_source = VideoSourceAnime(SITE_NAME)
 
 
-def download_episode(index_select: int):
+
+def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_source: VideoSourceAnime):
     """
     Downloads the selected episode.
 
@@ -46,12 +45,6 @@ def download_episode(index_select: int):
 
         # Collect mp4 url
         video_source.get_embed(obj_episode.id)
-
-        # Get the js script from the episode
-        #js_script = video_source.get_embed(obj_episode.id)
-
-        # Parse parameter in embed text
-        #video_source.parse_script(js_script)
 
         # Create output path
         title_name = f"{obj_episode.number}.mp4"
@@ -90,6 +83,8 @@ def download_series(select_title: MediaItem):
         - tv_id (int): The ID of the TV series.
         - tv_name (str): The name of the TV series.
     """
+    scrape_serie = ScrapeSerieAnime(SITE_NAME)
+    video_source = VideoSourceAnime(SITE_NAME)
 
     # Set up video source
     scrape_serie.setup(None, select_title.id, select_title.slug)
@@ -106,12 +101,12 @@ def download_series(select_title: MediaItem):
 
     # Download selected episodes
     if len(list_episode_select) == 1 and last_command != "*":
-        download_episode(list_episode_select[0]-1)
+        download_episode(list_episode_select[0]-1, scrape_serie, video_source)
 
     # Download all other episodes selecter
     else:
         for i_episode in list_episode_select:
-            download_episode(i_episode-1)
+            download_episode(i_episode-1, scrape_serie, video_source)
 
 
 def download_film(select_title: MediaItem):
@@ -123,9 +118,13 @@ def download_film(select_title: MediaItem):
         - title_name (str): The title of the film.
     """
 
+    # Init class
+    scrape_serie = ScrapeSerieAnime(SITE_NAME)
+    video_source = VideoSourceAnime(SITE_NAME)
+
     # Set up video source
     scrape_serie.setup(None, select_title.id, select_title.slug)
     scrape_serie.is_series = False
 
     # Start download
-    download_episode(0)
+    download_episode(0, scrape_serie, video_source)

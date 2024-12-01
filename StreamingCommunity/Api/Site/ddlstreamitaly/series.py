@@ -26,11 +26,10 @@ from StreamingCommunity.Api.Player.ddl import VideoSource
 # Variable
 from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER
 table_show_manager = TVShowManager()
-video_source = VideoSource()
 
 
 
-def download_video(scape_info_serie: GetSerieInfo, index_episode_selected: int) -> None:
+def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, video_source: VideoSource) -> None:
     """
     Download a single episode video.
 
@@ -86,6 +85,7 @@ def download_thread(dict_serie: MediaItem):
 
     # Init class
     scape_info_serie = GetSerieInfo(dict_serie)
+    video_source = VideoSource()
 
     # Collect information about thread
     list_dict_episode = scape_info_serie.get_episode_number()
@@ -103,8 +103,7 @@ def download_thread(dict_serie: MediaItem):
 
     # Download selected episodes
     for i_episode in list_episode_select:
-        download_video(scape_info_serie, i_episode)
-
+        download_video(i_episode, scape_info_serie, video_source)
 
 
 def display_episodes_list(obj_episode_manager) -> str:

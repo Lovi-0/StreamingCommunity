@@ -10,6 +10,8 @@ Chat, contribute, and have fun in our **Git_StreamingCommunity** Discord [Server
 
 ## 📋 Table of Contents
 
+- [Website available](#-website-status)
+- [Release files](#-release-files)
 - [Installation](#installation)
     - [PyPI Installation](#pypi-installation)
     - [Automatic Installation](#automatic-installation)
@@ -20,6 +22,7 @@ Chat, contribute, and have fun in our **Git_StreamingCommunity** Discord [Server
 - [DOCKER](#docker)
 - [Tutorial](#tutorial)
 - [To Do](#to-do)
+
 
 ## 💻 Installation
 
@@ -146,6 +149,15 @@ python update.py
 python3 update.py
 ```
 
+
+
+## 📂 Release files
+
+| **File**                     | **Description**                                                            |
+|------------------------------|----------------------------------------------------------------------------|
+| `StreamingCommunity.exe`     | Windows (Win10+) standalone executable (recommended for Windows).          |
+| `StreamingCommunity-main.zip`| Source code and resources                                                  |
+
 ## Configuration ⚙️
 
 You can change some behaviors by tweaking the configuration file.
@@ -157,6 +169,8 @@ The configuration file is divided into several main sections:
 ```json
 {
     "root_path": "Video",
+    "movie_folder_name": "Movie",
+    "serie_folder_name": "TV",
     "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
     "not_close": false,
     "show_trending": false
@@ -166,11 +180,13 @@ The configuration file is divided into several main sections:
 - `root_path`: Directory where all videos will be saved
 
   #### Path examples:
-
-
   * Windows: `C:\\MyLibrary\\Folder` or `\\\\MyServer\\MyLibrary` (if you want to use a network folder)
   * Linux/MacOS: `Desktop/MyLibrary/Folder`
     `<br/><br/>`
+
+- `movie_folder_name`: The name of the subdirectory where movies will be stored.
+- `serie_folder_name`: The name of the subdirectory where TV series will be stored.
+
 - `map_episode_name`: Template for TV series episode filenames
 
   #### Episode name usage:
@@ -277,6 +293,18 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
 > "specific_list_subtitles": ["ita", "eng", "spa"]
 > ```
 
+### M3U8_PARSER Settings
+
+```json
+{
+    "force_resolution": -1,
+    "get_only_link": false
+}
+```
+
+- `force_resolution`: Force specific resolution (-1 for best available, or specify 1080, 720, 360)
+- `get_only_link`: Return M3U8 playlist/index URL instead of downloading
+
 ## Docker 🐳
 
 You can run the script in a docker container, to build the image just run
@@ -310,19 +338,6 @@ make LOCAL_DIR=/path/to/download run-container
 
 The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
 
-### M3U8_PARSER Settings
-
-```json
-{
-    "force_resolution": -1,
-    "get_only_link": false
-}
-```
-
-- `force_resolution`: Force specific resolution (-1 for best available, or specify 1080, 720, 360)
-- `get_only_link`: Return M3U8 playlist/index URL instead of downloading
-
-
 ## 🌐 Website Status 
 
 | Website            | Status |
@@ -355,3 +370,7 @@ Contributions are welcome! Steps:
 3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open Pull Request
+
+
+## 🛡️ Disclaimer
+This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.

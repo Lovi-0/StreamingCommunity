@@ -23,7 +23,6 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSource
 
 # Variable
 from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
-video_source = VideoSource(SITE_NAME, False)
         
 
 def download_film(select_title: MediaItem):
@@ -39,7 +38,8 @@ def download_film(select_title: MediaItem):
     start_message()
     console.print(f"[yellow]Download:  [red]{select_title.slug} \n")
 
-    # Set domain and media ID for the video source
+    # Init class
+    video_source = VideoSource(SITE_NAME, False)
     video_source.setup(select_title.id)
 
     # Retrieve scws and if available master playlist

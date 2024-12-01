@@ -25,13 +25,11 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSource
 
 # Variable
 from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER
-scrape_serie = ScrapeSerie(SITE_NAME)
-video_source = VideoSource(SITE_NAME, True)
 table_show_manager = TVShowManager()
 
 
 
-def download_video(tv_name: str, index_season_selected: int, index_episode_selected: int) -> None:
+def download_video(tv_name: str, index_season_selected: int, index_episode_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource) -> None:
     """
     Download a single episode video.
 
@@ -75,7 +73,7 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
         console.print("[green]Result: ")
         console.print(r_proc)
 
-def download_episode(tv_name: str, index_season_selected: int, download_all: bool = False) -> None:
+def download_episode(tv_name: str, index_season_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource, download_all: bool = False) -> None:
     """
     Download episodes of a selected season.
 
@@ -98,13 +96,13 @@ def download_episode(tv_name: str, index_season_selected: int, download_all: boo
 
         # Download all episodes without asking
         for i_episode in range(1, episodes_count + 1):
-            download_video(tv_name, index_season_selected, i_episode)
+            download_video(tv_name, index_season_selected, i_episode, scrape_serie, video_source)
         console.print(f"\n[red]End downloaded [yellow]season: [red]{index_season_selected}.")
 
     else:
 
         # Display episodes list and manage user selection
-        last_command = display_episodes_list()
+        last_command = display_episodes_list(scrape_serie)
         list_episode_select = manage_selection(last_command, episodes_count)
 
         try:
@@ -115,7 +113,7 @@ def download_episode(tv_name: str, index_season_selected: int, download_all: boo
 
         # Download selected episodes
         for i_episode in list_episode_select:
-            download_video(tv_name, index_season_selected, i_episode)
+            download_video(tv_name, index_season_selected, i_episode, scrape_serie, video_source)
 
 def download_series(select_season: MediaItem, version: str) -> None:
     """
@@ -129,6 +127,10 @@ def download_series(select_season: MediaItem, version: str) -> None:
 
     # Start message and set up video source
     start_message()
+
+    # Init class
+    scrape_serie = ScrapeSerie(SITE_NAME)
+    video_source = VideoSource(SITE_NAME, True)
 
     # Setup video source
     scrape_serie.setup(version, select_season.id, select_season.slug)
@@ -159,14 +161,14 @@ def download_series(select_season: MediaItem, version: str) -> None:
         if len(list_season_select) > 1 or index_season_selected == "*":
 
             # Download all episodes if multiple seasons are selected or if '*' is used
-            download_episode(select_season.slug, i_season, download_all=True)
+            download_episode(select_season.slug, i_season, scrape_serie, video_source, download_all=True)
         else:
 
             # Otherwise, let the user select specific episodes for the single season
-            download_episode(select_season.slug, i_season, download_all=False)
+            download_episode(select_season.slug, i_season, scrape_serie, video_source, download_all=False)
 
 
-def display_episodes_list() -> str:
+def display_episodes_list(scrape_serie) -> str:
     """
     Display episodes list and handle user input.
 

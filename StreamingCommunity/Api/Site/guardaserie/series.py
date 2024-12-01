@@ -29,7 +29,7 @@ table_show_manager = TVShowManager()
 
 
 
-def download_video(scape_info_serie: GetSerieInfo, index_season_selected: int, index_episode_selected: int) -> None:
+def download_video(index_season_selected: int, index_episode_selected: int, scape_info_serie: GetSerieInfo) -> None:
     """
     Download a single episode video.
 
@@ -95,7 +95,7 @@ def download_episode(scape_info_serie: GetSerieInfo, index_season_selected: int,
 
         # Download all episodes without asking
         for i_episode in range(1, episodes_count + 1):
-            download_video(scape_info_serie, index_season_selected, i_episode)
+            download_video(index_season_selected, i_episode, scape_info_serie)
         console.print(f"\n[red]End downloaded [yellow]season: [red]{index_season_selected}.")
 
     else:
@@ -112,7 +112,7 @@ def download_episode(scape_info_serie: GetSerieInfo, index_season_selected: int,
 
         # Download selected episodes
         for i_episode in list_episode_select:
-            download_video(scape_info_serie, index_season_selected, i_episode)
+            download_video(index_season_selected, i_episode, scape_info_serie)
 
 
 def download_series(dict_serie: MediaItem) -> None:
