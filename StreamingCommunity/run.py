@@ -142,7 +142,7 @@ def main():
 
     # Create logger
     log_not = Logger()
-    initialize()
+    #initialize()
 
     # Load search functions
     search_functions = load_search_functions()
