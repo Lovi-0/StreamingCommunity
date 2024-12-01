@@ -11,6 +11,7 @@ import shutil
 import glob
 from typing import Optional, Tuple
 
+
 # External library
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeRemainingColumn
@@ -18,7 +19,6 @@ from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeRe
 
 # Variable
 console = Console()
-
 FFMPEG_CONFIGURATION = {
     'windows': {
         'base_dir': lambda home: os.path.join(os.path.splitdrive(home)[0] + os.path.sep, 'binary'),
@@ -208,7 +208,7 @@ class FFMPEGDownloader:
         Returns paths of ffmpeg and ffprobe
         """
         # First, check if binaries already exist in base directory
-        existing_ffmpeg, existing_ffprobe = self._check_existing_binaries()
+        existing_ffmpeg, existing_ffprobe, existing_ffplay = self._check_existing_binaries()
         if existing_ffmpeg and existing_ffprobe:
             return existing_ffmpeg, existing_ffprobe
 

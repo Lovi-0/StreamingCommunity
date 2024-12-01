@@ -13,7 +13,7 @@ import subprocess
 import contextlib
 import pathvalidate
 import urllib.request
-import pkg_resources
+import importlib.metadata
 
 
 # External library
@@ -318,13 +318,27 @@ class OsSummary():
         Returns:
             str: The version string of the executable.
         """
-
         try:
             version_output = subprocess.check_output(command, stderr=subprocess.STDOUT).decode().split('\n')[0]
             return version_output.split(" ")[2]
         
         except (FileNotFoundError, subprocess.CalledProcessError):
             console.print(f"{command[0]} not found", style="bold red")
+            sys.exit(0)
+
+    def check_ffmpeg_location(self, command: list):
+        """
+        Run 'where ffmpeg' command to check FFmpeg's location.
+
+        Returns:
+            str: Location of FFmpeg executable or None if not found
+        """
+        try:
+            result = subprocess.check_output(command, stderr=subprocess.STDOUT, text=True).strip()
+            return result
+        
+        except subprocess.CalledProcessError:
+            console.print("FFmpeg not found in system PATH", style="bold red")
             sys.exit(0)
 
     def get_library_version(self, lib_name: str):
@@ -338,40 +352,35 @@ class OsSummary():
             str: The library name followed by its version, or `-not installed` if not found.
         """
         try:
-            version = pkg_resources.get_distribution(lib_name).version
+            version = importlib.metadata.version(lib_name)
             return f"{lib_name}-{version}"
         
-        except pkg_resources.DistributionNotFound as e:
-            logging.error(f"Error with get_library_version (1): {e}")
-            return f"{lib_name}-not installed"
-        
-        except Exception as e:
-            logging.error(f"Error with get_library_version (2): {e}")
+        except importlib.metadata.PackageNotFoundError:
             return f"{lib_name}-not installed"
 
-    async def download_requirements(self, url: str, filename: str):
+    def download_requirements(self, url: str, filename: str):
         """
-        Download the requirements.txt file from the specified URL if not found locally using httpx.
-
+        Download the requirements.txt file from the specified URL if not found locally using requests.
+        
         Args:
             url (str): The URL to download the requirements file from.
             filename (str): The local filename to save the requirements file as.
         """
         try:
-            async with httpx.AsyncClient() as client:
-                console.print(f"{filename} not found locally. Downloading from {url}...", style="bold yellow")
-                response = await client.get(url)
-
-                if response.status_code == 200:
-                    with open(filename, 'wb') as f:
-                        f.write(response.content)
-
-                    console.print(f"{filename} successfully downloaded.", style="bold green")
-                
-                else:
-                    console.print(f"Failed to download {filename}. HTTP Status code: {response.status_code}", style="bold red")
-                    sys.exit(1)
-
+            import requests
+            
+            console.print(f"{filename} not found locally. Downloading from {url}...", style="bold yellow")
+            response = requests.get(url)
+            
+            if response.status_code == 200:
+                with open(filename, 'wb') as f:
+                    f.write(response.content)
+                console.print(f"{filename} successfully downloaded.", style="bold green")
+            
+            else:
+                console.print(f"Failed to download {filename}. HTTP Status code: {response.status_code}", style="bold red")
+                sys.exit(1)
+        
         except Exception as e:
             console.print(f"Failed to download {filename}: {e}", style="bold red")
             sys.exit(1)
@@ -435,8 +444,14 @@ class OsSummary():
         # ffmpeg and ffprobe versions
         ffmpeg_path, ffprobe_path = check_ffmpeg()
         
-        ffmpeg_version = self.get_executable_version(['ffmpeg', '-version'])
-        ffprobe_version = self.get_executable_version(['ffprobe', '-version'])
+        # Locate ffmpeg and ffprobe
+        if "binary" not in ffmpeg_path:        
+            ffmpeg_path = self.check_ffmpeg_location(['where', 'ffmpeg'])
+        if "binary" not in ffprobe_path:
+            ffprobe_path = self.check_ffmpeg_location(['where', 'ffprobe'])
+
+        ffmpeg_version = self.get_executable_version([ffprobe_path, '-version'])
+        ffprobe_version = self.get_executable_version([ffprobe_path, '-version'])
 
         console.print(f"[cyan]Path[white]: [red]ffmpeg [bold yellow]'{ffmpeg_path}'[/bold yellow][white], [red]ffprobe '[bold yellow]{ffprobe_path}'[/bold yellow]")
         console.print(f"[cyan]Exe versions[white]: [bold red]ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}[/bold red]")
@@ -444,29 +459,27 @@ class OsSummary():
         # Check if requirements.txt exists, if not on pyinstaller
         if not getattr(sys, 'frozen', False):
             requirements_file = 'requirements.txt'
+            
             if not os.path.exists(requirements_file):
-                await self.download_requirements(
+                self.download_requirements(
                     'https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/refs/heads/main/requirements.txt',
                     requirements_file
                 )
-
-            # Read the optional libraries from the requirements file
-            optional_libraries = [line.strip() for line in open(requirements_file, 'r', encoding='utf-8-sig')]
+            
+            # Read the optional libraries from the requirements file, get only name without version if "library==1.0.0"
+            optional_libraries = [line.strip().split("=")[0] for line in open(requirements_file, 'r', encoding='utf-8-sig')]
             
             # Check if libraries are installed and prompt to install missing ones
             for lib in optional_libraries:
                 installed_version = self.get_library_version(lib)
 
                 if 'not installed' in installed_version:
-                    
-                    # Prompt user to install missing library using Prompt.ask()
                     user_response = msg.ask(f"{lib} is not installed. Do you want to install it? (yes/no)", default="y")
-
+                    
                     if user_response.lower().strip() in ["yes", "y"]:
                         self.install_library(lib)
-                        
+                
                 else:
-                    #console.print(f"[cyan]Library[white]: [bold red]{installed_version}[/bold red]")
                     logging.info(f"Library: {installed_version}")
             
             console.print(f"[cyan]Libraries[white]: [bold red]{', '.join([self.get_library_version(lib) for lib in optional_libraries])}[/bold red]\n")

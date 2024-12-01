@@ -6,6 +6,8 @@
         "show_message": true,
         "clean_console": true,
         "root_path": "Video",
+        "movie_folder_name": "Movie",
+        "serie_folder_name": "TV",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
         "config_qbit_tor": {
             "host": "192.168.1.59",
