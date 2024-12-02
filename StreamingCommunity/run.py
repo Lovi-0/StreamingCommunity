@@ -142,7 +142,7 @@ def main():
 
     # Create logger
     log_not = Logger()
-    #initialize()
+    initialize()
 
     # Load search functions
     search_functions = load_search_functions()
@@ -185,7 +185,7 @@ def main():
 
     # Display the category legend in a single line
     legend_text = " | ".join([f"[{color}]{category.capitalize()}[/{color}]" for category, color in color_map.items()])
-    console.print(f"[bold green]Category Legend:[/bold green] {legend_text}")
+    console.print(f"\n[bold green]Category Legend:[/bold green] {legend_text}")
 
     # Construct the prompt message with color-coded site names
     prompt_message = "[green]Insert category [white](" + ", ".join(

@@ -4,29 +4,34 @@
 
 A versatile script designed to download films and series from various supported streaming platforms.
 
-## 🤝 Join our Community 
+# 🤝 Join our Community 
 
 Chat, contribute, and have fun in our **Git_StreamingCommunity** Discord [Server](https://discord.com/invite/8vV68UGRc7)
 
-## 📋 Table of Contents
+# 📋 Table of Contents
 
-- [Website available](#-website-status)
-- [Release files](#-release-files)
+- [Website available](#website-status)
 - [Installation](#installation)
-    - [PyPI Installation](#pypi-installation)
-    - [Automatic Installation](#automatic-installation)
-    - [Manual Installation](#manual-installation)
+    - [PyPI Installation](#1-pypi-installation)
+    - [Automatic Installation](#2-automatic-installation)
+    - [Manual Installation](#3-manual-installation)
         - [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
         - [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux)
 - [Configuration](#configuration)
-- [DOCKER](#docker)
-- [Tutorial](#tutorial)
+    - [Default](#default-settings)
+    - [Request](#requests-settings)
+    - [Browser](#browser-settings)
+    - [Download](#m3u8_download-settings)
+    - [Parser](#m3u8_parser-settings)
+- [Docker](#docker)
+- [Tutorial](#tutorials)
 - [To Do](#to-do)
 
 
-## 💻 Installation
 
-### 1. PyPI Installation
+# Installation
+
+## 1. PyPI Installation
 
 Install directly from PyPI:
 
@@ -34,7 +39,7 @@ Install directly from PyPI:
 pip install StreamingCommunity
 ```
 
-#### Creating a Run Script
+### Creating a Run Script
 
 Create `run_streaming.py`:
 
@@ -50,15 +55,15 @@ Run the script:
 python run_streaming.py
 ```
 
-#### Updating via PyPI
+## Updating via PyPI
 
 ```bash
 pip install --upgrade StreamingCommunity
 ```
 
-### 2. Automatic Installation
+## 2. Automatic Installation
 
-#### Supported Operating Systems 💿
+### Supported Operating Systems 💿
 
 | OS              | Automatic Installation Support |
 |:----------------|:------------------------------:|
@@ -71,100 +76,93 @@ pip install --upgrade StreamingCommunity
 | MacOS           |              ✔️              |
 | Termux          |              ❌              |
 
-#### Installation Steps
+### Installation Steps
 
-##### On Windows:
+#### On Windows:
 
 ```powershell
 .\win_install.bat
 ```
 
-##### On Linux/MacOS/BSD:
+#### On Linux/MacOS/BSD:
 
 ```bash
 sudo chmod +x unix_install.sh && ./unix_install.sh
 ```
 
-#### Usage
+### Usage
 
-##### On Windows:
+#### On Windows:
 
 ```powershell
-python .\run.py
+python .\test_run.py
 ```
 
 or
 
 ```powershell
-source .venv/bin/activate && python run.py && deactivate
+source .venv/bin/activate && python test_run.py && deactivate
 ```
 
-##### On Linux/MacOS/BSD:
+#### On Linux/MacOS/BSD:
 
 ```bash
-./run.py
+./test_run.py
 ```
 
-### 3. Manual Installation
+## 3. Manual Installation
 
-#### Requirements 📋
+### Requirements 📋
 
 Prerequisites:
 * [Python](https://www.python.org/downloads/) > 3.8
 * [FFmpeg](https://www.gyan.dev/ffmpeg/builds/)
 
-#### Install Python Dependencies
+### Install Python Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-#### Usage
-
-##### On Windows:
-
-```powershell
-python run.py
-```
-
-##### On Linux/MacOS:
-
-```bash
-python3 run.py
-```
-
-### Update
-
-Keep your script up to date with the latest features by running:
+### Usage
 
 #### On Windows:
 
 ```powershell
-python update.py
+python test_run.py
 ```
 
 #### On Linux/MacOS:
 
 ```bash
+python3 test_run.py
+```
+
+## Update
+
+Keep your script up to date with the latest features by running:
+
+### On Windows:
+
+```powershell
+python update.py
+```
+
+### On Linux/MacOS:
+
+```bash
 python3 update.py
 ```
 
+<br>
 
-
-## 📂 Release files
-
-| **File**                     | **Description**                                                            |
-|------------------------------|----------------------------------------------------------------------------|
-| `StreamingCommunity.exe`     | Windows (Win10+) standalone executable (recommended for Windows).          |
-| `StreamingCommunity-main.zip`| Source code and resources                                                  |
-
-## Configuration ⚙️
+# Configuration
 
 You can change some behaviors by tweaking the configuration file.
 
 The configuration file is divided into several main sections:
 
-### DEFAULT Settings
+## DEFAULT Settings
 
 ```json
 {
@@ -179,7 +177,7 @@ The configuration file is divided into several main sections:
 
 - `root_path`: Directory where all videos will be saved
 
-  #### Path examples:
+  ### Path examples:
   * Windows: `C:\\MyLibrary\\Folder` or `\\\\MyServer\\MyLibrary` (if you want to use a network folder)
   * Linux/MacOS: `Desktop/MyLibrary/Folder`
     `<br/><br/>`
@@ -189,7 +187,7 @@ The configuration file is divided into several main sections:
 
 - `map_episode_name`: Template for TV series episode filenames
 
-  #### Episode name usage:
+  ### Episode name usage:
 
   You can choose different vars:
 
@@ -203,22 +201,24 @@ The configuration file is divided into several main sections:
 - `not_close`: If true, continues running after downloading
 - `show_trending`: Display trending content on startup
 
-#### qBittorrent Configuration
+    ### qBittorrent Configuration
 
-```json
-{
-    "config_qbit_tor": {
-        "host": "192.168.1.59",
-        "port": "8080",
-        "user": "admin",
-        "pass": "adminadmin"
+    ```json
+    {
+        "config_qbit_tor": {
+            "host": "192.168.1.59",
+            "port": "8080",
+            "user": "admin",
+            "pass": "adminadmin"
+        }
     }
-}
-```
+    ```
 
-To enable qBittorrent integration, follow the setup guide [here](https://github.com/lgallard/qBittorrent-Controller/wiki/How-to-enable-the-qBittorrent-Web-UI).
+    To enable qBittorrent integration, follow the setup guide [here](https://github.com/lgallard/qBittorrent-Controller/wiki/How-to-enable-the-qBittorrent-Web-UI).
 
-### REQUESTS Settings
+<br>
+
+## REQUESTS Settings
 
 ```json
 {
@@ -230,7 +230,9 @@ To enable qBittorrent integration, follow the setup guide [here](https://github.
 - `timeout`: Maximum timeout (in seconds) for each request
 - `max_retry`: Number of retry attempts per segment during M3U8 index download
 
-### BROWSER Settings
+<br>
+
+## BROWSER Settings
 
 ```json
 {
@@ -240,7 +242,9 @@ To enable qBittorrent integration, follow the setup guide [here](https://github.
 
 - `headless`: Controls whether to run browser in headless mode
 
-### M3U8_DOWNLOAD Settings
+<br>
+
+## M3U8_DOWNLOAD Settings
 
 ```json
 {
@@ -258,7 +262,10 @@ To enable qBittorrent integration, follow the setup guide [here](https://github.
 - `default_audio_workser`: Number of threads for audio download
 - `cleanup_tmp_folder`: Remove temporary .ts files after download
 
-#### Language Settings
+
+<br>
+
+### Language Settings
 
 The following codes can be used for `specific_list_audio` and `specific_list_subtitles`:
 
@@ -293,7 +300,7 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
 > "specific_list_subtitles": ["ita", "eng", "spa"]
 > ```
 
-### M3U8_PARSER Settings
+## M3U8_PARSER Settings
 
 ```json
 {
@@ -305,7 +312,9 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
 - `force_resolution`: Force specific resolution (-1 for best available, or specify 1080, 720, 360)
 - `get_only_link`: Return M3U8 playlist/index URL instead of downloading
 
-## Docker 🐳
+<br>
+
+# Docker
 
 You can run the script in a docker container, to build the image just run
 
@@ -338,7 +347,7 @@ make LOCAL_DIR=/path/to/download run-container
 
 The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
 
-## 🌐 Website Status 
+# Website Status 
 
 | Website            | Status |
 |:-------------------|:------:|
@@ -353,18 +362,18 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | PirateBays         |   ✅   |
 | StreamingCommunity |   ✅   |
 
-## 📖 Tutorials 
+# Tutorials 
 
 - [Windows Tutorial](https://www.youtube.com/watch?v=mZGqK4wdN-k)
 - [Linux Tutorial](https://www.youtube.com/watch?v=0qUNXPE_mTg)
 - [Pypy Tutorial](https://www.youtube.com/watch?v=C6m9ZKOK0p4)
 - [Compiled .exe Tutorial](https://www.youtube.com/watch?v=pm4lqsxkTVo)
 
-## 📝 To Do 
+# To Do 
 
 - Create website API
 
-## 🤝 Contributing
+# Contributing
 
 Contributions are welcome! Steps:
 1. Fork the repository
@@ -374,5 +383,6 @@ Contributions are welcome! Steps:
 5. Open Pull Request
 
 
-## 🛡️ Disclaimer
+# Disclaimer
+
 This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.

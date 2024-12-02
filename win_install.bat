@@ -123,8 +123,8 @@ pip install -r requirements.txt || (
 )
 
 :: Run run.py
-echo Running run.py...
-call .venv\Scripts\python .\run.py || (
+echo Running test_run.py...
+call .venv\Scripts\python .\test_run.py || (
     echo Error during run.py execution.
     exit /b 1
 )

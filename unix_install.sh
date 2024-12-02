@@ -194,7 +194,7 @@ else
     esac
 fi
 
-sed -i.bak '1s|.*|#!.venv/bin/python3|' run.py
-sudo chmod +x run.py
+sed -i.bak '1s|.*|#!.venv/bin/python3|' test_run.py
+sudo chmod +x test_run.py
 echo 'Everything is installed!'
-echo 'Run StreamingCommunity with "./run.py"'
+echo 'Run StreamingCommunity with "./test_run.py"'
