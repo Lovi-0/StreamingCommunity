@@ -4,7 +4,6 @@ import os
 import sys
 import time
 import glob
-import asyncio
 import logging
 import platform
 import argparse
@@ -110,7 +109,7 @@ def initialize():
 
     # Get system info
     os_summary = OsSummary()
-    asyncio.run(os_summary.get_system_summary())
+    os_summary.get_system_summary()
 
     # Set terminal size for win 7
     if platform.system() == "Windows" and "7" in platform.version():

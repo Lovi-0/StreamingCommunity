@@ -11,7 +11,7 @@ with open("requirements.txt", "r", encoding="utf-8-sig") as f:
 
 setup(
     name="StreamingCommunity",
-    version="1.9.0",
+    version="1.9.1",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
     author="Lovi-0",
