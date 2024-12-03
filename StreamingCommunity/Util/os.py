@@ -413,7 +413,7 @@ class OsSummary():
             console.print("Please install the official Python from [bold blue]https://www.python.org[/bold blue] and try again.", style="bold yellow")
             sys.exit(0)
 
-    async def get_system_summary(self):
+    def get_system_summary(self):
         """
         Generate a summary of the system environment.
 
