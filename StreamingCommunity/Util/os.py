@@ -444,11 +444,19 @@ class OsSummary():
         # ffmpeg and ffprobe versions
         ffmpeg_path, ffprobe_path = check_ffmpeg()
         
+        if platform.system() == "Windows":
+            # Usa il comando 'where' su Windows
+            command = 'where'
+        else:
+            # Usa il comando 'which' su Unix/Linux
+            command = 'which'
+
         # Locate ffmpeg and ffprobe
         if "binary" not in ffmpeg_path:        
-            ffmpeg_path = self.check_ffmpeg_location(['where', 'ffmpeg'])
+            ffmpeg_path = self.check_ffmpeg_location([command, 'ffmpeg'])
+
         if "binary" not in ffprobe_path:
-            ffprobe_path = self.check_ffmpeg_location(['where', 'ffprobe'])
+            ffprobe_path = self.check_ffmpeg_location([command, 'ffprobe'])
 
         ffmpeg_version = self.get_executable_version([ffprobe_path, '-version'])
         ffprobe_version = self.get_executable_version([ffprobe_path, '-version'])
