@@ -224,7 +224,7 @@ class M3U8_Segments:
         if threading.current_thread() is threading.main_thread():
             signal.signal(signal.SIGINT, interrupt_handler)
         else:
-            print("Signal handler must be set in the main thread")
+            console.log("[red]Signal handler must be set in the main thread !!")
 
     def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm, backoff_factor: float = 1.5) -> None:
         """

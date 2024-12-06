@@ -61,17 +61,11 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
         output_filename=os.path.join(mp4_path, mp4_name)
     ).start()
     
-    if r_proc == 404:
-        time.sleep(2)
-
-        # Re call search function
-        if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
-            frames = get_call_stack()
-            execute_search(frames[-4])
-
     if r_proc != None:
         console.print("[green]Result: ")
         console.print(r_proc)
+
+    return os.path.join(mp4_path, mp4_name)
 
 def download_episode(tv_name: str, index_season_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource, download_all: bool = False) -> None:
     """

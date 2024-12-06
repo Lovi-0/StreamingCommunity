@@ -26,7 +26,7 @@ class ScrapeSerie:
             site_name (str): Name of the streaming site to scrape from
         """
         self.is_series = False
-        self.headers = {'user-agent': get_headers()}
+        self.headers = {}
         self.base_name = site_name
         self.domain = config_manager.get_dict('SITE', self.base_name)['domain']
 
@@ -48,6 +48,13 @@ class ScrapeSerie:
             self.series_name = series_name
             self.obj_season_manager: SeasonManager = SeasonManager()
             self.obj_episode_manager: EpisodeManager = EpisodeManager()
+    
+        # Create headers
+        self.headers = {
+            'user-agent': get_headers(),
+            'x-inertia': 'true', 
+            'x-inertia-version': self.version,
+        }
 
     def collect_info_seasons(self) -> None:
         """
@@ -56,12 +63,6 @@ class ScrapeSerie:
         Raises:
             Exception: If there's an error fetching season information
         """
-        self.headers = {
-            'user-agent': get_headers(),
-            'x-inertia': 'true', 
-            'x-inertia-version': self.version,
-        }
-
         try:
 
             response = httpx.get(
@@ -93,7 +94,6 @@ class ScrapeSerie:
             Exception: If there's an error fetching episode information
         """
         try:
-
             response = httpx.get(
                 url=f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', 
                 headers=self.headers, 
