@@ -4,10 +4,11 @@ import os
 import sys
 import time
 import queue
+import signal
 import logging
 import binascii
 import threading
-import signal
+
 from queue import PriorityQueue
 from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -34,6 +35,7 @@ from ...M3U8 import (
     M3U8_Parser,
     M3U8_UrlFix
 )
+from ...FFmpeg.util import print_duration_table
 from .proxyes import main_test_proxy
 
 # Config
@@ -92,6 +94,10 @@ class M3U8_Segments:
         # Stopping
         self.interrupt_flag = threading.Event()
         self.download_interrupted = False
+
+        # OTHER INFO
+        self.info_maxRetry = 0
+        self.info_nRetry = 0
 
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
@@ -317,11 +323,16 @@ class M3U8_Segments:
             except Exception as e:
                 logging.info(f"Attempt {attempt + 1} failed for segment {index} - '{ts_url}': {e}")
                 
+                # Update stat variable class
+                if attempt > self.info_maxRetry:
+                    self.info_maxRetry = ( attempt + 1 )
+                self.info_nRetry += 1
+
                 if attempt + 1 == REQUEST_MAX_RETRY:
                     console.log(f"[red]Final retry failed for segment: {index}")
                     self.queue.put((index, None))  # Marker for failed segment
                     progress_bar.update(1)
-                    break
+                    #break
                 
                 sleep_time = backoff_factor * (2 ** attempt)
                 logging.info(f"Retrying segment {index} in {sleep_time} seconds...")
@@ -382,12 +393,13 @@ class M3U8_Segments:
                 except Exception as e:
                     logging.error(f"Error writing segment {index}: {str(e)}")
     
-    def download_streams(self, add_desc):
+    def download_streams(self, description: str, type: str):
         """
         Downloads all TS segments in parallel and writes them to a file.
 
         Parameters:
-            - add_desc (str): Additional description for the progress bar.
+            - description: Description to insert on tqdm bar
+            - type (str): Type of download: 'video' or 'audio'
         """
         self.setup_interrupt_handler()
 
@@ -414,15 +426,18 @@ class M3U8_Segments:
             AUDIO_WORKERS = DEFAULT_AUDIO_WORKERS
 
         # Differnt workers for audio and video
-        if "video" in str(add_desc):
+        if "video" == str(type):
             TQDM_MAX_WORKER = VIDEO_WORKERS
-        if "audio" in str(add_desc):
+
+        if "audio" == str(type):
             TQDM_MAX_WORKER = AUDIO_WORKERS
+
+        console.print(f"[cyan]Video workers[white]: [green]{VIDEO_WORKERS} [white]| [cyan]Audio workers[white]: [green]{AUDIO_WORKERS}")
 
         # Custom bar for mobile and pc
         if TQDM_USE_LARGE_BAR:
             bar_format = (
-                f"{Colors.YELLOW}[HLS] {Colors.WHITE}({Colors.CYAN}{add_desc}{Colors.WHITE}): "
+                f"{Colors.YELLOW}[HLS] {Colors.WHITE}({Colors.CYAN}{description}{Colors.WHITE}): "
                 f"{Colors.RED}{{percentage:.2f}}% "
                 f"{Colors.MAGENTA}{{bar}} "
                 f"{Colors.WHITE}[ {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] "
@@ -535,4 +550,11 @@ class M3U8_Segments:
         if file_size == 0:
             raise Exception("Output file is empty")
         
-        logging.info(f"Download completed. File size: {file_size} bytes")
+        console.print(f"[cyan]Max retry per URL[white]: [green]{self.info_maxRetry}[green] [white]| [cyan]Total retry done[white]: [green]{self.info_nRetry}[green] [white]| [cyan]Duration: {print_duration_table(self.tmp_file_path, None, True)} \n")
+
+        if self.info_nRetry >= len(self.segments) * (1/3.33):
+            console.print(
+                "[yellow]⚠ Warning:[/yellow] Too many retries detected! "
+                "Consider reducing the number of [cyan]workers[/cyan] in the [magenta]config.json[/magenta] file. "
+                "This will impact [bold]performance[/bold]."
+            )

@@ -20,7 +20,7 @@
     },
     "REQUESTS": {
         "timeout": 20,
-        "max_retry": 5,
+        "max_retry": 8,
         "verify_ssl": true,
         "proxy_start_min": 0.1,
         "proxy_start_max": 0.5,

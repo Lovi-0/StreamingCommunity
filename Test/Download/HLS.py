@@ -18,6 +18,6 @@ from StreamingCommunity.Lib.Downloader import HLS_Downloader
 start_message()
 logger = Logger()
 print("Return: ", HLS_Downloader(
-    output_filename="",
+    output_filename="test.mp4",
     m3u8_index=""
 ).start())

@@ -397,7 +397,7 @@ class ContentDownloader:
             self.expected_real_time = video_m3u8.expected_real_time
 
             # Download the video streams and print status
-            video_m3u8.download_streams(f"{Colors.MAGENTA}video")
+            video_m3u8.download_streams(f"{Colors.MAGENTA}video", "video")
 
             # Print duration information of the downloaded video
             #print_duration_table(downloaded_video[0].get('path'))
@@ -427,7 +427,7 @@ class ContentDownloader:
                 audio_m3u8.get_info()
 
                 # Download the audio segments and print status
-                audio_m3u8.download_streams(f"{Colors.MAGENTA}audio {Colors.RED}{obj_audio.get('language')}")
+                audio_m3u8.download_streams(f"{Colors.MAGENTA}audio {Colors.RED}{obj_audio.get('language')}", "audio")
 
                 # Print duration information of the downloaded audio
                 #print_duration_table(obj_audio.get('path'))
