@@ -10,7 +10,7 @@ import httpx
 # Internal utilities
 from StreamingCommunity.Util.headers import get_headers
 from StreamingCommunity.Util._jsonConfig import config_manager
-from StreamingCommunity.Api.Player.Helper.Vixcloud.util import SeasonManager, EpisodeManager
+from StreamingCommunity.Api.Player.Helper.Vixcloud.util import Season, EpisodeManager
 
 
 # Variable
@@ -46,10 +46,10 @@ class ScrapeSerie:
         if series_name is not None:
             self.is_series = True
             self.series_name = series_name
-            self.obj_season_manager: SeasonManager = SeasonManager()
-            self.obj_episode_manager: EpisodeManager = EpisodeManager()
+            self.season_manager = None
+            self.episode_manager: EpisodeManager = EpisodeManager()
 
-    def collect_info_seasons(self) -> None:
+    def collect_info_title(self) -> None:
         """
         Retrieve season information for a TV series from the streaming site.
         
@@ -72,17 +72,22 @@ class ScrapeSerie:
             response.raise_for_status()
 
             # Extract seasons from JSON response
-            json_response = response.json().get('props', {}).get('title', {}).get('seasons', [])
-                
-            # Add each season to the season manager
-            for dict_season in json_response:
-                self.obj_season_manager.add_season(dict_season)
+            json_response = response.json().get('props')
 
+            # Collect info about season
+            self.season_manager = Season(json_response.get('title'))
+            self.season_manager.collect_images(self.base_name, self.domain)
+
+            # Collect first episode info
+            for i, ep in enumerate(json_response.get('loadedSeason').get('episodes')):
+                self.season_manager.episodes.add(ep)
+                self.season_manager.episodes.get(i).collect_image(self.base_name, self.domain)
+            
         except Exception as e:
             logging.error(f"Error collecting season info: {e}")
             raise
 
-    def collect_title_season(self, number_season: int) -> None:
+    def collect_info_season(self, number_season: int) -> None:
         """
         Retrieve episode information for a specific season.
         
@@ -92,8 +97,13 @@ class ScrapeSerie:
         Raises:
             Exception: If there's an error fetching episode information
         """
-        try:
+        self.headers = {
+            'user-agent': get_headers(),
+            'x-inertia': 'true', 
+            'x-inertia-version': self.version,
+        }
 
+        try:
             response = httpx.get(
                 url=f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', 
                 headers=self.headers, 
@@ -102,11 +112,11 @@ class ScrapeSerie:
             response.raise_for_status()
 
             # Extract episodes from JSON response
-            json_response = response.json().get('props', {}).get('loadedSeason', {}).get('episodes', [])
+            json_response = response.json().get('props').get('loadedSeason').get('episodes')
                 
             # Add each episode to the episode manager
             for dict_episode in json_response:
-                self.obj_episode_manager.add_episode(dict_episode)
+                self.episode_manager.add(dict_episode)
 
         except Exception as e:
             logging.error(f"Error collecting title season info: {e}")

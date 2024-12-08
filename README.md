@@ -314,6 +314,24 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
 
 <br>
 
+
+# COMMAND
+
+
+- Download a specific season by entering its number.
+  *  **Example:** `1` will download *Season 1* only.
+
+-  Use the wildcard `*` to download every available season.
+   * **Example:** `*` will download all seasons in the series.
+
+- Specify a range of seasons using a hyphen `-`.
+   * **Example:** `1-2` will download *Seasons 1 and 2*.
+
+- Enter a season number followed by `-*` to download from that season to the end.
+  * **Example:** `3-*` will download from *Season 3* to the final season.
+
+<br>
+
 # Docker
 
 You can run the script in a docker container, to build the image just run
@@ -371,7 +389,13 @@ The `run-container` command mounts also the `config.json` file, so any change to
 
 # To Do 
 
-- Create website API
+- Create website API -> https://github.com/Lovi-0/StreamingCommunity/tree/test_gui_1
+
+# SUPPORT
+
+If you'd like to support this project, consider making a donation!
+
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=UXTWMT8P6HE2C)
 
 # Contributing
 

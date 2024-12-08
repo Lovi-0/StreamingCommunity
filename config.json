@@ -62,7 +62,7 @@
     },
     "SITE": {
         "streamingcommunity": {
-            "domain": "asia"
+            "domain": "family"
         },
         "altadefinizione": {
             "domain": "now"
@@ -75,7 +75,7 @@
         },
         "ddlstreamitaly": {
             "domain": "co",
-            "cookie": {
+            "extra": {
                 "ips4_device_key": "",
                 "ips4_member_id": "",
                 "ips4_login_key": ""
