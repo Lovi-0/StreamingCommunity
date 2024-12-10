@@ -16,7 +16,7 @@ from StreamingCommunity.Util.message import start_message
 from StreamingCommunity.Util.console import console, msg
 from StreamingCommunity.Util._jsonConfig import config_manager
 from StreamingCommunity.Upload.update import update as git_update
-from StreamingCommunity.Util.os import OsSummary
+from StreamingCommunity.Util.os import os_summary
 from StreamingCommunity.Lib.TMBD import tmdb
 from StreamingCommunity.Util.logger import Logger
 
@@ -108,7 +108,6 @@ def initialize():
     start_message()
 
     # Get system info
-    os_summary = OsSummary()
     os_summary.get_system_summary()
 
     # Set terminal size for win 7
@@ -133,7 +132,7 @@ def initialize():
         print()
         tmdb.display_trending_tv_shows()
         print()
-        
+
 
 def main():
 

@@ -22,7 +22,6 @@ from StreamingCommunity.Util.os import (
 # Logic class
 from ...FFmpeg import (
     print_duration_table,
-    get_video_duration_s,
     join_video,
     join_audios,
     join_subtitle
@@ -52,6 +51,7 @@ GET_ONLY_LINK = config_manager.get_bool('M3U8_PARSER', 'get_only_link')
 max_timeout = config_manager.get_int("REQUESTS", "timeout")
 headers_index = config_manager.get_dict('REQUESTS', 'user-agent')
 m3u8_url_fixer = M3U8_UrlFix()
+list_MissingTs = []
 
 
 
@@ -397,7 +397,8 @@ class ContentDownloader:
             self.expected_real_time = video_m3u8.expected_real_time
 
             # Download the video streams and print status
-            video_m3u8.download_streams(f"{Colors.MAGENTA}video", "video")
+            info_dw = video_m3u8.download_streams(f"{Colors.MAGENTA}video", "video")
+            list_MissingTs.append(info_dw)
 
             # Print duration information of the downloaded video
             #print_duration_table(downloaded_video[0].get('path'))
@@ -427,7 +428,8 @@ class ContentDownloader:
                 audio_m3u8.get_info()
 
                 # Download the audio segments and print status
-                audio_m3u8.download_streams(f"{Colors.MAGENTA}audio {Colors.RED}{obj_audio.get('language')}", "audio")
+                info_dw = audio_m3u8.download_streams(f"{Colors.MAGENTA}audio {Colors.RED}{obj_audio.get('language')}", f"audio_{obj_audio.get('language')}")
+                list_MissingTs.append(info_dw)
 
                 # Print duration information of the downloaded audio
                 #print_duration_table(obj_audio.get('path'))
@@ -838,39 +840,32 @@ class HLS_Downloader:
 
         # Rename the output file to the desired output filename if it does not already exist
         if not os.path.exists(self.output_filename):
+            missing_ts = False
+            missing_info = ""
 
             # Rename the converted file to the specified output filename
             os.rename(out_path, self.output_filename)
 
-            # Get duration information for the output file
-            end_output_time = print_duration_table(self.output_filename, description=False, return_string=False)
-
             # Calculate file size and duration for reporting
             formatted_size = internet_manager.format_file_size(os.path.getsize(self.output_filename))
             formatted_duration = print_duration_table(self.output_filename, description=False, return_string=True)
-            
-            expected_real_seconds = dict_to_seconds(self.content_downloader.expected_real_time)
-            end_output_seconds = dict_to_seconds(end_output_time)
 
-            # Check if the downloaded content is complete based on expected duration
-            if expected_real_seconds is not None:
-                missing_ts = not (expected_real_seconds - 3 <= end_output_seconds <= expected_real_seconds + 3)
-            else:
-                missing_ts = "Undefined"
-
-            # Second check for missing segments
-            if not missing_ts:
-                if get_video_duration_s(self.output_filename) < int(expected_real_seconds) - 5:
+            # Collect info about type missing
+            for item in list_MissingTs:
+                if int(item['nFailed']) >= 1:
                     missing_ts = True
+                    missing_info += f"[red]TS Failed: {item['nFailed']} {item['type']} tracks[/red]\n"
 
             # Prepare the report panel content
             print("")
             panel_content = (
                 f"[bold green]Download completed![/bold green]\n"
                 f"[cyan]File size: [bold red]{formatted_size}[/bold red]\n"
-                f"[cyan]Duration: [bold]{formatted_duration}[/bold]\n"
-                f"[cyan]Missing TS: [bold red]{missing_ts}[/bold red]"
+                f"[cyan]Duration: [bold]{formatted_duration}[/bold]"
             )
+
+            if missing_ts:
+                panel_content += f"\n{missing_info}"
 
             # Display the download completion message
             console.print(Panel(

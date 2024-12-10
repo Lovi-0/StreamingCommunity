@@ -117,16 +117,29 @@ def validate_selection(list_season_select: List[int], seasons_count: int) -> Lis
     Returns:
         - List[int]: Adjusted list of valid season numbers.
     """
+    while True:
+        try:
+            
+            # Remove any seasons greater than the available seasons
+            valid_seasons = [season for season in list_season_select if 1 <= season <= seasons_count]
 
-    # Remove any seasons greater than the available seasons
-    valid_seasons = [season for season in list_season_select if 1 <= season <= seasons_count]
+            # If the list is empty, the input was completely invalid
+            if not valid_seasons:
+                logging.error(f"Invalid selection: The selected seasons are outside the available range (1-{seasons_count}). Please try again.")
 
-    # If the list is empty, the input was completely invalid
-    if not valid_seasons:
-        print()
-        raise ValueError(f"Invalid selection: The selected seasons are outside the available range (1-{seasons_count}).")
+                # Re-prompt for valid input
+                input_seasons = input(f"Enter valid season numbers (1-{seasons_count}): ")
+                list_season_select = list(map(int, input_seasons.split(',')))
+                continue  # Re-prompt the user if the selection is invalid
+            
+            return valid_seasons  # Return the valid seasons if the input is correct
+        
+        except ValueError:
+            logging.error("Error: Please enter valid integers separated by commas.")
 
-    return valid_seasons
+            # Prompt the user for valid input again
+            input_seasons = input(f"Enter valid season numbers (1-{seasons_count}): ")
+            list_season_select = list(map(int, input_seasons.split(',')))
 
 
 # --> for episode
@@ -141,13 +154,26 @@ def validate_episode_selection(list_episode_select: List[int], episodes_count: i
     Returns:
         - List[int]: Adjusted list of valid episode numbers.
     """
+    while True:
+        try:
 
-    # Remove any episodes greater than the available episodes
-    valid_episodes = [episode for episode in list_episode_select if 1 <= episode <= episodes_count]
+            # Remove any episodes greater than the available episodes
+            valid_episodes = [episode for episode in list_episode_select if 1 <= episode <= episodes_count]
 
-    # If the list is empty, the input was completely invalid
-    if not valid_episodes:
-        print()
-        raise ValueError(f"Invalid selection: The selected episodes are outside the available range (1-{episodes_count}).")
+            # If the list is empty, the input was completely invalid
+            if not valid_episodes:
+                logging.error(f"Invalid selection: The selected episodes are outside the available range (1-{episodes_count}). Please try again.")
 
-    return valid_episodes
+                # Re-prompt for valid input
+                input_episodes = input(f"Enter valid episode numbers (1-{episodes_count}): ")
+                list_episode_select = list(map(int, input_episodes.split(',')))
+                continue  # Re-prompt the user if the selection is invalid
+            
+            return valid_episodes
+        
+        except ValueError:
+            logging.error("Error: Please enter valid integers separated by commas.")
+            
+            # Prompt the user for valid input again
+            input_episodes = input(f"Enter valid episode numbers (1-{episodes_count}): ")
+            list_episode_select = list(map(int, input_episodes.split(',')))

@@ -120,8 +120,7 @@ class VideoSource:
                     response.raise_for_status()
 
                 except Exception as e:
-                    print("\n")
-                    console.print(Panel("[red bold]Coming soon", title="Notification", title_align="left", border_style="yellow"))
+                    logging.error(f"Failed to get vixcloud contente with error: {e}")
                     sys.exit(0)
 
                 # Parse response with BeautifulSoup to get content

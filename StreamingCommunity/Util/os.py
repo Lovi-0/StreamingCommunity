@@ -309,9 +309,8 @@ class InternManager():
 class OsSummary:
 
     def __init__(self):
-        ffmpeg_path, ffprobe_path = check_ffmpeg()
-        self.ffmpeg_path = ffmpeg_path
-        self.ffprobe_path = ffprobe_path
+        self.ffmpeg_path = None
+        self.ffprobe_path = None
 
     def get_executable_version(self, command: list):
         """
@@ -454,12 +453,16 @@ class OsSummary:
         else:
             command = 'which'
 
-        # Locate ffmpeg and ffprobe
+        # Locate ffmpeg and ffprobe from path enviroment
         if self.ffmpeg_path != None and "binary" not in self.ffmpeg_path:        
             self.ffmpeg_path = self.check_ffmpeg_location([command, 'ffmpeg'])
 
         if self.ffprobe_path != None and "binary" not in self.ffprobe_path:
             self.ffprobe_path = self.check_ffmpeg_location([command, 'ffprobe'])
+
+        # Locate ffmpeg from bin installation
+        if self.ffmpeg_path is None or self.ffprobe_path is None:
+            self.ffmpeg_path, self.ffprobe_path = check_ffmpeg()
 
         if self.ffmpeg_path is None or self.ffprobe_path is None:
             console.log("[red]Cant locate ffmpeg or ffprobe")
@@ -499,7 +502,6 @@ class OsSummary:
             
             console.print(f"[cyan]Libraries[white]: [bold red]{', '.join([self.get_library_version(lib) for lib in optional_libraries])}[/bold red]\n")
             logging.info(f"Libraries: {', '.join([self.get_library_version(lib) for lib in optional_libraries])}")
-
 
 
 # OTHER

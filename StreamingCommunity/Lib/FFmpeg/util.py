@@ -79,7 +79,7 @@ def get_video_duration(file_path: str) -> float:
                 return 1
 
     except Exception as e:
-        logging.error(f"Error get video duration: {e}")
+        logging.error(f"Get video duration error: {e}")
         sys.exit(0)
 
 
@@ -144,7 +144,6 @@ def print_duration_table(file_path: str, description: str = "Duration", return_s
         - str: The formatted duration string if return_string is True.
         - dict: A dictionary with keys 'h', 'm', 's' representing hours, minutes, and seconds if return_string is False.
     """
-
     video_duration = get_video_duration(file_path)
 
     if video_duration is not None:
