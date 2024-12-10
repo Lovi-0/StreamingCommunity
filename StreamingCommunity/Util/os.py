@@ -306,7 +306,11 @@ class InternManager():
         print()
 
 
-class OsSummary():
+class OsSummary:
+
+    def __init__(self):
+        self.ffmpeg_path = None
+        self.ffprobe_path = None
 
     def get_executable_version(self, command: list):
         """
@@ -413,7 +417,7 @@ class OsSummary():
             console.print("Please install the official Python from [bold blue]https://www.python.org[/bold blue] and try again.", style="bold yellow")
             sys.exit(0)
 
-    async def get_system_summary(self):
+    def get_system_summary(self):
         """
         Generate a summary of the system environment.
 
@@ -441,19 +445,33 @@ class OsSummary():
         console.print(f"[cyan]Python[white]: [bold red]{python_version} ({python_implementation} {arch}) - {os_info} ({glibc_version})[/bold red]")
         logging.info(f"Python: {python_version} ({python_implementation} {arch}) - {os_info} ({glibc_version})")
         
-        # ffmpeg and ffprobe versions
-        ffmpeg_path, ffprobe_path = check_ffmpeg()
-        
-        # Locate ffmpeg and ffprobe
-        if "binary" not in ffmpeg_path:        
-            ffmpeg_path = self.check_ffmpeg_location(['where', 'ffmpeg'])
-        if "binary" not in ffprobe_path:
-            ffprobe_path = self.check_ffmpeg_location(['where', 'ffprobe'])
+        # Usa il comando 'where' su Windows
+        if platform.system() == "Windows":
+            command = 'where'
 
-        ffmpeg_version = self.get_executable_version([ffprobe_path, '-version'])
-        ffprobe_version = self.get_executable_version([ffprobe_path, '-version'])
+        # Usa il comando 'which' su Unix/Linux
+        else:
+            command = 'which'
 
-        console.print(f"[cyan]Path[white]: [red]ffmpeg [bold yellow]'{ffmpeg_path}'[/bold yellow][white], [red]ffprobe '[bold yellow]{ffprobe_path}'[/bold yellow]")
+        # Locate ffmpeg and ffprobe from path enviroment
+        if self.ffmpeg_path != None and "binary" not in self.ffmpeg_path:        
+            self.ffmpeg_path = self.check_ffmpeg_location([command, 'ffmpeg'])
+
+        if self.ffprobe_path != None and "binary" not in self.ffprobe_path:
+            self.ffprobe_path = self.check_ffmpeg_location([command, 'ffprobe'])
+
+        # Locate ffmpeg from bin installation
+        if self.ffmpeg_path is None or self.ffprobe_path is None:
+            self.ffmpeg_path, self.ffprobe_path = check_ffmpeg()
+
+        if self.ffmpeg_path is None or self.ffprobe_path is None:
+            console.log("[red]Cant locate ffmpeg or ffprobe")
+            sys.exit(0)
+
+        ffmpeg_version = self.get_executable_version([self.ffprobe_path, '-version'])
+        ffprobe_version = self.get_executable_version([self.ffprobe_path, '-version'])
+
+        console.print(f"[cyan]Path[white]: [red]ffmpeg [bold yellow]'{self.ffmpeg_path}'[/bold yellow][white], [red]ffprobe '[bold yellow]{self.ffprobe_path}'[/bold yellow]")
         console.print(f"[cyan]Exe versions[white]: [bold red]ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}[/bold red]")
 
         # Check if requirements.txt exists, if not on pyinstaller
@@ -486,11 +504,11 @@ class OsSummary():
             logging.info(f"Libraries: {', '.join([self.get_library_version(lib) for lib in optional_libraries])}")
 
 
-
 # OTHER
 os_manager = OsManager()
 internet_manager = InternManager()
 os_summary = OsSummary()
+
 
 @contextlib.contextmanager
 def suppress_output():

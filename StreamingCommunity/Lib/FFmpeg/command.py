@@ -9,8 +9,11 @@ from typing import List, Dict
 
 # Internal utilities
 from StreamingCommunity.Util._jsonConfig import config_manager
-from StreamingCommunity.Util.os import os_manager, suppress_output
+from StreamingCommunity.Util.os import os_manager, os_summary, suppress_output
 from StreamingCommunity.Util.console import console
+
+
+# Logic class
 from .util import need_to_force_to_ts, check_duration_v_a
 from .capture import capture_ffmpeg_real_time
 from ..M3U8 import M3U8_Codec
@@ -29,6 +32,7 @@ FFMPEG_DEFAULT_PRESET = config_manager.get("M3U8_CONVERSION", "default_preset")
 
 # Variable
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
+FFMPEG_PATH = os_summary.ffmpeg_path
 
 
 def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
@@ -49,8 +53,8 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
         logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
-    # Start command
-    ffmpeg_cmd = ['ffmpeg']
+    # Start command with locate ffmpeg
+    ffmpeg_cmd = [FFMPEG_PATH]
 
     # Enabled the use of gpu
     if USE_GPU:
@@ -140,8 +144,8 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
 
     video_audio_same_duration = check_duration_v_a(video_path, audio_tracks[0].get('path'))
 
-    # Start command
-    ffmpeg_cmd = ['ffmpeg']
+    # Start command with locate ffmpeg
+    ffmpeg_cmd = [FFMPEG_PATH]
 
     # Enabled the use of gpu
     if USE_GPU:
@@ -242,8 +246,8 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
         logging.error("Missing input video for ffmpeg conversion.")
         sys.exit(0)
 
-    # Start command
-    ffmpeg_cmd = ["ffmpeg", "-i", video_path]
+    # Start command with locate ffmpeg
+    ffmpeg_cmd = [FFMPEG_PATH, "-i", video_path]
 
     # Add subtitle input files first
     for subtitle in subtitles_list:

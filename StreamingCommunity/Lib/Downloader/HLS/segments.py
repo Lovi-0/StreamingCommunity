@@ -4,10 +4,11 @@ import os
 import sys
 import time
 import queue
+import signal
 import logging
 import binascii
 import threading
-import signal
+
 from queue import PriorityQueue
 from urllib.parse import urljoin, urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -34,6 +35,7 @@ from ...M3U8 import (
     M3U8_Parser,
     M3U8_UrlFix
 )
+from ...FFmpeg.util import print_duration_table, format_duration
 from .proxyes import main_test_proxy
 
 # Config
@@ -93,6 +95,11 @@ class M3U8_Segments:
         self.interrupt_flag = threading.Event()
         self.download_interrupted = False
 
+        # OTHER INFO
+        self.info_maxRetry = 0
+        self.info_nRetry = 0
+        self.info_nFailed = 0
+
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         """
         Retrieves the encryption key from the M3U8 playlist.
@@ -127,6 +134,7 @@ class M3U8_Segments:
         hex_content = binascii.hexlify(response.content).decode('utf-8')
         byte_content = bytes.fromhex(hex_content)
         
+        #console.print(f"[cyan]Find key: [red]{hex_content}")
         return byte_content
     
     def parse_data(self, m3u8_content: str) -> None:
@@ -221,11 +229,10 @@ class M3U8_Segments:
                 self.download_interrupted = True
                 self.stop_event.set()
 
-        """if threading.current_thread() is threading.main_thread():
+        if threading.current_thread() is threading.main_thread():
             signal.signal(signal.SIGINT, interrupt_handler)
         else:
-            console.log("[red]Signal handler must be set in the main thread !!")"""
-        signal.signal(signal.SIGINT, interrupt_handler)
+            print("Signal handler must be set in the main thread")
 
     def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm, backoff_factor: float = 1.5) -> None:
         """
@@ -318,11 +325,18 @@ class M3U8_Segments:
             except Exception as e:
                 logging.info(f"Attempt {attempt + 1} failed for segment {index} - '{ts_url}': {e}")
                 
+                # Update stat variable class
+                if attempt > self.info_maxRetry:
+                    self.info_maxRetry = ( attempt + 1 )
+                self.info_nRetry += 1
+
                 if attempt + 1 == REQUEST_MAX_RETRY:
                     console.log(f"[red]Final retry failed for segment: {index}")
                     self.queue.put((index, None))  # Marker for failed segment
                     progress_bar.update(1)
-                    break
+                    self.info_nFailed += 1
+
+                    #break
                 
                 sleep_time = backoff_factor * (2 ** attempt)
                 logging.info(f"Retrying segment {index} in {sleep_time} seconds...")
@@ -383,12 +397,13 @@ class M3U8_Segments:
                 except Exception as e:
                     logging.error(f"Error writing segment {index}: {str(e)}")
     
-    def download_streams(self, add_desc):
+    def download_streams(self, description: str, type: str):
         """
         Downloads all TS segments in parallel and writes them to a file.
 
         Parameters:
-            - add_desc (str): Additional description for the progress bar.
+            - description: Description to insert on tqdm bar
+            - type (str): Type of download: 'video' or 'audio'
         """
         self.setup_interrupt_handler()
 
@@ -415,15 +430,18 @@ class M3U8_Segments:
             AUDIO_WORKERS = DEFAULT_AUDIO_WORKERS
 
         # Differnt workers for audio and video
-        if "video" in str(add_desc):
+        if "video" in str(type):
             TQDM_MAX_WORKER = VIDEO_WORKERS
-        if "audio" in str(add_desc):
+
+        if "audio" in str(type):
             TQDM_MAX_WORKER = AUDIO_WORKERS
+
+        console.print(f"[cyan]Video workers[white]: [green]{VIDEO_WORKERS} [white]| [cyan]Audio workers[white]: [green]{AUDIO_WORKERS}")
 
         # Custom bar for mobile and pc
         if TQDM_USE_LARGE_BAR:
             bar_format = (
-                f"{Colors.YELLOW}[HLS] {Colors.WHITE}({Colors.CYAN}{add_desc}{Colors.WHITE}): "
+                f"{Colors.YELLOW}[HLS] {Colors.WHITE}({Colors.CYAN}{description}{Colors.WHITE}): "
                 f"{Colors.RED}{{percentage:.2f}}% "
                 f"{Colors.MAGENTA}{{bar}} "
                 f"{Colors.WHITE}[ {Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] "
@@ -512,11 +530,6 @@ class M3U8_Segments:
             if self.download_interrupted:
                 console.log("[red] Download was manually stopped.")
 
-                # Optional: Delete partial download
-                if os.path.exists(self.tmp_file_path):
-                    os.remove(self.tmp_file_path)
-                sys.exit(0)
-
         # Clean up
         self.stop_event.set()
         writer_thread.join(timeout=30)
@@ -535,5 +548,18 @@ class M3U8_Segments:
         file_size = os.path.getsize(self.tmp_file_path)
         if file_size == 0:
             raise Exception("Output file is empty")
-        
-        logging.info(f"Download completed. File size: {file_size} bytes")
+    
+        # Get expected time
+        ex_hours, ex_minutes, ex_seconds = format_duration(self.expected_real_time_s)
+        ex_formatted_duration = f"[yellow]{int(ex_hours)}[red]h [yellow]{int(ex_minutes)}[red]m [yellow]{int(ex_seconds)}[red]s"
+        console.print(f"[cyan]Max retry per URL[white]: [green]{self.info_maxRetry}[green] [white]| [cyan]Total retry done[white]: [green]{self.info_nRetry}[green] [white]| [cyan]Missing TS: [red]{self.info_nFailed} [white]| [cyan]Duration: {print_duration_table(self.tmp_file_path, None, True)} [white]| [cyan]Expected duation: {ex_formatted_duration} \n")
+
+        if self.info_nRetry >= len(self.segments) * (1/3.33):
+            console.print(
+                "[yellow]⚠ Warning:[/yellow] Too many retries detected! "
+                "Consider reducing the number of [cyan]workers[/cyan] in the [magenta]config.json[/magenta] file. "
+                "This will impact [bold]performance[/bold]."
+            )
+
+        # Info to return
+        return {'type': type, 'nFailed': self.info_nFailed}

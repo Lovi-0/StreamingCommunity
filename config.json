@@ -53,7 +53,7 @@
         }
     },
     "EXTRA": {
-        "mongodb": "mongodb+srv://admin:admin@cluster0.hwk1q.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+        "mongodb": "mongodb+srv://...",
         "database": "StreamingCommunity"
     }
 }

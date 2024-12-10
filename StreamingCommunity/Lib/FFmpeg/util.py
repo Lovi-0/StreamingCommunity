@@ -10,6 +10,12 @@ from typing import Tuple
 
 # Internal utilities
 from StreamingCommunity.Util.console import console
+from StreamingCommunity.Util.os import os_summary
+
+
+# Variable
+FFPROB_PATH = os_summary.ffprobe_path
+
 
 
 def has_audio_stream(video_path: str) -> bool:
@@ -23,7 +29,7 @@ def has_audio_stream(video_path: str) -> bool:
         has_audio (bool): True if the input video has an audio stream, False otherwise.
     """
     try:
-        ffprobe_cmd = ['ffprobe', '-v', 'error', '-print_format', 'json', '-select_streams', 'a', '-show_streams', video_path]
+        ffprobe_cmd = [FFPROB_PATH, '-v', 'error', '-print_format', 'json', '-select_streams', 'a', '-show_streams', video_path]
         logging.info(f"FFmpeg command: {ffprobe_cmd}")
 
         with subprocess.Popen(ffprobe_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as proc:
@@ -47,12 +53,11 @@ def get_video_duration(file_path: str) -> float:
         - file_path (str): The path to the video file.
 
     Returns:
-        (float): The duration of the video in seconds if successful, 
-        None if there's an error.
+        (float): The duration of the video in seconds if successful, None if there's an error.
     """
 
     try:
-        ffprobe_cmd = ['ffprobe', '-v', 'error', '-show_format', '-print_format', 'json', file_path]
+        ffprobe_cmd = [FFPROB_PATH, '-v', 'error', '-show_format', '-print_format', 'json', file_path]
         logging.info(f"FFmpeg command: {ffprobe_cmd}")
 
         # Use a with statement to ensure the subprocess is cleaned up properly
@@ -74,18 +79,19 @@ def get_video_duration(file_path: str) -> float:
                 return 1
 
     except Exception as e:
-        logging.error(f"Error get video duration: {e}")
+        logging.error(f"Get video duration error: {e}")
         sys.exit(0)
+
 
 def get_video_duration_s(filename):
     """
     Get the duration of a video file using ffprobe.
 
     Parameters:
-    - filename (str): Path to the video file (e.g., 'sim.mp4')
+        - filename (str): Path to the video file (e.g., 'sim.mp4')
 
     Returns:
-    - duration (float): Duration of the video in seconds, or None if an error occurs.
+        - duration (float): Duration of the video in seconds, or None if an error occurs.
     """
     ffprobe_cmd = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', filename]
 
@@ -138,7 +144,6 @@ def print_duration_table(file_path: str, description: str = "Duration", return_s
         - str: The formatted duration string if return_string is True.
         - dict: A dictionary with keys 'h', 'm', 's' representing hours, minutes, and seconds if return_string is False.
     """
-
     video_duration = get_video_duration(file_path)
 
     if video_duration is not None:
@@ -160,14 +165,14 @@ def get_ffprobe_info(file_path):
     Get format and codec information for a media file using ffprobe.
 
     Parameters:
-        file_path (str): Path to the media file.
+        - file_path (str): Path to the media file.
 
     Returns:
         dict: A dictionary containing the format name and a list of codec names.
     """
     try:
         result = subprocess.run(
-            ['ffprobe', '-v', 'error', '-show_format', '-show_streams', '-print_format', 'json', file_path],
+            [FFPROB_PATH, '-v', 'error', '-show_format', '-show_streams', '-print_format', 'json', file_path],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True
         )
         output = result.stdout
@@ -195,7 +200,7 @@ def is_png_format_or_codec(file_info):
     Check if the format is 'png_pipe' or if any codec is 'png'.
 
     Parameters:
-        file_info (dict): The dictionary containing file information.
+        - file_info (dict): The dictionary containing file information.
 
     Returns:
         bool: True if the format is 'png_pipe' or any codec is 'png', otherwise False.
@@ -210,7 +215,7 @@ def need_to_force_to_ts(file_path):
     Get if a file to TS format if it is in PNG format or contains a PNG codec.
 
     Parameters:
-        file_path (str): Path to the input media file.
+        - file_path (str): Path to the input media file.
     """
     logging.info(f"Processing file: {file_path}")
     file_info = get_ffprobe_info(file_path)
@@ -225,11 +230,11 @@ def check_duration_v_a(video_path, audio_path):
     Check if the duration of the video and audio matches.
 
     Parameters:
-    - video_path (str): Path to the video file.
-    - audio_path (str): Path to the audio file.
+        - video_path (str): Path to the video file.
+        - audio_path (str): Path to the audio file.
 
     Returns:
-    - bool: True if the duration of the video and audio matches, False otherwise.
+        - bool: True if the duration of the video and audio matches, False otherwise.
     """
     
     # Ottieni la durata del video
