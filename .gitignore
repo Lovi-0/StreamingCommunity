@@ -23,6 +23,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+*.pyc
 
 # PyInstaller
 *.manifest
@@ -34,6 +35,7 @@ note.txt
 list_proxy.txt
 cmd.txt
 downloaded_files
+key.t
 
 # Cache
 __pycache__/

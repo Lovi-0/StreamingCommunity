@@ -1,16 +1,16 @@
 Per testare
 
 1. Installare requirements
-2. Inserire url per mongodb e creare database
-3. Runnare server.py
+1. Installare node js: https://nodejs.org/en/download/package-manager
+2. Inserire url per mongodb. Pagina login: https://account.mongodb.com/account/login
+3. Eseguire server.py: python server.py
 
 4. Spostarsi su client\dashboard
-5. Eseguire npm install, npm run build, npm install -g serve
+5. Eseguire npm install, npm run build, npm install -g serve, serve -s build
 
-Cosa da fare
+Cosa da fare:
 - Aggiungere documentazione
-- Bottone download intera stagione
-- Messaggio con richiesta se scaricare le nuove stagione quando si fa il check in watchlist
-- Migliore player in case watch con bottone
+- Migliore player quando si clicca sul button watch.
 - Coda di download con bottone aggiungere alla coda (complessa)
+- Progresso di download (complesso)
 ...

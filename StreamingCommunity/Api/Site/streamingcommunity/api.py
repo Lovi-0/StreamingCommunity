@@ -87,14 +87,6 @@ def get_infoSelectTitle(url_title: str, domain: str, version: str):
     if response.status_code == 200:
         json_response = response.json()['props']
 
-        generes = []
-        for g in json_response["genres"]:
-            generes.append(g["name"])
-        
-        trailer = None
-        if len(json_response['title']['trailers']) > 0:
-            trailer = f"https://www.youtube.com/watch?v={json_response['title']['trailers'][0]['youtube_id']}"
-
         images = {}
         for dict_image in json_response['title'].get('images', []):
             images[dict_image.get('type')] = f"https://cdn.{SITE_NAME}.{domain}/images/{dict_image.get('filename')}"
@@ -106,8 +98,6 @@ def get_infoSelectTitle(url_title: str, domain: str, version: str):
             'plot': json_response['title']['plot'],
             'type': json_response['title']['type'],
             'season_count': json_response['title']['seasons_count'],
-            'generes': generes,
-            'trailer': trailer,
             'image': images
         }
 

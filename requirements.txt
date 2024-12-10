@@ -13,4 +13,4 @@ qbittorrent-api
 python-qbittorrent 
 googlesearch-python
 pymongo
-flask
+fastapi

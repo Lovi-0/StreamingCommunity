@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Row, Col, Card, Button, Badge, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Badge, Alert, Modal } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaDownload } from 'react-icons/fa';
 
-const API_BASE_URL = "http://127.0.0.1:1234";
+import { SERVER_WATCHLIST_URL, API_URL } from './ApiUrl';
 
 const Watchlist = () => {
   const [watchlistItems, setWatchlistItems] = useState([]);
@@ -12,10 +12,19 @@ const Watchlist = () => {
   const [loading, setLoading] = useState(true);
   const [newSeasonsMessage, setNewSeasonsMessage] = useState("");  // Stato per il messaggio delle nuove stagioni
 
+  // Nuovo stato per la gestione del modal di download
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [seasonsToDownload, setSeasonsToDownload] = useState([]);
+  const [downloadProgress, setDownloadProgress] = useState({
+    status: 'idle', // 'idle', 'downloading', 'completed', 'error'
+    current: 0,
+    total: 0
+  });
+
   // Funzione per recuperare i dati della watchlist
   const fetchWatchlistData = async () => {
     try {
-      const watchlistResponse = await axios.get(`${API_BASE_URL}/api/getWatchlist`);
+      const watchlistResponse = await axios.get(`${SERVER_WATCHLIST_URL}/get`);
       setWatchlistItems(watchlistResponse.data);
       setLoading(false);
     } catch (error) {
@@ -27,27 +36,22 @@ const Watchlist = () => {
   // Funzione per controllare se ci sono nuove stagioni (attivata dal bottone)
   const checkNewSeasons = async () => {
     try {
-      const newSeasonsResponse = await axios.get(`${API_BASE_URL}/api/checkWatchlist`);
+      const newSeasonsResponse = await axios.get(`${SERVER_WATCHLIST_URL}/checkNewSeason`);
       
-      if (Array.isArray(newSeasonsResponse.data)) {
+      if (Array.isArray(newSeasonsResponse.data) && newSeasonsResponse.data.length > 0) {
         setNewSeasons(newSeasonsResponse.data);
+        setSeasonsToDownload(newSeasonsResponse.data);
+        setShowDownloadModal(true);
 
-        // Crea un messaggio per i titoli con nuove stagioni
         const titlesWithNewSeasons = newSeasonsResponse.data.map(season => season.name);
-        if (titlesWithNewSeasons.length > 0) {
-          setNewSeasonsMessage(`Nuove stagioni disponibili per: ${titlesWithNewSeasons.join(", ")}`);
-          
-          // Dopo aver mostrato il messaggio, aggiorniamo i titoli con le nuove stagioni
-          updateTitlesWithNewSeasons(newSeasonsResponse.data);
-        } else {
-          setNewSeasonsMessage("Nessuna nuova stagione disponibile.");
-        }
+        setNewSeasonsMessage(`Nuove stagioni disponibili per: ${titlesWithNewSeasons.join(", ")}`);
       } else {
-        setNewSeasons([]);  // In caso contrario, non ci sono nuove stagioni
+        setNewSeasons([]);
         setNewSeasonsMessage("Nessuna nuova stagione disponibile.");
       }
     } catch (error) {
       console.error("Error fetching new seasons:", error);
+      setNewSeasonsMessage("Errore nel recuperare le nuove stagioni.");
     }
   };
 
@@ -58,7 +62,7 @@ const Watchlist = () => {
         // Manda una richiesta POST per ogni titolo con nuove stagioni
         console.log(`Updated watchlist for ${season.name} with new season ${season.nNewSeason}, url: ${season.title_url}`);
         
-        await axios.post(`${API_BASE_URL}/api/updateTitleWatchlist`, {
+        await axios.post(`${SERVER_WATCHLIST_URL}/update`, {
           url: season.title_url,
           season: season.season
         });
@@ -69,10 +73,76 @@ const Watchlist = () => {
     }
   };
 
+  const downloadNewSeasons = async () => {
+    try {
+      setDownloadProgress({
+        status: 'downloading',
+        current: 0,
+        total: seasonsToDownload.length
+      });
+      for (const [index, season] of seasonsToDownload.entries()) {
+        try {
+          // Request complete series information
+          const seriesInfoResponse = await axios.get(`${API_URL}/getInfo`, {
+            params: { url: season.title_url }
+          });
+          
+          // Download entire season
+          const seasonResponse = await axios.get(`${API_URL}/getInfoSeason`, {
+            params: { 
+              url: season.title_url,
+              n: season.nNewSeason 
+            }
+          });
+          
+          // Download each episode of the season
+          for (const episode of seasonResponse.data) {
+            await axios.get(`${API_URL}/download/episode`, {
+              params: {
+                n_s: season.nNewSeason,
+                n_ep: episode.number,
+                media_id: seriesInfoResponse.data.id,
+                series_name: seriesInfoResponse.data.slug
+              }
+            });
+          }
+          
+          // Update watchlist with new season
+          await axios.post(`${SERVER_WATCHLIST_URL}/update`, {
+            url: season.title_url,
+            season: season.season
+          });
+          
+          // Update progress
+          setDownloadProgress(prev => ({
+            ...prev,
+            current: index + 1,
+            status: index + 1 === seasonsToDownload.length ? 'completed' : 'downloading'
+          }));
+        } catch (error) {
+          console.error(`Errore durante lo scaricamento della stagione ${season.name}:`, error);
+        }
+      }
+      
+      // Close modal after completion
+      setShowDownloadModal(false);
+      
+      // Reload watchlist to show updates
+      fetchWatchlistData();
+    } catch (error) {
+      console.error("Errore durante lo scaricamento delle nuove stagioni:", error);
+      setDownloadProgress({
+        status: 'error',
+        current: 0,
+        total: 0
+      });
+    }
+  };
+
   // Funzione per rimuovere un elemento dalla watchlist
   const handleRemoveFromWatchlist = async (serieName) => {
     try {
-      await axios.post(`${API_BASE_URL}/api/removeWatchlist`, { name: serieName });
+      await axios.post(`${SERVER_WATCHLIST_URL}/remove`, { name: serieName });
 
       // Aggiorna lo stato locale per rimuovere l'elemento dalla watchlist
       setWatchlistItems((prev) => prev.filter((item) => item.name !== serieName));
@@ -156,6 +226,57 @@ const Watchlist = () => {
           </Row>
         )}
       </Container>
+
+
+     <Modal show={showDownloadModal} onHide={() => setShowDownloadModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Nuove Stagioni Disponibili</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Sono disponibili nuove stagioni per i seguenti titoli:</p>
+          <ul>
+            {seasonsToDownload.map((season) => (
+              <li key={season.name}>
+                {season.name.replace(/-/g, ' ')} - Stagione {season.nNewSeason}
+              </li>
+            ))}
+          </ul>
+
+          {downloadProgress.status !== 'idle' && (
+            <div className="mt-3">
+              <p>Progresso download:</p>
+              <div className="progress">
+                <div 
+                  className={`progress-bar ${
+                    downloadProgress.status === 'completed' ? 'bg-success' : 
+                    downloadProgress.status === 'error' ? 'bg-danger' : 'bg-primary'
+                  }`} 
+                  role="progressbar" 
+                  style={{width: `${(downloadProgress.current / downloadProgress.total) * 100}%`}}
+                  aria-valuenow={(downloadProgress.current / downloadProgress.total) * 100}
+                  aria-valuemin="0" 
+                  aria-valuemax="100"
+                >
+                  {downloadProgress.current}/{downloadProgress.total} Stagioni
+                </div>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDownloadModal(false)}>
+            Annulla
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={downloadNewSeasons}
+            disabled={downloadProgress.status === 'downloading'}
+          >
+            <FaDownload className="me-2" />
+            Scarica Nuove Stagioni
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

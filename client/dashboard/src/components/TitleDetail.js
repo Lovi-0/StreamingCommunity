@@ -5,8 +5,7 @@ import { Container, Row, Col, Image, Button, Dropdown, Modal, Alert } from 'reac
 import { FaDownload, FaPlay, FaPlus, FaTrash } from 'react-icons/fa';
 
 import SearchBar from './SearchBar.js';
-
-const API_BASE_URL = "http://127.0.0.1:1234";
+import { API_BASE_URL, API_URL, SERVER_DELETE_URL, SERVER_PATH_URL, SERVER_WATCHLIST_URL} from './ApiUrl.js';
 
 const TitleDetail = () => {
   const [titleDetails, setTitleDetails] = useState(null);
@@ -16,6 +15,7 @@ const TitleDetail = () => {
   const [hoveredEpisode, setHoveredEpisode] = useState(null);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState({});
+  const [downloadingAllSeason, setDownloadingAllSeason] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
   const [currentVideo, setCurrentVideo] = useState("");
   const location = useLocation();
@@ -27,7 +27,7 @@ const TitleDetail = () => {
         const titleUrl = location.state?.url || location.pathname.split('/title/')[1];
 
         // Fetch title information
-        const response = await axios.get(`${API_BASE_URL}/api/getInfo`, {
+        const response = await axios.get(`${API_URL}/getInfo`, {
           params: { url: titleUrl }
         });
         
@@ -70,7 +70,7 @@ const TitleDetail = () => {
           } 
         });
       } else if (titleData.type === 'tv') {
-        const response = await axios.get(`${API_BASE_URL}/downloads`);
+        const response = await axios.get(`${SERVER_PATH_URL}/getAll`);
         const downloadedEpisodes = response.data.filter(
           download => download.type === 'tv' && download.slug === titleData.slug
         );
@@ -92,7 +92,7 @@ const TitleDetail = () => {
   // Check watchlist status
   const checkWatchlistStatus = async (slug) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/getWatchlist`);
+      const response = await axios.get(`${SERVER_WATCHLIST_URL}/get`);
       const inWatchlist = response.data.some(item => item.name === slug);
       setIsInWatchlist(inWatchlist);
     } catch (error) {
@@ -104,7 +104,7 @@ const TitleDetail = () => {
     if (titleDetails.type === 'tv') {
       try {
         setLoading(true);
-        const seasonResponse = await axios.get(`${API_BASE_URL}/api/getInfoSeason`, {
+        const seasonResponse = await axios.get(`${API_URL}/getInfoSeason`, {
           params: { 
             url: location.state?.url,
             n: seasonNumber 
@@ -123,7 +123,7 @@ const TitleDetail = () => {
 
   const handleDownloadFilm = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/downloadFilm`, {
+      const response = await axios.get(`${API_URL}/download/film`, {
         params: {
           id: titleDetails.id,
           slug: titleDetails.slug
@@ -146,7 +146,7 @@ const TitleDetail = () => {
 
   const handleDownloadEpisode = async (seasonNumber, episodeNumber) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/downloadEpisode`, {
+      const response = await axios.get(`${API_URL}/download/episode`, {
         params: {
           n_s: seasonNumber,
           n_ep: episodeNumber
@@ -170,13 +170,52 @@ const TitleDetail = () => {
     }
   };
 
+  const handleDownloadAllSeason = async () => {
+    if (!titleDetails || titleDetails.type !== 'tv') return;
+
+    try {
+      setDownloadingAllSeason(true);
+      
+      // Download all episodes in the current season
+      for (const episode of episodes) {
+        try {
+          const response = await axios.get(`${API_URL}/download/episode`, {
+            params: {
+              n_s: selectedSeason,
+              n_ep: episode.number
+            }
+          });
+          const videoPath = response.data.path;
+          
+          // Update download status for this specific episode
+          setDownloadStatus(prev => ({
+            tv: {
+              ...prev.tv,
+              [`S${selectedSeason}E${episode.number}`]: {
+                downloaded: true,
+                path: videoPath
+              }
+            }
+          }));
+        } catch (error) {
+          console.error(`Error downloading episode ${episode.number}:`, error);
+        }
+      }
+    } catch (error) {
+      console.error("Error downloading all season episodes:", error);
+      alert("Error downloading season. Some episodes might not have downloaded.");
+    } finally {
+      setDownloadingAllSeason(false);
+    }
+  };
+
   const handleWatchVideo = async (videoPath) => {
     if (!videoPath) {
       // If no path provided, attempt to get path from downloads
       try {
         let path;
         if (titleDetails.type === 'movie') {
-          const response = await axios.get(`${API_BASE_URL}/moviePath`, {
+          const response = await axios.get(`${SERVER_PATH_URL}/movie`, {
             params: { id: titleDetails.id }
           });
           path = response.data.path;
@@ -198,7 +237,7 @@ const TitleDetail = () => {
 
   const handleAddToWatchlist = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/api/addWatchlist`, {
+      await axios.post(`${SERVER_WATCHLIST_URL}/add`, {
         name: titleDetails.slug,
         url: location.state?.url || location.pathname.split('/title/')[1],
         season: titleDetails.season_count
@@ -212,7 +251,7 @@ const TitleDetail = () => {
 
   const handleRemoveFromWatchlist = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/api/removeWatchlist`, {
+      await axios.post(`${SERVER_WATCHLIST_URL}/remove`, {
         name: titleDetails.slug
       });
       setIsInWatchlist(false);
@@ -318,22 +357,34 @@ const TitleDetail = () => {
           <>
             <Row className="mb-3">
               <Col>
-                <Dropdown>
-                  <Dropdown.Toggle variant="secondary">
-                    Season {selectedSeason}
-                  </Dropdown.Toggle>
+                <div className="d-flex align-items-center">
+                  {/* Dropdown per la selezione della stagione */}
+                  <Dropdown>
+                    <Dropdown.Toggle variant="secondary">
+                      Season {selectedSeason}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      {[...Array(titleDetails.season_count)].map((_, index) => (
+                        <Dropdown.Item 
+                          key={index + 1} 
+                          onClick={() => handleSeasonSelect(index + 1)}
+                        >
+                          Season {index + 1}
+                        </Dropdown.Item>
+                      ))}
+                    </Dropdown.Menu>
+                  </Dropdown>
 
-                  <Dropdown.Menu>
-                    {[...Array(titleDetails.season_count)].map((_, index) => (
-                      <Dropdown.Item 
-                        key={index + 1} 
-                        onClick={() => handleSeasonSelect(index + 1)}
-                      >
-                        Season {index + 1}
-                      </Dropdown.Item>
-                    ))}
-                  </Dropdown.Menu>
-                </Dropdown>
+                  {/* Bottone per il download con margine a sinistra */}
+                  <Button 
+                    variant="secondary" 
+                    className="ms-3" 
+                    onClick={handleDownloadAllSeason}
+                    disabled={downloadingAllSeason}
+                  >
+                    {downloadingAllSeason ? 'Downloading...' : `Download Season ${selectedSeason}`}
+                  </Button>
+                </div>
               </Col>
             </Row>
 
@@ -393,7 +444,7 @@ const TitleDetail = () => {
       <Modal show={showPlayer} onHide={() => setShowPlayer(false)} size="lg" centered>
         <Modal.Body>
           <video 
-            src={`http://127.0.0.1:1234/downloaded/${currentVideo}`} 
+            src={`${API_URL}/downloaded/${currentVideo}`} 
             controls 
             autoPlay 
             style={{ width: '100%' }}

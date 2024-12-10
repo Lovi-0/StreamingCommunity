@@ -1,22 +1,12 @@
 {
     "DEFAULT": {
         "debug": false,
-        "log_file": "app.log",
-        "log_to_file": true,
         "show_message": true,
-        "clean_console": true,
         "root_path": "Video",
         "movie_folder_name": "Movie",
         "serie_folder_name": "TV",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
-        "config_qbit_tor": {
-            "host": "192.168.1.59",
-            "port": "8080",
-            "user": "admin",
-            "pass": "adminadmin"
-        },
-        "not_close": false,
-        "show_trending": false
+        "clean_console": true
     },
     "REQUESTS": {
         "timeout": 20,
@@ -25,9 +15,6 @@
         "proxy_start_min": 0.1,
         "proxy_start_max": 0.5,
         "user-agent": ""
-    },
-    "BROWSER": {
-        "headless": false
     },
     "M3U8_DOWNLOAD": {
         "tqdm_delay": 0.01,

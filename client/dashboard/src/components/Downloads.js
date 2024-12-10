@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Row, Col, Card, Button, Badge, Modal } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';  // Aggiungi Modal qui
 import { FaTrash, FaPlay } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
 
-const API_BASE_URL = "http://127.0.0.1:1234";
+import { SERVER_PATH_URL, SERVER_DELETE_URL, API_URL } from './ApiUrl';
 
 const Downloads = () => {
   const [downloads, setDownloads] = useState([]);
@@ -15,7 +14,7 @@ const Downloads = () => {
   // Fetch all downloads
   const fetchDownloads = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/downloads`);
+      const response = await axios.get(`${SERVER_PATH_URL}/getAll`);
       setDownloads(response.data);
       setLoading(false);
     } catch (error) {
@@ -27,8 +26,8 @@ const Downloads = () => {
   // Delete a TV episode
   const handleDeleteEpisode = async (id, season, episode) => {
     try {
-      await axios.delete(`${API_BASE_URL}/deleteEpisode`, {
-        params: { id, season, episode }
+      await axios.delete(`${SERVER_DELETE_URL}/episode`, {
+        params: { series_id: id, season_number: season, episode_number: episode }
       });
       fetchDownloads(); // Refresh the list
     } catch (error) {
@@ -39,8 +38,8 @@ const Downloads = () => {
   // Delete a movie
   const handleDeleteMovie = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/deleteMovie`, {
-        params: { id }
+      await axios.delete(`${SERVER_DELETE_URL}/movie`, {
+        params: { movie_id: id }
       });
       fetchDownloads(); // Refresh the list
     } catch (error) {
@@ -111,13 +110,6 @@ const Downloads = () => {
                     >
                       <FaPlay className="me-2" /> Watch
                     </Button>
-                    <Link
-                      to={`/title/${movie.slug}`}
-                      state={{ url: movie.slug }}
-                      className="btn btn-secondary btn-sm ms-2"
-                    >
-                      View Details
-                    </Link>
                   </Card.Body>
                 </Card>
               </Col>
@@ -160,13 +152,6 @@ const Downloads = () => {
                         >
                           <FaPlay className="me-2" /> Watch
                         </Button>
-                        <Link
-                          to={`/title/${slug}`}
-                          state={{ url: slug }}
-                          className="btn btn-secondary btn-sm ms-2"
-                        >
-                          View Details
-                        </Link>
                       </Card.Body>
                     </Card>
                   </Col>
@@ -181,7 +166,7 @@ const Downloads = () => {
       <Modal show={showPlayer} onHide={() => setShowPlayer(false)} size="lg" centered>
         <Modal.Body>
           <video 
-            src={`http://127.0.0.1:1234/downloaded/${currentVideo}`} 
+            src={`${API_URL}/downloaded/${currentVideo}`} 
             controls 
             autoPlay 
             style={{ width: '100%' }}

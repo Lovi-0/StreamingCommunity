@@ -3,8 +3,7 @@ import axios from 'axios';
 import { Container, Button, Form, InputGroup } from 'react-bootstrap';
 
 import SearchBar from './SearchBar.js';
-
-const API_BASE_URL = "http://127.0.0.1:1234";
+import { API_BASE_URL } from './ApiUrl.js';
 
 const Dashboard = () => {
   const [items, setItems] = useState([]);
