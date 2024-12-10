@@ -57,14 +57,8 @@ def download_film(select_title: MediaItem):
         output_filename=os.path.join(mp4_path, title_name)
     ).start()
 
-    if r_proc == 404:
-        time.sleep(2)
-
-        # Re call search function
-        if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
-            frames = get_call_stack()
-            execute_search(frames[-4])
-
     if r_proc != None:
         console.print("[green]Result: ")
         console.print(r_proc)
+
+    return os.path.join(mp4_path, title_name)

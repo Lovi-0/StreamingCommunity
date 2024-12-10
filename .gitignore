@@ -28,35 +28,21 @@ MANIFEST
 *.manifest
 *.spec
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
 # Other
 Video
 note.txt
 list_proxy.txt
 cmd.txt
 downloaded_files
+
+# Cache
+__pycache__/
+**/__pycache__/
+
+# Ignore node_modules directory in the client dashboard to avoid committing dependencies
+/client/dashboard/node_modules
+
+# Ignore build directory in the client dashboard to avoid committing build artifacts
+/client/dashboard/build
+
+# PER PYCACHE -> pyclean .

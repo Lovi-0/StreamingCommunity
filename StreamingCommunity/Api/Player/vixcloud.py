@@ -120,7 +120,8 @@ class VideoSource:
                     response.raise_for_status()
 
                 except Exception as e:
-                    logging.error(f"Failed to get vixcloud contente with error: {e}")
+                    print("\n")
+                    console.print(Panel("[red bold]Coming soon", title="Notification", title_align="left", border_style="yellow"))
                     sys.exit(0)
 
                 # Parse response with BeautifulSoup to get content
@@ -167,56 +168,6 @@ class VideoSource:
 
         # Construct the new URL with updated query parameters
         return urlunparse(parsed_url._replace(query=query_string))
-
-    def get_mp4(self, url_to_download: str, scws_id: str) -> list:
-        """
-        Generate download links for the specified resolutions from StreamingCommunity.
-        
-        Args:
-            url_to_download (str): URL of the video page.
-            scws_id (str): SCWS ID of the title.
-        
-        Returns:
-            list: A list of video download URLs.
-        """
-        headers = {
-            'referer': url_to_download,
-            'user-agent': get_headers(),
-        }
-
-        # API request to get video details
-        video_api_url = f'https://{self.base_name}.{self.domain}/api/video/{scws_id}'
-        response = httpx.get(video_api_url, headers=headers)
-
-        if response.status_code == 200:
-            response_json = response.json()
-
-            video_tracks = response_json.get('video_tracks', [])
-            track = video_tracks[-1]
-            console.print(f"[cyan]Available resolutions: [red]{[str(track['quality']) for track in video_tracks]}")
-
-            # Request download link generation for each track
-            download_response = httpx.post(
-                url=f'https://{self.base_name}.{self.domain}/api/download/generate_link?scws_id={track["video_id"]}&rendition={track["quality"]}',
-                headers={
-                    'referer': url_to_download,
-                    'user-agent': get_headers(),
-                    'x-xsrf-token': config_manager.get("SITE", self.base_name)['extra']['x-xsrf-token']
-                },
-                cookies={
-                    'streamingcommunity_session': config_manager.get("SITE", self.base_name)['extra']['streamingcommunity_session']
-                }
-            )
-
-            if download_response.status_code == 200:
-                return {'url': download_response.text, 'quality': track["quality"]}
-
-            else:
-                logging.error(f"Failed to generate link for resolution {track['quality']} (HTTP {download_response.status_code}).")
-
-        else:
-            logging.error(f"Error fetching video API URL (HTTP {response.status_code}).")
-            return []
 
 
 class VideoSourceAnime(VideoSource):
