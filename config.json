@@ -63,10 +63,38 @@
     "SITE": {
         "streamingcommunity": {
             "domain": "family"
+        },
+        "altadefinizione": {
+            "domain": "now"
+        },
+        "guardaserie": {
+            "domain": "academy"
+        },
+        "mostraguarda": {
+            "domain": "stream"
+        },
+        "ddlstreamitaly": {
+            "domain": "co",
+            "extra": {
+                "ips4_device_key": "",
+                "ips4_member_id": "",
+                "ips4_login_key": ""
+            }
+        },
+        "animeunity": {
+            "domain": "to"
+        },
+        "cb01new": {
+            "domain": "club"
+        },
+        "bitsearch": {
+            "domain": "to"
+        },
+        "1337xx": {
+            "domain": "to"
+        },
+        "piratebays": {
+            "domain": "to"
         }
-    },
-    "EXTRA": {
-        "mongodb": "mongodb+srv://...",
-        "database": "StreamingCommunity"
     }
 }

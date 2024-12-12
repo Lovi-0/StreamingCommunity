@@ -1,4 +1,4 @@
-# 3.12.23
+# 26.05.24
 
 import os
 import time
@@ -18,45 +18,44 @@ from StreamingCommunity.Api.Template.Class.SearchType import MediaItem
 
 
 # Player
-from StreamingCommunity.Api.Player.vixcloud import VideoSource
+from StreamingCommunity.Api.Player.supervideo import VideoSource
 
 
-# Variable
+# Config
 from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
-        
+
 
 def download_film(select_title: MediaItem):
     """
     Downloads a film using the provided film ID, title name, and domain.
 
     Parameters:
-        - domain (str): The domain of the site
-        - version (str): Version of site.
+        - title_name (str): The name of the film title.
+        - url (str): The url of the video
     """
 
     # Start message and display film information
     start_message()
-    console.print(f"[yellow]Download:  [red]{select_title.slug} \n")
+    console.print(f"[yellow]Download:  [red]{select_title.name} \n")
 
-    # Init class
-    video_source = VideoSource(SITE_NAME, False)
-    video_source.setup(select_title.id)
+    # Set domain and media ID for the video source
+    video_source = VideoSource(select_title.url)
 
-    # Retrieve scws and if available master playlist
-    video_source.get_iframe(select_title.id)
-    video_source.get_content()
+    # Define output path
+    title_name = os_manager.get_sanitize_file(select_title.name) + ".mp4"
+    mp4_path = os_manager.get_sanitize_path(
+        os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name.replace(".mp4", ""))
+    )
+
+    # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()
-
-    # Define the filename and path for the downloaded film
-    title_name = os_manager.get_sanitize_file(select_title.slug) + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, select_title.slug)
 
     # Download the film using the m3u8 playlist, and output filename
     r_proc = HLS_Downloader(
         m3u8_playlist=master_playlist, 
         output_filename=os.path.join(mp4_path, title_name)
     ).start()
-
+    
     if r_proc == 404:
         time.sleep(2)
 

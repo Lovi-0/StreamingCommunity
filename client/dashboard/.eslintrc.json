@@ -1,7 +1,0 @@
-{
-    "extends": ["react-app", "plugin:react/recommended"],
-    "rules": {
-      // Aggiungi qui le tue regole personalizzate
-    }
-  }
-  

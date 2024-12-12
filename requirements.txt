@@ -1,4 +1,4 @@
-httpx
+﻿httpx
 bs4
 rich
 tqdm
@@ -12,6 +12,3 @@ fake-useragent==1.1.3
 qbittorrent-api
 python-qbittorrent 
 googlesearch-python
-pymongo
-fastapi
-pyclean

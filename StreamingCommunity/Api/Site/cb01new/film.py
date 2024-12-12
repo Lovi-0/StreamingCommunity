@@ -1,4 +1,4 @@
-# 3.12.23
+# 03.07.24
 
 import os
 import time
@@ -18,38 +18,37 @@ from StreamingCommunity.Api.Template.Class.SearchType import MediaItem
 
 
 # Player
-from StreamingCommunity.Api.Player.vixcloud import VideoSource
+from StreamingCommunity.Api.Player.maxstream import VideoSource
 
 
-# Variable
+# Config
 from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
-        
+
 
 def download_film(select_title: MediaItem):
     """
-    Downloads a film using the provided film ID, title name, and domain.
+    Downloads a film using the provided obj.
 
     Parameters:
-        - domain (str): The domain of the site
-        - version (str): Version of site.
+        - select_title (MediaItem): The media item to be downloaded. This should be an instance of the MediaItem class, containing attributes like `name` and `url`.
     """
 
     # Start message and display film information
     start_message()
-    console.print(f"[yellow]Download:  [red]{select_title.slug} \n")
+    console.print(f"[yellow]Download:  [red]{select_title.name} \n")
 
-    # Init class
-    video_source = VideoSource(SITE_NAME, False)
-    video_source.setup(select_title.id)
+    # Setup api manger
+    print(select_title.url)
+    video_source = VideoSource(select_title.url)
 
-    # Retrieve scws and if available master playlist
-    video_source.get_iframe(select_title.id)
-    video_source.get_content()
+    # Define output path
+    title_name = os_manager.get_sanitize_file(select_title.name) +".mp4"
+    mp4_path = os_manager.get_sanitize_path(
+        os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name.replace(".mp4", ""))
+    )
+
+    # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()
-
-    # Define the filename and path for the downloaded film
-    title_name = os_manager.get_sanitize_file(select_title.slug) + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, select_title.slug)
 
     # Download the film using the m3u8 playlist, and output filename
     r_proc = HLS_Downloader(
