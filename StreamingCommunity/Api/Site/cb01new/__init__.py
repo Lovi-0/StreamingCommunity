@@ -18,6 +18,7 @@ _useFor = "film"
 _deprecate = False
 _priority = 2
 _engineDownload = "mp4"
+from .costant import SITE_NAME
 
 
 def search(string_to_search: str = None, get_onylDatabase: bool = False):
@@ -26,7 +27,7 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
     """
 
     if string_to_search is None:
-        string_to_search = msg.ask("\n[purple]Insert word to search in all site").strip()
+        string_to_search = msg.ask(f"\n[purple]Insert word to search in [red]{SITE_NAME}").strip()
 
     # Search on database
     len_database = title_search(unidecode(string_to_search))
