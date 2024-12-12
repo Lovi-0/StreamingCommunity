@@ -49,7 +49,16 @@ def get_final_redirect_url(initial_url, max_timeout):
 
     # Create a client with redirects enabled
     try:
-        with httpx.Client(follow_redirects=True, timeout=max_timeout, headers={'user-agent': get_headers()}) as client:
+        with httpx.Client(
+            follow_redirects=True, 
+            timeout=max_timeout, 
+            headers={
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+                'User-Agent': get_headers()
+            }
+        ) as client:
+            
             response = client.get(initial_url)
             response.raise_for_status()
             
@@ -59,7 +68,7 @@ def get_final_redirect_url(initial_url, max_timeout):
         return final_url
     
     except Exception as e:
-        console.print(f"[cyan]Test url[white]: [red]{initial_url}, [cyan]error[white]: [red]{e}")
+        console.print(f"\n[cyan]Test url[white]: [red]{initial_url}, [cyan]error[white]: [red]{e}")
         return None
 
 def search_domain(site_name: str, base_url: str):
@@ -89,6 +98,7 @@ def search_domain(site_name: str, base_url: str):
             follow_redirects=True,
             timeout=max_timeout
         ) as client:
+            
             response_follow = client.get(f"{base_url}.{domain}")
             response_follow.raise_for_status()
 
@@ -115,7 +125,6 @@ def search_domain(site_name: str, base_url: str):
                 final_url = get_final_redirect_url(first_url, max_timeout)
 
                 if final_url is not None:
-                    #console.print(f"\n[cyan]New final URL[white]: [green]{final_url}")
                     
                     def extract_domain(url):
                         parsed_url = urlparse(url)
