@@ -1,12 +1,5 @@
 # 03.03.24
 
-import os
-import sys
-import logging
-import importlib
-
-
-# External library
 from rich.console import Console
 from rich.table import Table
 from rich.prompt import Prompt
@@ -16,13 +9,15 @@ from typing import Dict, List, Any
 
 # Internal utilities
 from .message import start_message
-from .call_stack import get_call_stack
 
 
 class TVShowManager:
     def __init__(self):
         """
         Initialize TVShowManager with provided column information.
+
+        Parameters:
+            - column_info (Dict[str, Dict[str, str]]): Dictionary containing column names, their colors, and justification.
         """
         self.console = Console()
         self.tv_shows: List[Dict[str, Any]] = []  # List to store TV show data as dictionaries
@@ -85,6 +80,7 @@ class TVShowManager:
 
         self.console.print(table)  # Use self.console.print instead of print
 
+
     def run(self, force_int_input: bool = False, max_int_input: int = 0) -> str:
         """
         Run the TV show manager application.
@@ -105,16 +101,9 @@ class TVShowManager:
             # Display table
             self.display_data(self.tv_shows[self.slice_start:self.slice_end])
 
-            # Find research function from call stack
-            research_func = None
-            for reverse_fun in get_call_stack():
-                if reverse_fun['function'] == 'search' and reverse_fun['script'] == '__init__.py':
-                    research_func = reverse_fun
-                    logging.info(f"Found research_func: {research_func}")
-
             # Handling user input for loading more items or quitting
             if self.slice_end < total_items:
-                self.console.print(f"\n\n[yellow][INFO] [green]Press [red]Enter [green]for next page, [red]'q' [green]to quit, or [red]'back' [green]to search.")
+                self.console.print(f"\n\n[yellow][INFO] [green]Press [red]Enter [green]for next page, or [red]'q' [green]to quit.")
 
                 if not force_int_input:
                     key = Prompt.ask(
@@ -124,7 +113,7 @@ class TVShowManager:
                     
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
-                    choices.extend(["q", "", "back"])
+                    choices.extend(["q", ""])
 
                     key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
                 last_command = key
@@ -138,62 +127,22 @@ class TVShowManager:
                     if self.slice_end > total_items:
                         self.slice_end = total_items
 
-                elif key.lower() == "back" and research_func:
-                    try:
-                        # Find the project root directory
-                        current_path = research_func['folder']
-                        while not os.path.exists(os.path.join(current_path, 'StreamingCommunity')):
-                            current_path = os.path.dirname(current_path)
-                        
-                        # Add project root to Python path
-                        project_root = current_path
-                        #print(f"[DEBUG] Project Root: {project_root}")
-                        
-                        if project_root not in sys.path:
-                            sys.path.insert(0, project_root)
-                        
-                        # Import using full absolute import
-                        module_path = 'StreamingCommunity.Api.Site.streamingcommunity'
-                        #print(f"[DEBUG] Importing module: {module_path}")
-                        
-                        # Import the module
-                        module = importlib.import_module(module_path)
-                        
-                        # Get the search function
-                        search_func = getattr(module, 'media_search_manager')
-                        
-                        # Ask for search string
-                        string_to_search = Prompt.ask(f"\n[purple]Insert word to search in [red]{research_func['folder_base']}").strip()
-                        
-                        # Call the search function with the search string
-                        search_func(string_to_search)
-                        
-                    except Exception as e:
-                        self.console.print(f"[red]Error during search: {e}")
-                        
-                        # Print detailed traceback
-                        import traceback
-                        traceback.print_exc()
-                    
-                    # Optionally remove the path if you want to clean up
-                    if project_root in sys.path:
-                        sys.path.remove(project_root)
-
                 else:
                     break
 
             else:
                 # Last slice, ensure all remaining items are shown
-                self.console.print(f"\n\n[yellow][INFO] [green]You've reached the end. [red]Enter [green]for first page, [red]'q' [green]to quit, or [red]'back' [green]to search.")
+                self.console.print(f"\n\n[yellow][INFO] [red]You've reached the end. [green]Press [red]Enter [green]for next page, or [red]'q' [green]to quit.")
                 if not force_int_input:
                     key = Prompt.ask(
                         "\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
                         "[yellow](e.g., 1-2) [cyan]for a range of media, or [yellow](e.g., 3-*) [cyan]to download from a specific index to the end"
                     )
 
+
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
-                    choices.extend(["q", "", "back"])
+                    choices.extend(["q", ""])
 
                     key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
                 last_command = key
@@ -204,47 +153,6 @@ class TVShowManager:
                 elif key == "":
                     self.slice_start = 0
                     self.slice_end = self.step
-
-                elif key.lower() == "back" and research_func:
-                    try:
-                        # Find the project root directory
-                        current_path = research_func['folder']
-                        while not os.path.exists(os.path.join(current_path, 'StreamingCommunity')):
-                            current_path = os.path.dirname(current_path)
-                        
-                        # Add project root to Python path
-                        project_root = current_path
-                        #print(f"[DEBUG] Project Root: {project_root}")
-                        
-                        if project_root not in sys.path:
-                            sys.path.insert(0, project_root)
-                        
-                        # Import using full absolute import
-                        module_path = 'StreamingCommunity.Api.Site.streamingcommunity'
-                        #print(f"[DEBUG] Importing module: {module_path}")
-                        
-                        # Import the module
-                        module = importlib.import_module(module_path)
-                        
-                        # Get the search function
-                        search_func = getattr(module, 'media_search_manager')
-                        
-                        # Ask for search string
-                        string_to_search = Prompt.ask(f"\n[purple]Insert word to search in [red]{research_func['folder_base']}").strip()
-                        
-                        # Call the search function with the search string
-                        search_func(string_to_search)
-                        
-                    except Exception as e:
-                        self.console.print(f"[red]Error during search: {e}")
-                        
-                        # Print detailed traceback
-                        import traceback
-                        traceback.print_exc()
-                    
-                    # Optionally remove the path if you want to clean up
-                    if project_root in sys.path:
-                        sys.path.remove(project_root)
 
                 else:
                     break
