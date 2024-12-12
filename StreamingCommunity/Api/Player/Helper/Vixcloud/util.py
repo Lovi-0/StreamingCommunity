@@ -1,22 +1,17 @@
 # 23.11.24
 
+import re
+import logging
 from typing import Dict, Any, List, Union
 
 
 class Episode:
     def __init__(self, data: Dict[str, Any]):
-        self.images = None
-        self.data = data
-
-        self.id: int = data.get('id')
-        self.scws_id: int = data.get('scws_id')
-        self.number: int = data.get('number')
-        self.name: str = data.get('name')
-        self.plot: str = data.get('plot')
-        self.duration: int = data.get('duration')
-
-    def collect_image(self, SITE_NAME, domain):
-        self.image = f"https://cdn.{SITE_NAME}.{domain}/images/{self.data.get('images')[0]['filename']}"
+        self.id: int = data.get('id', '')
+        self.number: int = data.get('number', '')
+        self.name: str = data.get('name', '')
+        self.plot: str = data.get('plot', '')
+        self.duration: int = data.get('duration', '')
 
     def __str__(self):
         return f"Episode(id={self.id}, number={self.number}, name='{self.name}', plot='{self.plot}', duration={self.duration} sec)"
@@ -25,7 +20,7 @@ class EpisodeManager:
     def __init__(self):
         self.episodes: List[Episode] = []
 
-    def add(self, episode_data: Dict[str, Any]):
+    def add_episode(self, episode_data: Dict[str, Any]):
         """
         Add a new episode to the manager.
 
@@ -34,20 +29,8 @@ class EpisodeManager:
         """
         episode = Episode(episode_data)
         self.episodes.append(episode)
-
-    def get(self, index: int) -> Episode:
-        """
-        Retrieve an episode by its index in the episodes list.
-
-        Parameters:
-            - index (int): The zero-based index of the episode to retrieve.
-
-        Returns:
-            Episode: The Episode object at the specified index.
-        """
-        return self.episodes[index]
     
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         Get the number of episodes in the manager.
 
@@ -71,23 +54,61 @@ class EpisodeManager:
 
 class Season:
     def __init__(self, season_data: Dict[str, Union[int, str, None]]):
-        self.images = {}
-        self.season_data = season_data
-
         self.id: int = season_data.get('id')
-        self.scws_id: int = season_data.get('scws_id')
-        self.imdb_id: int = season_data.get('imdb_id')
         self.number: int = season_data.get('number')
         self.name: str = season_data.get('name')
-        self.slug: str = season_data.get('slug')
         self.plot: str = season_data.get('plot')
-        self.type: str = season_data.get('type')
-        self.seasons_count: int = season_data.get('seasons_count')
-        self.episodes: EpisodeManager = EpisodeManager()
-        
-    def collect_images(self, SITE_NAME, domain):
-        for dict_image in self.season_data.get('images'):
-            self.images[dict_image.get('type')] = f"https://cdn.{SITE_NAME}.{domain}/images/{dict_image.get('filename')}"
+        self.episodes_count: int = season_data.get('episodes_count')
+
+    def __str__(self):
+        return f"Season(id={self.id}, number={self.number}, name='{self.name}', plot='{self.plot}', episodes_count={self.episodes_count})"
+
+class SeasonManager:
+    def __init__(self):
+        self.seasons: List[Season] = []
+
+    def add_season(self, season_data: Dict[str, Union[int, str, None]]):
+        """
+        Add a new season to the manager.
+
+        Parameters:
+            season_data (Dict[str, Union[int, str, None]]): A dictionary containing data for the new season.
+        """
+        season = Season(season_data)
+        self.seasons.append(season)
+
+    def get(self, index: int) -> Season:
+        """
+        Get a season item from the list by index.
+
+        Parameters:
+            index (int): The index of the seasons item to retrieve.
+
+        Returns:
+            Season: The media item at the specified index.
+        """
+        return self.media_list[index]
+
+    def get_length(self) -> int:
+        """
+        Get the number of seasons in the manager.
+
+        Returns:
+            int: Number of seasons.
+        """
+        return len(self.seasons)
+    
+    def clear(self) -> None:
+        """
+        This method clears the seasons list.
+
+        Parameters:
+            self: The object instance.
+        """
+        self.seasons.clear()
+
+    def __str__(self):
+        return f"SeasonManager(num_seasons={len(self.seasons)})"
 
 
 class Stream:

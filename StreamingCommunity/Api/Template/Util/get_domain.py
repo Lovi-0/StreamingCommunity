@@ -49,16 +49,7 @@ def get_final_redirect_url(initial_url, max_timeout):
 
     # Create a client with redirects enabled
     try:
-        with httpx.Client(
-            headers={
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-                'User-Agent': get_headers()
-            },
-            follow_redirects=True,
-            timeout=max_timeout
-
-        ) as client:
+        with httpx.Client(follow_redirects=True, timeout=max_timeout, headers={'user-agent': get_headers()}) as client:
             response = client.get(initial_url)
             response.raise_for_status()
             
@@ -68,7 +59,7 @@ def get_final_redirect_url(initial_url, max_timeout):
         return final_url
     
     except Exception as e:
-        console.print(f"\n[cyan]Test url[white]: [red]{initial_url}, [cyan]error[white]: [red]{e}")
+        console.print(f"[cyan]Test url[white]: [red]{initial_url}, [cyan]error[white]: [red]{e}")
         return None
 
 def search_domain(site_name: str, base_url: str):
@@ -78,6 +69,7 @@ def search_domain(site_name: str, base_url: str):
     Parameters:
         - site_name (str): The name of the site to search the domain for.
         - base_url (str): The base URL to construct complete URLs.
+        - follow_redirects (bool): To follow redirect url or not.
 
     Returns:
         tuple: The found domain and the complete URL.
@@ -88,67 +80,47 @@ def search_domain(site_name: str, base_url: str):
     domain = str(config_manager.get_dict("SITE", site_name)['domain'])
 
     try:
-        # Test the current domain
-        with httpx.Client(
-            headers={
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-                'User-Agent': get_headers()
-            },
-            follow_redirects=True,
-            timeout=max_timeout
 
-        ) as client:
-            response_follow = client.get(f"{base_url}.{domain}")
-            response_follow.raise_for_status()
+        # Test the current domain
+        response_follow = httpx.get(f"{base_url}.{domain}", headers={'user-agent': get_headers()}, timeout=max_timeout, follow_redirects=True)
+        response_follow.raise_for_status()
 
     except Exception as e:
+
         query = base_url.split("/")[-1]
-        
-        # Perform a Google search with multiple results
-        search_results = list(search(query, num_results=5))
-        #console.print(f"[green]Google search results[white]: {search_results}")
+        first_url = google_search(query)
+        console.print(f"[green]First url from google seach[white]: [red]{first_url}")
 
-        # Iterate through search results
-        for first_url in search_results:
-            console.print(f"[green]Checking url[white]: [red]{first_url}")
-            
-            # Check if the base URL matches the Google search result
-            parsed_first_url = urlparse(first_url)
+        if first_url:
+            final_url = get_final_redirect_url(first_url, max_timeout)
 
-            # Compare base url from google search with base url from config.json
-            if parsed_first_url.netloc.split(".")[0] == base_url:
-                console.print(f"[red]URL does not match base URL. Skipping.[/red]")
-                continue
+            if final_url != None:
+                console.print(f"\n[bold yellow]Suggestion:[/bold yellow] [white](Experimental)\n"
+                            f"[cyan]New final URL[white]: [green]{final_url}")
+                
+                def extract_domain(url):
+                    parsed_url = urlparse(url)
+                    domain = parsed_url.netloc
+                    return domain.split(".")[-1]
 
-            try:
-                final_url = get_final_redirect_url(first_url, max_timeout)
+                new_domain_extract = extract_domain(str(final_url))
 
-                if final_url is not None:
+                if msg.ask(f"[red]Do you want to auto update config.json - '[green]{site_name}[red]' with domain: [green]{new_domain_extract}", choices=["y", "n"], default="y").lower() == "y":
                     
-                    def extract_domain(url):
-                        parsed_url = urlparse(url)
-                        domain = parsed_url.netloc
-                        return domain.split(".")[-1]
+                    # Update domain in config.json
+                    config_manager.config['SITE'][site_name]['domain'] = new_domain_extract
+                    config_manager.write_config()
 
-                    new_domain_extract = extract_domain(str(final_url))
-
-                    if msg.ask(f"[cyan]\nDo you want to auto site[white]: [red]{site_name}[cyan] with domain[white]: [red]{new_domain_extract}", choices=["y", "n"], default="y").lower() == "y":
-                        
-                        # Update domain in config.json
-                        config_manager.config['SITE'][site_name]['domain'] = new_domain_extract
-                        config_manager.write_config()
-
-                        # Return config domain
-                        return new_domain_extract, f"{base_url}.{new_domain_extract}"
+                    # Return config domain
+                    #console.print(f"[cyan]Return domain: [red]{new_domain_extract} \n")
+                    return new_domain_extract, f"{base_url}.{new_domain_extract}"
             
-            except Exception as redirect_error:
-                console.print(f"[red]Error following redirect for {first_url}: {redirect_error}")
-                continue
+            else:
+                console.print("[bold red]\nManually change the domain in the JSON file.[/bold red]")
+                raise
 
-        # If no matching URL is found
-        console.print("[bold red]No valid URL found matching the base URL.[/bold red]")
-        raise Exception("No matching domain found")
+        else:
+            console.print("[bold red]No valid URL to follow redirects.[/bold red]")
 
     # Ensure the URL is in string format before parsing
     parsed_url = urlparse(str(response_follow.url))
@@ -156,6 +128,7 @@ def search_domain(site_name: str, base_url: str):
     tld = parse_domain.split('.')[-1]
 
     if tld is not None:
+        
         # Update domain in config.json
         config_manager.config['SITE'][site_name]['domain'] = tld
         config_manager.write_config()
