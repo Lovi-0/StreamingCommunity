@@ -56,7 +56,7 @@ def update():
         percentual_stars = 0
 
     # Check installed version
-    if __version__ != last_version:
+    if str(__version__).replace('v', '') != str(last_version).replace('v', '') :
         console.print(f"[red]New version available: [yellow]{last_version}")
     else:
         console.print(f"[red]Everything is up to date")

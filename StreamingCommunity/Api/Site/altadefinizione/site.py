@@ -38,12 +38,12 @@ def title_search(title_search: str) -> int:
 
     # Find new domain if prev dont work
     max_timeout = config_manager.get_int("REQUESTS", "timeout")
-    #domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+    domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
     
     # Send request to search for title
     try:
         response = client.get(
-            url=f"https://{SITE_NAME}.{DOMAIN_NOW}/?story={title_search.replace(' ', '+')}&do=search&subaction=search&titleonly=3", 
+            url=f"https://{SITE_NAME}.{domain_to_use}/?story={title_search.replace(' ', '+')}&do=search&subaction=search&titleonly=3", 
             headers={
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
                 'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
