@@ -112,6 +112,7 @@ def title_search(title_search: str, domain: str) -> int:
             'slug': dict_title.get('slug'),
             'name': dict_title.get('name'),
             'type': dict_title.get('type'),
+            'date': dict_title.get('last_air_date'),
             'score': dict_title.get('score')
         })
 
