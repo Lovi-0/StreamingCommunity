@@ -3,6 +3,7 @@
 import sys
 import json
 import logging
+import secrets
 
 
 # External libraries
@@ -31,7 +32,7 @@ from .costant import SITE_NAME
 # Variable
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
-
+max_timeout = config_manager.get_int("REQUESTS", "timeout")
 
 
 def get_version(text: str):
@@ -52,7 +53,7 @@ def get_version(text: str):
 
         # Extract version
         version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
-        #console.print(f"[cyan]Get version [white]=> [red]{version} \n")
+        console.print(f"[cyan]Get version [white]=> [red]{version} \n")
 
         return version
     
@@ -74,7 +75,17 @@ def get_version_and_domain():
     domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}")
 
     # Extract version from the response
-    version = get_version(httpx.get(base_url, headers={'user-agent': get_headers()}).text)
+    try:
+        version = get_version(httpx.get(
+            url=base_url, 
+            headers={
+                'user-agent': get_headers()
+            }, 
+            timeout=max_timeout
+        ).text)
+    except:
+        console.print("[green]Auto generate version ...")
+        version = secrets.token_hex(32 // 2)
 
     return version, domain_to_use
 
@@ -90,10 +101,6 @@ def title_search(title_search: str, domain: str) -> int:
     Returns:
         int: The number of titles found.
     """
-
-    max_timeout = config_manager.get_int("REQUESTS", "timeout")
-    
-    # Send request to search for titles ( replace à to a and space to "+" )
     try:
         response = httpx.get(
             url=f"https://{SITE_NAME}.{domain}/api/search?q={title_search.replace(' ', '+')}", 
