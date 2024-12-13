@@ -119,12 +119,12 @@ def initialize():
         console.log("[red]Install python version > 3.7.16")
         sys.exit(0)
 
-    """# Attempting GitHub update
+    # Attempting GitHub update
     try:
         git_update()
         print()
     except:
-        console.log("[red]Error with loading github.")"""
+        console.log("[red]Error with loading github.")
 
     # Show trending film and series
     if SHOW_TRENDING:
