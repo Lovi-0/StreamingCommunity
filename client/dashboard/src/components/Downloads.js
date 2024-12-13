@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import { Container, Row, Col, Card, Button, Badge, Modal } from 'react-bootstrap';
 import { FaTrash, FaPlay } from 'react-icons/fa';
@@ -6,7 +7,7 @@ import { Link } from 'react-router-dom';
 
 import { SERVER_PATH_URL, SERVER_DELETE_URL, API_URL } from './ApiUrl';
 
-const Downloads = () => {
+const Downloads = ({ theme }) => {
   const [downloads, setDownloads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPlayer, setShowPlayer] = useState(false);
@@ -28,7 +29,7 @@ const Downloads = () => {
   const handleDeleteEpisode = async (id, season, episode) => {
     try {
       await axios.delete(`${SERVER_DELETE_URL}/episode`, {
-        params: { id, season, episode }
+        params: { series_id: id, season_number: season, episode_number: episode }
       });
       fetchDownloads(); // Refresh the list
     } catch (error) {
@@ -40,7 +41,7 @@ const Downloads = () => {
   const handleDeleteMovie = async (id) => {
     try {
       await axios.delete(`${SERVER_DELETE_URL}/movie`, {
-        params: { id }
+        params: { movie_id: id }
       });
       fetchDownloads(); // Refresh the list
     } catch (error) {
@@ -80,7 +81,10 @@ const Downloads = () => {
   }, {});
 
   return (
-    <Container fluid className="p-0">
+    <Container fluid className="p-0" style={{ 
+      backgroundColor: theme === 'dark' ? '#121212' : '#ffffff', 
+      color: theme === 'dark' ? '#ffffff' : '#000000' 
+    }}>
       <Container className="mt-4">
         <h2 className="mb-4">My Downloads</h2>
 
@@ -193,6 +197,11 @@ const Downloads = () => {
       </Modal>
     </Container>
   );
+};
+
+Downloads.propTypes = {
+  toggleTheme: PropTypes.func.isRequired,
+  theme: PropTypes.oneOf(['light', 'dark']).isRequired,
 };
 
 export default Downloads;

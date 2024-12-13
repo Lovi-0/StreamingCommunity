@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import { Container, Row, Col, Image, Button, Dropdown, Modal, Alert } from 'react-bootstrap';
 import { FaDownload, FaPlay, FaPlus, FaTrash } from 'react-icons/fa';
@@ -8,7 +9,7 @@ import SearchBar from './SearchBar.js';
 
 import { API_URL, SERVER_WATCHLIST_URL, SERVER_PATH_URL } from './ApiUrl.js';
 
-const TitleDetail = () => {
+const TitleDetail = ({ theme }) => {
   const [titleDetails, setTitleDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSeason, setSelectedSeason] = useState(1);
@@ -233,7 +234,10 @@ const TitleDetail = () => {
   }
 
   return (
-    <Container fluid className="p-0">
+    <Container fluid className="p-0" style={{ 
+      backgroundColor: theme === 'dark' ? '#121212' : '#ffffff', 
+      color: theme === 'dark' ? '#ffffff' : '#000000' 
+    }}>
       <SearchBar />
       
       {/* Background Image */}
@@ -404,6 +408,11 @@ const TitleDetail = () => {
       </Modal>
     </Container>
   );
+};
+
+TitleDetail.propTypes = {
+  toggleTheme: PropTypes.func.isRequired,
+  theme: PropTypes.oneOf(['light', 'dark']).isRequired,
 };
 
 export default TitleDetail;

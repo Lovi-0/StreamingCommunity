@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Row, Col, Card, Spinner } from 'react-bootstrap';
@@ -6,7 +7,7 @@ import { Container, Row, Col, Card, Spinner } from 'react-bootstrap';
 import SearchBar from './SearchBar.js';
 import { API_URL } from './ApiUrl.js';
 
-const SearchResults = () => {
+const SearchResults = ({ theme }) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
@@ -44,7 +45,10 @@ const SearchResults = () => {
   };
 
   return (
-    <Container fluid className="p-4">
+    <Container fluid className="p-4" style={{ 
+      backgroundColor: theme === 'dark' ? '#121212' : '#ffffff', 
+      color: theme === 'dark' ? '#ffffff' : '#000000' 
+    }}>
       <div className="mb-4">
         <SearchBar />
       </div>
@@ -90,5 +94,11 @@ const SearchResults = () => {
     </Container>
   );
 };
+
+SearchResults.propTypes = {
+  toggleTheme: PropTypes.func.isRequired,
+  theme: PropTypes.oneOf(['light', 'dark']).isRequired,
+};
+
 
 export default SearchResults;

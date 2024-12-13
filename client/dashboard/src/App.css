@@ -8,12 +8,21 @@
   gap: 20px;
 }
 
+.search-results-container {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
 .search-result-item {
-  cursor: pointer;
-  transition: transform 0.3s ease;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  background-color: #f0f0f0; /* Default (light mode) */
+  color: var(--text-color);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .search-result-item {
+    background-color: #1e1e1e;
+  }
 }
 
 .search-result-item:hover {

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 import { Container, Row, Col, Card, Button, Badge, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaTrash } from 'react-icons/fa';
 
 import { SERVER_WATCHLIST_URL } from './ApiUrl';
 
-const Watchlist = () => {
+const Watchlist = ({ theme }) => {
   const [watchlistItems, setWatchlistItems] = useState([]);
   const [newSeasons, setNewSeasons] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newSeasonsMessage, setNewSeasonsMessage] = useState("");  // Stato per il messaggio delle nuove stagioni
+  const [newSeasonsMessage, setNewSeasonsMessage] = useState(""); 
 
   // Funzione per recuperare i dati della watchlist
   const fetchWatchlistData = async () => {
@@ -93,7 +94,10 @@ const Watchlist = () => {
   }
 
   return (
-    <Container fluid className="p-0">
+    <Container fluid className="p-0" style={{ 
+      backgroundColor: theme === 'dark' ? '#121212' : '#ffffff', 
+      color: theme === 'dark' ? '#ffffff' : '#000000' 
+    }}>
       <Container className="mt-4">
         <h2 className="mb-4">My Watchlist</h2>
         
@@ -160,6 +164,11 @@ const Watchlist = () => {
       </Container>
     </Container>
   );
+};
+
+Watchlist.propTypes = {
+  toggleTheme: PropTypes.func.isRequired,
+  theme: PropTypes.oneOf(['light', 'dark']).isRequired,
 };
 
 export default Watchlist;

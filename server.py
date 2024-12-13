@@ -449,7 +449,7 @@ async def remove_episode(series_id: int = Query(...), season_number: int = Query
     return {"success": True}
 
 @app.delete("/server/delete/movie")
-async def remove_movie(movie_id: int = Query(...)):
+async def remove_movie(movie_id: str = Query(...)):
     movie = downloads_collection.find_one({'type': 'movie', 'id': movie_id}, {'_id': 0, 'path': 1})
 
     if not movie:

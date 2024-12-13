@@ -22,7 +22,7 @@ const SearchBar = ({ onSearch }) => {
   };
 
   return (
-    <Form onSubmit={handleSearch} className="w-100">
+    <Form onSubmit={handleSearch} className="w-100" >
       <InputGroup>
         <Form.Control
           type="text"

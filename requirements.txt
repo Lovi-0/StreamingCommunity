@@ -14,4 +14,3 @@ python-qbittorrent
 googlesearch-python
 pymongo
 fastapi
-pyclean
