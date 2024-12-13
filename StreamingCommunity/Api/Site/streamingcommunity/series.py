@@ -40,15 +40,16 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
     """
 
     start_message()
+    tv_name = scrape_serie.season_manager.slug
 
     # Get info about episode
-    obj_episode = scrape_serie.obj_episode_manager.episodes[index_episode_selected - 1]
+    obj_episode = scrape_serie.episode_manager.get(index_episode_selected - 1)
     console.print(f"[yellow]Download: [red]{index_season_selected}:{index_episode_selected} {obj_episode.name}")
     print()
 
     # Define filename and path for the downloaded video
     mp4_name = f"{map_episode_title(tv_name, index_season_selected, index_episode_selected, obj_episode.name)}.mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER,  tv_name, f"S{index_season_selected}")
+    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, tv_name, f"S{index_season_selected}")
 
     # Retrieve scws and if available master playlist
     video_source.get_iframe(obj_episode.id)
@@ -56,14 +57,10 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
     master_playlist = video_source.get_playlist()
     
     # Download the episode
-    r_proc = HLS_Downloader(
+    HLS_Downloader(
         m3u8_playlist=master_playlist,
         output_filename=os.path.join(mp4_path, mp4_name)
     ).start()
-    
-    if r_proc != None:
-        console.print("[green]Result: ")
-        console.print(r_proc)
 
     return os.path.join(mp4_path, mp4_name)
 
@@ -78,13 +75,12 @@ def download_episode(tv_name: str, index_season_selected: int, scrape_serie: Scr
     """
 
     # Clean memory of all episodes and get the number of the season
-    scrape_serie.obj_episode_manager.clear()
-    season_number = scrape_serie.obj_season_manager.seasons[index_season_selected - 1].number
+    scrape_serie.episode_manager.clear()
 
     # Start message and collect information about episodes
     start_message()
-    scrape_serie.collect_title_season(season_number)
-    episodes_count = scrape_serie.obj_episode_manager.get_length()
+    scrape_serie.collect_info_season(index_season_selected)
+    episodes_count = scrape_serie.episode_manager.length()
 
     if download_all:
 
@@ -131,8 +127,8 @@ def download_series(select_season: MediaItem, version: str) -> None:
     video_source.setup(select_season.id)
 
     # Collect information about seasons
-    scrape_serie.collect_info_seasons()
-    seasons_count = scrape_serie.obj_season_manager.get_length()
+    scrape_serie.collect_info_title()
+    seasons_count = scrape_serie.season_manager.seasons_count
 
     # Prompt user for season selection and download episodes
     console.print(f"\n[green]Seasons found: [red]{seasons_count}")
@@ -182,7 +178,7 @@ def display_episodes_list(scrape_serie) -> str:
     table_show_manager.add_column(column_info)
 
     # Populate the table with episodes information
-    for i, media in enumerate(scrape_serie.obj_episode_manager.episodes):
+    for i, media in enumerate(scrape_serie.episode_manager.episodes):
         table_show_manager.add_tv_show({
             'Index': str(media.number),
             'Name': media.name,

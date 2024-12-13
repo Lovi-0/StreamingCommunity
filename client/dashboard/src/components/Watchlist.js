@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Button, Badge, Alert } from 'react-bootstrap
 import { Link } from 'react-router-dom';
 import { FaTrash } from 'react-icons/fa';
 
-const API_BASE_URL = "http://127.0.0.1:1234";
+import { SERVER_WATCHLIST_URL } from './ApiUrl';
 
 const Watchlist = () => {
   const [watchlistItems, setWatchlistItems] = useState([]);
@@ -15,7 +15,7 @@ const Watchlist = () => {
   // Funzione per recuperare i dati della watchlist
   const fetchWatchlistData = async () => {
     try {
-      const watchlistResponse = await axios.get(`${API_BASE_URL}/api/getWatchlist`);
+      const watchlistResponse = await axios.get(`${SERVER_WATCHLIST_URL}/get`);
       setWatchlistItems(watchlistResponse.data);
       setLoading(false);
     } catch (error) {
@@ -27,7 +27,7 @@ const Watchlist = () => {
   // Funzione per controllare se ci sono nuove stagioni (attivata dal bottone)
   const checkNewSeasons = async () => {
     try {
-      const newSeasonsResponse = await axios.get(`${API_BASE_URL}/api/checkWatchlist`);
+      const newSeasonsResponse = await axios.get(`${SERVER_WATCHLIST_URL}/check`);
       
       if (Array.isArray(newSeasonsResponse.data)) {
         setNewSeasons(newSeasonsResponse.data);
@@ -58,7 +58,7 @@ const Watchlist = () => {
         // Manda una richiesta POST per ogni titolo con nuove stagioni
         console.log(`Updated watchlist for ${season.name} with new season ${season.nNewSeason}, url: ${season.title_url}`);
         
-        await axios.post(`${API_BASE_URL}/api/updateTitleWatchlist`, {
+        await axios.post(`${SERVER_WATCHLIST_URL}/update`, {
           url: season.title_url,
           season: season.season
         });
@@ -72,15 +72,17 @@ const Watchlist = () => {
   // Funzione per rimuovere un elemento dalla watchlist
   const handleRemoveFromWatchlist = async (serieName) => {
     try {
-      await axios.post(`${API_BASE_URL}/api/removeWatchlist`, { name: serieName });
-
-      // Aggiorna lo stato locale per rimuovere l'elemento dalla watchlist
+      await axios.post(`${SERVER_WATCHLIST_URL}/remove`, {
+        name: serieName
+      });
+  
       setWatchlistItems((prev) => prev.filter((item) => item.name !== serieName));
     } catch (error) {
       console.error("Error removing from watchlist:", error);
     }
   };
-
+  
+  
   // Carica inizialmente la watchlist
   useEffect(() => {
     fetchWatchlistData();

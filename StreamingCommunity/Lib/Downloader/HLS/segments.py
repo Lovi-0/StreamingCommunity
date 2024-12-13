@@ -229,11 +229,6 @@ class M3U8_Segments:
                 self.download_interrupted = True
                 self.stop_event.set()
 
-        if threading.current_thread() is threading.main_thread():
-            signal.signal(signal.SIGINT, interrupt_handler)
-        else:
-            print("Signal handler must be set in the main thread")
-
     def make_requests_stream(self, ts_url: str, index: int, progress_bar: tqdm, backoff_factor: float = 1.5) -> None:
         """
         Downloads a TS segment and adds it to the segment queue with retry logic.
@@ -548,7 +543,7 @@ class M3U8_Segments:
         file_size = os.path.getsize(self.tmp_file_path)
         if file_size == 0:
             raise Exception("Output file is empty")
-    
+        
         # Get expected time
         ex_hours, ex_minutes, ex_seconds = format_duration(self.expected_real_time_s)
         ex_formatted_duration = f"[yellow]{int(ex_hours)}[red]h [yellow]{int(ex_minutes)}[red]m [yellow]{int(ex_seconds)}[red]s"

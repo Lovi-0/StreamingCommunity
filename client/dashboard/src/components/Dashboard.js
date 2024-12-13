@@ -3,8 +3,7 @@ import axios from 'axios';
 import { Container, Button, Form, InputGroup } from 'react-bootstrap';
 
 import SearchBar from './SearchBar.js';
-
-const API_BASE_URL = "http://127.0.0.1:1234";
+import { API_URL } from './ApiUrl.js';
 
 const Dashboard = () => {
   const [items, setItems] = useState([]);
@@ -15,7 +14,7 @@ const Dashboard = () => {
 
   const fetchItems = async (filter = '') => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/items?filter=${filter}`);
+      const response = await axios.get(`${API_URL}/items?filter=${filter}`);
       setItems(response.data);
     } catch (error) {
       console.error("Error fetching items:", error);

@@ -6,7 +6,7 @@ import { FaDownload, FaPlay, FaPlus, FaTrash } from 'react-icons/fa';
 
 import SearchBar from './SearchBar.js';
 
-const API_BASE_URL = "http://127.0.0.1:1234";
+import { API_URL, SERVER_WATCHLIST_URL, SERVER_PATH_URL } from './ApiUrl.js';
 
 const TitleDetail = () => {
   const [titleDetails, setTitleDetails] = useState(null);
@@ -27,7 +27,7 @@ const TitleDetail = () => {
         const titleUrl = location.state?.url || location.pathname.split('/title/')[1];
 
         // Fetch title information
-        const response = await axios.get(`${API_BASE_URL}/api/getInfo`, {
+        const response = await axios.get(`${API_URL}/getInfo`, {
           params: { url: titleUrl }
         });
         
@@ -59,7 +59,7 @@ const TitleDetail = () => {
   const checkDownloadStatus = async (titleData) => {
     try {
       if (titleData.type === 'movie') {
-        const response = await axios.get(`${API_BASE_URL}/downloads`);
+        const response = await axios.get(`${SERVER_PATH_URL}/get`);
         const downloadedMovie = response.data.find(
           download => download.type === 'movie' && download.slug === titleData.slug
         );
@@ -70,7 +70,7 @@ const TitleDetail = () => {
           } 
         });
       } else if (titleData.type === 'tv') {
-        const response = await axios.get(`${API_BASE_URL}/downloads`);
+        const response = await axios.get(`${SERVER_PATH_URL}/get`);
         const downloadedEpisodes = response.data.filter(
           download => download.type === 'tv' && download.slug === titleData.slug
         );
@@ -92,7 +92,7 @@ const TitleDetail = () => {
   // Check watchlist status
   const checkWatchlistStatus = async (slug) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/getWatchlist`);
+      const response = await axios.get(`${SERVER_WATCHLIST_URL}/get`);
       const inWatchlist = response.data.some(item => item.name === slug);
       setIsInWatchlist(inWatchlist);
     } catch (error) {
@@ -104,7 +104,7 @@ const TitleDetail = () => {
     if (titleDetails.type === 'tv') {
       try {
         setLoading(true);
-        const seasonResponse = await axios.get(`${API_BASE_URL}/api/getInfoSeason`, {
+        const seasonResponse = await axios.get(`${API_URL}/getInfoSeason`, {
           params: { 
             url: location.state?.url,
             n: seasonNumber 
@@ -123,7 +123,7 @@ const TitleDetail = () => {
 
   const handleDownloadFilm = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/downloadFilm`, {
+      const response = await axios.get(`${API_URL}/download/film`, {
         params: {
           id: titleDetails.id,
           slug: titleDetails.slug
@@ -144,12 +144,14 @@ const TitleDetail = () => {
     }
   };
 
-  const handleDownloadEpisode = async (seasonNumber, episodeNumber) => {
+  const handleDownloadEpisode = async (seasonNumber, episodeNumber, titleID, titleSlug) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/downloadEpisode`, {
+      const response = await axios.get(`${API_URL}/download/episode`, {
         params: {
           n_s: seasonNumber,
-          n_ep: episodeNumber
+          n_ep: episodeNumber,
+          titleID: titleID,
+          slug: titleSlug 
         }
       });
       const videoPath = response.data.path;
@@ -176,7 +178,7 @@ const TitleDetail = () => {
       try {
         let path;
         if (titleDetails.type === 'movie') {
-          const response = await axios.get(`${API_BASE_URL}/moviePath`, {
+          const response = await axios.get(`${SERVER_PATH_URL}/movie`, {
             params: { id: titleDetails.id }
           });
           path = response.data.path;
@@ -198,21 +200,21 @@ const TitleDetail = () => {
 
   const handleAddToWatchlist = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/api/addWatchlist`, {
+      await axios.post(`${SERVER_WATCHLIST_URL}/add`, {
         name: titleDetails.slug,
         url: location.state?.url || location.pathname.split('/title/')[1],
-        season: titleDetails.season_count
+        season: titleDetails.season_count  // Changed 'season_count' to 'season'
       });
       setIsInWatchlist(true);
     } catch (error) {
       console.error("Error adding to watchlist:", error);
       alert("Error adding to watchlist. Please try again.");
     }
-  };
-
+ };
+ 
   const handleRemoveFromWatchlist = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/api/removeWatchlist`, {
+      await axios.post(`${SERVER_WATCHLIST_URL}/remove`, {
         name: titleDetails.slug
       });
       setIsInWatchlist(false);
@@ -375,7 +377,7 @@ const TitleDetail = () => {
                       ) : (
                         <Button 
                           variant="primary" 
-                          onClick={() => handleDownloadEpisode(selectedSeason, episode.number)}
+                          onClick={() => handleDownloadEpisode(selectedSeason, episode.number, titleDetails.id, titleDetails.slug)}
                         >
                           <FaDownload className="me-2" /> Download
                         </Button>
@@ -393,7 +395,7 @@ const TitleDetail = () => {
       <Modal show={showPlayer} onHide={() => setShowPlayer(false)} size="lg" centered>
         <Modal.Body>
           <video 
-            src={`http://127.0.0.1:1234/downloaded/${currentVideo}`} 
+            src={`${API_URL}/downloaded/${currentVideo}`} 
             controls 
             autoPlay 
             style={{ width: '100%' }}

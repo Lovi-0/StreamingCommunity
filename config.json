@@ -2,9 +2,9 @@
     "DEFAULT": {
         "debug": false,
         "log_file": "app.log",
-        "log_to_file": true,
-        "show_message": true,
-        "clean_console": true,
+        "log_to_file": false,
+        "show_message": false,
+        "clean_console": false,
         "root_path": "Video",
         "movie_folder_name": "Movie",
         "serie_folder_name": "TV",
@@ -24,8 +24,8 @@
         "download_video": true,
         "download_audio": true,
         "merge_audio": true,
-        "default_video_workser": 12,
-        "default_audio_workser": 12,
+        "default_video_workser": 8,
+        "default_audio_workser": 8,
         "specific_list_audio": [
             "ita"
         ],
@@ -55,7 +55,7 @@
         }
     },
     "EXTRA": {
-        "mongodb": "mongodb+srv://..",
+        "mongodb": "mongodb+srv://...",
         "database": "StreamingCommunity"
     }
 }

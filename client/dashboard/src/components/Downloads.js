@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Button, Badge, Modal } from 'react-bootstrap
 import { FaTrash, FaPlay } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
-const API_BASE_URL = "http://127.0.0.1:1234";
+import { SERVER_PATH_URL, SERVER_DELETE_URL, API_URL } from './ApiUrl';
 
 const Downloads = () => {
   const [downloads, setDownloads] = useState([]);
@@ -15,7 +15,7 @@ const Downloads = () => {
   // Fetch all downloads
   const fetchDownloads = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/downloads`);
+      const response = await axios.get(`${SERVER_PATH_URL}/get`);
       setDownloads(response.data);
       setLoading(false);
     } catch (error) {
@@ -27,7 +27,7 @@ const Downloads = () => {
   // Delete a TV episode
   const handleDeleteEpisode = async (id, season, episode) => {
     try {
-      await axios.delete(`${API_BASE_URL}/deleteEpisode`, {
+      await axios.delete(`${SERVER_DELETE_URL}/episode`, {
         params: { id, season, episode }
       });
       fetchDownloads(); // Refresh the list
@@ -39,7 +39,7 @@ const Downloads = () => {
   // Delete a movie
   const handleDeleteMovie = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/deleteMovie`, {
+      await axios.delete(`${SERVER_DELETE_URL}/movie`, {
         params: { id }
       });
       fetchDownloads(); // Refresh the list
@@ -50,13 +50,16 @@ const Downloads = () => {
 
   // Watch video
   const handleWatchVideo = (videoPath) => {
+    console.log("Video path received:", videoPath); // Controlla il valore di videoPath
     setCurrentVideo(videoPath);
     setShowPlayer(true);
   };
+  
 
   // Initial fetch of downloads
   useEffect(() => {
     fetchDownloads();
+    console.log("Downloads fetched:", downloads);
   }, []);
 
   if (loading) {
@@ -107,7 +110,7 @@ const Downloads = () => {
                     <Button
                       variant="primary"
                       size="sm"
-                      onClick={() => handleWatchVideo(movie.path)}
+                      onClick={() => handleWatchVideo(movie.path || movie.videoUrl)} // Usa il campo corretto
                     >
                       <FaPlay className="me-2" /> Watch
                     </Button>
@@ -180,12 +183,12 @@ const Downloads = () => {
       {/* Modal Video Player */}
       <Modal show={showPlayer} onHide={() => setShowPlayer(false)} size="lg" centered>
         <Modal.Body>
-          <video 
-            src={`http://127.0.0.1:1234/downloaded/${currentVideo}`} 
-            controls 
-            autoPlay 
-            style={{ width: '100%' }}
-          />
+        <video 
+          src={`${API_URL}/downloaded/${currentVideo}`} 
+          controls 
+          autoPlay 
+          style={{ width: '100%' }}
+        />
         </Modal.Body>
       </Modal>
     </Container>

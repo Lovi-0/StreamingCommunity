@@ -4,8 +4,7 @@ import axios from 'axios';
 import { Container, Row, Col, Card, Spinner } from 'react-bootstrap';
 
 import SearchBar from './SearchBar.js';
-
-const API_BASE_URL = "http://127.0.0.1:1234";
+import { API_URL } from './ApiUrl.js';
 
 const SearchResults = () => {
   const [results, setResults] = useState([]);
@@ -20,7 +19,7 @@ const SearchResults = () => {
     const fetchSearchResults = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/api/search`, {
+        const response = await axios.get(`${API_URL}/search`, {
           params: { q: query }
         });
         setResults(response.data);

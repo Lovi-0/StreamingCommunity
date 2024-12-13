@@ -55,7 +55,6 @@ def get_video_duration(file_path: str) -> float:
     Returns:
         (float): The duration of the video in seconds if successful, None if there's an error.
     """
-
     try:
         ffprobe_cmd = [FFPROB_PATH, '-v', 'error', '-show_format', '-print_format', 'json', file_path]
         logging.info(f"FFmpeg command: {ffprobe_cmd}")

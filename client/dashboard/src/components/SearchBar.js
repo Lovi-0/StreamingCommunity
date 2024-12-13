@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types'; // Add this import
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { Form, InputGroup, Button } from 'react-bootstrap';
 import { FaSearch } from 'react-icons/fa';
@@ -38,11 +38,8 @@ const SearchBar = ({ onSearch }) => {
   );
 };
 
-// Add PropTypes validation
 SearchBar.propTypes = {
-  onSearch: PropTypes.func // If onSearch is optional
-  // or 
-  // onSearch: PropTypes.func.isRequired // If onSearch is required
+  onSearch: PropTypes.func
 };
 
 export default SearchBar;

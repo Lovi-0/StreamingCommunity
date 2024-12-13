@@ -1,19 +1,30 @@
+# 13.12.24
+
 import os
 import logging
+#logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 import datetime
-from urllib.parse import urlparse
-from urllib.parse import unquote
+from urllib.parse import urlparse, unquote
+from typing import Optional
 
 
 # External
+import uvicorn
+from rich.console import Console
 from pymongo import MongoClient
-from flask_cors import CORS 
-from flask import Flask, jsonify, request
-from flask import send_from_directory
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 
 # Util
+from StreamingCommunity.Util.os import os_summary
+os_summary.get_system_summary()
+from StreamingCommunity.Util.logger import Logger
+log = Logger()
 from StreamingCommunity.Util._jsonConfig import config_manager
+from server_type import WatchlistItem, UpdateWatchlistItem
+from server_util import updateUrl
 
 
 # Internal
@@ -23,19 +34,30 @@ from StreamingCommunity.Api.Site.streamingcommunity.film import download_film
 from StreamingCommunity.Api.Site.streamingcommunity.series import download_video
 from StreamingCommunity.Api.Site.streamingcommunity.util.ScrapeSerie import ScrapeSerie
 
+
 # Player
 from StreamingCommunity.Api.Player.vixcloud import VideoSource
 
+
 # Variable
-app = Flask(__name__)
-CORS(app)
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 
 # Site variable
 version, domain = get_version_and_domain()
 season_name = None
 scrape_serie = ScrapeSerie("streamingcommunity")
 video_source = VideoSource("streamingcommunity", True)
+
 DOWNLOAD_DIRECTORY = os.getcwd()
+console = Console()
 
 
 # Mongo variable
@@ -47,179 +69,134 @@ downloads_collection = db['downloads']
 
 
 # ---------- SITE API ------------
-@app.route('/')
-def index():
-    """
-    Health check endpoint to confirm server is operational.
-    
-    Returns:
-        str: Operational status message
-    """
+@app.get("/", summary="Health Check")
+async def index():
     logging.info("Health check endpoint accessed")
-    return 'Server is operational'
+    return "Server is operational"
 
-@app.route('/api/search', methods=['GET'])
-def get_list_search():
-    """
-    Search for titles based on query parameter.
-    
-    Returns:
-        JSON response with search results or error message
-    """
+@app.get("/api/search")
+async def get_list_search(q: Optional[str] = Query(None)):
+    if not q:
+        logging.warning("Search request without query parameter")
+        raise HTTPException(status_code=400, detail="Missing query parameter")
     try:
-        query = request.args.get('q')
-        
-        if not query:
-            logging.warning("Search request without query parameter")
-            return jsonify({'error': 'Missing query parameter'}), 400
-        
-        result = search_titles(query, domain)
-        logging.info(f"Search performed for query: {query}")
-        return jsonify(result), 200
-    
+        result = search_titles(q, domain)
+        logging.info(f"Search performed for query: {q}")
+        return result
     except Exception as e:
         logging.error(f"Error in search: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Internal server error'}), 500
+        raise HTTPException(status_code=500, detail="Internal server error")
 
-@app.route('/api/getInfo', methods=['GET'])
-def get_info_title():
-    """
-    Retrieve information for a specific title.
+@app.get("/api/getInfo")
+async def get_info_title(url: Optional[str] = Query(None)):
+    if not url or "http" not in url:
+        logging.warning("GetInfo request without URL parameter")
+        raise HTTPException(status_code=400, detail="Missing URL parameter")
     
-    Returns:
-        JSON response with title information or error message
-    """
+    
     try:
-        title_url = request.args.get('url')
-        
-        if not title_url:
-            logging.warning("GetInfo request without URL parameter")
-            return jsonify({'error': 'Missing URL parameter'}), 400
-        
-        result = get_infoSelectTitle(title_url, domain, version)
-        
+        result = get_infoSelectTitle(url, domain, version)
+
         if result.get('type') == "tv":
             global season_name, scrape_serie, video_source
+
             season_name = result.get('slug')
+
             scrape_serie.setup(
                 version=version, 
                 media_id=int(result.get('id')), 
                 series_name=result.get('slug')
             )
+
             video_source.setup(result.get('id'))
-            
+
             logging.info(f"TV series info retrieved: {season_name}")
-        
-        return jsonify(result), 200
+
+        return result
     
     except Exception as e:
         logging.error(f"Error retrieving title info: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Failed to retrieve title information'}), 500
 
-@app.route('/api/getInfoSeason', methods=['GET'])
-def get_info_season():
-    """
-    Retrieve season information for a specific title.
+@app.get("/api/getInfoSeason")
+async def get_info_season(url: Optional[str] = Query(None), n: Optional[str] = Query(None)):
+    if not url or not n:
+        logging.warning("GetInfoSeason request with missing parameters")
+        raise HTTPException(status_code=400, detail="Missing URL or season number")
     
-    Returns:
-        JSON response with season information or error message
-    """
     try:
-        title_url = request.args.get('url')
-        number_season = request.args.get('n')
-        
-        if not title_url or not number_season:
-            logging.warning("GetInfoSeason request with missing parameters")
-            return jsonify({'error': 'Missing URL or season number'}), 400
-        
-        result = get_infoSelectSeason(title_url, number_season, domain, version)
-        logging.info(f"Season info retrieved for season {number_season}")
-        return jsonify(result), 200
+        result = get_infoSelectSeason(url, n, domain, version)
+        logging.info(f"Season info retrieved for season {n}")
+        return result
     
     except Exception as e:
         logging.error(f"Error retrieving season info: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Failed to retrieve season information'}), 500
+        raise HTTPException(status_code=500, detail="Failed to retrieve season information")
 
-@app.route('/api/getdomain', methods=['GET'])
-def get_domain():
-    """
-    Retrieve current domain and version.
-    
-    Returns:
-        JSON response with domain and version
-    """
+@app.get("/api/getdomain")
+async def get_domain():
     try:
         global version, domain
         version, domain = get_version_and_domain()
         logging.info(f"Domain retrieved: {domain}, Version: {version}")
-        return jsonify({'domain': domain, 'version': version}), 200
+
+        return {"domain": domain, "version": version}
     
     except Exception as e:
         logging.error(f"Error retrieving domain: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Failed to retrieve domain information'}), 500
-
+        raise HTTPException(status_code=500, detail="Failed to retrieve domain information")
 
 
 # ---------- DOWNLOAD API ------------
-@app.route('/downloadFilm', methods=['GET'])
-def call_download_film():
-    """
-    Download a film by its ID and slug.
+@app.get("/api/download/film")
+async def call_download_film(id: Optional[str] = Query(None), slug: Optional[str] = Query(None)):
+    if not id or not slug:
+        logging.warning("Download film request with missing parameters")
+        raise HTTPException(status_code=400, detail="Missing film ID or slug")
     
-    Returns:
-        JSON response with download path or error message
-    """
     try:
-        film_id = request.args.get('id')
-        slug = request.args.get('slug')
-        
-        if not film_id or not slug:
-            logging.warning("Download film request with missing parameters")
-            return jsonify({'error': 'Missing film ID or slug'}), 400
-        
-        item_media = MediaItem(**{'id': film_id, 'slug': slug})
+        item_media = MediaItem(**{'id': id, 'slug': slug})
         path_download = download_film(item_media)
 
         download_data = {
             'type': 'movie',
-            'id': film_id,
+            'id': id,
             'slug': slug,
             'path': path_download,
             'timestamp': datetime.datetime.now(datetime.timezone.utc)
         }
         downloads_collection.insert_one(download_data) 
-        
+
         logging.info(f"Film downloaded: {slug}")
-        return jsonify({'path': path_download}), 200
+        return {"path": path_download}
     
     except Exception as e:
         logging.error(f"Error downloading film: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Failed to download film'}), 500
+        raise HTTPException(status_code=500, detail="Failed to download film")
 
-@app.route('/downloadEpisode', methods=['GET'])
-def call_download_episode():
-    """
-    Download a specific TV series episode.
+@app.get("/api/download/episode")
+async def call_download_episode(n_s: Optional[int] = Query(None), n_ep: Optional[int] = Query(None), titleID: Optional[int] = Query(None), slug: Optional[str] = Query(None)):
+    global scrape_serie
+
+    if not n_s or not n_ep:
+        logging.warning("Download episode request with missing parameters")
+        raise HTTPException(status_code=400, detail="Missing season or episode number")
     
-    Returns:
-        JSON response with download path or error message
-    """
     try:
-        season_number = request.args.get('n_s')
-        episode_number = request.args.get('n_ep')
-        
-        if not season_number or not episode_number:
-            logging.warning("Download episode request with missing parameters")
-            return jsonify({'error': 'Missing season or episode number'}), 400
-        
-        season_number = int(season_number)
-        episode_number = int(episode_number)
-        
-        scrape_serie.collect_title_season(season_number)
+
+        scrape_serie.setup(
+            version=version, 
+            media_id=int(titleID), 
+            series_name=slug
+        )
+        video_source.setup(int(titleID))
+
+        scrape_serie.collect_info_title()
+        scrape_serie.collect_info_season(n_s)
+
         path_download = download_video(
             season_name, 
-            season_number, 
-            episode_number, 
+            n_s, 
+            n_ep, 
             scrape_serie, 
             video_source
         )
@@ -228,178 +205,151 @@ def call_download_episode():
             'type': 'tv',
             'id': scrape_serie.media_id,
             'slug': scrape_serie.series_name,
-            'n_s': season_number,
-            'n_ep': episode_number,
+            'n_s': n_s,
+            'n_ep': n_ep,
             'path': path_download,
             'timestamp': datetime.datetime.now(datetime.timezone.utc)
         }
+
         downloads_collection.insert_one(download_data) 
-        
-        logging.info(f"Episode downloaded: S{season_number}E{episode_number}")
-        return jsonify({'path': path_download}), 200
-    
-    except ValueError:
-        logging.error("Invalid season or episode number format")
-        return jsonify({'error': 'Invalid season or episode number'}), 400
+
+        logging.info(f"Episode downloaded: S{n_s}E{n_ep}")
+        return {"path": path_download}
     
     except Exception as e:
         logging.error(f"Error downloading episode: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Failed to download episode'}), 500
+        raise HTTPException(status_code=500, detail="Failed to download episode")
 
-@app.route('/downloaded/<path:filename>', methods=['GET'])
-def serve_downloaded_file(filename):
-    """
-    Serve downloaded files with proper URL decoding and error handling.
-    
-    Returns:
-        Downloaded file or error message
-    """
+@app.get("/api/downloaded/{filename:path}")
+async def serve_downloaded_file(filename: str):
     try:
-        # URL decode the filename
+        # Decodifica il nome file
         decoded_filename = unquote(filename)
-        logging.debug(f"Requested file: {decoded_filename}")
-        
-        # Construct full file path
-        file_path = os.path.join(DOWNLOAD_DIRECTORY, decoded_filename)
-        logging.debug(f"Full file path: {file_path}")
-        
-        # Verify file exists
+        logging.info(f"Decoded filename: {decoded_filename}")
+
+        # Normalizza il percorso
+        file_path = os.path.normpath(os.path.join(DOWNLOAD_DIRECTORY, decoded_filename))
+
+        # Verifica che il file sia all'interno della directory
+        if not file_path.startswith(os.path.abspath(DOWNLOAD_DIRECTORY)):
+            logging.error(f"Path traversal attempt detected: {file_path}")
+            raise HTTPException(status_code=400, detail="Invalid file path")
+
+        # Verifica che il file esista
         if not os.path.isfile(file_path):
-            logging.warning(f"File not found: {decoded_filename}")
-            return jsonify({'error': 'File not found'}), 404
-        
-        # Serve the file
-        return send_from_directory(DOWNLOAD_DIRECTORY, decoded_filename, as_attachment=False)
-    
+            logging.error(f"File not found: {file_path}")
+            raise HTTPException(status_code=404, detail="File not found")
+
+        # Restituisci il file
+        return FileResponse(file_path)
     except Exception as e:
         logging.error(f"Error serving file: {str(e)}", exc_info=True)
-        return jsonify({'error': 'Internal server error'}), 500
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
+# ---------- WATCHLIST UTIL MONGO ------------
+@app.post("/server/watchlist/add")
+async def add_to_watchlist(item: WatchlistItem):
+    existing_item = watchlist_collection.find_one({
+        'name': item.name, 
+        'url': item.url, 
+        'season': item.season
+    })
 
-# ---------- WATCHLIST MONGO ------------
-@app.route('/api/addWatchlist', methods=['POST'])
-def add_to_watchlist():
-    title_name = request.json.get('name')
-    title_url = request.json.get('url')
-    season = request.json.get('season')
+    if existing_item:
+        logging.warning(f"Item already in watchlist: {item.name}")
+        raise HTTPException(status_code=400, detail="Il titolo è già nella watchlist")
 
-    if title_url and season:
+    watchlist_collection.insert_one({
+        'name': item.name,
+        'title_url': item.url,
+        'season': item.season,
+        'added_on': datetime.datetime.utcnow()
+    })
 
-        existing_item = watchlist_collection.find_one({'name': title_name, 'url': title_url, 'season': season})
-        if existing_item:
-            return jsonify({'message': 'Il titolo è già nella watchlist'}), 400
+    logging.info(f"Added to watchlist: {item.name}")
+    return {"message": "Titolo aggiunto alla watchlist"}
 
-        watchlist_collection.insert_one({
-            'name': title_name,
-            'title_url': title_url,
-            'season': season,
-            'added_on': datetime.datetime.utcnow()
-        })
-        return jsonify({'message': 'Titolo aggiunto alla watchlist'}), 200
-    else:
-        return jsonify({'message': 'Missing title_url or season'}), 400
+@app.post("/server/watchlist/update")
+async def update_title_watchlist(update: UpdateWatchlistItem):
+    result = watchlist_collection.update_one(
+        {'title_url': update.url},
+        {'$set': {'season': update.season}}
+    )
 
-@app.route('/api/updateTitleWatchlist', methods=['POST'])
-def update_title_watchlist():
-    print(request.json)
-
-    title_url = request.json.get('url')
-    new_season = request.json.get('season')
-
-    if title_url is not None and new_season is not None:
-        result = watchlist_collection.update_one(
-            {'title_url': title_url},
-            {'$set': {'season': new_season}}
-        )
-
-        if result.matched_count == 0:
-            return jsonify({'message': 'Titolo non trovato nella watchlist'}), 404
-
-        if result.modified_count == 0:
-            return jsonify({'message': 'La stagione non è cambiata'}), 200
-
-        return jsonify({'message': 'Stagione aggiornata con successo'}), 200
+    if result.matched_count == 0:
+        logging.warning(f"Item not found for update: {update.url}")
+        raise HTTPException(status_code=404, detail="Titolo non trovato nella watchlist")
     
-    else:
-        return jsonify({'message': 'Missing title_url or season'}), 400
-    
-@app.route('/api/removeWatchlist', methods=['POST'])
-def remove_from_watchlist():
-    title_name = request.json.get('name')
+    if result.modified_count == 0:
+        logging.info(f"Season unchanged for: {update.url}")
+        return {"message": "La stagione non è cambiata"}
 
-    if title_name:
-        result = watchlist_collection.delete_one({'name': title_name})
+    logging.info(f"Updated season for: {update.url}")
+    return {"message": "Stagione aggiornata con successo"}
 
-        if result.deleted_count == 1:
-            return jsonify({'message': 'Titolo rimosso dalla watchlist'}), 200
-        else:
-            return jsonify({'message': 'Titolo non trovato nella watchlist'}), 404
-    else:
-        return jsonify({'message': 'Missing title_url or season'}), 400
-    
-@app.route('/api/getWatchlist', methods=['GET'])
-def get_watchlist():
-    watchlist_items = list(watchlist_collection.find({}, {'_id': 0}))
+@app.post("/server/watchlist/remove")
+async def remove_from_watchlist(item: WatchlistItem):
+    # You can handle just the 'name' field here
+    result = watchlist_collection.delete_one({'name': item.name})
 
-    if watchlist_items:
-        return jsonify(watchlist_items), 200
-    else:
-        return jsonify({'message': 'La watchlist è vuota'}), 200
+    if result.deleted_count == 0:
+        logging.warning(f"Item not found for removal: {item.name}")
+        raise HTTPException(status_code=404, detail="Titolo non trovato nella watchlist")
     
-@app.route('/api/checkWatchlist', methods=['GET'])
-def get_newSeason():
-    title_newSeasons = []
+    logging.info(f"Successfully removed from watchlist: {item.name}")
+    return {"message": "Titolo rimosso dalla watchlist"}
+
+@app.get("/server/watchlist/get")
+async def get_watchlist():
     watchlist_items = list(watchlist_collection.find({}, {'_id': 0}))
 
     if not watchlist_items:
-        return jsonify({'message': 'La watchlist è vuota'}), 200
+        logging.info("Watchlist is empty")
+        return {"message": "La watchlist è vuota"}
+
+    logging.info("Watchlist retrieved")
+    return watchlist_items
+    
+@app.get("/server/watchlist/check")
+async def get_new_season():
+    title_new_seasons = []
+    watchlist_items = list(watchlist_collection.find({}, {'_id': 0}))
+    logging.error("GET: ", watchlist_items)
+
+    if not watchlist_items:
+        logging.info("Watchlist is empty")
+        return {"message": "La watchlist è vuota"}
 
     for item in watchlist_items:
-        title_url = item.get('title_url')
-        if not title_url:
-            continue
-
         try:
-            parsed_url = urlparse(title_url)
-            hostname = parsed_url.hostname
-            domain_part = hostname.split('.')[1]
-            new_url = title_url.replace(domain_part, domain)
+            new_url = updateUrl(item['title_url'], domain)
 
             result = get_infoSelectTitle(new_url, domain, version)
-
             if not result or 'season_count' not in result:
-                continue 
+                continue
 
             number_season = result.get("season_count")
-
             if number_season > item.get("season"):
-                title_newSeasons.append({
-                    'title_url': item.get('title_url'),
-                    'name': item.get('name'),
-                    'season': int(number_season),
-                    'nNewSeason': int(number_season) - int(item.get("season"))
+                title_new_seasons.append({
+                    'title_url': item['title_url'],
+                    'name': item['name'],
+                    'season': number_season,
+                    'nNewSeason': number_season - item['season']
                 })
 
         except Exception as e:
-            print(f"Errore nel recuperare informazioni per {item.get('title_url')}: {e}")
+            logging.error(f"Error checking new season for {item['title_url']}: {e}")
 
-    if title_newSeasons:
-        return jsonify(title_newSeasons), 200
-    else:
-        return jsonify({'message': 'Nessuna nuova stagione disponibile'}), 200
+    if title_new_seasons:
+        logging.info(f"New seasons found: {len(title_new_seasons)}")
+        return title_new_seasons
+
+    return {"message": "Nessuna nuova stagione disponibile"}
 
 
-
-# ---------- DOWNLOAD MONGO ------------
+# ---------- DOWNLOAD UTIL MONGO ------------
 def ensure_collections_exist(db):
-    """
-    Ensures that the required collections exist in the database.
-    If they do not exist, they are created.
-
-    Args:
-        db: The MongoDB database object.
-    """
     required_collections = ['watchlist', 'downloads']
     existing_collections = db.list_collection_names()
 
@@ -411,190 +361,122 @@ def ensure_collections_exist(db):
         else:
             logging.info(f"Collection already exists: {collection_name}")
 
-@app.route('/downloads', methods=['GET'])
-def fetch_all_downloads():
-    """
-    Endpoint to fetch all downloads.
-    """
+
+@app.get("/server/path/get")
+async def fetch_all_downloads():
     try:
         downloads = list(downloads_collection.find({}, {'_id': 0}))
-        return jsonify(downloads), 200
+        logging.info("Downloads retrieved")
+        return downloads
     
     except Exception as e:
-        logging.error(f"Error fetching all downloads: {str(e)}")
-        return []
+        logging.error(f"Error fetching downloads: {e}")
+        raise HTTPException(status_code=500, detail="Errore nel recupero dei download")
 
-@app.route('/deleteEpisode', methods=['DELETE'])
-def remove_episode():
-    """
-    Endpoint to delete a specific episode and its file.
-    """
+@app.get("/server/path/movie")
+async def fetch_movie_path(id: Optional[int] = Query(None)):
+    if not id:
+        logging.warning("Movie path request without ID parameter")
+        raise HTTPException(status_code=400, detail="Missing movie ID")
+
     try:
-        series_id = request.args.get('id')
-        season_number = request.args.get('season')
-        episode_number = request.args.get('episode')
-
-        if not series_id or not season_number or not episode_number:
-            return jsonify({'error': 'Missing parameters (id, season, episode)'}), 400
-        
-        try:
-            series_id = int(series_id)
-            season_number = int(season_number)
-            episode_number = int(episode_number)
-        except ValueError:
-            return jsonify({'error': 'Invalid season or episode number'}), 400
-
-        # Trova il percorso del file
-        episode = downloads_collection.find_one({
-            'type': 'tv',
-            'id': series_id,
-            'n_s': season_number,
-            'n_ep': episode_number
-        }, {'_id': 0, 'path': 1})
-
-        if not episode or 'path' not in episode:
-            return jsonify({'error': 'Episode not found'}), 404
-
-        file_path = episode['path']
-
-        # Elimina il file fisico
-        try:
-            if os.path.exists(file_path):
-                os.remove(file_path)
-                logging.info(f"Deleted episode file: {file_path}")
-            else:
-                logging.warning(f"Episode file not found: {file_path}")
-        except Exception as e:
-            logging.error(f"Error deleting episode file: {str(e)}")
-
-        # Rimuovi l'episodio dal database
-        result = downloads_collection.delete_one({
-            'type': 'tv',
-            'id': series_id,
-            'n_s': season_number,
-            'n_ep': episode_number
-        })
-
-        if result.deleted_count > 0:
-            return jsonify({'success': True}), 200
-        else:
-            return jsonify({'error': 'Failed to delete episode from database'}), 500
-
-    except Exception as e:
-        logging.error(f"Error deleting episode: {str(e)}")
-        return jsonify({'error': 'Failed to delete episode'}), 500
-
-@app.route('/deleteMovie', methods=['DELETE'])
-def remove_movie():
-    """
-    Endpoint to delete a specific movie, its file, and its parent folder if empty.
-    """
-    try:
-        movie_id = request.args.get('id')
-
-        if not movie_id:
-            return jsonify({'error': 'Missing movie ID'}), 400
-
-        # Trova il percorso del file
-        movie = downloads_collection.find_one({'type': 'movie', 'id': movie_id}, {'_id': 0, 'path': 1})
-
-        if not movie or 'path' not in movie:
-            return jsonify({'error': 'Movie not found'}), 404
-
-        file_path = movie['path']
-        parent_folder = os.path.dirname(file_path)
-
-        # Elimina il file fisico
-        try:
-            if os.path.exists(file_path):
-                os.remove(file_path)
-                logging.info(f"Deleted movie file: {file_path}")
-            else:
-                logging.warning(f"Movie file not found: {file_path}")
-        except Exception as e:
-            logging.error(f"Error deleting movie file: {str(e)}")
-
-        # Elimina la cartella superiore se vuota
-        try:
-            if os.path.exists(parent_folder) and not os.listdir(parent_folder):
-                os.rmdir(parent_folder)
-                logging.info(f"Deleted empty parent folder: {parent_folder}")
-        except Exception as e:
-            logging.error(f"Error deleting parent folder: {str(e)}")
-
-        # Rimuovi il film dal database
-        result = downloads_collection.delete_one({'type': 'movie', 'id': movie_id})
-
-        if result.deleted_count > 0:
-            return jsonify({'success': True}), 200
-        else:
-            return jsonify({'error': 'Failed to delete movie from database'}), 500
-
-    except Exception as e:
-        logging.error(f"Error deleting movie: {str(e)}")
-        return jsonify({'error': 'Failed to delete movie'}), 500
-
-@app.route('/moviePath', methods=['GET'])
-def fetch_movie_path():
-    """
-    Endpoint to fetch the path of a specific movie.
-    """
-    try:
-        movie_id = int(request.args.get('id'))
-
-        if not movie_id:
-            return jsonify({'error': 'Missing movie ID'}), 400
-
-        movie = downloads_collection.find_one({'type': 'movie', 'id': movie_id}, {'_id': 0, 'path': 1})
+        movie = downloads_collection.find_one(
+            {'type': 'movie', 'id': id}, 
+            {'_id': 0, 'path': 1}
+        )
 
         if movie and 'path' in movie:
-            return jsonify({'path': movie['path']}), 200
+            logging.info(f"Movie path retrieved: {movie['path']}")
+            return {"path": movie['path']}
+        
         else:
-            return jsonify({'error': 'Movie not found'}), 404
-
+            logging.warning(f"Movie not found: ID {id}")
+            raise HTTPException(status_code=404, detail="Movie not found")
+        
     except Exception as e:
-        logging.error(f"Error fetching movie path: {str(e)}")
-        return jsonify({'error': 'Failed to fetch movie path'}), 500
+        logging.error(f"Error fetching movie path: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to fetch movie path")
 
-@app.route('/episodePath', methods=['GET'])
-def fetch_episode_path():
-    """
-    Endpoint to fetch the path of a specific episode.
-    """
+@app.get("/server/path/episode")
+async def fetch_episode_path(id: Optional[int] = Query(None), season: Optional[int] = Query(None), episode: Optional[int] = Query(None)):
+    if not id or not season or not episode:
+        logging.warning("Episode path request with missing parameters")
+        raise HTTPException(status_code=400, detail="Missing parameters (id, season, episode)")
+
     try:
-        series_id = request.args.get('id')
-        season_number = request.args.get('season')
-        episode_number = request.args.get('episode')
+        episode_data = downloads_collection.find_one(
+            {'type': 'tv', 'id': id, 'n_s': season, 'n_ep': episode},
+            {'_id': 0, 'path': 1}
+        )
 
-        if not series_id or not season_number or not episode_number:
-            return jsonify({'error': 'Missing parameters (id, season, episode)'}), 400
-
-        try:
-            series_id = int(series_id)
-            season_number = int(season_number)
-            episode_number = int(episode_number)
-        except ValueError:
-            return jsonify({'error': 'Invalid season or episode number'}), 400
-
-        episode = downloads_collection.find_one({
-            'type': 'tv',
-            'id': series_id,
-            'n_s': season_number,
-            'n_ep': episode_number
-        }, {'_id': 0, 'path': 1})
-
-        if episode and 'path' in episode:
-            return jsonify({'path': episode['path']}), 200
+        if episode_data and 'path' in episode_data:
+            logging.info(f"Episode path retrieved: {episode_data['path']}")
+            return {"path": episode_data['path']}
+        
         else:
-            return jsonify({'error': 'Episode not found'}), 404
-
+            logging.warning(f"Episode not found: ID {id}, Season {season}, Episode {episode}")
+            raise HTTPException(status_code=404, detail="Episode not found")
+        
     except Exception as e:
-        logging.error(f"Error fetching episode path: {str(e)}")
-        return jsonify({'error': 'Failed to fetch episode path'}), 500
+        logging.error(f"Error fetching episode path: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to fetch episode path")
+
+@app.delete("/server/delete/episode")
+async def remove_episode(series_id: int = Query(...), season_number: int = Query(...), episode_number: int = Query(...)):
+    episode = downloads_collection.find_one({
+        'type': 'tv',
+        'id': series_id,
+        'n_s': season_number,
+        'n_ep': episode_number
+    }, {'_id': 0, 'path': 1})
+
+    if not episode:
+        logging.warning(f"Episode not found: S{season_number}E{episode_number}")
+        raise HTTPException(status_code=404, detail="Episodio non trovato")
+
+    file_path = episode.get('path')
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        logging.info(f"Episode file deleted: {file_path}")
+
+    downloads_collection.delete_one({
+        'type': 'tv',
+        'id': series_id,
+        'n_s': season_number,
+        'n_ep': episode_number
+    })
+
+    return {"success": True}
+
+@app.delete("/server/delete/movie")
+async def remove_movie(movie_id: int = Query(...)):
+    movie = downloads_collection.find_one({'type': 'movie', 'id': movie_id}, {'_id': 0, 'path': 1})
+
+    if not movie:
+        logging.warning(f"Movie not found: ID {movie_id}")
+        raise HTTPException(status_code=404, detail="Film non trovato")
+
+    file_path = movie.get('path')
+    parent_folder = os.path.dirname(file_path)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        logging.info(f"Movie file deleted: {file_path}")
+
+    if os.path.exists(parent_folder) and not os.listdir(parent_folder):
+        os.rmdir(parent_folder)
+        logging.info(f"Parent folder deleted: {parent_folder}")
+
+    downloads_collection.delete_one({'type': 'movie', 'id': movie_id})
+    return {"success": True}
 
 
+if __name__ == "__main__":
 
-
-if __name__ == '__main__':
     ensure_collections_exist(db)
-    app.run(debug=True, port=1234, threaded=True)
+    uvicorn.run(
+        "server:app",
+        host="127.0.0.1",
+        port=1234,
+        reload=False
+    )
