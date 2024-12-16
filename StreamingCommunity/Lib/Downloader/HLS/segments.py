@@ -558,7 +558,7 @@ class M3U8_Segments:
             console.print(
                 "[yellow]⚠ Warning:[/yellow] Too many retries detected! "
                 "Consider reducing the number of [cyan]workers[/cyan] in the [magenta]config.json[/magenta] file. "
-                "This will impact [bold]performance[/bold]."
+                "This will impact [bold]performance[/bold]. \n"
             )
 
         # Info to return

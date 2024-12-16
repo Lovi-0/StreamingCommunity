@@ -1,6 +1,7 @@
-# 01.07.24
+# 02.07.24
 
-from unidecode import unidecode
+import asyncio
+from urllib.parse import quote_plus
 
 
 # Internal utilities
@@ -13,7 +14,7 @@ from .title import download_title
 
 
 # Variable
-indice = 7
+indice = 9
 _useFor = "film_serie"
 _deprecate = False
 _priority = 2
@@ -21,7 +22,7 @@ _engineDownload = "tor"
 from .costant import SITE_NAME
 
 
-def search(string_to_search: str = None, get_onylDatabase:bool = False):
+def search(string_to_search: str = None, get_onylDatabase: bool = False):
     """
     Main function of the application for film and series.
     """
@@ -30,7 +31,7 @@ def search(string_to_search: str = None, get_onylDatabase:bool = False):
         string_to_search = msg.ask(f"\n[purple]Insert word to search in [red]{SITE_NAME}").strip()
     
     # Search on database
-    len_database = title_search(unidecode(string_to_search))
+    len_database = asyncio.run(title_search(quote_plus(string_to_search)))
 
     # Return list of elements
     if get_onylDatabase:
@@ -43,7 +44,6 @@ def search(string_to_search: str = None, get_onylDatabase:bool = False):
 
         # Download title
         download_title(select_title)
-
 
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")

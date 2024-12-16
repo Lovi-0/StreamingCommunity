@@ -10,7 +10,7 @@
         "serie_folder_name": "TV",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
         "config_qbit_tor": {
-            "host": "192.168.1.59",
+            "host": "192.168.1.58",
             "port": "8080",
             "user": "admin",
             "pass": "adminadmin"
@@ -85,16 +85,13 @@
             "domain": "to"
         },
         "cb01new": {
-            "domain": "club"
-        },
-        "bitsearch": {
-            "domain": "to"
+            "domain": "icu"
         },
         "1337xx": {
             "domain": "to"
         },
-        "piratebays": {
-            "domain": "to"
+        "ilcorsaronero": {
+            "domain": "link"
         }
     }
 }

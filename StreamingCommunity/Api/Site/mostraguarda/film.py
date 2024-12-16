@@ -36,12 +36,15 @@ from StreamingCommunity.Lib.TMBD import Json_film
 from .costant import ROOT_PATH, SITE_NAME, DOMAIN_NOW, MOVIE_FOLDER
 
 
-def download_film(movie_details: Json_film):
+def download_film(movie_details: Json_film) -> str:
     """
     Downloads a film using the provided tmbd id.
 
     Parameters:
         - movie_details (Json_film): Class with info about film title.
+    
+    Return:
+        - str: output path
     """
 
     # Start message and display film information
@@ -81,14 +84,16 @@ def download_film(movie_details: Json_film):
         output_filename=os.path.join(mp4_path, title_name)
     ).start()
 
-    if r_proc == 404:
+    """if r_proc == 404:
         time.sleep(2)
 
         # Re call search function
         if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
             frames = get_call_stack()
-            execute_search(frames[-4])
+            execute_search(frames[-4])"""
 
     if r_proc != None:
         console.print("[green]Result: ")
         console.print(r_proc)
+
+    return os.path.join(mp4_path, title_name)

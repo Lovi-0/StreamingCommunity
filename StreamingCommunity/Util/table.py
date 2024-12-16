@@ -162,11 +162,8 @@ class TVShowManager:
                         # Get the search function
                         search_func = getattr(module, 'media_search_manager')
                         
-                        # Ask for search string
-                        string_to_search = Prompt.ask(f"\n[purple]Insert word to search in [red]{research_func['folder_base']}").strip()
-                        
                         # Call the search function with the search string
-                        search_func(string_to_search)
+                        search_func(None)
                         
                     except Exception as e:
                         self.console.print(f"[red]Error during search: {e}")
@@ -227,13 +224,10 @@ class TVShowManager:
                         module = importlib.import_module(module_path)
                         
                         # Get the search function
-                        search_func = getattr(module, 'media_search_manager')
-                        
-                        # Ask for search string
-                        string_to_search = Prompt.ask(f"\n[purple]Insert word to search in [red]{research_func['folder_base']}").strip()
+                        search_func = getattr(module, 'search')
                         
                         # Call the search function with the search string
-                        search_func(string_to_search)
+                        search_func(None)
                         
                     except Exception as e:
                         self.console.print(f"[red]Error during search: {e}")

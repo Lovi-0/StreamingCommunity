@@ -1,13 +1,7 @@
-# 03.07.24
-
-# External libraries
-import httpx
-from bs4 import BeautifulSoup
+# 02.07.24
 
 
 # Internal utilities
-from StreamingCommunity.Util._jsonConfig import config_manager
-from StreamingCommunity.Util.headers import get_headers
 from StreamingCommunity.Util.table import TVShowManager
 
 
@@ -15,6 +9,7 @@ from StreamingCommunity.Util.table import TVShowManager
 from StreamingCommunity.Api.Template import get_select_title
 from StreamingCommunity.Api.Template.Util import search_domain
 from StreamingCommunity.Api.Template.Class.SearchType import MediaManager
+from .util.ilCorsarScraper import IlCorsaroNeroScraper
 
 
 # Variable
@@ -23,7 +18,7 @@ media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 
 
-def title_search(word_to_search: str) -> int:
+async def title_search(word_to_search: str) -> int:
     """
     Search for titles based on a search query.
 
@@ -37,33 +32,25 @@ def title_search(word_to_search: str) -> int:
     table_show_manager.clear()
 
     # Find new domain if prev dont work
-    max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
 
-    response = httpx.get(
-        url=f"https://{SITE_NAME}.{domain_to_use}/?s={word_to_search}",
-        headers={'user-agent': get_headers()},
-        timeout=max_timeout
-    )
-    response.raise_for_status()
+    # Create scraper and collect result
+    print("\n")
+    scraper = IlCorsaroNeroScraper(f"https://{SITE_NAME}.{domain_to_use}/", 1)
+    results = await scraper.search(word_to_search)
 
-    # Create soup and find table
-    soup = BeautifulSoup(response.text, "html.parser")
+    # Add all result to media manager
+    for i, torrent in enumerate(results):
+        media_search_manager.add_media({
+            'name': torrent['name'],
+            'type': torrent['type'],
+            'seed': torrent['seed'],
+            'leech': torrent['leech'],
+            'size': torrent['size'],
+            'date': torrent['date'],
+            'url': torrent['url']
+        })
 
-    # For all element in table
-    for div in soup.find_all("div", class_ = "card-content"):
-
-        url = div.find("h3").find("a").get("href")
-        title = div.find("h3").find("a").get_text(strip=True)
-        desc = div.find("p").find("strong").text
-
-        title_info = {
-            'name': title,
-            'desc': desc,
-            'url': url
-        }
-
-        media_search_manager.add_media(title_info)
 
     # Return the number of titles found
     return media_search_manager.get_length()

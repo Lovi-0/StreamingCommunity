@@ -99,6 +99,8 @@ def title_search(title: str) -> int:
     Returns:
         - int: A number containing the length of media search manager.
     """
+    media_search_manager.clear()
+    table_show_manager.clear()
 
     # Get token and session value from configuration
     max_timeout = config_manager.get_int("REQUESTS", "timeout")

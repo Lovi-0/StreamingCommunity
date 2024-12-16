@@ -27,12 +27,15 @@ from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER, MOVIE_FOLDER
 
 
 
-def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_source: VideoSourceAnime):
+def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_source: VideoSourceAnime) -> str:
     """
     Downloads the selected episode.
 
     Parameters:
         - index_select (int): Index of the episode to download.
+
+    Return:
+        - str: output path
     """
 
     # Get information about the selected episode
@@ -63,13 +66,15 @@ def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_so
 
         # Start downloading
         r_proc = MP4_downloader(
-            url = str(video_source.src_mp4).strip(),
-            path = os.path.join(mp4_path, title_name)
+            url=str(video_source.src_mp4).strip(),
+            path=os.path.join(mp4_path, title_name)
         )
 
         if r_proc != None:
             console.print("[green]Result: ")
             console.print(r_proc)
+
+        return os.path.join(mp4_path, title_name)
 
     else:
         logging.error(f"Skip index: {index_select} cant find info with api.")

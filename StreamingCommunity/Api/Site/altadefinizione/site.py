@@ -34,13 +34,16 @@ def title_search(title_search: str) -> int:
     Returns:
         int: The number of titles found.
     """
-    client = httpx.Client()
+    media_search_manager.clear()
+    table_show_manager.clear()
 
     # Find new domain if prev dont work
     max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
     
     # Send request to search for title
+    client = httpx.Client()
+
     try:
         response = client.get(
             url=f"https://{SITE_NAME}.{domain_to_use}/?story={title_search.replace(' ', '+')}&do=search&subaction=search&titleonly=3", 

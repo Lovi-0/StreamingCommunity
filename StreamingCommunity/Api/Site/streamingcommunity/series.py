@@ -29,16 +29,17 @@ table_show_manager = TVShowManager()
 
 
 
-def download_video(tv_name: str, index_season_selected: int, index_episode_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource) -> None:
+def download_video(index_season_selected: int, index_episode_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource) -> str:
     """
     Download a single episode video.
 
     Parameters:
-        - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
         - index_episode_selected (int): Index of the selected episode.
-    """
 
+    Return:
+        - str: output path
+    """
     start_message()
 
     # Get info about episode
@@ -47,8 +48,8 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
     print()
 
     # Define filename and path for the downloaded video
-    mp4_name = f"{map_episode_title(tv_name, index_season_selected, index_episode_selected, obj_episode.name)}.mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, tv_name, f"S{index_season_selected}")
+    mp4_name = f"{map_episode_title(scrape_serie.series_name, index_season_selected, index_episode_selected, obj_episode.name)}.mp4"
+    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, SERIES_FOLDER, scrape_serie.series_name, f"S{index_season_selected}")
 
     # Retrieve scws and if available master playlist
     video_source.get_iframe(obj_episode.id)
@@ -61,24 +62,25 @@ def download_video(tv_name: str, index_season_selected: int, index_episode_selec
         output_filename=os.path.join(mp4_path, mp4_name)
     ).start()
     
-    if r_proc == 404:
+    """if r_proc == 404:
         time.sleep(2)
 
         # Re call search function
         if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
             frames = get_call_stack()
-            execute_search(frames[-4])
+            execute_search(frames[-4])"""
 
     if r_proc != None:
         console.print("[green]Result: ")
         console.print(r_proc)
 
-def download_episode(tv_name: str, index_season_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource, download_all: bool = False) -> None:
+    return os.path.join(mp4_path, mp4_name)
+
+def download_episode(index_season_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource, download_all: bool = False) -> None:
     """
     Download episodes of a selected season.
 
     Parameters:
-        - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
         - download_all (bool): Download all episodes in the season.
     """
@@ -95,7 +97,7 @@ def download_episode(tv_name: str, index_season_selected: int, scrape_serie: Scr
 
         # Download all episodes without asking
         for i_episode in range(1, episodes_count + 1):
-            download_video(tv_name, index_season_selected, i_episode, scrape_serie, video_source)
+            download_video(index_season_selected, i_episode, scrape_serie, video_source)
         console.print(f"\n[red]End downloaded [yellow]season: [red]{index_season_selected}.")
 
     else:
@@ -112,7 +114,7 @@ def download_episode(tv_name: str, index_season_selected: int, scrape_serie: Scr
 
         # Download selected episodes
         for i_episode in list_episode_select:
-            download_video(tv_name, index_season_selected, i_episode, scrape_serie, video_source)
+            download_video(index_season_selected, i_episode, scrape_serie, video_source)
 
 def download_series(select_season: MediaItem, version: str) -> None:
     """
@@ -160,11 +162,11 @@ def download_series(select_season: MediaItem, version: str) -> None:
         if len(list_season_select) > 1 or index_season_selected == "*":
 
             # Download all episodes if multiple seasons are selected or if '*' is used
-            download_episode(select_season.slug, i_season, scrape_serie, video_source, download_all=True)
+            download_episode(i_season, scrape_serie, video_source, download_all=True)
         else:
 
             # Otherwise, let the user select specific episodes for the single season
-            download_episode(select_season.slug, i_season, scrape_serie, video_source, download_all=False)
+            download_episode(i_season, scrape_serie, video_source, download_all=False)
 
 
 def display_episodes_list(scrape_serie) -> str:

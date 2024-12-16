@@ -1,6 +1,6 @@
 # 26.05.24
 
-from unidecode import unidecode
+from urllib.parse import quote_plus
 
 
 # Internal utilities
@@ -34,7 +34,7 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
         return 0
 
     # Search on database
-    movie_id = tmdb.search_movie(unidecode(string_to_search))
+    movie_id = tmdb.search_movie(quote_plus(string_to_search))
 
     if movie_id is not None:
         movie_details: Json_film = tmdb.get_movie_details(tmdb_id=movie_id)

@@ -34,6 +34,8 @@ def title_search(word_to_search: str) -> int:
     Returns:
         - int: The number of titles found.
     """
+    media_search_manager.clear()
+    table_show_manager.clear()
 
     # Find new domain if prev dont work
     max_timeout = config_manager.get_int("REQUESTS", "timeout")

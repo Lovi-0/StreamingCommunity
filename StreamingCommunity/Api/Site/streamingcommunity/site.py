@@ -101,6 +101,9 @@ def title_search(title_search: str, domain: str) -> int:
     Returns:
         int: The number of titles found.
     """
+    media_search_manager.clear()
+    table_show_manager.clear()
+    
     try:
         response = httpx.get(
             url=f"https://{SITE_NAME}.{domain}/api/search?q={title_search.replace(' ', '+')}", 

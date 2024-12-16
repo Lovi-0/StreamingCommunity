@@ -1,13 +1,12 @@
 # 02.07.24
 
 import os
-import sys
 
 
 # Internal utilities
 from StreamingCommunity.Util.console import console
-from StreamingCommunity.Util.message import start_message
 from StreamingCommunity.Util.os import os_manager
+from StreamingCommunity.Util.message import start_message
 from StreamingCommunity.Lib.Downloader import TOR_downloader
 
 
@@ -16,7 +15,7 @@ from StreamingCommunity.Api.Template.Class.SearchType import MediaItem
 
 
 # Config
-from .costant import ROOT_PATH, DOMAIN_NOW, SITE_NAME, MOVIE_FOLDER
+from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
 
 
 def download_title(select_title: MediaItem):
@@ -32,11 +31,13 @@ def download_title(select_title: MediaItem):
     print() 
 
     # Define output path
-    title_name = os_manager.get_sanitize_file(select_title.name.replace("-", "_") + ".mp4")
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name.replace(".mp4", ""))
-    
+    title_name = os_manager.get_sanitize_file(select_title.name)
+    mp4_path = os_manager.get_sanitize_path(
+        os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name.replace(".mp4", ""))
+    )
+
     # Create output folder
-    os_manager.create_path(mp4_path)   
+    os_manager.create_path(mp4_path)                                                                
 
     # Tor manager
     manager = TOR_downloader()

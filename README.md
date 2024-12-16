@@ -1,4 +1,4 @@
-# StreamingCommunity Downloader 🎬
+# StreamingCommunity Downloader
 
 ![Project Logo](https://i.ibb.co/f4h5Y2m/min-logo.png)
 
@@ -26,6 +26,9 @@ Chat, contribute, and have fun in our **Git_StreamingCommunity** Discord [Server
 - [Docker](#docker)
 - [Tutorial](#tutorials)
 - [To Do](#to-do)
+- [Support](#support)
+- [Contribute](#contributing)
+- [Disclamer](#disclaimer)
 
 
 
@@ -372,12 +375,11 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | 1337xx             |   ✅   |
 | Altadefinizione    |   ✅   |
 | AnimeUnity         |   ✅   |
-| BitSearch          |   ✅   |
+| Ilcorsaronero      |   ✅   |
 | CB01New            |   ✅   |
 | DDLStreamItaly     |   ✅   |
 | GuardaSerie        |   ✅   |
 | MostraGuarda       |   ✅   |
-| PirateBays         |   ✅   |
 | StreamingCommunity |   ✅   |
 
 # Tutorials 
@@ -391,7 +393,7 @@ The `run-container` command mounts also the `config.json` file, so any change to
 
 - Create website API -> https://github.com/Lovi-0/StreamingCommunity/tree/test_gui_1
 
-# SUPPORT
+# Support
 
 If you'd like to support this project, consider making a donation!
 

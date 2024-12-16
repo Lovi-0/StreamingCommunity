@@ -29,7 +29,7 @@ table_show_manager = TVShowManager()
 
 
 
-def download_video(index_season_selected: int, index_episode_selected: int, scape_info_serie: GetSerieInfo) -> None:
+def download_video(index_season_selected: int, index_episode_selected: int, scape_info_serie: GetSerieInfo) -> str:
     """
     Download a single episode video.
 
@@ -37,6 +37,9 @@ def download_video(index_season_selected: int, index_episode_selected: int, scap
         - tv_name (str): Name of the TV series.
         - index_season_selected (int): Index of the selected season.
         - index_episode_selected (int): Index of the selected episode.
+
+    Return:
+        - str: output path
     """
 
     start_message()
@@ -62,18 +65,19 @@ def download_video(index_season_selected: int, index_episode_selected: int, scap
         output_filename=os.path.join(mp4_path, mp4_name)
     ).start()
 
-    if r_proc == 404:
+    """if r_proc == 404:
         time.sleep(2)
 
         # Re call search function
         if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
             frames = get_call_stack()
-            execute_search(frames[-4])
+            execute_search(frames[-4])"""
 
     if r_proc != None:
         console.print("[green]Result: ")
         console.print(r_proc)
 
+    return os.path.join(mp4_path, mp4_name)
 
 
 def download_episode(scape_info_serie: GetSerieInfo, index_season_selected: int, download_all: bool = False) -> None:

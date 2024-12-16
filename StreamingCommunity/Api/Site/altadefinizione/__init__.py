@@ -1,6 +1,6 @@
 # 26.05.24
 
-from unidecode import unidecode
+from urllib.parse import quote_plus
 
 
 # Internal utilities
@@ -30,7 +30,7 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
         string_to_search = msg.ask(f"\n[purple]Insert word to search in [red]{SITE_NAME}").strip()
 
     # Search on database
-    len_database = title_search(unidecode(string_to_search))
+    len_database = title_search(quote_plus(string_to_search))
 
     # Return list of elements
     if get_onylDatabase:

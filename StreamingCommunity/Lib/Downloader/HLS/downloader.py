@@ -826,11 +826,6 @@ class HLS_Downloader:
         Args:
             out_path (str): The path of the output file to be cleaned up.
         """
-        def dict_to_seconds(d):
-            """Converts a dictionary of time components to total seconds."""
-            if d is not None:
-                return d['h'] * 3600 + d['m'] * 60 + d['s']
-            return 0
 
         # Check if the final output file exists
         logging.info(f"Check if end file converted exists: {out_path}")
@@ -861,7 +856,8 @@ class HLS_Downloader:
             panel_content = (
                 f"[bold green]Download completed![/bold green]\n"
                 f"[cyan]File size: [bold red]{formatted_size}[/bold red]\n"
-                f"[cyan]Duration: [bold]{formatted_duration}[/bold]"
+                f"[cyan]Duration: [bold]{formatted_duration}[/bold]\n"
+                f"[cyan]Output: [bold]{self.output_filename}[/bold]"
             )
 
             if missing_ts:

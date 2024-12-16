@@ -1,11 +1,10 @@
 # 03.07.24
 
 import os
-import time
 
 
 # Internal utilities
-from StreamingCommunity.Util.console import console, msg
+from StreamingCommunity.Util.console import console
 from StreamingCommunity.Util.os import os_manager
 from StreamingCommunity.Util.message import start_message
 from StreamingCommunity.Util.call_stack import get_call_stack
@@ -25,12 +24,15 @@ from StreamingCommunity.Api.Player.maxstream import VideoSource
 from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
 
 
-def download_film(select_title: MediaItem):
+def download_film(select_title: MediaItem) -> str:
     """
     Downloads a film using the provided obj.
 
     Parameters:
         - select_title (MediaItem): The media item to be downloaded. This should be an instance of the MediaItem class, containing attributes like `name` and `url`.
+
+    Return:
+        - str: output path
     """
 
     # Start message and display film information
@@ -56,14 +58,16 @@ def download_film(select_title: MediaItem):
         output_filename=os.path.join(mp4_path, title_name)
     ).start()
 
-    if r_proc == 404:
+    """if r_proc == 404:
         time.sleep(2)
 
         # Re call search function
         if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
             frames = get_call_stack()
-            execute_search(frames[-4])
+            execute_search(frames[-4])"""
 
     if r_proc != None:
         console.print("[green]Result: ")
         console.print(r_proc)
+
+    return os.path.join(mp4_path, title_name)

@@ -19,7 +19,7 @@ start_message()
 logger = Logger()
 manager = TOR_downloader()
 
-magnet_link = "magnet:?x"
+magnet_link = "magnet:?xt="
 manager.add_magnet_link(magnet_link)
 manager.start_download()
 manager.move_downloaded_files()

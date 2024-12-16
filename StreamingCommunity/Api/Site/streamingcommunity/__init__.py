@@ -1,6 +1,6 @@
 # 21.05.24
 
-from unidecode import unidecode
+from urllib.parse import quote_plus
 
 
 # Internal utilities
@@ -32,12 +32,12 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
 
     # Get site domain and version and get result of the search
     site_version, domain = get_version_and_domain()
-    len_database = title_search(unidecode(string_to_search), domain)
+    len_database = title_search(quote_plus(string_to_search), domain)
 
     # Return list of elements
     if get_onylDatabase:
         return media_search_manager
-
+    
     if len_database > 0:
 
         # Select title from list

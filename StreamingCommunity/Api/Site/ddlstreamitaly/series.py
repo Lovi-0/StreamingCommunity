@@ -29,13 +29,16 @@ table_show_manager = TVShowManager()
 
 
 
-def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, video_source: VideoSource) -> None:
+def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, video_source: VideoSource) -> str:
     """
     Download a single episode video.
 
     Parameters:
         - tv_name (str): Name of the TV series.
         - index_episode_selected (int): Index of the selected episode.
+
+    Return:
+        - str: output path
     """
 
     start_message()
@@ -65,14 +68,16 @@ def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, 
 
     # Start download
     r_proc = MP4_downloader(
-        url = master_playlist, 
-        path = os.path.join(mp4_path, title_name),
-        referer = f"{parsed_url.scheme}://{parsed_url.netloc}/",
+        url=master_playlist, 
+        path=os.path.join(mp4_path, title_name),
+        referer=f"{parsed_url.scheme}://{parsed_url.netloc}/",
     )
 
     if r_proc != None:
         console.print("[green]Result: ")
         console.print(r_proc)
+
+    return os.path.join(mp4_path, title_name)
 
 
 def download_thread(dict_serie: MediaItem):
