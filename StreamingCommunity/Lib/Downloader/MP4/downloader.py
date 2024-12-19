@@ -32,7 +32,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Config
 GET_ONLY_LINK = config_manager.get_bool('M3U8_PARSER', 'get_only_link')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
-REQUEST_VERIFY = config_manager.get_float('REQUESTS', 'verify_ssl')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 
 

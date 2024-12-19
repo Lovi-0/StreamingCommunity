@@ -43,7 +43,7 @@ TQDM_DELAY_WORKER = config_manager.get_float('M3U8_DOWNLOAD', 'tqdm_delay')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 
 REQUEST_MAX_RETRY = config_manager.get_int('REQUESTS', 'max_retry')
-REQUEST_VERIFY = config_manager.get_bool('REQUESTS', 'verify_ssl')
+REQUEST_VERIFY = False
 
 THERE_IS_PROXY_LIST = os_manager.check_file("list_proxy.txt")
 PROXY_START_MIN = config_manager.get_float('REQUESTS', 'proxy_start_min')
@@ -55,7 +55,6 @@ DEFAULT_AUDIO_WORKERS = config_manager.get_int('M3U8_DOWNLOAD', 'default_audio_w
 
 
 # Variable
-headers_index = config_manager.get_dict('REQUESTS', 'user-agent')
 max_timeout = config_manager.get_int("REQUESTS", "timeout")
 
 
@@ -110,7 +109,6 @@ class M3U8_Segments:
         Returns:
             bytes: The encryption key in bytes.
         """
-        headers_index = {'user-agent': get_headers()}
 
         # Construct the full URL of the key
         key_uri = urljoin(self.url, m3u8_parser.keys.get('uri'))
@@ -122,7 +120,7 @@ class M3U8_Segments:
         try:
             response = httpx.get(
                 url=key_uri, 
-                headers=headers_index,
+                headers={'User-Agent': get_headers()},
                 timeout=max_timeout
             )
             response.raise_for_status()
@@ -194,14 +192,12 @@ class M3U8_Segments:
         """
         Makes a request to the index M3U8 file to get information about segments.
         """
-        headers_index = {'user-agent': get_headers()}
-
         if self.is_index_url:
 
             # Send a GET request to retrieve the index M3U8 file
             response = httpx.get(
                 self.url, 
-                headers=headers_index, 
+                headers={'User-Agent': get_headers()}, 
                 timeout=max_timeout
             )
             response.raise_for_status()
@@ -271,7 +267,7 @@ class M3U8_Segments:
                         else:
                             response = client.get(
                                 url=ts_url, 
-                                headers={'user-agent': get_headers()}, 
+                                headers={'User-Agent': get_headers()}, 
                                 timeout=max_timeout, 
                                 follow_redirects=True
                             )
@@ -289,7 +285,7 @@ class M3U8_Segments:
                         else:
                             response = client_2.get(
                                 url=ts_url, 
-                                headers={'user-agent': get_headers()}, 
+                                headers={'User-Agent': get_headers()}, 
                                 timeout=max_timeout, 
                                 follow_redirects=True
                             )

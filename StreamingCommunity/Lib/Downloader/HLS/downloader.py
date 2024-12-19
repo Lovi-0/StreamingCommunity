@@ -49,7 +49,6 @@ GET_ONLY_LINK = config_manager.get_bool('M3U8_PARSER', 'get_only_link')
 
 # Variable
 max_timeout = config_manager.get_int("REQUESTS", "timeout")
-headers_index = config_manager.get_dict('REQUESTS', 'user-agent')
 m3u8_url_fixer = M3U8_UrlFix()
 list_MissingTs = []
 

@@ -1,4 +1,5 @@
 # 12.14.24
+
 import logging
 import asyncio
 from typing import List, Dict, Optional
@@ -11,6 +12,7 @@ from bs4 import BeautifulSoup
 
 # Internal utilities
 from StreamingCommunity.Util._jsonConfig import config_manager
+from StreamingCommunity.Util.headers import get_headers
 from StreamingCommunity.Util.console import console
 
 
@@ -23,7 +25,7 @@ class IlCorsaroNeroScraper:
         self.base_url = base_url
         self.max_page = max_page
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'User-Agent': get_headers(),
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.5',
             'Connection': 'keep-alive',

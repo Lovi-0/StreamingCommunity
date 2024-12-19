@@ -12,14 +12,14 @@ from StreamingCommunity.Util.console import console
 
 
 # Check if Crypto module is installed
-crypto_spec = importlib.util.find_spec("Crypto")
+crypto_spec = importlib.util.find_spec("Cryptodome")
 crypto_installed = crypto_spec is not None
 
 
 if crypto_installed:
-    logging.info("Decrypy use: Crypto")
-    from Crypto.Cipher import AES               # type: ignore
-    from Crypto.Util.Padding import unpad       # type: ignore
+    console.print("[cyan]Decrypy use: Cryptodome")
+    from Cryptodome.Cipher import AES
+    from Cryptodome.Util.Padding import unpad
 
     class M3U8_Decryption:
         """
@@ -93,12 +93,12 @@ else:
     # Check if openssl command is available
     try:
         openssl_available = subprocess.run(["openssl", "version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
-        logging.info("Decrypy use: OPENSSL")
+        console.print("[cyan]Decrypy use: OPENSSL")
     except:
         openssl_available = False
 
     if not openssl_available:
-        console.log("[red]Neither python library: pycryptodome nor openssl software is installed. Please install either one of them. Read readme.md [Requirement].")
+        console.log("[red]Neither python library: pycryptodomex nor openssl software is installed. Please install either one of them. Read readme.md [Requirement].")
         sys.exit(0)
 
     class M3U8_Decryption:

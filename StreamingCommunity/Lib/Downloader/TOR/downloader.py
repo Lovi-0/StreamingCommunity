@@ -29,7 +29,6 @@ PASSWORD = str(config_manager.get_dict('DEFAULT', 'config_qbit_tor')['pass'])
 
 # Config
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
-REQUEST_VERIFY = config_manager.get_float('REQUESTS', 'verify_ssl')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 
 

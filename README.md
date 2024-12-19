@@ -20,7 +20,6 @@ Chat, contribute, and have fun in our **Git_StreamingCommunity** Discord [Server
 - [Configuration](#configuration)
     - [Default](#default-settings)
     - [Request](#requests-settings)
-    - [Browser](#browser-settings)
     - [Download](#m3u8_download-settings)
     - [Parser](#m3u8_parser-settings)
 - [Docker](#docker)
@@ -173,8 +172,7 @@ The configuration file is divided into several main sections:
     "movie_folder_name": "Movie",
     "serie_folder_name": "TV",
     "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
-    "not_close": false,
-    "show_trending": false
+    "not_close": false
 }
 ```
 
@@ -202,7 +200,6 @@ The configuration file is divided into several main sections:
     `<br/><br/>`
     
 - `not_close`: If true, continues running after downloading
-- `show_trending`: Display trending content on startup
 
     ### qBittorrent Configuration
 
@@ -232,18 +229,6 @@ The configuration file is divided into several main sections:
 
 - `timeout`: Maximum timeout (in seconds) for each request
 - `max_retry`: Number of retry attempts per segment during M3U8 index download
-
-<br>
-
-## BROWSER Settings
-
-```json
-{
-    "headless": false
-}
-```
-
-- `headless`: Controls whether to run browser in headless mode
 
 <br>
 

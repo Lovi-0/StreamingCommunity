@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 # Internal utilities
 from StreamingCommunity.Util.headers import get_headers
-from StreamingCommunity.Util.console import console, Panel
+from StreamingCommunity.Util.console import console
 from StreamingCommunity.Util._jsonConfig import config_manager
 from .Helper.Vixcloud.util import WindowVideo, WindowParameter, StreamsCollection
 from .Helper.Vixcloud.js_parser import JavaScriptParser

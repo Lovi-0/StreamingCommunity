@@ -60,6 +60,11 @@ def get_final_redirect_url(initial_url, max_timeout):
 
         ) as client:
             response = client.get(initial_url)
+
+            if response.status_code == 403:
+                console.print("[bold red]The owner of this website has banned your IP[/bold red]")
+                raise
+
             response.raise_for_status()
             
             # Capture the final URL after all redirects
