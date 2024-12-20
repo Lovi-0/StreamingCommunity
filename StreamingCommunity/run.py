@@ -17,7 +17,6 @@ from StreamingCommunity.Util.console import console, msg
 from StreamingCommunity.Util._jsonConfig import config_manager
 from StreamingCommunity.Upload.update import update as git_update
 from StreamingCommunity.Util.os import os_summary
-from StreamingCommunity.Lib.TMBD import tmdb
 from StreamingCommunity.Util.logger import Logger
 
 

@@ -41,8 +41,20 @@ FFMPEG_CONFIGURATION = {
 }
 
 
-
 class FFMPEGDownloader:
+    """
+    A class for downloading and managing FFmpeg executables.
+    
+    This class handles the detection of the operating system, downloading of FFmpeg binaries,
+    and management of the FFmpeg executables (ffmpeg, ffprobe, and ffplay).
+
+    Attributes:
+        os_name (str): The detected operating system name
+        arch (str): The system architecture (e.g., x86_64, arm64)
+        home_dir (str): User's home directory path
+        base_dir (str): Base directory for storing FFmpeg binaries
+    """
+
     def __init__(self):
         self.os_name = self._detect_system()
         self.arch = self._detect_arch()
@@ -50,20 +62,32 @@ class FFMPEGDownloader:
         self.base_dir = self._get_base_directory()
 
     def _detect_system(self) -> str:
-        """Detect and normalize operating system name."""
-        system = platform.system().lower()
+        """
+        Detect and normalize the operating system name.
 
+        Returns:
+            str: Normalized operating system name ('windows', 'darwin', or 'linux')
+
+        Raises:
+            ValueError: If the operating system is not supported
+        """
+        system = platform.system().lower()
         if system in FFMPEG_CONFIGURATION:
             return system
-        
         raise ValueError(f"Unsupported operating system: {system}")
 
     def _detect_arch(self) -> str:
         """
-        Detect system architecture
+        Detect and normalize the system architecture.
+
+        Returns:
+            str: Normalized architecture name (e.g., 'x86_64', 'arm64')
+            
+        The method normalizes various architecture names to consistent values:
+            - amd64/x86_64/x64 -> x86_64
+            - arm64/aarch64 -> arm64
         """
         machine = platform.machine().lower()
-
         arch_map = {
             'amd64': 'x86_64', 
             'x86_64': 'x86_64', 
@@ -71,59 +95,80 @@ class FFMPEGDownloader:
             'arm64': 'arm64', 
             'aarch64': 'arm64'
         }
-
         return arch_map.get(machine, machine)
 
     def _get_base_directory(self) -> str:
         """
-        Get base directory for binaries
+        Get and create the base directory for storing FFmpeg binaries.
+
+        Returns:
+            str: Path to the base directory
+            
+        The directory location varies by operating system:
+            - Windows: C:\\binary
+            - macOS: ~/Applications/binary
+            - Linux: ~/.local/bin/binary
         """
         base_dir = FFMPEG_CONFIGURATION[self.os_name]['base_dir'](self.home_dir)
         os.makedirs(base_dir, exist_ok=True)
-
         return base_dir
 
-    def _check_existing_binaries(self) -> Tuple[Optional[str], Optional[str]]:
+    def _check_existing_binaries(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         """
-        Check if FFmpeg binaries already exist in the base directory
+        Check if FFmpeg binaries already exist in the base directory.
+
+        Returns:
+            Tuple[Optional[str], Optional[str], Optional[str]]: Paths to ffmpeg, ffprobe, and ffplay executables.
+            Returns None for each executable that is not found.
         """
         config = FFMPEG_CONFIGURATION[self.os_name]
         executables = config['executables']
-
         found_executables = []
+
         for executable in executables:
-            
-            # Search for exact executable in base directory
             exe_paths = glob.glob(os.path.join(self.base_dir, executable))
             if exe_paths:
                 found_executables.append(exe_paths[0])
+            else:
+                found_executables.append(None)
 
-        # Return paths if both executables are found
-        if len(found_executables) == len(executables):
-            return tuple(found_executables)
+        return tuple(found_executables) if len(found_executables) == 3 else (None, None, None)
 
-        return None, None
-
-    def _get_latest_version(self) -> str:
+    def _get_latest_version(self) -> Optional[str]:
         """
-        Get the latest FFmpeg version
+        Get the latest FFmpeg version from the official website.
+
+        Returns:
+            Optional[str]: The latest version string, or None if retrieval fails
+
+        Raises:
+            requests.exceptions.RequestException: If there are network-related errors
         """
         try:
             version_url = 'https://www.gyan.dev/ffmpeg/builds/release-version'
             return requests.get(version_url).text.strip()
-        
         except Exception as e:
             logging.error(f"Unable to get version: {e}")
             return None
 
     def _download_file(self, url: str, destination: str) -> bool:
         """
-        Download with Rich progress bar
+        Download a file from URL with a Rich progress bar display.
+
+        Parameters:
+            url (str): The URL to download the file from. Should be a direct download link.
+            destination (str): Local file path where the downloaded file will be saved.
+
+        Returns:
+            bool: True if download was successful, False otherwise.
+
+        Raises:
+            requests.exceptions.RequestException: If there are network-related errors
+            IOError: If there are issues writing to the destination file
         """
         try:
             response = requests.get(url, stream=True)
             response.raise_for_status()
-            
             total_size = int(response.headers.get('content-length', 0))
             
             with open(destination, 'wb') as file, \
@@ -136,140 +181,131 @@ class FFMPEGDownloader:
                 ) as progress:
                 
                 download_task = progress.add_task("[green]Downloading FFmpeg", total=total_size)
-                
                 for chunk in response.iter_content(chunk_size=8192):
                     size = file.write(chunk)
                     progress.update(download_task, advance=size)
-            
             return True
-        
         except Exception as e:
             logging.error(f"Download error: {e}")
             return False
 
-    def _extract_and_copy_binaries(self, archive_path: str) -> Tuple[Optional[str], Optional[str]]:
+    def _extract_and_copy_binaries(self, archive_path: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         """
-        Extract archive and copy executables to base directory
+        Extract FFmpeg binaries from the downloaded archive and copy them to the base directory.
+
+        Parameters:
+            archive_path (str): Path to the downloaded archive file
+
+        Returns:
+            Tuple[Optional[str], Optional[str], Optional[str]]: Paths to the extracted ffmpeg, 
+            ffprobe, and ffplay executables. Returns None for each executable that couldn't be extracted.
         """
         try:
-            # Temporary extraction path
             extraction_path = os.path.join(self.base_dir, 'temp_extract')
             os.makedirs(extraction_path, exist_ok=True)
 
-            # Extract based on file type
             if archive_path.endswith('.zip'):
                 with zipfile.ZipFile(archive_path, 'r') as zip_ref:
                     zip_ref.extractall(extraction_path)
             elif archive_path.endswith('.tar.xz'):
-                import lzma
-                with lzma.open(archive_path, 'rb') as xz_file:
-                    with tarfile.open(fileobj=xz_file) as tar_ref:
-                        tar_ref.extractall(extraction_path)
+                with tarfile.open(archive_path) as tar_ref:
+                    tar_ref.extractall(extraction_path)
 
-            # Find and copy executables
             config = FFMPEG_CONFIGURATION[self.os_name]
             executables = config['executables']
-            
             found_paths = []
+
             for executable in executables:
-                # Find executable in extracted files
                 exe_paths = glob.glob(os.path.join(extraction_path, '**', executable), recursive=True)
                 
                 if exe_paths:
-                    # Copy to base directory
                     dest_path = os.path.join(self.base_dir, executable)
                     shutil.copy2(exe_paths[0], dest_path)
                     
-                    # Set execution permissions for Unix-like systems
                     if self.os_name != 'windows':
                         os.chmod(dest_path, 0o755)
                     
                     found_paths.append(dest_path)
+                else:
+                    found_paths.append(None)
 
-            # Clean up temporary extraction directory
             shutil.rmtree(extraction_path, ignore_errors=True)
-            
-            # Remove downloaded archive
             os.remove(archive_path)
 
-            # Return paths if both executables found
-            if len(found_paths) == len(executables):
-                return tuple(found_paths)
-            
-            return None, None
+            return tuple(found_paths) if len(found_paths) == 3 else (None, None, None)
 
         except Exception as e:
             logging.error(f"Extraction/copy error: {e}")
-            return None, None
+            return None, None, None
 
-    def download(self) -> Tuple[Optional[str], Optional[str]]:
+    def download(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         """
-        Main download procedure
-        Returns paths of ffmpeg and ffprobe
+        Main method to download and set up FFmpeg executables.
+
+        Returns:
+            Tuple[Optional[str], Optional[str], Optional[str]]: Paths to ffmpeg, ffprobe, and ffplay executables.
+            Returns None for each executable that couldn't be downloaded or set up.
         """
-        # First, check if binaries already exist in base directory
         existing_ffmpeg, existing_ffprobe, existing_ffplay = self._check_existing_binaries()
-        if existing_ffmpeg and existing_ffprobe:
-            return existing_ffmpeg, existing_ffprobe
+        if all([existing_ffmpeg, existing_ffprobe, existing_ffplay]):
+            return existing_ffmpeg, existing_ffprobe, existing_ffplay
 
-        # Get latest version
         version = self._get_latest_version()
         if not version:
             logging.error("Cannot proceed: version not found")
-            return None, None
+            return None, None, None
 
-        # Prepare configurations
         config = FFMPEG_CONFIGURATION[self.os_name]
-        
-        # Build download URL
         download_url = config['download_url'].format(
             version=version, 
             arch=self.arch
         )
         
-        # Download path
         download_path = os.path.join(
             self.base_dir, 
             f'ffmpeg-{version}{config["file_extension"]}'
         )
         
-        # Download
-        console.print(
-            f"[bold blue]Downloading FFmpeg from:[/] {download_url}", 
-        )
+        console.print(f"[bold blue]Downloading FFmpeg from:[/] {download_url}")
         if not self._download_file(download_url, download_path):
-            return None, None
+            return None, None, None
         
-        # Extract and copy binaries
-        ffmpeg_path, ffprobe_path = self._extract_and_copy_binaries(download_path)
-        
-        if ffmpeg_path and ffprobe_path:
-            return ffmpeg_path, ffprobe_path
-        
-        logging.error("FFmpeg executables not found")
-        return None, None
+        return self._extract_and_copy_binaries(download_path)
 
+def check_ffmpeg() -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """
+    Check for FFmpeg executables in the system and download them if not found.
 
-def check_ffmpeg():
+    Returns:
+        Tuple[Optional[str], Optional[str], Optional[str]]: Paths to ffmpeg, ffprobe, and ffplay executables.
+        Returns None for each executable that couldn't be found or downloaded.
+
+    The function first checks if FFmpeg executables are available in the system PATH:
+    - On Windows, uses the 'where' command
+    - On Unix-like systems, uses 'which'
+    
+    If the executables are not found in PATH, it attempts to download and install them
+    using the FFMPEGDownloader class.
+    """
     try:
-        # First, use 'where' command to check existing binaries on Windows
         if platform.system().lower() == 'windows':
             ffmpeg_path = subprocess.check_output(['where', 'ffmpeg'], text=True).strip().split('\n')[0] if subprocess.call(['where', 'ffmpeg'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0 else None
             ffprobe_path = subprocess.check_output(['where', 'ffprobe'], text=True).strip().split('\n')[0] if subprocess.call(['where', 'ffprobe'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0 else None
+            ffplay_path = subprocess.check_output(['where', 'ffplay'], text=True).strip().split('\n')[0] if subprocess.call(['where', 'ffplay'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0 else None
             
-            if ffmpeg_path and ffprobe_path:
-                return ffmpeg_path, ffprobe_path
-        
-        # Fallback to which/shutil method for Unix-like systems
-        ffmpeg_path = shutil.which('ffmpeg')
-        ffprobe_path = shutil.which('ffprobe')
-        
-        if ffmpeg_path and ffprobe_path:
-            return ffmpeg_path, ffprobe_path
+            if all([ffmpeg_path, ffprobe_path, ffplay_path]):
+                return ffmpeg_path, ffprobe_path, ffplay_path
+        else:
+            ffmpeg_path = shutil.which('ffmpeg')
+            ffprobe_path = shutil.which('ffprobe')
+            ffplay_path = shutil.which('ffplay')
+            
+            if all([ffmpeg_path, ffprobe_path, ffplay_path]):
+                return ffmpeg_path, ffprobe_path, ffplay_path
         
         downloader = FFMPEGDownloader()
         return downloader.download()
     
     except Exception as e:
         logging.error(f"Error checking FFmpeg: {e}")
-        return None, None
+        return None, None, None

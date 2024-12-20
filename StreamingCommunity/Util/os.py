@@ -311,6 +311,7 @@ class OsSummary:
     def __init__(self):
         self.ffmpeg_path = None
         self.ffprobe_path = None
+        self.ffplay_path = None
 
     def get_executable_version(self, command: list):
         """
@@ -462,7 +463,7 @@ class OsSummary:
 
         # Locate ffmpeg from bin installation
         if self.ffmpeg_path is None or self.ffprobe_path is None:
-            self.ffmpeg_path, self.ffprobe_path = check_ffmpeg()
+            self.ffmpeg_path, self.ffprobe_path, self.ffplay_path = check_ffmpeg()
 
         if self.ffmpeg_path is None or self.ffprobe_path is None:
             console.log("[red]Cant locate ffmpeg or ffprobe")
