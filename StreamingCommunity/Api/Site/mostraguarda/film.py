@@ -73,7 +73,7 @@ def download_film(movie_details: Json_film) -> str:
     
     # Define output path
     title_name = os_manager.get_sanitize_file(movie_details.title) + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name.replace(".mp4", ""))
+    mp4_path = os.path.join(ROOT_PATH, MOVIE_FOLDER, title_name.replace(".mp4", ""))
 
     # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()

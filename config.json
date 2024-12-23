@@ -5,7 +5,7 @@
         "log_to_file": true,
         "show_message": true,
         "clean_console": true,
-        "root_path": "Video",
+        "root_path": "D:\\StreamingDownload\\Downloads",
         "movie_folder_name": "Movie",
         "serie_folder_name": "TV",
         "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",

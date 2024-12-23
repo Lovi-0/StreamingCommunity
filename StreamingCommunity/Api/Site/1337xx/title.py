@@ -39,7 +39,7 @@ def download_title(select_title: MediaItem):
     # Define output path
     title_name = os_manager.get_sanitize_file(select_title.name)
     mp4_path = os_manager.get_sanitize_path(
-        os.path.join(ROOT_PATH, SITE_NAME, MOVIE_FOLDER, title_name.replace(".mp4", ""))
+        os.path.join(ROOT_PATH, MOVIE_FOLDER, title_name.replace(".mp4", ""))
     )
     
     # Create output folder

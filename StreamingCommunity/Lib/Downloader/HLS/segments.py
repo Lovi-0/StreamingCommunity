@@ -257,7 +257,7 @@ class M3U8_Segments:
 
                     with httpx.Client(proxies=proxy, verify=REQUEST_VERIFY) as client:  
                         if 'key_base_url' in self.__dict__:
-                             response = client.get(
+                            response = client.get(
                                 url=ts_url, 
                                 headers=random_headers(self.key_base_url), 
                                 timeout=max_timeout, 
