@@ -174,17 +174,11 @@ class ContentExtractor:
             # Extract available languages from the audio tracks
             available_languages = [obj_audio.get('language') for obj_audio in self.list_available_audio]
             set_language = DOWNLOAD_SPECIFIC_AUDIO                      
-            result = list(set(available_languages) & set(set_language))
+            downloadable_languages = list(set(available_languages) & set(set_language))
 
-            # Create a formatted table to display audio info
-            if len(available_languages) > 0:
-                table = Table(show_header=False, box=None)
-                table.add_row(f"[cyan]Available languages:", f"[purple]{', '.join(available_languages)}")
-                table.add_row(f"[red]Set audios:", f"[purple]{', '.join(set_language)}")
-                table.add_row(f"[green]Downloadable:", f"[purple]{', '.join(result)}")
-
-                console.rule("[bold green] AUDIO ", style="bold red")
-                console.print(table)
+            console.print(f"[cyan bold]Audio:[/cyan bold] [green]Available:[/green] [purple]{', '.join(available_languages)}[/purple] | "
+                  f"[red]Set:[/red] [purple]{', '.join(set_language)}[/purple] | "
+                  f"[yellow]Downloadable:[/yellow] [purple]{', '.join(downloadable_languages)}[/purple]")
 
         else:
             console.log("[red]Can't find a list of audios")
@@ -204,17 +198,11 @@ class ContentExtractor:
             # Extract available languages from the subtitles
             available_languages = [obj_subtitle.get('language') for obj_subtitle in self.list_available_subtitles]
             set_language = DOWNLOAD_SPECIFIC_SUBTITLE
-            result = list(set(available_languages) & set(set_language))
+            downloadable_languages = list(set(available_languages) & set(set_language))
 
-            # Create a formatted table to display subtitle info
-            if len(available_languages) > 0:
-                table = Table(show_header=False, box=None)
-                table.add_row(f"[cyan]Available languages:", f"[purple]{', '.join(available_languages)}")
-                table.add_row(f"[red]Set subtitles:", f"[purple]{', '.join(set_language)}")
-                table.add_row(f"[green]Downloadable:", f"[purple]{', '.join(result)}")
-
-                console.rule("[bold green] SUBTITLE ", style="bold red")
-                console.print(table)
+            console.print(f"[cyan bold]Subtitle:[/cyan bold] [green]Available:[/green] [purple]{', '.join(available_languages)}[/purple] | "
+                  f"[red]Set:[/red] [purple]{', '.join(set_language)}[/purple] | "
+                  f"[yellow]Downloadable:[/yellow] [purple]{', '.join(downloadable_languages)}[/purple]")
 
         else:
             console.log("[red]Can't find a list of subtitles")
@@ -239,19 +227,18 @@ class ContentExtractor:
         logging.info(f"M3U8 index selected: {self.m3u8_index}, with resolution: {video_res}")
 
         # Create a formatted table to display video info
-        table = Table(show_header=False, box=None)
-        table.add_row(f"[cyan]Available resolutions:", f"[purple]{', '.join(list_available_resolution)}")
-        table.add_row(f"[green]Downloadable:", f"[purple]{video_res[0]}x{video_res[1]}")
+        console.print(f"[cyan bold]Video:[/cyan bold] [green]Available resolutions:[/green] [purple]{', '.join(list_available_resolution)}[/purple] | "
+              f"[yellow]Downloadable:[/yellow] [purple]{video_res[0]}x{video_res[1]}[/purple]")
 
         if self.codec is not None:
             if config_manager.get_bool("M3U8_CONVERSION", "use_codec"):
-                table.add_row(f"[green]Codec:", f"([green]'v'[white]: [yellow]{self.codec.video_codec_name}[white] ([green]b[white]: [yellow]{self.codec.video_bitrate // 1000}k[white]), [green]'a'[white]: [yellow]{self.codec.audio_codec_name}[white] ([green]b[white]: [yellow]{self.codec.audio_bitrate // 1000}k[white]))")
+                codec_info = (f"[green]v[/green]: [yellow]{self.codec.video_codec_name}[/yellow] "
+                            f"([green]b[/green]: [yellow]{self.codec.video_bitrate // 1000}k[/yellow]), "
+                            f"[green]a[/green]: [yellow]{self.codec.audio_codec_name}[/yellow] "
+                            f"([green]b[/green]: [yellow]{self.codec.audio_bitrate // 1000}k[/yellow])")
             else:
-                table.add_row(f"[green]Codec:", "[purple]copy")
-
-        console.rule("[bold green] VIDEO ", style="bold red")
-        console.print(table)
-        print("")
+                codec_info = "[cyan]copy[/cyan]"
+            console.print(f"[bold green]Codec:[/bold green] {codec_info}")
 
         # Fix the URL if it does not include the full protocol
         if "http" not in self.m3u8_index:
@@ -268,7 +255,8 @@ class ContentExtractor:
             else:
                 logging.error("[download_m3u8] Can't find a valid m3u8 index")
                 raise ValueError("Invalid m3u8 index URL")
-            
+    
+        print("")
 
 class DownloadTracker:
     def __init__(self, path_manager: PathManager):
