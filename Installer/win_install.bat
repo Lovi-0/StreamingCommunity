@@ -1,4 +1,8 @@
 @echo off
+
+:: Spostarsi nella directory superiore rispetto a quella corrente
+cd ..
+
 :: Check if the script is running as administrator
 net session >nul 2>&1
 if %errorlevel% neq 0 (

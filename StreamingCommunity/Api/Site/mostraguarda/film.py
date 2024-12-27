@@ -61,6 +61,10 @@ def download_film(movie_details: Json_film) -> str:
         logging.error(f"Not found in the server. Dict: {movie_details}")
         raise
 
+    if "not found" in str(response.text):
+        logging.error(f"Cant find in the server, Element: {movie_details}")
+        raise
+
     # Extract supervideo url
     soup = BeautifulSoup(response.text, "html.parser")
     player_links = soup.find("ul", class_ = "_player-mirrors").find_all("li")

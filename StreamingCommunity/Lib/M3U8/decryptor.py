@@ -17,7 +17,7 @@ crypto_installed = crypto_spec is not None
 
 
 if crypto_installed:
-    console.print("[cyan]Decrypy use: Cryptodome")
+    console.print("[cyan]Decrypy use: Cryptodomex")
     from Cryptodome.Cipher import AES
     from Cryptodome.Util.Padding import unpad
 

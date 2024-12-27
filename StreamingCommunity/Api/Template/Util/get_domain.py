@@ -87,7 +87,6 @@ def search_domain(site_name: str, base_url: str):
     Returns:
         tuple: The found domain and the complete URL.
     """
-
     # Extract config domain
     max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain = str(config_manager.get_dict("SITE", site_name)['domain'])
@@ -102,7 +101,6 @@ def search_domain(site_name: str, base_url: str):
             },
             follow_redirects=True,
             timeout=max_timeout
-
         ) as client:
             response_follow = client.get(f"{base_url}.{domain}")
             response_follow.raise_for_status()
@@ -111,51 +109,57 @@ def search_domain(site_name: str, base_url: str):
         query = base_url.split("/")[-1]
         
         # Perform a Google search with multiple results
-        search_results = list(search(query, num_results=5))
-        #console.print(f"[green]Google search results[white]: {search_results}")
+        search_results = list(search(query, num_results=10, lang="it"))
+        console.print(f"\nGoogle search results: {search_results}")
 
+        def normalize_for_comparison(url):
+            """Normalize URL by removing protocol, www, and trailing slashes"""
+            url = url.lower()
+            url = url.replace("https://", "").replace("http://", "")
+            url = url.replace("www.", "")
+            return url.rstrip("/")
+
+        # Normalize the base_url we're looking for
+        target_url = normalize_for_comparison(base_url)
+        
         # Iterate through search results
         for first_url in search_results:
             console.print(f"[green]Checking url[white]: [red]{first_url}")
             
-            # Check if the base URL matches the Google search result
-            parsed_first_url = urlparse(first_url)
-
-            # Compare base url from google search with base url from config.json
-            if parsed_first_url.netloc.split(".")[0] == base_url:
-                console.print(f"[red]URL does not match base URL. Skipping.[/red]")
-                continue
-
-            try:
-                final_url = get_final_redirect_url(first_url, max_timeout)
-
-                if final_url is not None:
-                    
-                    def extract_domain(url):
-                        parsed_url = urlparse(url)
-                        domain = parsed_url.netloc
-                        return domain.split(".")[-1]
-
-                    new_domain_extract = extract_domain(str(final_url))
-
-                    if msg.ask(f"[cyan]\nDo you want to auto site[white]: [red]{site_name}[cyan] with domain[white]: [red]{new_domain_extract}", choices=["y", "n"], default="y").lower() == "y":
-                        
-                        # Update domain in config.json
-                        config_manager.config['SITE'][site_name]['domain'] = new_domain_extract
-                        config_manager.write_config()
-
-                        # Return config domain
-                        return new_domain_extract, f"{base_url}.{new_domain_extract}"
+            # Get just the domain part of the search result
+            parsed_result = urlparse(first_url)
+            result_domain = normalize_for_comparison(parsed_result.netloc)
             
-            except Exception as redirect_error:
-                console.print(f"[red]Error following redirect for {first_url}: {redirect_error}")
-                continue
+            # Compare with our target URL (without the protocol part)
+            if result_domain.startswith(target_url.split("/")[-1]):
+                try:
+                    final_url = get_final_redirect_url(first_url, max_timeout)
+
+                    if final_url is not None:
+                        def extract_domain(url):
+                            parsed_url = urlparse(url)
+                            domain = parsed_url.netloc
+                            return domain.split(".")[-1]
+
+                        new_domain_extract = extract_domain(str(final_url))
+
+                        if msg.ask(f"\n[cyan]Do you want to auto update site[white] [red]'{site_name}'[cyan] with domain[white] [red]'{new_domain_extract}'.", choices=["y", "n"], default="y").lower() == "y":
+                            
+                            # Update domain in config.json
+                            config_manager.config['SITE'][site_name]['domain'] = new_domain_extract
+                            config_manager.write_config()
+
+                            return new_domain_extract, f"{base_url}.{new_domain_extract}"
+                
+                except Exception as redirect_error:
+                    console.print(f"[red]Error following redirect for {first_url}: {redirect_error}")
+                    continue
 
         # If no matching URL is found
         console.print("[bold red]No valid URL found matching the base URL.[/bold red]")
         raise Exception("No matching domain found")
 
-    # Ensure the URL is in string format before parsing
+    # Handle successful initial domain check
     parsed_url = urlparse(str(response_follow.url))
     parse_domain = parsed_url.netloc
     tld = parse_domain.split('.')[-1]

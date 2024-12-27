@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Spostarsi nella directory superiore rispetto a quella corrente
+cd "$(dirname "$0")/.." || exit 1
+
 # Function to check if a command exists
 command_exists() {
     command -v "$1" > /dev/null 2>&1

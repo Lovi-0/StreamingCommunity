@@ -27,28 +27,28 @@ from StreamingCommunity.Util.console import console, msg
 
 # Variable
 OS_CONFIGURATIONS = {
-        'windows': {
-            'max_length': 255,
-            'invalid_chars': '<>:"/\\|?*',
-            'reserved_names': [
-                "CON", "PRN", "AUX", "NUL",
-                "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-                "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
-            ],
-            'max_path': 255
-        },
-        'darwin': {
-            'max_length': 4096,
-            'invalid_chars': '/:',
-            'reserved_names': [],
-            'hidden_file_restriction': True
-        },
-        'linux': {
-            'max_length': 4096,
-            'invalid_chars': '/\0',
-            'reserved_names': []
-        }
+    'windows': {
+        'max_length': 255,
+        'invalid_chars': '<>:"/\\|?*',
+        'reserved_names': [
+            "CON", "PRN", "AUX", "NUL",
+            "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+            "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+        ],
+        'max_path': 255
+    },
+    'darwin': {
+        'max_length': 4096,
+        'invalid_chars': '/:',
+        'reserved_names': [],
+        'hidden_file_restriction': True
+    },
+    'linux': {
+        'max_length': 4096,
+        'invalid_chars': '/\0',
+        'reserved_names': []
     }
+}
 
 
 
@@ -66,6 +66,27 @@ class OsManager:
         
         raise ValueError(f"Unsupported operating system: {system}")
 
+    def _normalize_windows_path(self, path: str) -> str:
+        """
+        Normalize Windows paths to handle drive letters correctly.
+        
+        Args:
+            path (str): Original path that might contain a drive letter.
+            
+        Returns:
+            str: Properly normalized absolute path.
+        """
+        if self.system != 'windows':
+            return path
+            
+        # Check if path starts with a drive letter
+        if len(path) >= 2 and path[1] == ':':
+            drive = path[0:2]
+            rest = path[2:].lstrip(os.sep)
+            # Ensure proper absolute path format
+            return os.path.join(drive + os.sep, rest)
+        return path
+    
     def _process_filename(self, filename: str) -> str:
         """
         Comprehensively process filename with cross-platform considerations.
@@ -76,8 +97,6 @@ class OsManager:
         Returns:
             str: Processed filename.
         """
-        # Preserve file extension
-        logging.info("_process_filename: ", filename)
         name, ext = os.path.splitext(filename)
         
         # Handle length restrictions
@@ -118,7 +137,6 @@ class OsManager:
         Returns:
             str: Sanitized filename.
         """
-        logging.info("get_sanitize_file: ", filename)
 
         # Decode unicode characters and sanitize
         decoded_filename = unidecode.unidecode(filename)
@@ -129,8 +147,8 @@ class OsManager:
         if len(name) > self.config['max_length']:
             name = self._truncate_filename(name)
         
-        logging.info("return :", name + ext)
-        return name + ext
+        result = name + ext
+        return result
 
     def get_sanitize_path(self, path: str) -> str:
         """
@@ -142,7 +160,9 @@ class OsManager:
         Returns:
             str: Sanitized folder path.
         """
-        logging.info("get_sanitize_file: ", path)
+
+        # Normalize path for Windows drive letters first
+        path = self._normalize_windows_path(path)
 
         # Decode unicode characters and sanitize
         decoded_path = unidecode.unidecode(path)
@@ -150,16 +170,26 @@ class OsManager:
         
         # Split path and process each component
         path_components = os.path.normpath(sanitized_path).split(os.sep)
-        processed_components = []
         
-        for component in path_components:
-            # Truncate component if necessary
-            if len(component) > self.config['max_length']:
-                component = self._truncate_filename(component)
-            processed_components.append(component)
+        # Handle Windows drive letter specially
+        if self.system == 'windows' and len(path_components[0]) == 2 and path_components[0][1] == ':':
+            drive = path_components.pop(0)
+            processed_components = [drive + os.sep]
 
-        logging.info("return :", os.path.join(*processed_components))
-        return os.path.join(*processed_components)
+        else:
+            processed_components = []
+        
+        # Process remaining components
+        for component in path_components:
+            if component:  # Skip empty components
+                if len(component) > self.config['max_length']:
+                    component = self._truncate_filename(component)
+                    
+                processed_components.append(component)
+
+        # Join with proper separator and normalize
+        result = os.path.normpath(os.path.join(*processed_components))
+        return result
 
     def create_path(self, path: str, mode: int = 0o755) -> bool:
         """
@@ -173,10 +203,7 @@ class OsManager:
             bool: True if path created successfully, False otherwise.
         """
         try:
-            # Sanitize path first
             sanitized_path = self.get_sanitize_path(path)
-            
-            # Create directory with recursive option
             os.makedirs(sanitized_path, mode=mode, exist_ok=True)
             return True
         
@@ -197,6 +224,7 @@ class OsManager:
         try:
             shutil.rmtree(folder_path)
             return True
+        
         except OSError as e:
             logging.error(f"Folder removal error: {e}")
             return False
@@ -238,17 +266,11 @@ class OsManager:
         """
         try:
             logging.info(f"Check if file exists: {file_path}")
-            if os.path.exists(file_path):
-                logging.info(f"The file '{file_path}' exists.")
-                return True
-            
-            else:
-                return False
+            return os.path.exists(file_path)
             
         except Exception as e:
             logging.error(f"An error occurred while checking file existence: {e}")
             return False
-
 
 class InternManager():
 
@@ -296,7 +318,7 @@ class InternManager():
         while True:
             try:
                 httpx.get("https://www.google.com")
-                console.log("[bold green]Internet is available![/bold green]")
+                #console.log("[bold green]Internet is available![/bold green]")
                 break
 
             except urllib.error.URLError:
@@ -374,21 +396,20 @@ class OsSummary:
         try:
             import requests
             
-            console.print(f"{filename} not found locally. Downloading from {url}...", style="bold yellow")
+            logging.info(f"{filename} not found locally. Downloading from {url}...")
             response = requests.get(url)
             
             if response.status_code == 200:
                 with open(filename, 'wb') as f:
                     f.write(response.content)
-                console.print(f"{filename} successfully downloaded.", style="bold green")
-            
+
             else:
-                console.print(f"Failed to download {filename}. HTTP Status code: {response.status_code}", style="bold red")
-                sys.exit(1)
+                logging.error(f"Failed to download {filename}. HTTP Status code: {response.status_code}")
+                sys.exit(0)
         
         except Exception as e:
-            console.print(f"Failed to download {filename}: {e}", style="bold red")
-            sys.exit(1)
+            logging.error(f"Failed to download {filename}: {e}")
+            sys.exit(0)
 
     def install_library(self, lib_name: str):
         """

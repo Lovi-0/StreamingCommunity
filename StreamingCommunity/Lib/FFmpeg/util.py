@@ -74,8 +74,8 @@ def get_video_duration(file_path: str) -> float:
             # Extract duration from the video information
             try:
                 return float(probe_result['format']['duration'])
+            
             except:
-                logging.error("Cant get duration.")
                 return 1
 
     except Exception as e:
@@ -207,6 +207,8 @@ def is_png_format_or_codec(file_info):
     """
     if not file_info:
         return False
+    
+    console.print(f"[yellow][FFmpeg] [cyan]Avaiable codec[white]: [red]{file_info['codec_names']}")
     return file_info['format_name'] == 'png_pipe' or 'png' in file_info['codec_names']
 
 

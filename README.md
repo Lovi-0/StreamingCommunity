@@ -1,35 +1,64 @@
-# StreamingCommunity Downloader
+<p align="center">
+  <img src="https://i.ibb.co/PFnjvBc/immagine-2024-12-26-180318047.png" alt="Project Logo" width="700"/>
+</p>
 
-![Project Logo](https://i.ibb.co/f4h5Y2m/min-logo.png)
+<p align="center">
+  <a href="https://pypi.org/project/streamingcommunity">
+    <img src="https://img.shields.io/pypi/v/streamingcommunity?logo=pypi&labelColor=555555&style=for-the-badge" alt="PyPI"/>
+  </a>
+  <a href="https://www.python.org">
+    <img src="https://img.shields.io/badge/Python->=3.8-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
+  </a>
+  <a href="https://www.paypal.com/donate/?hosted_button_id=UXTWMT8P6HE2C">
+    <img src="https://img.shields.io/badge/_-Donate-red.svg?logo=githubsponsors&labelColor=555555&style=for-the-badge" alt="Donate"/>
+  </a>
+  <a href="https://github.com/Lovi-0/StreamingCommunity/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-GPL_3.0-blue.svg?style=for-the-badge" alt="License"/>
+  </a>
+  <a href="https://github.com/Lovi-0/StreamingCommunity/commits">
+    <img src="https://img.shields.io/github/commit-activity/m/Lovi-0/StreamingCommunity?label=commits&style=for-the-badge" alt="Commits"/>
+  </a>
+  <a href="https://github.com/Lovi-0/StreamingCommunity/commits">
+    <img src="https://img.shields.io/github/last-commit/Lovi-0/StreamingCommunity/main?label=&style=for-the-badge&display_timestamp=committer" alt="Last Commit"/>
+  </a>
+</p>
 
-A versatile script designed to download films and series from various supported streaming platforms.
-
-# 🤝 Join our Community 
-
-Chat, contribute, and have fun in our **Git_StreamingCommunity** Discord [Server](https://discord.com/invite/8vV68UGRc7)
+<p align="center">
+  <a href="https://pypi.org/project/streamingcommunity">
+    <img src="https://img.shields.io/pypi/dm/streamingcommunity?style=for-the-badge" alt="PyPI Downloads"/>
+  </a>
+  <a href="https://github.com/Lovi-0/StreamingCommunity/network/members">
+    <img src="https://img.shields.io/github/forks/Lovi-0/StreamingCommunity?style=for-the-badge" alt="Forks"/>
+  </a>
+  <a href="https://github.com/Lovi-0/StreamingCommunity">
+    <img src="https://img.shields.io/github/languages/code-size/Lovi-0/StreamingCommunity?style=for-the-badge" alt="Code Size"/>
+  </a>
+  <a href="https://github.com/Lovi-0/StreamingCommunity">
+    <img src="https://img.shields.io/github/repo-size/Lovi-0/StreamingCommunity?style=for-the-badge" alt="Repo Size"/>
+  </a>
+</p>
 
 # 📋 Table of Contents
 
-- [Website available](#website-status)
-- [Installation](#installation)
-    - [PyPI Installation](#1-pypi-installation)
-    - [Automatic Installation](#2-automatic-installation)
-    - [Manual Installation](#3-manual-installation)
-        - [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
-        - [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux)
-- [Configuration](#configuration)
-    - [Default](#default-settings)
-    - [Request](#requests-settings)
-    - [Download](#m3u8_download-settings)
-    - [Parser](#m3u8_parser-settings)
-- [Docker](#docker)
-- [Tutorial](#tutorials)
-- [To Do](#to-do)
-- [Support](#support)
-- [Contribute](#contributing)
-- [Disclamer](#disclaimer)
-
-
+- 🌐 [Website available](#website-status)
+- 🛠️ [Installation](#installation)
+    - 📦 [PyPI Installation](#1-pypi-installation)
+    - 🔄 [Automatic Installation](#2-automatic-installation)
+    - 📝 [Manual Installation](#3-manual-installation)
+        - 💻 [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
+        - 📱 [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux)
+- ⚙️ [Configuration](#configuration)
+    - 🔧 [Default](#default-settings)
+    - 📩 [Request](#requests-settings)
+    - 📥 [Download](#m3u8_download-settings)
+    - 🔍 [Parser](#m3u8_parser-settings)
+- 🐳 [Docker](#docker)
+- 🎓 [Tutorial](#tutorials)
+- 📝 [To do](#to-do)
+- 💬 [Support](#support)
+- 🤝 [Contribute](#contributing)
+- ⚠️ [Disclaimer](#disclaimer)
+- ⚡ [Contributors](#contributors)  
 
 # Installation
 
@@ -83,13 +112,13 @@ pip install --upgrade StreamingCommunity
 #### On Windows:
 
 ```powershell
-.\win_install.bat
+.\Installer\win_install.bat
 ```
 
 #### On Linux/MacOS/BSD:
 
 ```bash
-sudo chmod +x unix_install.sh && ./unix_install.sh
+sudo chmod +x Installer/unix_install.sh && ./Installer/unix_install.sh
 ```
 
 ### Usage
@@ -378,12 +407,6 @@ The `run-container` command mounts also the `config.json` file, so any change to
 
 - Create website API -> https://github.com/Lovi-0/StreamingCommunity/tree/test_gui_1
 
-# Support
-
-If you'd like to support this project, consider making a donation!
-
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=UXTWMT8P6HE2C)
-
 # Contributing
 
 Contributions are welcome! Steps:
@@ -397,3 +420,9 @@ Contributions are welcome! Steps:
 # Disclaimer
 
 This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
+
+## Contributors
+
+<a href="https://github.com/Lovi-0/StreamingCommunity/graphs/contributors" alt="View Contributors">
+  <img src="https://contrib.rocks/image?repo=Lovi-0/StreamingCommunity&max=1000&columns=10" alt="Contributors" />
+</a>

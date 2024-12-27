@@ -83,7 +83,57 @@ class TVShowManager:
             row_data = [entry.get(col_name, '') for col_name in self.column_info.keys()]
             table.add_row(*row_data)
 
-        self.console.print(table)  # Use self.console.print instead of print
+        self.console.print(table)
+
+    def run_back_command(self, research_func: dict):
+        """
+        Executes a back-end search command by dynamically importing a module and invoking its search function.
+
+        Args:
+            research_func (dict): A dictionary containing:
+                - 'folder' (str): The absolute path to the directory containing the module to be executed.
+        """
+        try:
+
+            # Get site name from folder
+            site_name = (os.path.basename(research_func['folder']))
+
+            # Find the project root directory
+            current_path = research_func['folder']
+            while not os.path.exists(os.path.join(current_path, 'StreamingCommunity')):
+                current_path = os.path.dirname(current_path)
+            
+            # Add project root to Python path
+            project_root = current_path
+            #print(f"[DEBUG] Project Root: {project_root}")
+            
+            if project_root not in sys.path:
+                sys.path.insert(0, project_root)
+            
+            # Import using full absolute import
+            module_path = f'StreamingCommunity.Api.Site.{site_name}'
+            #print(f"[DEBUG] Importing module: {module_path}")
+            
+            # Import the module
+            module = importlib.import_module(module_path)
+            
+            # Get the search function
+            search_func = getattr(module, 'search')
+            
+            # Call the search function with the search string
+            search_func(None)
+            
+        except Exception as e:
+            self.console.print(f"[red]Error during search: {e}")
+            
+            # Print detailed traceback
+            import traceback
+            traceback.print_exc()
+        
+        # Optionally remove the path if you want to clean up
+        if project_root in sys.path:
+            sys.path.remove(project_root)
+
 
     def run(self, force_int_input: bool = False, max_int_input: int = 0) -> str:
         """
@@ -114,7 +164,7 @@ class TVShowManager:
 
             # Handling user input for loading more items or quitting
             if self.slice_end < total_items:
-                self.console.print(f"\n\n[yellow][INFO] [green]Press [red]Enter [green]for next page, [red]'q' [green]to quit, or [red]'back' [green]to search.")
+                self.console.print(f"\n[green]Press [red]Enter [green]for next page, [red]'q' [green]to quit, or [red]'back' [green]to search.")
 
                 if not force_int_input:
                     key = Prompt.ask(
@@ -139,49 +189,14 @@ class TVShowManager:
                         self.slice_end = total_items
 
                 elif key.lower() == "back" and research_func:
-                    try:
-                        # Find the project root directory
-                        current_path = research_func['folder']
-                        while not os.path.exists(os.path.join(current_path, 'StreamingCommunity')):
-                            current_path = os.path.dirname(current_path)
-                        
-                        # Add project root to Python path
-                        project_root = current_path
-                        #print(f"[DEBUG] Project Root: {project_root}")
-                        
-                        if project_root not in sys.path:
-                            sys.path.insert(0, project_root)
-                        
-                        # Import using full absolute import
-                        module_path = 'StreamingCommunity.Api.Site.streamingcommunity'
-                        #print(f"[DEBUG] Importing module: {module_path}")
-                        
-                        # Import the module
-                        module = importlib.import_module(module_path)
-                        
-                        # Get the search function
-                        search_func = getattr(module, 'media_search_manager')
-                        
-                        # Call the search function with the search string
-                        search_func(None)
-                        
-                    except Exception as e:
-                        self.console.print(f"[red]Error during search: {e}")
-                        
-                        # Print detailed traceback
-                        import traceback
-                        traceback.print_exc()
-                    
-                    # Optionally remove the path if you want to clean up
-                    if project_root in sys.path:
-                        sys.path.remove(project_root)
+                    self.run_back_command(research_func)
 
                 else:
                     break
 
             else:
                 # Last slice, ensure all remaining items are shown
-                self.console.print(f"\n\n[yellow][INFO] [green]You've reached the end. [red]Enter [green]for first page, [red]'q' [green]to quit, or [red]'back' [green]to search.")
+                self.console.print(f"\n [green]You've reached the end. [red]Enter [green]for first page, [red]'q' [green]to quit, or [red]'back' [green]to search.")
                 if not force_int_input:
                     key = Prompt.ask(
                         "\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
@@ -203,42 +218,7 @@ class TVShowManager:
                     self.slice_end = self.step
 
                 elif key.lower() == "back" and research_func:
-                    try:
-                        # Find the project root directory
-                        current_path = research_func['folder']
-                        while not os.path.exists(os.path.join(current_path, 'StreamingCommunity')):
-                            current_path = os.path.dirname(current_path)
-                        
-                        # Add project root to Python path
-                        project_root = current_path
-                        #print(f"[DEBUG] Project Root: {project_root}")
-                        
-                        if project_root not in sys.path:
-                            sys.path.insert(0, project_root)
-                        
-                        # Import using full absolute import
-                        module_path = 'StreamingCommunity.Api.Site.streamingcommunity'
-                        #print(f"[DEBUG] Importing module: {module_path}")
-                        
-                        # Import the module
-                        module = importlib.import_module(module_path)
-                        
-                        # Get the search function
-                        search_func = getattr(module, 'search')
-                        
-                        # Call the search function with the search string
-                        search_func(None)
-                        
-                    except Exception as e:
-                        self.console.print(f"[red]Error during search: {e}")
-                        
-                        # Print detailed traceback
-                        import traceback
-                        traceback.print_exc()
-                    
-                    # Optionally remove the path if you want to clean up
-                    if project_root in sys.path:
-                        sys.path.remove(project_root)
+                    self.run_back_command(research_func)
 
                 else:
                     break

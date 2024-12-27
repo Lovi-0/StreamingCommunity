@@ -62,7 +62,7 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
 
     # Add mpegts to force to detect input file as ts file
     if need_to_force_to_ts(video_path):
-        console.log("[red]Force input file to 'mpegts'.")
+        #console.log("[red]Force input file to 'mpegts'.")
         ffmpeg_cmd.extend(['-f', 'mpegts'])
         vcodec = "libx264"
 

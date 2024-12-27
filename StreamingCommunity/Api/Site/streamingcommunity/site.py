@@ -76,13 +76,14 @@ def get_version_and_domain():
 
     # Extract version from the response
     try:
-        version = get_version(httpx.get(
-            url=base_url, 
-            headers={
-                'user-agent': get_headers()
-            }, 
-            timeout=max_timeout
-        ).text)
+        version = get_version(
+            httpx.get(
+                url=base_url, 
+                headers={'User-Agent': get_headers()}, 
+                timeout=max_timeout
+            ).text
+        )
+        
     except:
         console.print("[green]Auto generate version ...")
         version = secrets.token_hex(32 // 2)

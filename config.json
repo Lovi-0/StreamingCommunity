@@ -26,11 +26,11 @@
     "M3U8_DOWNLOAD": {
         "tqdm_delay": 0.01,
         "tqdm_use_large_bar": true,
+        "default_video_workser": 12,
+        "default_audio_workser": 12,
         "download_video": true,
         "download_audio": true,
         "merge_audio": true,
-        "default_video_workser": 12,
-        "default_audio_workser": 12,
         "specific_list_audio": [
             "ita"
         ],
@@ -56,10 +56,10 @@
     },
     "SITE": {
         "streamingcommunity": {
-            "domain": "family"
+            "domain": "prof"
         },
         "altadefinizione": {
-            "domain": "now"
+            "domain": "deal"
         },
         "guardaserie": {
             "domain": "academy"
