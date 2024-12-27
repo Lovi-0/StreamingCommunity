@@ -70,10 +70,8 @@ def download_film(movie_details: Json_film) -> str:
     player_links = soup.find("ul", class_ = "_player-mirrors").find_all("li")
     supervideo_url = "https:" + player_links[0].get("data-link")
 
-    
     # Set domain and media ID for the video source
-    video_source = VideoSource()
-    video_source.setup(supervideo_url)
+    video_source = VideoSource(url=supervideo_url)
     
     # Define output path
     title_name = os_manager.get_sanitize_file(movie_details.title) + ".mp4"
