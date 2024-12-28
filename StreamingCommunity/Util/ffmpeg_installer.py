@@ -288,24 +288,35 @@ def check_ffmpeg() -> Tuple[Optional[str], Optional[str], Optional[str]]:
     using the FFMPEGDownloader class.
     """
     try:
-        if platform.system().lower() == 'windows':
+        system_platform = platform.system().lower()
+
+        # Check for Windows platform
+        if system_platform == 'windows':
+            
+            # Using subprocess.call to check the executables and subprocess.check_output to get the path
             ffmpeg_path = subprocess.check_output(['where', 'ffmpeg'], text=True).strip().split('\n')[0] if subprocess.call(['where', 'ffmpeg'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0 else None
             ffprobe_path = subprocess.check_output(['where', 'ffprobe'], text=True).strip().split('\n')[0] if subprocess.call(['where', 'ffprobe'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0 else None
             ffplay_path = subprocess.check_output(['where', 'ffplay'], text=True).strip().split('\n')[0] if subprocess.call(['where', 'ffplay'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0 else None
-            
+
+            # If all three executables are found, return their paths
             if all([ffmpeg_path, ffprobe_path, ffplay_path]):
                 return ffmpeg_path, ffprobe_path, ffplay_path
+
+        # Check for Unix-like systems (Linux, macOS)
         else:
             ffmpeg_path = shutil.which('ffmpeg')
             ffprobe_path = shutil.which('ffprobe')
             ffplay_path = shutil.which('ffplay')
-            
+
+            # If all three executables are found, return their paths
             if all([ffmpeg_path, ffprobe_path, ffplay_path]):
                 return ffmpeg_path, ffprobe_path, ffplay_path
-        
+
+        # If executables were not found, attempt to download FFmpeg
         downloader = FFMPEGDownloader()
         return downloader.download()
-    
+
     except Exception as e:
-        logging.error(f"Error checking FFmpeg: {e}")
+        # Log any unexpected errors that may occur during the check or download process
+        logging.error(f"Error checking or downloading FFmpeg executables: {e}")
         return None, None, None

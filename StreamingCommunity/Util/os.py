@@ -353,20 +353,17 @@ class OsSummary:
             console.print(f"{command[0]} not found", style="bold red")
             sys.exit(0)
 
-    def check_ffmpeg_location(self, command: list):
+    def check_ffmpeg_location(self, command: list) -> str:
         """
-        Run 'where ffmpeg' command to check FFmpeg's location.
-
-        Returns:
-            str: Location of FFmpeg executable or None if not found
+        Check if a specific executable (ffmpeg or ffprobe) is located using the given command.
+        Returns the path of the executable or None if not found.
         """
         try:
-            result = subprocess.check_output(command, stderr=subprocess.STDOUT, text=True).strip()
-            return result
+            result = subprocess.check_output(command, text=True).strip()
+            return result.split('\n')[0] if result else None
         
         except subprocess.CalledProcessError:
-            console.print("FFmpeg not found in system PATH", style="bold red")
-            sys.exit(0)
+            return None
 
     def get_library_version(self, lib_name: str):
         """
@@ -467,27 +464,24 @@ class OsSummary:
         console.print(f"[cyan]Python[white]: [bold red]{python_version} ({python_implementation} {arch}) - {os_info} ({glibc_version})[/bold red]")
         logging.info(f"Python: {python_version} ({python_implementation} {arch}) - {os_info} ({glibc_version})")
         
-        # Usa il comando 'where' su Windows
-        if platform.system() == "Windows":
-            command = 'where'
+        # Use the 'where' command on Windows and 'which' command on Unix-like systems
+        system_platform = platform.system().lower()
+        command = 'where' if system_platform == 'windows' else 'which'
 
-        # Usa il comando 'which' su Unix/Linux
-        else:
-            command = 'which'
-
-        # Locate ffmpeg and ffprobe from path enviroment
-        if self.ffmpeg_path != None and "binary" not in self.ffmpeg_path:        
+        # Locate ffmpeg and ffprobe from the PATH environment
+        if self.ffmpeg_path is not None and "binary" not in self.ffmpeg_path:
             self.ffmpeg_path = self.check_ffmpeg_location([command, 'ffmpeg'])
 
-        if self.ffprobe_path != None and "binary" not in self.ffprobe_path:
+        if self.ffprobe_path is not None and "binary" not in self.ffprobe_path:
             self.ffprobe_path = self.check_ffmpeg_location([command, 'ffprobe'])
 
-        # Locate ffmpeg from bin installation
+        # If ffmpeg or ffprobe is not located, fall back to using the check_ffmpeg function
         if self.ffmpeg_path is None or self.ffprobe_path is None:
             self.ffmpeg_path, self.ffprobe_path, self.ffplay_path = check_ffmpeg()
 
+        # If still not found, print error and exit
         if self.ffmpeg_path is None or self.ffprobe_path is None:
-            console.log("[red]Cant locate ffmpeg or ffprobe")
+            console.log("[red]Can't locate ffmpeg or ffprobe")
             sys.exit(0)
 
         ffmpeg_version = self.get_executable_version([self.ffprobe_path, '-version'])
