@@ -176,7 +176,7 @@ class ContentExtractor:
             set_language = DOWNLOAD_SPECIFIC_AUDIO                      
             downloadable_languages = list(set(available_languages) & set(set_language))
 
-            console.print(f"[cyan bold]Audio:[/cyan bold] [green]Available:[/green] [purple]{', '.join(available_languages)}[/purple] | "
+            console.print(f"[cyan bold]Audio →[/cyan bold] [green]Available:[/green] [purple]{', '.join(available_languages)}[/purple] | "
                   f"[red]Set:[/red] [purple]{', '.join(set_language)}[/purple] | "
                   f"[yellow]Downloadable:[/yellow] [purple]{', '.join(downloadable_languages)}[/purple]")
 
@@ -200,7 +200,7 @@ class ContentExtractor:
             set_language = DOWNLOAD_SPECIFIC_SUBTITLE
             downloadable_languages = list(set(available_languages) & set(set_language))
 
-            console.print(f"[cyan bold]Subtitle:[/cyan bold] [green]Available:[/green] [purple]{', '.join(available_languages)}[/purple] | "
+            console.print(f"[cyan bold]Subtitle →[/cyan bold] [green]Available:[/green] [purple]{', '.join(available_languages)}[/purple] | "
                   f"[red]Set:[/red] [purple]{', '.join(set_language)}[/purple] | "
                   f"[yellow]Downloadable:[/yellow] [purple]{', '.join(downloadable_languages)}[/purple]")
 
@@ -227,7 +227,7 @@ class ContentExtractor:
         logging.info(f"M3U8 index selected: {self.m3u8_index}, with resolution: {video_res}")
 
         # Create a formatted table to display video info
-        console.print(f"[cyan bold]Video:[/cyan bold] [green]Available resolutions:[/green] [purple]{', '.join(list_available_resolution)}[/purple] | "
+        console.print(f"[cyan bold]Video →[/cyan bold] [green]Available resolutions:[/green] [purple]{', '.join(list_available_resolution)}[/purple] | "
               f"[yellow]Downloadable:[/yellow] [purple]{video_res[0]}x{video_res[1]}[/purple]")
 
         if self.codec is not None:
@@ -238,7 +238,8 @@ class ContentExtractor:
                             f"([green]b[/green]: [yellow]{self.codec.audio_bitrate // 1000}k[/yellow])")
             else:
                 codec_info = "[cyan]copy[/cyan]"
-            console.print(f"[bold green]Codec:[/bold green] {codec_info}")
+                
+            console.print(f"[bold cyan]Codec →[/bold cyan] {codec_info}")
 
         # Fix the URL if it does not include the full protocol
         if "http" not in self.m3u8_index:
@@ -486,19 +487,6 @@ class ContentJoiner:
         self.there_is_audio = len(downloaded_audio) > 0
         self.there_is_subtitle = len(downloaded_subtitle) > 0
 
-        if self.there_is_audio or self.there_is_subtitle:
-
-            # Display the status of available media
-            table = Table(show_header=False, box=None)
-
-            table.add_row(f"[green]Video - audio", f"[yellow]{self.there_is_audio}")
-            table.add_row(f"[green]Video - Subtitle", f"[yellow]{self.there_is_subtitle}")
-
-            print("")
-            console.rule("[bold green] JOIN ", style="bold red")
-            console.print(table)
-            print("")
-
         # Start the joining process
         self.conversione()
 
@@ -583,10 +571,6 @@ class ContentJoiner:
 
         # Check if the joined video file already exists
         if not os.path.exists(path_join_video):
-
-            # Set codec to None if not defined in class
-            #if not hasattr(self, 'codec'):
-            #    self.codec = None
 
             # Join the video segments into a single video file
             join_video(
@@ -844,7 +828,7 @@ class HLS_Downloader:
                 f"[bold green]Download completed![/bold green]\n"
                 f"[cyan]File size: [bold red]{formatted_size}[/bold red]\n"
                 f"[cyan]Duration: [bold]{formatted_duration}[/bold]\n"
-                f"[cyan]Output: [bold]{self.output_filename}[/bold]"
+                f"[cyan]Output: [bold]{os.path.abspath(self.output_filename)}[/bold]"
             )
 
             if missing_ts:

@@ -144,23 +144,20 @@ def print_duration_table(file_path: str, description: str = "Duration", return_s
         - str: The formatted duration string if return_string is True.
         - dict: A dictionary with keys 'h', 'm', 's' representing hours, minutes, and seconds if return_string is False.
     """
-    try:
-        video_duration = get_video_duration(file_path)
+    video_duration = get_video_duration(file_path)
 
-        if video_duration is not None:
-            hours, minutes, seconds = format_duration(video_duration)
-            formatted_duration = f"[yellow]{int(hours)}[red]h [yellow]{int(minutes)}[red]m [yellow]{int(seconds)}[red]s"
-            duration_dict = {'h': hours, 'm': minutes, 's': seconds}
+    if video_duration is not None:
+        hours, minutes, seconds = format_duration(video_duration)
+        formatted_duration = f"[yellow]{int(hours)}[red]h [yellow]{int(minutes)}[red]m [yellow]{int(seconds)}[red]s"
+        duration_dict = {'h': hours, 'm': minutes, 's': seconds}
 
-            if description:
-                console.print(f"[cyan]{description} for [white]([green]{os.path.basename(file_path)}[white]): {formatted_duration}")
+        if description:
+            console.print(f"[cyan]{description} for [white]([green]{os.path.basename(file_path)}[white]): {formatted_duration}")
+        else:
+            if return_string:
+                return formatted_duration
             else:
-                if return_string:
-                    return formatted_duration
-                else:
-                    return duration_dict
-    except:
-        return None
+                return duration_dict
 
 
 def get_ffprobe_info(file_path):
@@ -211,7 +208,7 @@ def is_png_format_or_codec(file_info):
     if not file_info:
         return False
     
-    console.print(f"[yellow][FFmpeg] [cyan]Avaiable codec[white]: [red]{file_info['codec_names']}")
+    #console.print(f"[yellow][FFmpeg] [cyan]Avaiable codec[white]: [red]{file_info['codec_names']}")
     return file_info['format_name'] == 'png_pipe' or 'png' in file_info['codec_names']
 
 

@@ -432,7 +432,7 @@ class M3U8_Segments:
         if "audio" in str(type):
             TQDM_MAX_WORKER = AUDIO_WORKERS
 
-        console.print(f"[cyan]Video workers[white]: [green]{VIDEO_WORKERS} [white]| [cyan]Audio workers[white]: [green]{AUDIO_WORKERS}")
+        #console.print(f"[cyan]Video workers[white]: [green]{VIDEO_WORKERS} [white]| [cyan]Audio workers[white]: [green]{AUDIO_WORKERS}")
 
         # Custom bar for mobile and pc
         if TQDM_USE_LARGE_BAR:
@@ -551,11 +551,7 @@ class M3U8_Segments:
         console.print(f"[cyan]Max retry per URL[white]: [green]{self.info_maxRetry}[green] [white]| [cyan]Total retry done[white]: [green]{self.info_nRetry}[green] [white]| [cyan]Missing TS: [red]{self.info_nFailed} [white]| [cyan]Duration: {print_duration_table(self.tmp_file_path, None, True)} [white]| [cyan]Expected duation: {ex_formatted_duration} \n")
 
         if self.info_nRetry >= len(self.segments) * (1/3.33):
-            console.print(
-                "[yellow]⚠ Warning:[/yellow] Too many retries detected! "
-                "Consider reducing the number of [cyan]workers[/cyan] in the [magenta]config.json[/magenta] file. "
-                "This will impact [bold]performance[/bold]. \n"
-            )
+            console.print("[yellow]⚠ Warning:[/yellow] Too many retries detected! Consider reducing the number of [cyan]workers[/cyan] in the [magenta]config.json[/magenta] file. This will impact [bold]performance[/bold]. \n")
 
         # Info to return
         return {'type': type, 'nFailed': self.info_nFailed}
