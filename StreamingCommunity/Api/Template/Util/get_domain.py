@@ -76,17 +76,19 @@ def get_final_redirect_url(initial_url, max_timeout):
         console.print(f"\n[cyan]Test url[white]: [red]{initial_url}, [cyan]error[white]: [red]{e}")
         return None
 
-def search_domain(site_name: str, base_url: str):
+def search_domain(site_name: str, base_url: str, get_first: bool = False):
     """
     Search for a valid domain for the given site name and base URL.
 
     Parameters:
         - site_name (str): The name of the site to search the domain for.
         - base_url (str): The base URL to construct complete URLs.
+        - get_first (bool): If True, automatically update to the first valid match without user confirmation.
 
     Returns:
         tuple: The found domain and the complete URL.
     """
+    
     # Extract config domain
     max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain = str(config_manager.get_dict("SITE", site_name)['domain'])
@@ -107,10 +109,10 @@ def search_domain(site_name: str, base_url: str):
 
     except Exception as e:
         query = base_url.split("/")[-1]
-        
+
         # Perform a Google search with multiple results
         search_results = list(search(query, num_results=10, lang="it"))
-        console.print(f"\nGoogle search results: {search_results}")
+        #console.print(f"\nGoogle search results: {search_results}")
 
         def normalize_for_comparison(url):
             """Normalize URL by removing protocol, www, and trailing slashes"""
@@ -121,15 +123,15 @@ def search_domain(site_name: str, base_url: str):
 
         # Normalize the base_url we're looking for
         target_url = normalize_for_comparison(base_url)
-        
+
         # Iterate through search results
         for first_url in search_results:
             console.print(f"[green]Checking url[white]: [red]{first_url}")
-            
+
             # Get just the domain part of the search result
             parsed_result = urlparse(first_url)
             result_domain = normalize_for_comparison(parsed_result.netloc)
-            
+
             # Compare with our target URL (without the protocol part)
             if result_domain.startswith(target_url.split("/")[-1]):
                 try:
@@ -143,21 +145,20 @@ def search_domain(site_name: str, base_url: str):
 
                         new_domain_extract = extract_domain(str(final_url))
 
-                        if msg.ask(f"\n[cyan]Do you want to auto update site[white] [red]'{site_name}'[cyan] with domain[white] [red]'{new_domain_extract}'.", choices=["y", "n"], default="y").lower() == "y":
-                            
+                        if get_first or msg.ask(f"\n[cyan]Do you want to auto update site[white] [red]'{site_name}'[cyan] with domain[white] [red]'{new_domain_extract}'.", choices=["y", "n"], default="y").lower() == "y":
                             # Update domain in config.json
                             config_manager.config['SITE'][site_name]['domain'] = new_domain_extract
                             config_manager.write_config()
 
                             return new_domain_extract, f"{base_url}.{new_domain_extract}"
-                
+
                 except Exception as redirect_error:
                     console.print(f"[red]Error following redirect for {first_url}: {redirect_error}")
                     continue
 
-        # If no matching URL is found
+        # If no matching URL is found return base domain
         console.print("[bold red]No valid URL found matching the base URL.[/bold red]")
-        raise Exception("No matching domain found")
+        return domain, f"{base_url}.{domain}"
 
     # Handle successful initial domain check
     parsed_url = urlparse(str(response_follow.url))
