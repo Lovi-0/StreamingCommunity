@@ -1,0 +1,33 @@
+name: Run Script Every 6 Hours
+
+# Configura il cron job
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+      # Step 1: Clona il repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Configura Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      # Step 3: Installa le dipendenze
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 4: Esegui lo script
+      - name: Execute the script
+        run: |
+          python Test/call_updateDomain.py
