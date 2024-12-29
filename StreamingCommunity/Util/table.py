@@ -21,6 +21,9 @@ from .call_stack import get_call_stack
 
 class TVShowManager:
     def __init__(self, console=Console(), global_search=False):
+        """
+        Initialize TVShowManager with provided column information.
+        """
         self.isGlobal = global_search
         self.console = console
         self.tv_shows: List[Dict[str, Any]] = []
@@ -30,16 +33,40 @@ class TVShowManager:
         self.column_info = []
 
     def set_slice_end(self, new_slice: int) -> None:
+        """
+        Set the end of the slice for displaying TV shows.
+
+        Parameters:
+            - new_slice (int): The new value for the slice end.
+        """
         self.slice_end = new_slice
         self.step = new_slice
 
     def add_column(self, column_info: Dict[str, Dict[str, str]]) -> None:
+        """
+        Add column information.
+
+        Parameters:
+            - column_info (Dict[str, Dict[str, str]]): Dictionary containing column names, their colors, and justification.
+        """
         self.column_info = column_info
 
     def add_tv_show(self, tv_show: Dict[str, Any]):
+        """
+        Add a TV show to the list of TV shows.
+
+        Parameters:
+            - tv_show (Dict[str, Any]): Dictionary containing TV show details.
+        """
         self.tv_shows.append(tv_show)
 
     def display_data(self, data_slice: List[Dict[str, Any]]):
+        """
+        Display TV show data in a tabular format.
+
+        Parameters:
+            - data_slice (List[Dict[str, Any]]): List of dictionaries containing TV show details to display.
+        """
         table = Table(border_style="white")
         for col_name, col_style in self.column_info.items():
             color = col_style.get("color", None)
@@ -51,6 +78,13 @@ class TVShowManager:
         self.console.print(table)
 
     def run_back_command(self, research_func: dict):
+        """
+        Executes a back-end search command by dynamically importing a module and invoking its search function.
+
+        Args:
+            research_func (dict): A dictionary containing:
+                - 'folder' (str): The absolute path to the directory containing the module to be executed.
+        """
         try:
             site_name = os.path.basename(research_func['folder'])
             current_path = research_func['folder']
@@ -69,74 +103,18 @@ class TVShowManager:
             traceback.print_exc()
         if project_root in sys.path:
             sys.path.remove(project_root)
-    '''
-    def run(self, force_int_input: bool = False, max_int_input: int = 0) -> str:
-        total_items = len(self.tv_shows)
-        last_command = ""
-        while True:
-            start_message()
-            self.display_data(self.tv_shows[self.slice_start:self.slice_end])
-            research_func = None
-            for reverse_fun in get_call_stack():
-                if reverse_fun['function'] == 'search' and reverse_fun['script'] == '__init__.py':
-                    research_func = reverse_fun
-                    logging.info(f"Found research_func: {research_func}")
-            if self.slice_end < total_items:
-                self.console.print(f"\n[green]Press [red]Enter [green]for next page, [red]'q' [green]to quit, [red]'back' [green]to search, [red]'next' [green]for next manager, or [red]'prev' [green]for previous manager.")
-                if not force_int_input:
-                    key = Prompt.ask(
-                        "\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
-                        "[yellow](e.g., 1-2) [cyan]for a range of media, or [yellow](e.g., 3-*) [cyan]to download from a specific index to the end"
-                    )
-                else:
-                    choices = [str(i) for i in range(0, max_int_input)]
-                    choices.extend(["q", "", "back", "next", "prev"])
-                    key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
-                last_command = key
-                if key.lower() == "q":
-                    return "quit"
-                elif key == "":
-                    self.slice_start += self.step
-                    self.slice_end += self.step
-                    if self.slice_end > total_items:
-                        self.slice_end = total_items
-                elif key.lower() == "back" and research_func:
-                    self.run_back_command(research_func)
-                elif key.lower() == "next":
-                    return "next"
-                elif key.lower() == "prev":
-                    return "prev"
-                else:
-                    break
-            else:
-                self.console.print(f"\n [green]You've reached the end. [red]Enter [green]for first page, [red]'q' [green]to quit, [red]'back' [green]to search, [red]'next' [green]for next manager, or [red]'prev' [green]for previous manager.")
-                if not force_int_input:
-                    key = Prompt.ask(
-                        "\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
-                        "[yellow](e.g., 1-2) [cyan]for a range of media, or [yellow](e.g., 3-*) [cyan]to download from a specific index to the end"
-                    )
-                else:
-                    choices = [str(i) for i in range(0, max_int_input)]
-                    choices.extend(["q", "", "back", "next", "prev"])
-                    key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
-                last_command = key
-                if key.lower() == "q":
-                    return "quit"
-                elif key == "":
-                    self.slice_start = 0
-                    self.slice_end = self.step
-                elif key.lower() == "back" and research_func:
-                    self.run_back_command(research_func)
-                elif key.lower() == "next":
-                    return "next"
-                elif key.lower() == "prev":
-                    return "prev"
-                else:
-                    break
-        return last_command
-    '''
 
     def run(self, force_int_input: bool = False, max_int_input: int = 0) -> str:
+        """
+        Run the TVShowManager to display TV shows and handle user input.
+
+        Parameters:
+            - force_int_input (bool): If True, forces the user to input an integer.
+            - max_int_input (int): The maximum integer input allowed if force_int_input is True.
+
+        Returns:
+            str: The last command entered by the user.
+        """
         total_items = len(self.tv_shows)
         last_command = ""
         while True:

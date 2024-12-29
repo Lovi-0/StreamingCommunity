@@ -27,6 +27,13 @@ CLOSE_CONSOLE = config_manager.get_bool('DEFAULT', 'not_close')
 
 
 def run_function(func: Callable[..., None], close_console: bool = False) -> None:
+    """
+    Run a given function indefinitely or once, depending on the value of close_console.
+
+    Parameters:
+        func (Callable[..., None]): The function to run.
+        close_console (bool, optional): Whether to close the console after running the function once. Defaults to False.
+    """
     if close_console:
         while 1:
             func()
@@ -35,6 +42,13 @@ def run_function(func: Callable[..., None], close_console: bool = False) -> None
 
 
 def load_search_functions():
+    """
+    Load search functions from modules in the 'Api/Site' directory.
+
+    Returns:
+        Dict[str, Tuple[Callable[..., Any], str]]: A dictionary where keys are module aliases and values are tuples
+        containing the search function and its usage category.
+    """
     modules = []
     loaded_functions = {}
 
@@ -79,6 +93,17 @@ def load_search_functions():
 
 
 def search_all_sites(loaded_functions, search_string, max_sites=10):
+    """
+    Search all sites for the given search string and display results.
+
+    Parameters:
+        loaded_functions (Dict[str, Tuple[Callable[..., Any], str]]): Dictionary of loaded search functions and their usage categories.
+        search_string (str): The search string to use for querying the sites.
+        max_sites (int, optional): The maximum number of sites to search. Defaults to 10.
+
+    Returns:
+        int: The total number of results found across all sites.
+    """
     total_len_database = 0
     site_count = 0
     console = Console()
@@ -131,6 +156,13 @@ def search_all_sites(loaded_functions, search_string, max_sites=10):
 
 
 def initialize():
+    """
+    Initialize the application by displaying the start message, getting the system summary,
+    setting the console mode for Windows 7, checking the Python version, and updating from GitHub.
+
+    Raises:
+        SystemExit: If the Python version is less than 3.7.16.
+    """
     start_message()
     os_summary.get_system_summary()
 
