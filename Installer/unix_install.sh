@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Spostarsi nella directory superiore rispetto a quella corrente
-cd "$(dirname "$0")/.." || exit 1
-
 # Function to check if a command exists
 command_exists() {
     command -v "$1" > /dev/null 2>&1
@@ -46,35 +43,6 @@ install_on_macos() {
 }
 
 set -e
-
-
-# Check and install Python3
-# if command_exists python3 > /dev/null 2>&1; then
-#     echo "Checking Python..."
-# else
-#     # Detect the platform and install Python3 accordingly
-#     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-#         # Detect the package manager
-#         if command_exists apt; then
-#             install_on_debian "python3"
-#         elif command_exists yum; then
-#             install_on_redhat "python3"
-#         elif command_exists pacman; then
-#             install_on_arch "python-pip"
-#         else
-#             echo "Unsupported Linux distribution."
-#             exit 1
-#         fi
-#     elif [[ "$OSTYPE" == "bsd"* ]]; then
-#         echo "Detected BSD-based system."
-#         install_on_bsd "python39"
-#     elif [[ "$OSTYPE" == "darwin"* ]]; then
-#         install_on_macos "python"
-#     else
-#         echo "Unsupported operating system."
-#         exit 1
-#     fi
-# fi
 
 # Get the Python version
 PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')
@@ -150,49 +118,6 @@ else
         *)
             echo "Unsupported operating system."
             exit 1
-            ;;
-    esac
-fi
-
-if command_exists openssl || .venv/bin/pip list | grep -q pycryptodome; then
-    echo "openssl or pycryptodome exists."
-else
-    echo "Please choose an option:"
-    echo "1) openssl"
-    echo "2) pycryptodome"
-    read -p "Enter your choice (1): " choice
-
-    case "$choice" in
-        2)
-            echo "Installing pycryptodome."
-            .venv/bin/pip install pycryptodome
-            ;;
-        *)
-            # Detect the platform and install OpenSSL accordingly.
-            case "$(uname)" in
-                Linux)
-                    if command_exists apt; then
-                        install_on_debian openssl
-                    elif command_exists yum; then
-                        install_on_redhat openssl
-                    elif command_exists pacman; then
-                        install_on_arch openssl
-                    else
-                        echo "Unsupported Linux distribution."
-                        exit 1
-                    fi
-                    ;;
-                FreeBSD|NetBSD|OpenBSD)
-                    install_on_bsd openssl
-                    ;;
-                Darwin)
-                    install_on_macos openssl
-                    ;;
-                *)
-                    echo "Unsupported operating system."
-                    exit 1
-                    ;;
-            esac
             ;;
     esac
 fi

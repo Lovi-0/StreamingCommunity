@@ -331,9 +331,7 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
 
 <br>
 
-
 # COMMAND
-
 
 - Download a specific season by entering its number.
   *  **Example:** `1` will download *Season 1* only.
@@ -405,7 +403,7 @@ The `run-container` command mounts also the `config.json` file, so any change to
 
 # To Do 
 
-- Create website API -> https://github.com/Lovi-0/StreamingCommunity/tree/test_gui_1
+- Finish [website API](https://github.com/Lovi-0/StreamingCommunity/tree/test_gui_1)
 
 # Contributing
 

@@ -33,6 +33,9 @@ IF %ERRORLEVEL% EQU 0 (
     echo Chocolatey installed successfully.
     call choco --version
     echo.
+    echo Please restart the terminal to continue...
+    pause
+    exit /b
 )
 
 :: Check if Python is already installed
@@ -41,7 +44,7 @@ echo Checking if Python is installed...
 python -V >nul 2>&1
 IF %ERRORLEVEL% EQU 0 (
     echo Python is already installed. Skipping installation.
-    goto install_openssl
+    goto install_ffmpeg
 ) ELSE (
     echo Installing Python...
     choco install python --confirm --params="'/NoStore'" --allow-downgrade || (
@@ -51,29 +54,9 @@ IF %ERRORLEVEL% EQU 0 (
     echo Python installed successfully.
     call python -V
     echo.
-)
-
-:: Ask to restart the terminal
-echo Please restart the terminal to continue...
-pause
-exit /b
-
-:: Check if OpenSSL is already installed
-:install_openssl
-echo Checking if OpenSSL is installed...
-openssl version -a >nul 2>&1
-IF %ERRORLEVEL% EQU 0 (
-    echo OpenSSL is already installed. Skipping installation.
-    goto install_ffmpeg
-) ELSE (
-    echo Installing OpenSSL...
-    choco install openssl --confirm || (
-        echo Error during OpenSSL installation.
-        exit /b 1
-    )
-    echo OpenSSL installed successfully.
-    call openssl version -a
-    echo.
+    echo Please restart the terminal to continue...
+    pause
+    exit /b
 )
 
 :: Check if FFmpeg is already installed
@@ -99,7 +82,6 @@ IF %ERRORLEVEL% EQU 0 (
 echo Verifying installations...
 call choco --version
 call python -V
-call openssl version -a
 call ffmpeg -version
 
 echo All programs have been successfully installed and verified.
@@ -126,7 +108,7 @@ pip install -r requirements.txt || (
     exit /b 1
 )
 
-:: Run run.py
+:: Run test_run.py
 echo Running test_run.py...
 call .venv\Scripts\python .\test_run.py || (
     echo Error during run.py execution.
