@@ -176,9 +176,11 @@ class ContentExtractor:
             set_language = DOWNLOAD_SPECIFIC_AUDIO                      
             downloadable_languages = list(set(available_languages) & set(set_language))
 
-            console.print(f"[cyan bold]Audio →[/cyan bold] [green]Available:[/green] [purple]{', '.join(available_languages)}[/purple] | "
-                  f"[red]Set:[/red] [purple]{', '.join(set_language)}[/purple] | "
-                  f"[yellow]Downloadable:[/yellow] [purple]{', '.join(downloadable_languages)}[/purple]")
+            # Only show if there is something available
+            if len(available_languages) > 0:
+                console.print(f"[cyan bold]Audio    →[/cyan bold] [green]Available:[/green] [purple]{', '.join(available_languages)}[/purple] | "
+                    f"[red]Set:[/red] [purple]{', '.join(set_language)}[/purple] | "
+                    f"[yellow]Downloadable:[/yellow] [purple]{', '.join(downloadable_languages)}[/purple]")
 
         else:
             console.log("[red]Can't find a list of audios")
@@ -200,9 +202,11 @@ class ContentExtractor:
             set_language = DOWNLOAD_SPECIFIC_SUBTITLE
             downloadable_languages = list(set(available_languages) & set(set_language))
 
-            console.print(f"[cyan bold]Subtitle →[/cyan bold] [green]Available:[/green] [purple]{', '.join(available_languages)}[/purple] | "
-                  f"[red]Set:[/red] [purple]{', '.join(set_language)}[/purple] | "
-                  f"[yellow]Downloadable:[/yellow] [purple]{', '.join(downloadable_languages)}[/purple]")
+            # Only show if there is something available
+            if len(available_languages) > 0:
+                console.print(f"[cyan bold]Subtitle →[/cyan bold] [green]Available:[/green] [purple]{', '.join(available_languages)}[/purple] | "
+                    f"[red]Set:[/red] [purple]{', '.join(set_language)}[/purple] | "
+                    f"[yellow]Downloadable:[/yellow] [purple]{', '.join(downloadable_languages)}[/purple]")
 
         else:
             console.log("[red]Can't find a list of subtitles")
@@ -212,13 +216,18 @@ class ContentExtractor:
         It identifies the best video quality and displays relevant information to the user.
         """
         logging.info(f"class 'ContentExtractor'; call _collect_video()")
+        set_resolution = "Best"
 
         # Collect custom quality video if a specific resolution is set
         if FILTER_CUSTOM_REOLUTION != -1:
             self.m3u8_index, video_res = self.obj_parse._video.get_custom_uri(y_resolution=FILTER_CUSTOM_REOLUTION)
+            set_resolution = f"{FILTER_CUSTOM_REOLUTION}p"
 
-        # Otherwise, get the best available video quality
-        self.m3u8_index, video_res = self.obj_parse._video.get_best_uri()
+        else:
+
+            # Otherwise, get the best available video quality
+            self.m3u8_index, video_res = self.obj_parse._video.get_best_uri()
+            
         self.codec: M3U8_Codec = self.obj_parse.codec
 
         # List all available resolutions
@@ -227,19 +236,34 @@ class ContentExtractor:
         logging.info(f"M3U8 index selected: {self.m3u8_index}, with resolution: {video_res}")
 
         # Create a formatted table to display video info
-        console.print(f"[cyan bold]Video →[/cyan bold] [green]Available resolutions:[/green] [purple]{', '.join(list_available_resolution)}[/purple] | "
-              f"[yellow]Downloadable:[/yellow] [purple]{video_res[0]}x{video_res[1]}[/purple]")
+        console.print(f"[cyan bold]Video    →[/cyan bold] [green]Available:[/green] [purple]{', '.join(list_available_resolution)}[/purple] | "
+                  f"[red]Set:[/red] [purple]{set_resolution}[/purple] | "
+                  f"[yellow]Downloadable:[/yellow] [purple]{video_res[0]}x{video_res[1]}[/purple]")
 
         if self.codec is not None:
+            
+            # Generate the string for available codec information
+            available_codec_info = (
+                f"[green]v[/green]: [yellow]{self.codec.video_codec_name}[/yellow] "
+                f"([green]b[/green]: [yellow]{self.codec.video_bitrate // 1000}k[/yellow]), "
+                f"[green]a[/green]: [yellow]{self.codec.audio_codec_name}[/yellow] "
+                f"([green]b[/green]: [yellow]{self.codec.audio_bitrate // 1000}k[/yellow])"
+            )
+
+            # Determine what to display for "Set"
+            # If the codec usage is enabled in the configuration, use the detailed codec info
+            # Otherwise, display "copy"
             if config_manager.get_bool("M3U8_CONVERSION", "use_codec"):
-                codec_info = (f"[green]v[/green]: [yellow]{self.codec.video_codec_name}[/yellow] "
-                            f"([green]b[/green]: [yellow]{self.codec.video_bitrate // 1000}k[/yellow]), "
-                            f"[green]a[/green]: [yellow]{self.codec.audio_codec_name}[/yellow] "
-                            f"([green]b[/green]: [yellow]{self.codec.audio_bitrate // 1000}k[/yellow])")
+                set_codec_info = available_codec_info
             else:
-                codec_info = "[cyan]copy[/cyan]"
-                
-            console.print(f"[bold cyan]Codec →[/bold cyan] {codec_info}")
+                set_codec_info = "[purple]copy[/purple]"
+
+            # Print the formatted result with "Available" and "Set" information
+            console.print(
+                f"[bold cyan]Codec    →[/bold cyan] [green]Available:[/green] {available_codec_info} | "
+                f"[red]Set:[/red] {set_codec_info}"
+            )
+
 
         # Fix the URL if it does not include the full protocol
         if "http" not in self.m3u8_index:

@@ -25,7 +25,6 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSource
 
 # Variable
 from .costant import ROOT_PATH, SITE_NAME, SERIES_FOLDER
-table_show_manager = TVShowManager()
 
 
 
@@ -178,6 +177,7 @@ def display_episodes_list(scrape_serie) -> str:
     """
 
     # Set up table for displaying episodes
+    table_show_manager = TVShowManager()
     table_show_manager.set_slice_end(10)
 
     # Add columns to the table

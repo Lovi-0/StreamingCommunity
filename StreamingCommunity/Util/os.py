@@ -317,15 +317,12 @@ class InternManager():
     def check_internet():
         while True:
             try:
-                httpx.get("https://www.google.com")
-                #console.log("[bold green]Internet is available![/bold green]")
+                httpx.get("https://www.google.com", timeout=15)
                 break
 
             except urllib.error.URLError:
                 console.log("[bold red]Internet is not available. Waiting...[/bold red]")
                 time.sleep(5)
-
-        print()
 
 
 class OsSummary:

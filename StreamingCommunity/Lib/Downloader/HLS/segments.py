@@ -544,11 +544,14 @@ class M3U8_Segments:
         file_size = os.path.getsize(self.tmp_file_path)
         if file_size == 0:
             raise Exception("Output file is empty")
-    
-        # Get expected time
-        ex_hours, ex_minutes, ex_seconds = format_duration(self.expected_real_time_s)
-        ex_formatted_duration = f"[yellow]{int(ex_hours)}[red]h [yellow]{int(ex_minutes)}[red]m [yellow]{int(ex_seconds)}[red]s"
-        console.print(f"[cyan]Max retry per URL[white]: [green]{self.info_maxRetry}[green] [white]| [cyan]Total retry done[white]: [green]{self.info_nRetry}[green] [white]| [cyan]Missing TS: [red]{self.info_nFailed} [white]| [cyan]Duration: {print_duration_table(self.tmp_file_path, None, True)} [white]| [cyan]Expected duation: {ex_formatted_duration} \n")
+
+        # Display additional info only if there is failed segments
+        if self.info_nFailed > 0:
+
+            # Get expected time
+            ex_hours, ex_minutes, ex_seconds = format_duration(self.expected_real_time_s)
+            ex_formatted_duration = f"[yellow]{int(ex_hours)}[red]h [yellow]{int(ex_minutes)}[red]m [yellow]{int(ex_seconds)}[red]s"
+            console.print(f"[cyan]Max retry per URL[white]: [green]{self.info_maxRetry}[green] [white]| [cyan]Total retry done[white]: [green]{self.info_nRetry}[green] [white]| [cyan]Missing TS: [red]{self.info_nFailed} [white]| [cyan]Duration: {print_duration_table(self.tmp_file_path, None, True)} [white]| [cyan]Expected duation: {ex_formatted_duration} \n")
 
         if self.info_nRetry >= len(self.segments) * (1/3.33):
             console.print("[yellow]⚠ Warning:[/yellow] Too many retries detected! Consider reducing the number of [cyan]workers[/cyan] in the [magenta]config.json[/magenta] file. This will impact [bold]performance[/bold]. \n")

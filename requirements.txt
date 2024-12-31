@@ -1,5 +1,4 @@
 ﻿httpx
-cffi
 bs4
 rich
 tqdm

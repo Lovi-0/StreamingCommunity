@@ -56,42 +56,68 @@ class M3U8_Ts_Estimator:
         self.ts_file_sizes.append(size)
         self.now_downloaded_size += size_download
 
-    def capture_speed(self, interval: float = 1):
+    def capture_speed(self, interval: float = 1, pid: int = None):
         """
-        Capture the internet speed periodically and store the values.
+        Capture the internet speed periodically for a specific process (identified by PID) 
+        or the entire system if no PID is provided.
         """
-        def get_network_io():
-            """Get network I/O counters, handle missing psutil gracefully."""
+        
+        def get_network_io(process=None):
+            """
+            Get network I/O counters for a specific process or system-wide if no process is specified.
+            """
             try:
-                io_counters = psutil.net_io_counters()
-                return io_counters
-            
+                if process:
+                    io_counters = process.io_counters()
+                    return io_counters
+                else:
+                    io_counters = psutil.net_io_counters()
+                    return io_counters
             except Exception as e:
                 logging.warning(f"Unable to access network I/O counters: {e}")
                 return None
 
-        while True:
-            old_value = get_network_io()
+        # If a PID is provided, attempt to attach to the corresponding process
+        process = None
+        if pid is not None:
+            try:
+                process = psutil.Process(pid)
+            except psutil.NoSuchProcess:
+                logging.error(f"Process with PID {pid} does not exist.")
+                return
+            except Exception as e:
+                logging.error(f"Failed to attach to process with PID {pid}: {e}")
+                return
 
-            if old_value is None:  # If psutil is not available, continue with default values
+        while True:
+            old_value = get_network_io(process)
+
+            if old_value is None:  # If psutil fails, continue with the next interval
                 time.sleep(interval)
                 continue
 
             time.sleep(interval)
-            new_value = get_network_io()
-            
+            new_value = get_network_io(process)
+
             if new_value is None:  # Handle again if psutil fails in the next call
                 time.sleep(interval)
                 continue
 
             with self.lock:
-                upload_speed = (new_value.bytes_sent - old_value.bytes_sent) / interval
-                download_speed = (new_value.bytes_recv - old_value.bytes_recv) / interval
+                # Calculate speed based on process-specific counters if process is specified
+                if process:
+                    upload_speed = (new_value.write_bytes - old_value.write_bytes) / interval
+                    download_speed = (new_value.read_bytes - old_value.read_bytes) / interval
+                else:
+                    # System-wide counters
+                    upload_speed = (new_value.bytes_sent - old_value.bytes_sent) / interval
+                    download_speed = (new_value.bytes_recv - old_value.bytes_recv) / interval
 
                 self.speed = {
                     "upload": internet_manager.format_transfer_speed(upload_speed),
                     "download": internet_manager.format_transfer_speed(download_speed)
                 }
+
 
     def get_average_speed(self) -> float:
         """

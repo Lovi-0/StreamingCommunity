@@ -28,7 +28,7 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
     """
 
     if string_to_search is None:
-        string_to_search = msg.ask(f"\n[purple]Insert word to search in [red]{SITE_NAME}").strip()
+        string_to_search = msg.ask(f"\n[purple]Insert word to search in [green]{SITE_NAME}").strip()
     
     # Search on database
     len_database = asyncio.run(title_search(quote_plus(string_to_search)))

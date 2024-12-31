@@ -25,7 +25,6 @@ from StreamingCommunity.Api.Player.supervideo import VideoSource
 
 # Variable
 from .costant import ROOT_PATH, SERIES_FOLDER
-table_show_manager = TVShowManager()
 
 
 
@@ -171,8 +170,9 @@ def display_episodes_list(obj_episode_manager) -> str:
     Returns:
         last_command (str): Last command entered by the user.
     """
-
+    
     # Set up table for displaying episodes
+    table_show_manager = TVShowManager()
     table_show_manager.set_slice_end(10)
 
     # Add columns to the table

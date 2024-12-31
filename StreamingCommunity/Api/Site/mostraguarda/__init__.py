@@ -27,7 +27,7 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
     """
 
     if string_to_search is None:
-        string_to_search = msg.ask(f"\n[purple]Insert word to search in [red]{SITE_NAME}").strip()
+        string_to_search = msg.ask(f"\n[purple]Insert word to search in [green]{SITE_NAME}").strip()
 
     # Not available for the moment
     if get_onylDatabase:

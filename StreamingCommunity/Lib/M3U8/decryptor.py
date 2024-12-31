@@ -17,7 +17,7 @@ crypto_installed = crypto_spec is not None
 
 
 if crypto_installed:
-    console.print("[cyan]Decrypy use: Cryptodomex")
+    logging.info("[cyan]Decrypy use: Cryptodomex")
     from Cryptodome.Cipher import AES
     from Cryptodome.Util.Padding import unpad
 
@@ -93,7 +93,7 @@ else:
     # Check if openssl command is available
     try:
         openssl_available = subprocess.run(["openssl", "version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
-        console.print("[cyan]Decrypy use: OPENSSL")
+        logging.info("[cyan]Decrypy use: OPENSSL")
     except:
         openssl_available = False
 
