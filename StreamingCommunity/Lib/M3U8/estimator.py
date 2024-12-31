@@ -1,5 +1,3 @@
-# 20.02.24
-
 import os
 import time
 import logging
@@ -34,10 +32,13 @@ class M3U8_Ts_Estimator:
         self.now_downloaded_size = 0
         self.total_segments = total_segments
         self.lock = threading.Lock()
-        self.speed = {"upload": "N/A", "download": "N/A"}  # Default to N/A
-        self.speed_thread = threading.Thread(target=self.capture_speed)
-        self.speed_thread.daemon = True
-        self.speed_thread.start()
+        self.speed = {"upload": "N/A", "download": "N/A"}
+
+        # Only start the speed capture thread if TQDM_USE_LARGE_BAR is True
+        if not TQDM_USE_LARGE_BAR:
+            self.speed_thread = threading.Thread(target=self.capture_speed)
+            self.speed_thread.daemon = True
+            self.speed_thread.start()
 
     def add_ts_file(self, size: int, size_download: int, duration: float):
         """
@@ -104,10 +105,12 @@ class M3U8_Ts_Estimator:
                 continue
 
             with self.lock:
+
                 # Calculate speed based on process-specific counters if process is specified
                 if process:
                     upload_speed = (new_value.write_bytes - old_value.write_bytes) / interval
                     download_speed = (new_value.read_bytes - old_value.read_bytes) / interval
+                    
                 else:
                     # System-wide counters
                     upload_speed = (new_value.bytes_sent - old_value.bytes_sent) / interval
@@ -185,18 +188,17 @@ class M3U8_Ts_Estimator:
         units_file_downloaded = downloaded_file_size_str.split(' ')[1]
         units_file_total_size = file_total_size.split(' ')[1]
 
-        average_internet_speed = self.get_average_speed()[0]
-        average_internet_unit = self.get_average_speed()[1]
-
         # Update the progress bar's postfix
         if TQDM_USE_LARGE_BAR:
+            average_internet_speed = self.get_average_speed()[0]
+            average_internet_unit = self.get_average_speed()[1]
             progress_counter.set_postfix_str(
                 f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded} {Colors.WHITE}< {Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
                 f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed} {Colors.RED}{average_internet_unit}"
             )
+
         else:
             progress_counter.set_postfix_str(
                 f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded}{Colors.RED} {units_file_downloaded} "
-                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed} {Colors.RED}{average_internet_unit}"
+                f"{Colors.WHITE}| {Colors.CYAN}N/A{Colors.RED} N/A"
             )
-    
