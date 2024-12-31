@@ -118,10 +118,10 @@ def initialize():
         sys.exit(0)
 
     # Attempting GitHub update
-    """try:
+    try:
         git_update()
     except:
-        console.log("[red]Error with loading github.")"""
+        console.log("[red]Error with loading github.")
 
 
 def main():
