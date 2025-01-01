@@ -140,6 +140,7 @@ class FFMPEGDownloader:
                         break
                 found_executables.append(found)
         else:
+
             # Original behavior for other operating systems
             for executable in executables:
                 exe_paths = glob.glob(os.path.join(self.base_dir, executable))
@@ -298,13 +299,14 @@ def check_ffmpeg() -> Tuple[Optional[str], Optional[str], Optional[str]]:
         
         # Special handling for macOS
         if system_platform == 'darwin':
+
             # Common installation paths on macOS
             potential_paths = [
-                '/usr/local/bin',  # Homebrew default
-                '/opt/homebrew/bin',  # Apple Silicon Homebrew
-                '/usr/bin',  # System default
-                os.path.expanduser('~/Applications/binary'),  # Custom installation
-                '/Applications/binary'  # Custom installation
+                '/usr/local/bin',                               # Homebrew default
+                '/opt/homebrew/bin',                            # Apple Silicon Homebrew
+                '/usr/bin',                                     # System default
+                os.path.expanduser('~/Applications/binary'),    # Custom installation
+                '/Applications/binary'                          # Custom installation
             ]
             
             for path in potential_paths:
@@ -314,6 +316,7 @@ def check_ffmpeg() -> Tuple[Optional[str], Optional[str], Optional[str]]:
                 
                 if (os.path.exists(ffmpeg_path) and os.path.exists(ffprobe_path) and 
                     os.access(ffmpeg_path, os.X_OK) and os.access(ffprobe_path, os.X_OK)):
+                    
                     # Return found executables, with ffplay being optional
                     ffplay_path = ffplay_path if os.path.exists(ffplay_path) else None
                     return ffmpeg_path, ffprobe_path, ffplay_path

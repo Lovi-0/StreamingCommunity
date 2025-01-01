@@ -1,3 +1,5 @@
+# 21.04.25
+
 import os
 import time
 import logging
@@ -24,7 +26,7 @@ class M3U8_Ts_Estimator:
     def __init__(self, total_segments: int):
         """
         Initialize the M3U8_Ts_Estimator object.
-
+        
         Parameters:
             - total_segments (int): Length of total segments to download.
         """
@@ -33,103 +35,119 @@ class M3U8_Ts_Estimator:
         self.total_segments = total_segments
         self.lock = threading.Lock()
         self.speed = {"upload": "N/A", "download": "N/A"}
+        self.process_pid = os.getpid()  # Get current process PID
+        logging.debug(f"Initializing M3U8_Ts_Estimator with PID: {self.process_pid}")
 
-        # Only start the speed capture thread if TQDM_USE_LARGE_BAR is True
-        if not TQDM_USE_LARGE_BAR:
-            self.speed_thread = threading.Thread(target=self.capture_speed)
+        # Start the speed capture thread if TQDM_USE_LARGE_BAR is True
+        if TQDM_USE_LARGE_BAR:
+            logging.debug("TQDM_USE_LARGE_BAR is True, starting speed capture thread")
+            self.speed_thread = threading.Thread(target=self.capture_speed, args=(1, self.process_pid))
             self.speed_thread.daemon = True
             self.speed_thread.start()
 
-    def add_ts_file(self, size: int, size_download: int, duration: float):
-        """
-        Add a file size to the list of file sizes.
+        else:
+            logging.debug("TQDM_USE_LARGE_BAR is False, speed capture thread not started")
 
-        Parameters:
-            - size (int): The size of the ts file to be added.
-            - size_download (int): Single size of the ts file.
-            - duration (float): Time to download segment file.
-        """
+    def add_ts_file(self, size: int, size_download: int, duration: float):
+        """Add a file size to the list of file sizes."""
+        logging.debug(f"Adding ts file - size: {size}, download size: {size_download}, duration: {duration}")
+        
         if size <= 0 or size_download <= 0 or duration <= 0:
-            logging.error("Invalid input values: size=%d, size_download=%d, duration=%f", size, size_download, duration)
+            logging.error(f"Invalid input values: size={size}, size_download={size_download}, duration={duration}")
             return
 
-        # Add total size bytes
         self.ts_file_sizes.append(size)
         self.now_downloaded_size += size_download
+        logging.debug(f"Current total downloaded size: {self.now_downloaded_size}")
 
     def capture_speed(self, interval: float = 1, pid: int = None):
-        """
-        Capture the internet speed periodically for a specific process (identified by PID) 
-        or the entire system if no PID is provided.
-        """
+        """Capture the internet speed periodically."""
+        logging.debug(f"Starting speed capture with interval {interval}s for PID: {pid}")
         
         def get_network_io(process=None):
-            """
-            Get network I/O counters for a specific process or system-wide if no process is specified.
-            """
             try:
                 if process:
-                    io_counters = process.io_counters()
-                    return io_counters
+
+                    # For process-specific monitoring
+                    connections = process.connections(kind='inet')
+                    if connections:
+                        io_counters = process.io_counters()
+                        logging.debug(f"Process IO counters: {io_counters}")
+                        return io_counters
+                    
+                    else:
+                        logging.debug("No active internet connections found for process")
+                        return None
                 else:
+
+                    # For system-wide monitoring
                     io_counters = psutil.net_io_counters()
+                    logging.debug(f"System IO counters: {io_counters}")
                     return io_counters
+                
             except Exception as e:
-                logging.warning(f"Unable to access network I/O counters: {e}")
+                logging.error(f"Error getting network IO: {str(e)}")
                 return None
 
-        # If a PID is provided, attempt to attach to the corresponding process
-        process = None
-        if pid is not None:
-            try:
-                process = psutil.Process(pid)
-            except psutil.NoSuchProcess:
-                logging.error(f"Process with PID {pid} does not exist.")
-                return
-            except Exception as e:
-                logging.error(f"Failed to attach to process with PID {pid}: {e}")
-                return
+        try:
+            process = psutil.Process(pid) if pid else None
+            logging.debug(f"Monitoring process: {process}")
+
+        except Exception as e:
+            logging.error(f"Failed to get process with PID {pid}: {str(e)}")
+            process = None
+
+        last_upload = None
+        last_download = None
+        first_run = True
+        
+        # Buffer circolare per le ultime N misurazioni
+        speed_buffer_size = 3
+        speed_buffer = deque(maxlen=speed_buffer_size)
 
         while True:
-            old_value = get_network_io(process)
-
-            if old_value is None:  # If psutil fails, continue with the next interval
-                time.sleep(interval)
-                continue
-
-            time.sleep(interval)
-            new_value = get_network_io(process)
-
-            if new_value is None:  # Handle again if psutil fails in the next call
-                time.sleep(interval)
-                continue
-
-            with self.lock:
-
-                # Calculate speed based on process-specific counters if process is specified
-                if process:
-                    upload_speed = (new_value.write_bytes - old_value.write_bytes) / interval
-                    download_speed = (new_value.read_bytes - old_value.read_bytes) / interval
+            try:
+                io_counters = get_network_io()
+                
+                if io_counters:
+                    current_upload = io_counters.bytes_sent
+                    current_download = io_counters.bytes_recv
                     
-                else:
-                    # System-wide counters
-                    upload_speed = (new_value.bytes_sent - old_value.bytes_sent) / interval
-                    download_speed = (new_value.bytes_recv - old_value.bytes_recv) / interval
+                    if not first_run and last_upload is not None and last_download is not None:
 
-                self.speed = {
-                    "upload": internet_manager.format_transfer_speed(upload_speed),
-                    "download": internet_manager.format_transfer_speed(download_speed)
-                }
+                        # Calcola la velocità istantanea
+                        upload_speed = max(0, (current_upload - last_upload) / interval)
+                        download_speed = max(0, (current_download - last_download) / interval)
+                        
+                        # Aggiungi al buffer
+                        speed_buffer.append(download_speed)
+                        
+                        # Calcola la media mobile delle velocità
+                        if len(speed_buffer) > 0:
+                            avg_download_speed = sum(speed_buffer) / len(speed_buffer)
+                            
+                            if avg_download_speed > 0:
+                                with self.lock:
+                                    self.speed = {
+                                        "upload": internet_manager.format_transfer_speed(upload_speed),
+                                        "download": internet_manager.format_transfer_speed(avg_download_speed)
+                                    }
+                                    logging.debug(f"Updated speeds - Upload: {self.speed['upload']}, Download: {self.speed['download']}")
+                    
+                    last_upload = current_upload
+                    last_download = current_download
+                    first_run = False
+                
+                time.sleep(interval)
+            except Exception as e:
+                logging.error(f"Error in speed capture loop: {str(e)}")
+                logging.exception("Full traceback:")
+                logging.sleep(interval)
 
-
-    def get_average_speed(self) -> float:
-        """
-        Calculate the average internet speed.
-
-        Returns:
-            float: The average internet speed in Mbps.
-        """
+    def get_average_speed(self) -> list:
+        """Calculate the average internet speed."""
         with self.lock:
+            logging.debug(f"Current speed data: {self.speed}")
             return self.speed['download'].split(" ")
 
     def calculate_total_size(self) -> str:
@@ -156,7 +174,7 @@ class M3U8_Ts_Estimator:
         except Exception as e:
             logging.error("An unexpected error occurred: %s", e)
             return "Error"
-
+        
     def get_downloaded_size(self) -> str:
         """
         Get the total downloaded size formatted as a human-readable string.
@@ -165,40 +183,47 @@ class M3U8_Ts_Estimator:
             str: The total downloaded size as a human-readable string.
         """
         return internet_manager.format_file_size(self.now_downloaded_size)
-
+    
     def update_progress_bar(self, total_downloaded: int, duration: float, progress_counter: tqdm) -> None:
-        """
-        Updates the progress bar with information about the TS segment download.
+        """Updates the progress bar with download information."""
+        try:
+            self.add_ts_file(total_downloaded * self.total_segments, total_downloaded, duration)
+            
+            downloaded_file_size_str = self.get_downloaded_size()
+            file_total_size = self.calculate_total_size()
+            
+            number_file_downloaded = downloaded_file_size_str.split(' ')[0]
+            number_file_total_size = file_total_size.split(' ')[0]
+            units_file_downloaded = downloaded_file_size_str.split(' ')[1]
+            units_file_total_size = file_total_size.split(' ')[1]
+            
+            if TQDM_USE_LARGE_BAR:
+                speed_data = self.get_average_speed()
+                logging.debug(f"Speed data for progress bar: {speed_data}")
+                
+                if len(speed_data) >= 2:
+                    average_internet_speed = speed_data[0]
+                    average_internet_unit = speed_data[1]
 
-        Parameters:
-            total_downloaded (int): The length of the content of the downloaded TS segment.
-            duration (float): The duration of the segment download in seconds.
-            progress_counter (tqdm): The tqdm object representing the progress bar.
-        """
-        # Add the size of the downloaded segment to the estimator
-        self.add_ts_file(total_downloaded * self.total_segments, total_downloaded, duration)
-
-        # Get downloaded size and total estimated size
-        downloaded_file_size_str = self.get_downloaded_size()
-        file_total_size = self.calculate_total_size()
-
-        # Fix parameter for prefix
-        number_file_downloaded = downloaded_file_size_str.split(' ')[0]
-        number_file_total_size = file_total_size.split(' ')[0]
-        units_file_downloaded = downloaded_file_size_str.split(' ')[1]
-        units_file_total_size = file_total_size.split(' ')[1]
-
-        # Update the progress bar's postfix
-        if TQDM_USE_LARGE_BAR:
-            average_internet_speed = self.get_average_speed()[0]
-            average_internet_unit = self.get_average_speed()[1]
-            progress_counter.set_postfix_str(
-                f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded} {Colors.WHITE}< {Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
-                f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed} {Colors.RED}{average_internet_unit}"
-            )
-
-        else:
-            progress_counter.set_postfix_str(
-                f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded}{Colors.RED} {units_file_downloaded} "
-                f"{Colors.WHITE}| {Colors.CYAN}N/A{Colors.RED} N/A"
-            )
+                else:
+                    logging.warning(f"Invalid speed data format: {speed_data}")
+                    average_internet_speed = "N/A"
+                    average_internet_unit = ""
+                
+                progress_str = (
+                    f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded} {Colors.WHITE}< "
+                    f"{Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
+                    f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed} {Colors.RED}{average_internet_unit}"
+                )
+                
+            else:
+                progress_str = (
+                    f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded} {Colors.WHITE}< "
+                    f"{Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size}"
+                )
+            
+            progress_counter.set_postfix_str(progress_str)
+            logging.debug(f"Updated progress bar: {progress_str}")
+            
+        except Exception as e:
+            logging.error(f"Error updating progress bar: {str(e)}")

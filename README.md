@@ -279,6 +279,9 @@ The configuration file is divided into several main sections:
 - `default_audio_workser`: Number of threads for audio download
 - `cleanup_tmp_folder`: Remove temporary .ts files after download
 
+> [!IMPORTANT]
+> Set `tqdm_use_large_bar` to `false` when using Termux or terminals with limited width to prevent display issues
+
 
 <br>
 
