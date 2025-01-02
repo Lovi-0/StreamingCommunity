@@ -20,6 +20,7 @@ from StreamingCommunity.Api.Template.Util import search_domain
 
 # Variable
 console = Console()
+README_PATH = "README.md"
 
 
 def load_site_names():
@@ -78,6 +79,39 @@ def load_site_names():
 
     return site_names
 
+def update_readme(site_names):
+    if not os.path.exists(README_PATH):
+        console.print(f"[red]README file not found at {README_PATH}")
+        return
+
+    with open(README_PATH, "r", encoding="utf-8") as file:
+        lines = file.readlines()
+
+    updated_lines = []
+
+    for line in lines:
+        if line.startswith("| [") and "|" in line:
+            site_name = line.split("[")[1].split("]")[0]
+            alias = f"{site_name.lower()}"
+
+            if alias in site_names:
+                domain_to_use, _ = search_domain(site_name=alias, base_url=f"https://{alias}", get_first=True)
+                print("Update line: ", line)
+                
+                if site_name == "animeunity":
+                    updated_line = f"| [{site_name}](https://www.{alias}.{domain_to_use}/) |   ✅   |\n"
+                else:
+                    updated_line = f"| [{site_name}](https://{alias}.{domain_to_use}/) |   ✅   |\n"
+
+                print("To: ", updated_line.strip())
+                updated_lines.append(updated_line)
+                continue
+
+        updated_lines.append(line)
+
+    with open(README_PATH, "w", encoding="utf-8") as file:
+        file.writelines(updated_lines)
+
 if __name__ == "__main__":
     site_names = load_site_names()
     for alias, (site_name, use_for) in site_names.items():
@@ -85,6 +119,11 @@ if __name__ == "__main__":
 
         if site_name == "animeunity":
             domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://www.{site_name}", get_first=True)
-
         else:
             domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://{site_name}", get_first=True)
+            
+
+        # Update readme
+        print("\n")
+        print("Return domain: ", domain_to_use)
+        update_readme(alias)

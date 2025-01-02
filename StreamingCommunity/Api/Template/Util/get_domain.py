@@ -146,11 +146,9 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
     # Get configuration values
     max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain = str(config_manager.get_dict("SITE", site_name)['domain'])
+    test_url = f"{base_url}.{domain}"
 
     try:
-        # Test current domain configuration
-        test_url = f"{base_url}.{domain}"
-
         if validate_url(test_url, max_timeout):
             parsed_url = urlparse(test_url)
             tld = parsed_url.netloc.split('.')[-1]
@@ -163,7 +161,7 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
 
     # Perform Google search if current domain fails
     query = base_url.split("/")[-1]
-    search_results = list(search(query, num_results=10, lang="it"))
+    search_results = list(search(query, num_results=15, lang="it"))
     console.print(f"Google search: {search_results}")
 
     def normalize_for_comparison(url):
