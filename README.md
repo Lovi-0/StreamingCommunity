@@ -59,6 +59,22 @@
 
 # Installation
 
+<p align="center">
+  <a href="https://github.com/Lovi-0/StreamingCommunity/releases/latest/download/StreamingCommunity.exe">
+    <img src="https://img.shields.io/badge/-Windows_x64-blue.svg?style=for-the-badge&logo=windows" alt="Windows">
+  </a>
+  <a href="https://pypi.org/project/StreamingCommunity">
+    <img src="https://img.shields.io/badge/-PyPI-blue.svg?logo=pypi&labelColor=555555&style=for-the-badge" alt="PyPI">
+  </a>
+  <a href="https://github.com/Lovi-0/StreamingCommunity/releases/latest/download/StreamingCommunity.zip">
+    <img src="https://img.shields.io/badge/-Source_tar-green.svg?style=for-the-badge" alt="Source Tarball">
+  </a>
+  <a href="https://github.com/Lovi-0/StreamingCommunity/releases">
+    <img src="https://img.shields.io/badge/-All_Versions-lightgrey.svg?style=for-the-badge" alt="All Versions">
+  </a>
+</p>
+
+
 ## 1. PyPI Installation
 
 Install directly from PyPI:
