@@ -16,7 +16,9 @@ class Episode:
         self.duration: int = data.get('duration')
 
     def collect_image(self, SITE_NAME, domain):
-        self.image = f"https://cdn.{SITE_NAME}.{domain}/images/{self.data.get('images')[0]['filename']}"
+        self.image = None
+        if len(self.data.get('images')) > 0:
+            self.image = f"https://cdn.{SITE_NAME}.{domain}/images/{self.data.get('images')[0]['filename']}"
 
     def __str__(self):
         return f"Episode(id={self.id}, number={self.number}, name='{self.name}', plot='{self.plot}', duration={self.duration} sec)"
