@@ -18,17 +18,16 @@ from StreamingCommunity.Util._jsonConfig import config_manager
 def google_search(query):
     """
     Perform a Google search and return the first result.
-
-    Args:
-        query (str): The search query to execute on Google.
-
-    Returns:
-        str: The first URL result from the search, or None if no result is found.
-    """
-    # Perform the search on Google and limit to 1 result
-    search_results = search(query, num_results=1)
     
-    # Extract the first result
+    Args:
+        query (str): Search query to execute
+        
+    Returns:
+        str: First URL from search results, None if no results found
+    """
+
+    # Perform search with single result limit
+    search_results = search(query, num_results=1)
     first_result = next(search_results, None)
     
     if not first_result:
@@ -36,18 +35,51 @@ def google_search(query):
     
     return first_result
 
+def validate_url(url, max_timeout):
+    """
+    Validate if a URL is accessible via GET request.
+    
+    Args:
+        url (str): URL to validate
+        max_timeout (int): Maximum timeout for request
+        
+    Returns:
+        bool: True if URL is valid and accessible, False otherwise
+    """
+    try:
+        with httpx.Client(
+            headers={
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+                'User-Agent': get_headers()
+            },
+            follow_redirects=False,
+            timeout=max_timeout
+        ) as client:
+            
+            # Attempt GET request
+            response = client.get(url)
+
+            if response.status_code == 403:
+                return False
+                
+            response.raise_for_status()
+            return True
+            
+    except Exception:
+        return False
+    
 def get_final_redirect_url(initial_url, max_timeout):
     """
-    Follow redirects from the initial URL and return the final URL after all redirects.
-
+    Follow all redirects for a URL and return final destination.
+    
     Args:
-        initial_url (str): The URL to start with and follow redirects.
-
+        initial_url (str): Starting URL to follow redirects from
+        max_timeout (int): Maximum timeout for request
+        
     Returns:
-        str: The final URL after all redirects are followed.
+        str: Final URL after all redirects, None if error occurs
     """
-
-    # Create a client with redirects enabled
     try:
         with httpx.Client(
             headers={
@@ -57,8 +89,9 @@ def get_final_redirect_url(initial_url, max_timeout):
             },
             follow_redirects=True,
             timeout=max_timeout
-
         ) as client:
+            
+            # Follow redirects and get response
             response = client.get(initial_url)
 
             if response.status_code == 403:
@@ -66,11 +99,7 @@ def get_final_redirect_url(initial_url, max_timeout):
                 raise
 
             response.raise_for_status()
-            
-            # Capture the final URL after all redirects
-            final_url = response.url
-        
-        return final_url
+            return response.url
     
     except Exception as e:
         console.print(f"\n[cyan]Test url[white]: [red]{initial_url}, [cyan]error[white]: [red]{e}")
@@ -78,97 +107,77 @@ def get_final_redirect_url(initial_url, max_timeout):
 
 def search_domain(site_name: str, base_url: str, get_first: bool = False):
     """
-    Search for a valid domain for the given site name and base URL.
-
-    Parameters:
-        - site_name (str): The name of the site to search the domain for.
-        - base_url (str): The base URL to construct complete URLs.
-        - get_first (bool): If True, automatically update to the first valid match without user confirmation.
-
-    Returns:
-        tuple: The found domain and the complete URL.
-    """
+    Search for valid domain matching site name and base URL.
     
-    # Extract config domain
+    Args:
+        site_name (str): Name of site to find domain for
+        base_url (str): Base URL to construct complete URLs
+        get_first (bool): Auto-update config with first valid match if True
+        
+    Returns:
+        tuple: (found_domain, complete_url)
+    """
+    # Get configuration values
     max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain = str(config_manager.get_dict("SITE", site_name)['domain'])
 
     try:
-        # Test the current domain
-        with httpx.Client(
-            headers={
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-                'User-Agent': get_headers()
-            },
-            follow_redirects=True,
-            timeout=max_timeout
-        ) as client:
-            response_follow = client.get(f"{base_url}.{domain}")
-            response_follow.raise_for_status()
+        # Test current domain configuration
+        test_url = f"{base_url}.{domain}"
 
-    except Exception as e:
-        query = base_url.split("/")[-1]
+        if validate_url(test_url, max_timeout):
+            parsed_url = urlparse(test_url)
+            tld = parsed_url.netloc.split('.')[-1]
+            config_manager.config['SITE'][site_name]['domain'] = tld
+            config_manager.write_config()
+            return tld, test_url
 
-        # Perform a Google search with multiple results
-        search_results = list(search(query, num_results=10, lang="it"))
-        #console.print(f"\nGoogle search results: {search_results}")
+    except Exception:
+        pass
 
-        def normalize_for_comparison(url):
-            """Normalize URL by removing protocol, www, and trailing slashes"""
-            url = url.lower()
-            url = url.replace("https://", "").replace("http://", "")
-            url = url.replace("www.", "")
-            return url.rstrip("/")
+    # Perform Google search if current domain fails
+    query = base_url.split("/")[-1]
+    search_results = list(search(query, num_results=10, lang="it"))
+    console.print(f"Google search: {search_results}")
 
-        # Normalize the base_url we're looking for
-        target_url = normalize_for_comparison(base_url)
+    def normalize_for_comparison(url):
+        """Normalize URL by removing protocol, www, and trailing slashes"""
+        url = url.lower()
+        url = url.replace("https://", "").replace("http://", "")
+        url = url.replace("www.", "")
+        return url.rstrip("/")
 
-        # Iterate through search results
-        for first_url in search_results:
-            console.print(f"[green]Checking url[white]: [red]{first_url}")
+    target_url = normalize_for_comparison(base_url)
 
-            # Get just the domain part of the search result
-            parsed_result = urlparse(first_url)
-            result_domain = normalize_for_comparison(parsed_result.netloc)
+    # Check each search result
+    for result_url in search_results:
+        #console.print(f"[green]Checking url[white]: [red]{result_url}")
 
-            # Compare with our target URL (without the protocol part)
-            if result_domain.startswith(target_url.split("/")[-1]):
-                try:
-                    final_url = get_final_redirect_url(first_url, max_timeout)
+        # Skip invalid URLs
+        if not validate_url(result_url, max_timeout):
+            console.print(f"[red]URL validation failed for: {result_url}")
+            continue
 
-                    if final_url is not None:
-                        def extract_domain(url):
-                            parsed_url = urlparse(url)
-                            domain = parsed_url.netloc
-                            return domain.split(".")[-1]
+        parsed_result = urlparse(result_url)
+        result_domain = normalize_for_comparison(parsed_result.netloc)
 
-                        new_domain_extract = extract_domain(str(final_url))
+        # Check if domain matches target
+        if result_domain.startswith(target_url.split("/")[-1]):
+            final_url = get_final_redirect_url(result_url, max_timeout)
+            
+            if final_url is not None:
+                new_domain = urlparse(str(final_url)).netloc.split(".")[-1]
 
-                        if get_first or msg.ask(f"\n[cyan]Do you want to auto update site[white] [red]'{site_name}'[cyan] with domain[white] [red]'{new_domain_extract}'.", choices=["y", "n"], default="y").lower() == "y":
-                            # Update domain in config.json
-                            config_manager.config['SITE'][site_name]['domain'] = new_domain_extract
-                            config_manager.write_config()
+                # Update config if auto-update enabled or user confirms
+                if get_first or msg.ask(
+                    f"\n[cyan]Do you want to auto update site[white] [red]'{site_name}'[cyan] with domain[white] [red]'{new_domain}'.",
+                    choices=["y", "n"],
+                    default="y"
+                ).lower() == "y":
+                    config_manager.config['SITE'][site_name]['domain'] = new_domain
+                    config_manager.write_config()
+                    return new_domain, f"{base_url}.{new_domain}"
 
-                            return new_domain_extract, f"{base_url}.{new_domain_extract}"
-
-                except Exception as redirect_error:
-                    console.print(f"[red]Error following redirect for {first_url}: {redirect_error}")
-                    continue
-
-        # If no matching URL is found return base domain
-        console.print("[bold red]No valid URL found matching the base URL.[/bold red]")
-        return domain, f"{base_url}.{domain}"
-
-    # Handle successful initial domain check
-    parsed_url = urlparse(str(response_follow.url))
-    parse_domain = parsed_url.netloc
-    tld = parse_domain.split('.')[-1]
-
-    if tld is not None:
-        # Update domain in config.json
-        config_manager.config['SITE'][site_name]['domain'] = tld
-        config_manager.write_config()
-
-    # Return config domain
-    return tld, f"{base_url}.{tld}"
+    # Return original domain if no valid matches found
+    console.print("[bold red]No valid URL found matching the base URL.[/bold red]")
+    return domain, f"{base_url}.{domain}"

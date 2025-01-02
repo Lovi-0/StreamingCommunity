@@ -6,9 +6,6 @@
   <a href="https://pypi.org/project/streamingcommunity">
     <img src="https://img.shields.io/pypi/v/streamingcommunity?logo=pypi&labelColor=555555&style=for-the-badge" alt="PyPI"/>
   </a>
-  <a href="https://www.python.org">
-    <img src="https://img.shields.io/badge/Python->=3.8-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
-  </a>
   <a href="https://www.paypal.com/donate/?hosted_button_id=UXTWMT8P6HE2C">
     <img src="https://img.shields.io/badge/_-Donate-red.svg?logo=githubsponsors&labelColor=555555&style=for-the-badge" alt="Donate"/>
   </a>
