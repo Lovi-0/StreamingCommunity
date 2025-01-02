@@ -37,16 +37,21 @@ def google_search(query):
 
 def validate_url(url, max_timeout):
     """
-    Validate if a URL is accessible via GET request.
+    Validate if a URL is accessible and check if its redirect destination is significantly different.
     
     Args:
         url (str): URL to validate
         max_timeout (int): Maximum timeout for request
         
     Returns:
-        bool: True if URL is valid and accessible, False otherwise
+        bool: True if URL is valid, accessible and redirect destination is acceptable
     """
+    def get_domain_parts(url_str):
+        parsed = urlparse(url_str)
+        return parsed.netloc.lower().split('.')[-2:]  # Get last two parts of domain
+    
     try:
+        # First check without following redirects
         with httpx.Client(
             headers={
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -56,14 +61,35 @@ def validate_url(url, max_timeout):
             follow_redirects=False,
             timeout=max_timeout
         ) as client:
-            
-            # Attempt GET request
             response = client.get(url)
-
             if response.status_code == 403:
                 return False
-                
             response.raise_for_status()
+            
+        # Then check with redirects enabled
+        with httpx.Client(
+            headers={
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+                'User-Agent': get_headers()
+            },
+            follow_redirects=True,
+            timeout=max_timeout
+        ) as client:
+            response = client.get(url)
+            if response.status_code == 403:
+                return False
+            response.raise_for_status()
+            
+            # Compare original and final URLs
+            original_domain = get_domain_parts(url)
+            final_domain = get_domain_parts(str(response.url))
+            
+            # Check if domains are significantly different
+            if original_domain != final_domain:
+                console.print(f"[yellow]Warning: URL redirects to different domain: {response.url}[/yellow]")
+                return False
+                
             return True
             
     except Exception:
