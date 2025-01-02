@@ -155,7 +155,7 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
 
         # Skip invalid URLs
         if not validate_url(result_url, max_timeout):
-            console.print(f"[red]URL validation failed for: {result_url}")
+            #console.print(f"[red]URL validation failed for: {result_url}")
             continue
 
         parsed_result = urlparse(result_url)
