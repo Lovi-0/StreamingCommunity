@@ -401,7 +401,7 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | Website            | Status |
 |:-------------------|:------:|
 | [1337xx](https://1337xx.to/) |   ✅   |
-| [Altadefinizione](https://altadefinizione.prof/) |   ✅   |
+| [Altadefinizione](https://altadefinizione.com/) |   ✅   |
 | [AnimeUnity](https://animeunity.so/) |   ✅   |
 | [Ilcorsaronero](https://ilcorsaronero.link/) |   ✅   |
 | [CB01New](https://cb01new.pics/) |   ✅   |
