@@ -47,11 +47,7 @@ def title_search(title_search: str) -> int:
     try:
         response = client.get(
             url=f"https://{SITE_NAME}.{domain_to_use}/?story={title_search.replace(' ', '+')}&do=search&subaction=search&titleonly=3", 
-            headers={
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-                'User-Agent': get_headers()
-            },
+            headers={'User-Agent': get_headers()},
             timeout=max_timeout
         )
         response.raise_for_status()

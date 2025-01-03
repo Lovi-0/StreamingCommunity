@@ -8,6 +8,7 @@ sys.path.append(src_path)
 
 
 # Other
+import time
 import glob
 import logging
 import importlib
@@ -15,6 +16,7 @@ from rich.console import Console
 
 
 # Util
+from StreamingCommunity.Util._jsonConfig import config_manager
 from StreamingCommunity.Api.Template.Util import search_domain
 
 
@@ -60,7 +62,7 @@ def load_site_names():
     for module_name, _, use_for in modules:
 
         # Construct a unique alias for the module
-        module_alias = f'{module_name}_site_name'
+        module_alias = f'{module_name}'
         logging.info(f"Module alias: {module_alias}")
 
         try:
@@ -114,15 +116,18 @@ def update_readme(site_names, domain_to_use):
 if __name__ == "__main__":
     site_names = load_site_names()
     for alias, (site_name, use_for) in site_names.items():
-        print(f"Alias: {alias}, SITE_NAME: {site_name}, Use for: {use_for}")
+        original_domain = config_manager.get_list("SITE", alias)['domain']
 
         if site_name == "animeunity":
             domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://www.{site_name}", get_first=True)
         else:
             domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://{site_name}", get_first=True)
             
-
         # Update readme
-        print("\n")
-        print("Return domain: ", domain_to_use)
-        update_readme(alias, domain_to_use)
+        if original_domain != domain_to_use:
+            print("\n")
+            print("Return domain: ", domain_to_use)
+            update_readme(alias, domain_to_use)
+            
+        print("------------------------------------")
+        time.sleep(2)

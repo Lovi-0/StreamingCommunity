@@ -43,11 +43,7 @@ def validate_url(url, base_url, max_timeout):
         # Check 1: Initial request without following redirects
         console.print("[cyan]Performing initial connection check...")
         with httpx.Client(
-            headers={
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-                'User-Agent': get_headers()
-            },
+            headers={'User-Agent': get_headers()},
             follow_redirects=False,
             timeout=max_timeout
         ) as client:
@@ -58,14 +54,11 @@ def validate_url(url, base_url, max_timeout):
         # Check 2: Follow redirects and verify final domain
         console.print("[cyan]Checking redirect destination...")
         with httpx.Client(
-            headers={
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-                'User-Agent': get_headers()
-            },
+            headers={'User-Agent': get_headers()},
             follow_redirects=True,
             timeout=max_timeout
         ) as client:
+            
             response = client.get(url)
             if not check_response(response, 2):
                 return False
@@ -114,6 +107,7 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
             config_manager.write_config()
             console.print(f"[green]Successfully validated initial URL")
             return tld, test_url
+        
     except Exception as e:
         console.print(f"[red]Error testing initial URL: {str(e)}")
 
@@ -134,6 +128,7 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
                 choices=["y", "n"],
                 default="y"
             ).lower() == "y":
+                
                 config_manager.config['SITE'][site_name]['domain'] = new_domain
                 config_manager.write_config()
                 return new_domain, f"{base_url}.{new_domain}"
