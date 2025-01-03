@@ -79,7 +79,7 @@ def load_site_names():
 
     return site_names
 
-def update_readme(site_names):
+def update_readme(site_names, domain_to_use):
     if not os.path.exists(README_PATH):
         console.print(f"[red]README file not found at {README_PATH}")
         return
@@ -95,7 +95,6 @@ def update_readme(site_names):
             alias = f"{site_name.lower()}"
 
             if alias in site_names:
-                domain_to_use, _ = search_domain(site_name=alias, base_url=f"https://{alias}", get_first=True)
                 print("Update line: ", line)
                 
                 if site_name == "animeunity":
@@ -126,4 +125,4 @@ if __name__ == "__main__":
         # Update readme
         print("\n")
         print("Return domain: ", domain_to_use)
-        update_readme(alias)
+        update_readme(alias, domain_to_use)

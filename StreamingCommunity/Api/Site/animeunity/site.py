@@ -140,21 +140,23 @@ def title_search(title: str) -> int:
     except Exception as e:
         console.print(f"Site: {SITE_NAME}, request search error: {e}")
 
-    # Process each record returned in the response
     for dict_title in response.json()['records']:
+        try:
 
-        # Rename keys for consistency
-        dict_title['name'] = get_real_title(dict_title)
+            # Rename keys for consistency
+            dict_title['name'] = get_real_title(dict_title)
 
-        # Add the record to media search manager if the name is not None
-        media_search_manager.add_media({
-            'id': dict_title.get('id'),
-            'slug': dict_title.get('slug'),
-            'name': dict_title.get('name'),
-            'type': dict_title.get('type'),
-            'score': dict_title.get('score'),
-            'episodes_count': dict_title.get('episodes_count')
-        })
+            media_search_manager.add_media({
+                'id': dict_title.get('id'),
+                'slug': dict_title.get('slug'),
+                'name': dict_title.get('name'),
+                'type': dict_title.get('type'),
+                'score': dict_title.get('score'),
+                'episodes_count': dict_title.get('episodes_count')
+            })
+
+        except Exception as e:
+            print(f"Error parsing a film entry: {e}")
 
     # Return the length of media search manager
     return media_search_manager.get_length()

@@ -75,9 +75,9 @@ def title_search(word_to_search: str) -> int:
                 }
 
                 media_search_manager.add_media(title_info)
-
+                    
             except Exception as e:
-                logging.error(f"Error processing title div: {e}")
+                print(f"Error parsing a film entry: {e}")
 
         return media_search_manager.get_length()
     

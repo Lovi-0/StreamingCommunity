@@ -39,18 +39,21 @@ async def title_search(word_to_search: str) -> int:
     scraper = IlCorsaroNeroScraper(f"https://{SITE_NAME}.{domain_to_use}/", 1)
     results = await scraper.search(word_to_search)
 
-    # Add all result to media manager
     for i, torrent in enumerate(results):
-        media_search_manager.add_media({
-            'name': torrent['name'],
-            'type': torrent['type'],
-            'seed': torrent['seed'],
-            'leech': torrent['leech'],
-            'size': torrent['size'],
-            'date': torrent['date'],
-            'url': torrent['url']
-        })
+        try:
+            
+            media_search_manager.add_media({
+                'name': torrent['name'],
+                'type': torrent['type'],
+                'seed': torrent['seed'],
+                'leech': torrent['leech'],
+                'size': torrent['size'],
+                'date': torrent['date'],
+                'url': torrent['url']
+            })
 
+        except Exception as e:
+            print(f"Error parsing a film entry: {e}")
 
     # Return the number of titles found
     return media_search_manager.get_length()

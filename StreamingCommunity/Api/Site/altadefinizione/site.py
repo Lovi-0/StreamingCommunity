@@ -62,21 +62,27 @@ def title_search(title_search: str) -> int:
 
     # Create soup and find table
     soup = BeautifulSoup(response.text, "html.parser")
-    table_content = soup.find('div', id="dle-content")
 
-    # Scrape div film in table on single page
-    for film_div in table_content.find_all('div', class_='col-lg-3'):
-        title = film_div.find('h2', class_='titleFilm').get_text(strip=True)
-        link = film_div.find('h2', class_='titleFilm').find('a')['href']
-        imdb_rating = film_div.find('div', class_='imdb-rate').get_text(strip=True).split(":")[-1]
+    for row in soup.find_all('div', class_='col-lg-3 col-md-3 col-xs-4'):
+        try:
+            
+            title_element = row.find('h2', class_='titleFilm').find('a')
+            title = title_element.get_text(strip=True)
+            link = title_element['href']
 
-        film_info = {
-            'name': title,
-            'url': link,
-            'score': imdb_rating
-        }
+            imdb_element = row.find('div', class_='imdb-rate')
+            imdb_rating = imdb_element.get_text(strip=True).split(":")[-1]
 
-        media_search_manager.add_media(film_info)
+            film_info = {
+                'name': title,
+                'url': link,
+                'score': imdb_rating
+            }
+            
+            media_search_manager.add_media(film_info)
+
+        except AttributeError as e:
+            print(f"Error parsing a film entry: {e}")
 
     # Return the number of titles found
     return media_search_manager.get_length()

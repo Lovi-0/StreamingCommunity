@@ -116,16 +116,20 @@ def title_search(title_search: str, domain: str) -> int:
     except Exception as e:
         console.print(f"Site: {SITE_NAME}, request search error: {e}")
 
-    # Add found titles to media search manager
     for dict_title in response.json()['data']:
-        media_search_manager.add_media({
-            'id': dict_title.get('id'),
-            'slug': dict_title.get('slug'),
-            'name': dict_title.get('name'),
-            'type': dict_title.get('type'),
-            'date': dict_title.get('last_air_date'),
-            'score': dict_title.get('score')
-        })
+        try:
+
+            media_search_manager.add_media({
+                'id': dict_title.get('id'),
+                'slug': dict_title.get('slug'),
+                'name': dict_title.get('name'),
+                'type': dict_title.get('type'),
+                'date': dict_title.get('last_air_date'),
+                'score': dict_title.get('score')
+            })
+
+        except Exception as e:
+            print(f"Error parsing a film entry: {e}")
 
     # Return the number of titles found
     return media_search_manager.get_length()

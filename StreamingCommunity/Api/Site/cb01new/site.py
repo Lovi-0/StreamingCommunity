@@ -50,20 +50,23 @@ def title_search(word_to_search: str) -> int:
     # Create soup and find table
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # For all element in table
     for div in soup.find_all("div", class_ = "card-content"):
+        try:
 
-        url = div.find("h3").find("a").get("href")
-        title = div.find("h3").find("a").get_text(strip=True)
-        desc = div.find("p").find("strong").text
+            url = div.find("h3").find("a").get("href")
+            title = div.find("h3").find("a").get_text(strip=True)
+            desc = div.find("p").find("strong").text
 
-        title_info = {
-            'name': title,
-            'desc': desc,
-            'url': url
-        }
+            title_info = {
+                'name': title,
+                'desc': desc,
+                'url': url
+            }
 
-        media_search_manager.add_media(title_info)
+            media_search_manager.add_media(title_info)
+
+        except Exception as e:
+            print(f"Error parsing a film entry: {e}")
 
     # Return the number of titles found
     return media_search_manager.get_length()

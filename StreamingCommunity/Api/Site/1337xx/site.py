@@ -57,7 +57,6 @@ def title_search(word_to_search: str) -> int:
     # Create soup and find table
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # Scrape div film in table on single page
     for tr in soup.find_all('tr'):
         try:
 
@@ -72,8 +71,8 @@ def title_search(word_to_search: str) -> int:
             
             media_search_manager.add_media(title_info)
 
-        except:
-            continue
+        except Exception as e:
+            print(f"Error parsing a film entry: {e}")
 
     # Return the number of titles found
     return media_search_manager.get_length()
