@@ -1,10 +1,12 @@
 # 01.03.24
 
+import json
 import logging
 
 
 # External libraries
 import httpx
+from bs4 import BeautifulSoup
 
 
 # Internal utilities
@@ -56,33 +58,33 @@ class ScrapeSerie:
         Raises:
             Exception: If there's an error fetching season information
         """
-        self.headers = {
-            'user-agent': get_headers(),
-            'x-inertia': 'true', 
-            'x-inertia-version': self.version,
-        }
-
         try:
-
             response = httpx.get(
-                url=f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}", 
-                headers=self.headers, 
+                url=f"https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}",
+                headers=self.headers,
                 timeout=max_timeout
             )
             response.raise_for_status()
 
             # Extract seasons from JSON response
-            json_response = response.json().get('props')
+            soup = BeautifulSoup(response.text, "html.parser")
+            json_response = json.loads(soup.find("div", {"id": "app"}).get("data-page"))
+                  
+            """
+            response = httpx.post(
+                url=f'https://{self.base_name}.{self.domain}/api/titles/preview/{self.media_id}', 
+                headers={'User-Agent': get_headers()}
+            )
+            response.raise_for_status()
+            
+
+            # Extract seasons from JSON response
+            json_response = response.json()
+            """
 
             # Collect info about season
-            self.season_manager = Season(json_response.get('title'))
-            self.season_manager.collect_images(self.base_name, self.domain)
+            self.season_manager = Season(json_response.get("props").get("title"))
 
-            # Collect first episode info
-            for i, ep in enumerate(json_response.get('loadedSeason').get('episodes')):
-                self.season_manager.episodes.add(ep)
-                self.season_manager.episodes.get(i).collect_image(self.base_name, self.domain)
-            
         except Exception as e:
             logging.error(f"Error collecting season info: {e}")
             raise
@@ -97,16 +99,14 @@ class ScrapeSerie:
         Raises:
             Exception: If there's an error fetching episode information
         """
-        self.headers = {
-            'user-agent': get_headers(),
-            'x-inertia': 'true', 
-            'x-inertia-version': self.version,
-        }
-
         try:
             response = httpx.get(
                 url=f'https://{self.base_name}.{self.domain}/titles/{self.media_id}-{self.series_name}/stagione-{number_season}', 
-                headers=self.headers, 
+                headers={
+                    'User-Agent': get_headers(),
+                    'x-inertia': 'true', 
+                    'x-inertia-version': self.version,
+                },
                 timeout=max_timeout
             )
             response.raise_for_status()

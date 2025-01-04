@@ -19,9 +19,11 @@ from StreamingCommunity.Api.Template.Class.SearchType import MediaManager
 
 
 # Variable
-from .costant import SITE_NAME
+from .costant import SITE_NAME, DOMAIN_NOW
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
+max_timeout = config_manager.get_int("REQUESTS", "timeout")
+disable_searchDomain = config_manager.get_bool("DEFAULT", "disable_searchDomain")
 
 
 def title_search(title_search: str) -> int:
@@ -38,9 +40,11 @@ def title_search(title_search: str) -> int:
     table_show_manager.clear()
 
     # Find new domain if prev dont work
-    max_timeout = config_manager.get_int("REQUESTS", "timeout")
-    domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+    domain_to_use = DOMAIN_NOW
     
+    if not disable_searchDomain:
+        domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+        
     # Send request to search for title
     client = httpx.Client()
 

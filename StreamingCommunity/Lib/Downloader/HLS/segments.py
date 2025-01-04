@@ -194,23 +194,28 @@ class M3U8_Segments:
         """
         if self.is_index_url:
 
-            # Send a GET request to retrieve the index M3U8 file
-            response = httpx.get(
-                self.url, 
-                headers={'User-Agent': get_headers()}, 
-                timeout=max_timeout
-            )
-            response.raise_for_status()
+            try:
 
-            # Save the M3U8 file to the temporary folder
-            path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
-            open(path_m3u8_file, "w+").write(response.text) 
+                # Send a GET request to retrieve the index M3U8 file
+                response = httpx.get(
+                    self.url, 
+                    headers={'User-Agent': get_headers()}, 
+                    timeout=max_timeout,
+                    follow_redirects=True
+                )
+                response.raise_for_status()
 
-            # Parse the text from the M3U8 index file
-            self.parse_data(response.text)  
+                # Save the M3U8 file to the temporary folder
+                path_m3u8_file = os.path.join(self.tmp_folder, "playlist.m3u8")
+                open(path_m3u8_file, "w+").write(response.text) 
+
+                # Parse the text from the M3U8 index file
+                self.parse_data(response.text)  
+
+            except Exception as e:
+                print(f"Error during M3U8 index request: {e}")
 
         else:
-
             # Parser data of content of index pass in input to class
             self.parse_data(self.url)
     
@@ -385,7 +390,7 @@ class M3U8_Segments:
                         buffer[index] = segment_content
 
                 except queue.Empty:
-                    self.current_timeout = min(self.max_timeout, self.current_timeout * 1.5)
+                    self.current_timeout = min(self.max_timeout, self.current_timeout * 1.25)
 
                     if self.stop_event.is_set():
                         break
@@ -546,7 +551,7 @@ class M3U8_Segments:
             raise Exception("Output file is empty")
 
         # Display additional 
-        if self.info_nRetry >= len(self.segments) * (1/3.33):
+        if self.info_nRetry >= len(self.segments) * 0.3:
 
             # Get expected time
             ex_hours, ex_minutes, ex_seconds = format_duration(self.expected_real_time_s)

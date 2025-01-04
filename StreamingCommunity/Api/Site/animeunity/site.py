@@ -21,10 +21,11 @@ from StreamingCommunity.Api.Template.Class.SearchType import MediaManager
 
 
 # Variable
-from .costant import SITE_NAME
+from .costant import SITE_NAME, DOMAIN_NOW
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
-
+max_timeout = config_manager.get_int("REQUESTS", "timeout")
+disable_searchDomain = config_manager.get_bool("DEFAULT", "disable_searchDomain")
 
 
 def get_token(site_name: str, domain: str) -> dict:
@@ -40,7 +41,10 @@ def get_token(site_name: str, domain: str) -> dict:
     """
 
     # Send a GET request to the specified URL composed of the site name and domain
-    response = httpx.get(f"https://www.{site_name}.{domain}")
+    response = httpx.get(
+        url=f"https://www.{site_name}.{domain}", 
+        timeout=max_timeout
+    )
     response.raise_for_status()
 
     # Initialize variables to store CSRF token
@@ -103,8 +107,10 @@ def title_search(title: str) -> int:
     table_show_manager.clear()
 
     # Get token and session value from configuration
-    max_timeout = config_manager.get_int("REQUESTS", "timeout")
-    domain_to_use, _ = search_domain(SITE_NAME, f"https://www.{SITE_NAME}")
+    domain_to_use = DOMAIN_NOW
+    
+    if not disable_searchDomain:
+        domain_to_use, base_url = search_domain(SITE_NAME, f"https://www.{SITE_NAME}")
     
     data = get_token(SITE_NAME, domain_to_use)
 

@@ -2,7 +2,6 @@
 
 import os
 import sys
-import time
 
 
 # Internal utilities
@@ -24,7 +23,7 @@ from StreamingCommunity.Api.Player.supervideo import VideoSource
 
 
 # Variable
-from .costant import ROOT_PATH, SERIES_FOLDER
+from .costant import SERIES_FOLDER
 
 
 
@@ -50,7 +49,7 @@ def download_video(index_season_selected: int, index_episode_selected: int, scap
 
     # Define filename and path for the downloaded video
     mp4_name = f"{map_episode_title(scape_info_serie.tv_name, index_season_selected, index_episode_selected, obj_episode.get('name'))}.mp4"
-    mp4_path = os.path.join(ROOT_PATH, SERIES_FOLDER, scape_info_serie.tv_name, f"S{index_season_selected}")
+    mp4_path = os.path.join(SERIES_FOLDER, scape_info_serie.tv_name, f"S{index_season_selected}")
 
     # Setup video source
     video_source = VideoSource(obj_episode.get('url'))

@@ -214,12 +214,14 @@ The configuration file is divided into several main sections:
     "movie_folder_name": "Movie",
     "serie_folder_name": "TV",
     "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
+    "add_siteName": false,
+    "disable_searchDomain": false,
     "not_close": false
 }
 ```
 
 - `root_path`: Directory where all videos will be saved
-
+  
   ### Path examples:
   * Windows: `C:\\MyLibrary\\Folder` or `\\\\MyServer\\MyLibrary` (if you want to use a network folder)
   * Linux/MacOS: `Desktop/MyLibrary/Folder`
@@ -241,7 +243,10 @@ The configuration file is divided into several main sections:
   * `%(episode_name)` : Is the name of the episode
     `<br/><br/>`
     
-- `not_close`: If true, continues running after downloading
+- `add_siteName`: If set to true, appends the site_name to the root path before the movie and serie folders.
+- `disable_searchDomain`: If set to true, disables the search for a new domain for all sites.
+- `not_close`: If set to true, keeps the program running after the download is complete.
+
 
     ### qBittorrent Configuration
 
@@ -258,7 +263,6 @@ The configuration file is divided into several main sections:
 
     To enable qBittorrent integration, follow the setup guide [here](https://github.com/lgallard/qBittorrent-Controller/wiki/How-to-enable-the-qBittorrent-Web-UI).
 
-<br>
 
 ## REQUESTS Settings
 
@@ -272,7 +276,6 @@ The configuration file is divided into several main sections:
 - `timeout`: Maximum timeout (in seconds) for each request
 - `max_retry`: Number of retry attempts per segment during M3U8 index download
 
-<br>
 
 ## M3U8_DOWNLOAD Settings
 
@@ -293,10 +296,9 @@ The configuration file is divided into several main sections:
 - `cleanup_tmp_folder`: Remove temporary .ts files after download
 
 > [!IMPORTANT]
-> Set `tqdm_use_large_bar` to `false` when using Termux or terminals with limited width to prevent display issues
+> Set `tqdm_use_large_bar` to `false` when using Termux or terminals with limited width to prevent network monitoring issues
 
 
-<br>
 
 ### Language Settings
 
@@ -345,7 +347,6 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
 - `force_resolution`: Force specific resolution (-1 for best available, or specify 1080, 720, 360)
 - `get_only_link`: Return M3U8 playlist/index URL instead of downloading
 
-<br>
 
 # COMMAND
 
@@ -361,7 +362,6 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
 - Enter a season number followed by `-*` to download from that season to the end.
   * **Example:** `3-*` will download from *Season 3* to the final season.
 
-<br>
 
 # Docker
 

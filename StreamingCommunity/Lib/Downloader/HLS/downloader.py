@@ -104,14 +104,15 @@ class HttpClient:
             response = httpx.get(
                 url=url, 
                 headers=self.headers, 
-                timeout=max_timeout
+                timeout=max_timeout,
+                follow_redirects=True
             )
 
             response.raise_for_status()
             return response.text
 
         except Exception as e:
-            logging.info(f"Request to {url} failed with error: {e}")
+            console.print(f"Request to {url} failed with error: {e}")
             return 404
 
     def get_content(self, url):

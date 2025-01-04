@@ -26,30 +26,36 @@ from StreamingCommunity.Api.Template.Class.SearchType import MediaManager
 
 
 # Config
-from .costant import SITE_NAME
+from .costant import SITE_NAME, DOMAIN_NOW
 
 
 # Variable
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 max_timeout = config_manager.get_int("REQUESTS", "timeout")
+disable_searchDomain = config_manager.get_bool("DEFAULT", "disable_searchDomain")
 
 
-def get_version(text: str):
+def get_version(domain: str):
     """
     Extracts the version from the HTML text of a webpage.
 
     Parameters:
-        - text (str): The HTML text of the webpage.
+        - domain (str): The domain of the site.
 
     Returns:
         str: The version extracted from the webpage.
-        list: Top 10 titles headlines for today.
     """
     try:
+        response = httpx.get(
+            url=f"https://{SITE_NAME}.{domain}/", 
+            headers={'User-Agent': get_headers()}, 
+            timeout=max_timeout
+        )
+        response.raise_for_status()
 
         # Parse request to site
-        soup = BeautifulSoup(text, "html.parser")
+        soup = BeautifulSoup(response.text, "html.parser")
 
         # Extract version
         version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
@@ -72,22 +78,13 @@ def get_version_and_domain():
     """
 
     # Find new domain if prev dont work
-    domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+    domain_to_use = DOMAIN_NOW
 
-    # Extract version from the response
-    try:
-        version = get_version(
-            httpx.get(
-                url=base_url, 
-                headers={'User-Agent': get_headers()}, 
-                timeout=max_timeout
-            ).text
-        )
+    if not disable_searchDomain:
+        domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+
+    version = get_version(domain_to_use)
         
-    except:
-        console.print("[green]Auto generate version ...")
-        version = secrets.token_hex(32 // 2)
-
     return version, domain_to_use
 
 

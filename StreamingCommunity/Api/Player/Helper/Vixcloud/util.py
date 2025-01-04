@@ -5,20 +5,14 @@ from typing import Dict, Any, List, Union
 
 class Episode:
     def __init__(self, data: Dict[str, Any]):
-        self.images = None
         self.data = data
 
-        self.id: int = data.get('id')
-        self.scws_id: int = data.get('scws_id')
-        self.number: int = data.get('number')
-        self.name: str = data.get('name')
-        self.plot: str = data.get('plot')
-        self.duration: int = data.get('duration')
-
-    def collect_image(self, SITE_NAME, domain):
-        self.image = None
-        if len(self.data.get('images')) > 0:
-            self.image = f"https://cdn.{SITE_NAME}.{domain}/images/{self.data.get('images')[0]['filename']}"
+        self.id: int = data.get('id', 0)
+        self.scws_id: int = data.get('scws_id', 0)
+        self.number: int = data.get('number', 1)
+        self.name: str = data.get('name', '')
+        self.plot: str = data.get('plot', '')
+        self.duration: int = data.get('duration', 0)
 
     def __str__(self):
         return f"Episode(id={self.id}, number={self.number}, name='{self.name}', plot='{self.plot}', duration={self.duration} sec)"
@@ -73,24 +67,19 @@ class EpisodeManager:
 
 class Season:
     def __init__(self, season_data: Dict[str, Union[int, str, None]]):
-        self.images = {}
         self.season_data = season_data
 
-        self.id: int = season_data.get('id')
-        self.scws_id: int = season_data.get('scws_id')
-        self.imdb_id: int = season_data.get('imdb_id')
-        self.number: int = season_data.get('number')
-        self.name: str = season_data.get('name')
-        self.slug: str = season_data.get('slug')
-        self.plot: str = season_data.get('plot')
-        self.type: str = season_data.get('type')
-        self.seasons_count: int = season_data.get('seasons_count')
+        self.id: int = season_data.get('id', 0)
+        self.scws_id: int = season_data.get('scws_id', 0)
+        self.imdb_id: int = season_data.get('imdb_id', 0)
+        self.number: int = season_data.get('number', 0)
+        self.name: str = season_data.get('name', '')
+        self.slug: str = season_data.get('slug', '')
+        self.plot: str = season_data.get('plot', '')
+        self.type: str = season_data.get('type', '')
+        self.seasons_count: int = season_data.get('seasons_count', 0)
         self.episodes: EpisodeManager = EpisodeManager()
         
-    def collect_images(self, SITE_NAME, domain):
-        for dict_image in self.season_data.get('images'):
-            self.images[dict_image.get('type')] = f"https://cdn.{SITE_NAME}.{domain}/images/{dict_image.get('filename')}"
-
 
 class Stream:
     def __init__(self, name: str, url: str, active: bool):

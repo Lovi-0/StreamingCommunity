@@ -22,7 +22,7 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSource
 
 
 # Variable
-from .costant import ROOT_PATH, SITE_NAME, MOVIE_FOLDER
+from .costant import SITE_NAME, MOVIE_FOLDER
         
 
 def download_film(select_title: MediaItem) -> str:
@@ -51,8 +51,8 @@ def download_film(select_title: MediaItem) -> str:
     master_playlist = video_source.get_playlist()
 
     # Define the filename and path for the downloaded film
-    title_name = os_manager.get_sanitize_file(select_title.slug) + ".mp4"
-    mp4_path = os.path.join(ROOT_PATH, MOVIE_FOLDER, select_title.slug)
+    title_name = os_manager.get_sanitize_file(select_title.name) + ".mp4"
+    mp4_path = os.path.join(MOVIE_FOLDER, select_title.name)
 
     # Download the film using the m3u8 playlist, and output filename
     r_proc = HLS_Downloader(

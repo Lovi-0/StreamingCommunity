@@ -21,7 +21,7 @@ from StreamingCommunity.Api.Template.Class.SearchType import MediaItem
 
 
 # Config
-from .costant import ROOT_PATH, DOMAIN_NOW, SITE_NAME, MOVIE_FOLDER
+from .costant import DOMAIN_NOW, SITE_NAME, MOVIE_FOLDER
 
 
 def download_title(select_title: MediaItem):
@@ -39,7 +39,7 @@ def download_title(select_title: MediaItem):
     # Define output path
     title_name = os_manager.get_sanitize_file(select_title.name)
     mp4_path = os_manager.get_sanitize_path(
-        os.path.join(ROOT_PATH, MOVIE_FOLDER, title_name.replace(".mp4", ""))
+        os.path.join(MOVIE_FOLDER, title_name.replace(".mp4", ""))
     )
     
     # Create output folder

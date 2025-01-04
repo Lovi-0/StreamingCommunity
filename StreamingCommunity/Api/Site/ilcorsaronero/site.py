@@ -2,6 +2,7 @@
 
 
 # Internal utilities
+from StreamingCommunity.Util._jsonConfig import config_manager
 from StreamingCommunity.Util.table import TVShowManager
 
 
@@ -13,9 +14,11 @@ from .util.ilCorsarScraper import IlCorsaroNeroScraper
 
 
 # Variable
-from .costant import SITE_NAME
+from .costant import SITE_NAME, DOMAIN_NOW
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
+max_timeout = config_manager.get_int("REQUESTS", "timeout")
+disable_searchDomain = config_manager.get_bool("DEFAULT", "disable_searchDomain")
 
 
 async def title_search(word_to_search: str) -> int:
@@ -32,7 +35,10 @@ async def title_search(word_to_search: str) -> int:
     table_show_manager.clear()
 
     # Find new domain if prev dont work
-    domain_to_use, _ = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+    domain_to_use = DOMAIN_NOW
+    
+    if not disable_searchDomain:
+        domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}")
 
     # Create scraper and collect result
     print("\n")

@@ -15,6 +15,8 @@
             "user": "admin",
             "pass": "adminadmin"
         },
+        "add_siteName": true,
+        "disable_searchDomain": true,
         "not_close": false
     },
     "REQUESTS": {
@@ -24,7 +26,7 @@
         "proxy_start_max": 0.5
     },
     "M3U8_DOWNLOAD": {
-        "tqdm_delay": 0.01,
+        "tqdm_delay": 0.12,
         "tqdm_use_large_bar": true,
         "default_video_workser": 12,
         "default_audio_workser": 12,

@@ -24,7 +24,7 @@ from StreamingCommunity.Api.Player.ddl import VideoSource
 
 
 # Variable
-from .costant import ROOT_PATH, SERIES_FOLDER
+from .costant import SERIES_FOLDER
 
 
 
@@ -51,7 +51,7 @@ def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, 
     title_name = os_manager.get_sanitize_file(
         f"{map_episode_title(scape_info_serie.tv_name, None, index_episode_selected, obj_episode.get('name'))}.mp4"
     )
-    mp4_path = os.path.join(ROOT_PATH, SERIES_FOLDER, scape_info_serie.tv_name)
+    mp4_path = os.path.join(SERIES_FOLDER, scape_info_serie.tv_name)
 
     # Create output folder
     os_manager.create_path(mp4_path)
