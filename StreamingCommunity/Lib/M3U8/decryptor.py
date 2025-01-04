@@ -61,6 +61,7 @@ if crypto_installed:
                 bytes: The decrypted content.
             """
             start = time.perf_counter_ns()
+            #logging.info(f"Ciphertext: {ciphertext}")
 
             # Decrypt based on encryption method
             if self.method in {"AES", "AES-128"}:

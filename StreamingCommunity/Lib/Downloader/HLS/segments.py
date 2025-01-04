@@ -131,6 +131,7 @@ class M3U8_Segments:
         # Convert the content of the response to hexadecimal and then to bytes
         hex_content = binascii.hexlify(response.content).decode('utf-8')
         byte_content = bytes.fromhex(hex_content)
+        logging.info(f"URI: Hex content: {hex_content}, Byte content: {byte_content}")
         
         #console.print(f"[cyan]Find key: [red]{hex_content}")
         return byte_content
@@ -160,6 +161,7 @@ class M3U8_Segments:
 
             iv = m3u8_parser.keys.get('iv')
             method = m3u8_parser.keys.get('method')
+            logging.info(f"M3U8_Decryption - IV: {iv}, method: {method}")
 
             # Create a decryption object with the key and set the method
             self.decryption = M3U8_Decryption(key, iv, method)
@@ -308,7 +310,9 @@ class M3U8_Segments:
                         
                     except Exception as e:
                         logging.error(f"Decryption failed for segment {index}: {str(e)}")
-                        raise
+                        self.interrupt_flag.set()   # Interrupt the download process
+                        self.stop_event.set()       # Trigger the stopping event for all threads
+                        break                       # Stop the current task immediately
 
                 # Update progress and queue
                 self.class_ts_estimator.update_progress_bar(content_size, duration, progress_bar)
@@ -537,10 +541,14 @@ class M3U8_Segments:
         progress_bar.close()
 
         # Final verification
-        final_completion = (len(self.downloaded_segments) / total_segments) * 100
-        if final_completion < 99.9:  # Less than 99.9% complete
-            missing = set(range(total_segments)) - self.downloaded_segments
-            raise Exception(f"Download incomplete ({final_completion:.1f}%). Missing segments: {sorted(missing)}")
+        try:
+            final_completion = (len(self.downloaded_segments) / total_segments) * 100
+            if final_completion < 99.9:  # Less than 99.9% complete
+                missing = set(range(total_segments)) - self.downloaded_segments
+                raise Exception(f"Download incomplete ({final_completion:.1f}%). Missing segments: {sorted(missing)}")
+            
+        except:
+            pass
 
         # Verify output file
         if not os.path.exists(self.tmp_file_path):

@@ -1,6 +1,7 @@
 # 29.01.24
 
 import os
+import sys
 import json
 import httpx
 import logging
@@ -31,24 +32,45 @@ class ConfigManager:
             
             # Download config.json
             else:
-                logging.info("Configuration file does not exist. Downloading...")
-                url = "https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/refs/heads/main/config.json"
+                self.download_requirements(
+                    'https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/refs/heads/main/config.json',
+                    self.file_path
+                )
                 
-                with httpx.Client() as client:
-                    response = client.get(url)
-                    
-                    if response.status_code == 200:
-                        with open(self.file_path, 'w') as f:
-                            f.write(response.text)
+                with open(self.file_path, 'r') as f:
+                    self.config = json.loads(f)
+                logging.info("Configuration file downloaded and saved.")
 
-                        self.config = json.loads(response.text)
-                        logging.info("Configuration file downloaded and saved.")
-
-                    else:
-                        logging.error(f"Failed to download configuration file. Status code: {response.status_code}")
-        
+            logging.info("Configuration file does not exist. Downloading...")
+            
         except Exception as e:
             logging.error(f"Error reading configuration file: {e}")
+
+    def download_requirements(self, url: str, filename: str):
+        """
+        Download the requirements.txt file from the specified URL if not found locally using requests.
+        
+        Args:
+            url (str): The URL to download the requirements file from.
+            filename (str): The local filename to save the requirements file as.
+        """
+        try:
+            import requests
+            
+            logging.info(f"{filename} not found locally. Downloading from {url}...")
+            response = requests.get(url)
+            
+            if response.status_code == 200:
+                with open(filename, 'wb') as f:
+                    f.write(response.content)
+
+            else:
+                logging.error(f"Failed to download {filename}. HTTP Status code: {response.status_code}")
+                sys.exit(0)
+        
+        except Exception as e:
+            logging.error(f"Failed to download {filename}: {e}")
+            sys.exit(0)
 
     def read_key(self, section: str, key: str, data_type: type = str) -> Any:
         """Read a key from the configuration file.

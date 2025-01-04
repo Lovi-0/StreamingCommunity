@@ -15,8 +15,8 @@
             "user": "admin",
             "pass": "adminadmin"
         },
-        "add_siteName": true,
-        "disable_searchDomain": true,
+        "add_siteName": false,
+        "disable_searchDomain": false,
         "not_close": false
     },
     "REQUESTS": {
