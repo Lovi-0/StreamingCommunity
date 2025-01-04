@@ -23,26 +23,28 @@ class ConfigManager:
         """Read the configuration file."""
         try:
             logging.info(f"Reading file: {self.file_path}")
-            
-            # Check if file exist
+
+            # Check if file exists
             if os.path.exists(self.file_path):
                 with open(self.file_path, 'r') as f:
                     self.config = json.load(f)
                 logging.info("Configuration file loaded successfully.")
-            
-            # Download config.json
+
+            # Download config.json if it doesn't exist locally
             else:
+                logging.info("Configuration file does not exist. Downloading...")
                 self.download_requirements(
                     'https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/refs/heads/main/config.json',
                     self.file_path
                 )
-                
+
+                # Load the downloaded config.json into the config attribute
                 with open(self.file_path, 'r') as f:
-                    self.config = json.loads(f)
+                    self.config = json.load(f)
                 logging.info("Configuration file downloaded and saved.")
 
-            logging.info("Configuration file does not exist. Downloading...")
-            
+            logging.info("Configuration file processed successfully.")
+
         except Exception as e:
             logging.error(f"Error reading configuration file: {e}")
 
