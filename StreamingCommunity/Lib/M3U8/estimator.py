@@ -199,7 +199,7 @@ class M3U8_Ts_Estimator:
             
             if TQDM_USE_LARGE_BAR:
                 speed_data = self.get_average_speed()
-                logging.debug(f"Speed data for progress bar: {speed_data}")
+                #logging.debug(f"Speed data for progress bar: {speed_data}")
                 
                 if len(speed_data) >= 2:
                     average_internet_speed = speed_data[0]
@@ -223,7 +223,7 @@ class M3U8_Ts_Estimator:
                 )
             
             progress_counter.set_postfix_str(progress_str)
-            logging.debug(f"Updated progress bar: {progress_str}")
+            #logging.debug(f"Updated progress bar: {progress_str}")
             
         except Exception as e:
             logging.error(f"Error updating progress bar: {str(e)}")

@@ -1,0 +1,26 @@
+---
+name: Bug Report
+about: Report a bug you encountered
+title: "[BUG] Brief description of the issue"
+labels: bug
+assignees: ''
+---
+
+**Checklist before submitting**
+Please make sure to check the following:
+
+- [ ] You are using the latest version of the project/repository.
+- [ ] The issue relates to a website or a specific functionality.
+- [ ] If the issue is related to a website, you have verified that the URL works correctly in your browser.
+
+**Describe the issue**
+Provide a clear and complete description of the problem.
+
+**Expected behavior**
+Explain what you expected to happen.
+
+**Screenshots**
+If applicable, attach screenshots that illustrate the issue.
+
+**Additional context**
+Add any other relevant information that could help in diagnosing the problem.
