@@ -97,14 +97,12 @@ def update_readme(site_names, domain_to_use):
             alias = f"{site_name.lower()}"
 
             if alias in site_names:
-                print("Update line: ", line)
-                
                 if site_name == "animeunity":
                     updated_line = f"| [{site_name}](https://www.{alias}.{domain_to_use}/) |   ✅   |\n"
                 else:
                     updated_line = f"| [{site_name}](https://{alias}.{domain_to_use}/) |   ✅   |\n"
 
-                print("To: ", updated_line.strip())
+                print("Update: ", updated_line.strip())
                 updated_lines.append(updated_line)
                 continue
 
@@ -124,11 +122,6 @@ if __name__ == "__main__":
             else:
                 domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://{site_name}", get_first=True)
                 
-            # Update readme
-            if original_domain != domain_to_use:
-                print("\n")
-                print("Return domain: ", domain_to_use)
-                update_readme(alias, domain_to_use)
-                
+            update_readme(alias, domain_to_use)
             print("------------------------------------")
             time.sleep(3)
