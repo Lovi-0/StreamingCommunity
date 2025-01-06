@@ -102,7 +102,6 @@ def update_readme(site_names, domain_to_use):
                 else:
                     updated_line = f"| [{site_name}](https://{alias}.{domain_to_use}/) |   ✅   |\n"
 
-                print("Update: ", updated_line.strip())
                 updated_lines.append(updated_line)
                 continue
 
@@ -118,9 +117,9 @@ if __name__ == "__main__":
 
         if site_name != "ilcorsaronero":
             if site_name == "animeunity":
-                domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://www.{site_name}", get_first=True)
+                domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://www.{site_name}.{original_domain}", get_first=True)
             else:
-                domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://{site_name}", get_first=True)
+                domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://{site_name}.{original_domain}", get_first=True)
                 
             update_readme(alias, domain_to_use)
             print("------------------------------------")

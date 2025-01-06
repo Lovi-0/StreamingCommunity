@@ -14,6 +14,22 @@ from StreamingCommunity.Util.console import console, msg
 from StreamingCommunity.Util._jsonConfig import config_manager
 
 
+base_headers = {
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+    'priority': 'u=0, i',
+    'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-fetch-dest': 'document',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-site': 'none',
+    'sec-fetch-user': '?1',
+    'upgrade-insecure-requests': '1',
+    'user-agent': None
+}
+
+
 def get_tld(url_str):
     """Extract the TLD (Top-Level Domain) from the URL without using external libraries."""
     url_str = unquote(url_str)
@@ -59,8 +75,10 @@ def validate_url(url, base_url, max_timeout, max_retries=5):
         try:
             # Check 1: Initial request without following redirects
             #console.print("[cyan]Performing initial connection check...")
+            base_headers['user-agent'] = get_headers()
+
             with httpx.Client(
-                headers={'User-Agent': get_headers()},
+                headers=base_headers,
                 follow_redirects=False,
                 timeout=max_timeout
             ) as client:
@@ -75,7 +93,7 @@ def validate_url(url, base_url, max_timeout, max_retries=5):
             # Check 2: Follow redirects and verify final domain
             #console.print("[cyan]Checking redirect destination...")
             with httpx.Client(
-                headers={'User-Agent': get_headers()},
+                headers=base_headers,
                 follow_redirects=True,
                 timeout=max_timeout
             ) as client:
@@ -117,24 +135,23 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
     """
     max_timeout = config_manager.get_int("REQUESTS", "timeout")
     domain = str(config_manager.get_dict("SITE", site_name)['domain'])
-    test_url = f"{base_url}.{domain}"
 
     try:
-        is_correct, redirect_tld = validate_url(test_url, base_url, max_timeout, max_retries=5)
+        is_correct, redirect_tld = validate_url(base_url, base_url, max_timeout, max_retries=5)
 
         if is_correct and redirect_tld is not None:
             config_manager.config['SITE'][site_name]['domain'] = redirect_tld
             config_manager.write_config()
             console.print(f"[green]Successfully validated initial URL")
-            return redirect_tld, test_url
+            return redirect_tld, base_url
 
         if is_correct:
-            parsed_url = urlparse(test_url)
+            parsed_url = urlparse(base_url)
             tld = parsed_url.netloc.split('.')[-1]
             config_manager.config['SITE'][site_name]['domain'] = tld
             config_manager.write_config()
             console.print(f"[green]Successfully validated initial URL")
-            return tld, test_url
+            return tld, base_url
 
     except Exception as e:
         console.print(f"[red]Error testing initial URL: {str(e)}")
@@ -145,7 +162,7 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
     search_results = list(search(query, num_results=20, lang="it"))
 
     for idx, result_url in enumerate(search_results, 1):
-        if get_base_domain(result_url) == get_base_domain(test_url):
+        if get_base_domain(result_url) == get_base_domain(base_url):
             console.print(f"\n[cyan]Checking Google result {idx}/20[white]: [yellow]{result_url}")
 
             if validate_url(result_url, base_url, max_timeout):
