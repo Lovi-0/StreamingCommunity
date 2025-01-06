@@ -110,7 +110,7 @@ def title_search(title: str) -> int:
     domain_to_use = DOMAIN_NOW
     
     if not disable_searchDomain:
-        domain_to_use, base_url = search_domain(SITE_NAME, f"https://www.{SITE_NAME}")
+        domain_to_use, base_url = search_domain(SITE_NAME, f"https://www.{SITE_NAME}.{DOMAIN_NOW}")
     
     data = get_token(SITE_NAME, domain_to_use)
 

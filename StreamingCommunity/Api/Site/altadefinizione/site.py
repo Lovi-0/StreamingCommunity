@@ -43,7 +43,7 @@ def title_search(title_search: str) -> int:
     domain_to_use = DOMAIN_NOW
     
     if not disable_searchDomain:
-        domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+        domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}.{DOMAIN_NOW}")
         
     # Send request to search for title
     client = httpx.Client()

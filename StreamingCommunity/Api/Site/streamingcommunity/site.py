@@ -81,7 +81,7 @@ def get_version_and_domain():
     domain_to_use = DOMAIN_NOW
 
     if not disable_searchDomain:
-        domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+        domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}.{DOMAIN_NOW}")
 
     version = get_version(domain_to_use)
         

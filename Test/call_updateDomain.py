@@ -123,4 +123,4 @@ if __name__ == "__main__":
                 
             update_readme(alias, domain_to_use)
             print("------------------------------------")
-            time.sleep(3)
+            time.sleep(2)

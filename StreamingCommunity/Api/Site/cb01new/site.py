@@ -42,7 +42,7 @@ def title_search(word_to_search: str) -> int:
     domain_to_use = DOMAIN_NOW
     
     if not disable_searchDomain:
-        domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}")
+        domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}.{DOMAIN_NOW}")
 
     response = httpx.get(
         url=f"https://{SITE_NAME}.{domain_to_use}/?s={word_to_search}",
