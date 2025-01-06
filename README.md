@@ -404,7 +404,7 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | [Altadefinizione](https://altadefinizione.prof/) |   ✅   |
 | [AnimeUnity](https://animeunity.so/) |   ✅   |
 | [Ilcorsaronero](https://ilcorsaronero.link/) |   ✅   |
-| [CB01New](https://cb01new.pics/) |   ✅   |
+| [CB01New](https://cb01new.quest/) |   ✅   |
 | [DDLStreamItaly](https://ddlstreamitaly.co/) |   ✅   |
 | [GuardaSerie](https://guardaserie.academy/) |   ✅   |
 | [MostraGuarda](https://mostraguarda.stream/) |   ✅   |

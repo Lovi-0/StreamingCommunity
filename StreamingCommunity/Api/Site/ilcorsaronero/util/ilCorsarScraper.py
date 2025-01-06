@@ -54,7 +54,7 @@ class IlCorsaroNeroScraper:
                 return response.text
             
         except Exception as e:
-            logging.error(f"Error fetching {url}: {e}")
+            logging.error(f"Error fetching from {url}: {e}")
             return None
 
     def parse_torrents(self, html: str) -> List[Dict[str, str]]:

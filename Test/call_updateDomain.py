@@ -118,16 +118,17 @@ if __name__ == "__main__":
     for alias, (site_name, use_for) in site_names.items():
         original_domain = config_manager.get_list("SITE", alias)['domain']
 
-        if site_name == "animeunity":
-            domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://www.{site_name}", get_first=True)
-        else:
-            domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://{site_name}", get_first=True)
-            
-        # Update readme
-        if original_domain != domain_to_use:
-            print("\n")
-            print("Return domain: ", domain_to_use)
-            update_readme(alias, domain_to_use)
-            
-        print("------------------------------------")
-        time.sleep(2)
+        if site_name != "ilcorsaronero":
+            if site_name == "animeunity":
+                domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://www.{site_name}", get_first=True)
+            else:
+                domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://{site_name}", get_first=True)
+                
+            # Update readme
+            if original_domain != domain_to_use:
+                print("\n")
+                print("Return domain: ", domain_to_use)
+                update_readme(alias, domain_to_use)
+                
+            print("------------------------------------")
+            time.sleep(3)

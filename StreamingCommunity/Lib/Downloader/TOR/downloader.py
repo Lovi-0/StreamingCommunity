@@ -139,9 +139,8 @@ class TOR_downloader:
         
         # Formatta e stampa le informazioni
         console.print("\n[bold green]🔗 Dettagli Torrent Aggiunto:[/bold green]")
-        console.print(f"[yellow]Nome:[/yellow] {torrent_info.get('name', torrent_name)}")
+        console.print(f"[yellow]Name:[/yellow] {torrent_info.get('name', torrent_name)}")
         console.print(f"[yellow]Hash:[/yellow] {torrent_info['hash']}")
-        console.print(f"[yellow]Dimensione:[/yellow] {internet_manager.format_file_size(torrent_info.get('size'))}")
         print()
 
         # Salva l'hash per usi successivi e il path
@@ -288,7 +287,8 @@ class TOR_downloader:
                     raise
 
             # Delete the torrent data
-            #self.qb.delete_permanently(self.qb.torrents()[-1]['hash'])
+            time.sleep(5)
+            self.qb.delete_permanently(self.qb.torrents()[-1]['hash'])
             return True
 
         except Exception as e:
