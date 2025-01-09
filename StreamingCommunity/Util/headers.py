@@ -1,7 +1,9 @@
 # 4.04.24
 
 import re
+import sys
 import random
+import pkg_resources
 
 
 # External library
@@ -9,7 +11,14 @@ from fake_useragent import UserAgent
 
 
 # Variable
-ua = UserAgent(use_external_data=True)
+ua_version = pkg_resources.get_distribution('fake-useragent').version
+if not getattr(sys, 'frozen', False):
+    if ua_version == '1.1.3':
+        ua = UserAgent(use_external_data=True)
+    else:
+        ua = UserAgent()
+else:
+    ua = UserAgent()
 
 
 def extract_versions(user_agent):

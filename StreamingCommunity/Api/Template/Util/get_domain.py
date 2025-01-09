@@ -40,10 +40,13 @@ def get_tld(url_str):
         url_str = unquote(url_str)
         parsed = urlparse(url_str)
         domain = parsed.netloc.lower()
+
         if domain.startswith('www.'):
             domain = domain[4:]
         parts = domain.split('.')
+
         return parts[-1] if len(parts) >= 2 else None
+    
     except Exception:
         return None
 
@@ -54,15 +57,27 @@ def get_base_domain(url_str):
         domain = parsed.netloc.lower()
         if domain.startswith('www.'):
             domain = domain[4:]
+
         # Check if domain has multiple parts separated by dots
         parts = domain.split('.')
         if len(parts) > 2:  # Handle subdomains
             return '.'.join(parts[:-1])  # Return everything except TLD
+        
         return parts[0]  # Return base domain
+    
+    except Exception:
+        return None
+    
+def get_base_url(url_str):
+    """Extract base URL including protocol and domain, removing path and query parameters."""
+    try:
+        parsed = urlparse(url_str)
+        return f"{parsed.scheme}://{parsed.netloc}"
+    
     except Exception:
         return None
 
-def validate_url(url, base_url, max_timeout, max_retries=5):
+def validate_url(url, base_url, max_timeout, max_retries=3, sleep=3):
     """Validate if URL is accessible and matches expected base domain."""
     console.print(f"\n[cyan]Starting validation for URL[white]: [yellow]{url}")
     
@@ -90,7 +105,7 @@ def validate_url(url, base_url, max_timeout, max_retries=5):
 
     for retry in range(max_retries):
         try:
-            time.sleep(2)  # Add delay between retries
+            time.sleep(sleep)
             
             # Initial check without redirects
             response = client.get(url, follow_redirects=False)
@@ -119,7 +134,7 @@ def validate_url(url, base_url, max_timeout, max_retries=5):
             
         except (httpx.RequestError, ssl.SSLError) as e:
             console.print(f"[red]Connection error: {str(e)}")
-            time.sleep(2)  # Add delay after error
+            time.sleep(sleep)
             continue
             
     return False, None
@@ -132,12 +147,14 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
     # Test initial URL
     try:
         is_correct, redirect_tld = validate_url(base_url, base_url, max_timeout)
+
         if is_correct:
             tld = redirect_tld or get_tld(base_url)
             config_manager.config['SITE'][site_name]['domain'] = tld
             config_manager.write_config()
             console.print(f"[green]Successfully validated initial URL")
             return tld, base_url
+        
     except Exception as e:
         console.print(f"[red]Error testing initial URL: {str(e)}")
 
@@ -147,8 +164,16 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
     
     try:
         search_results = list(search(base_domain, num_results=20, lang="it"))
+        base_urls = set()
+
+        for url in search_results:
+            base_url = get_base_url(url)
+            if base_url:
+                base_urls.add(base_url)
+        
+        # Filter URLs based on domain matching and subdomain count
         filtered_results = [
-            url for url in search_results 
+            url for url in base_urls 
             if get_base_domain(url) == base_domain 
             and url.count('.') <= base_url.count('.') + 1
         ]
@@ -159,11 +184,13 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
             is_valid, new_tld = validate_url(result_url, base_url, max_timeout)
             if is_valid:
                 final_tld = new_tld or get_tld(result_url)
+
                 if get_first or msg.ask(
                     f"\n[cyan]Update site[white] [red]'{site_name}'[cyan] with domain[white] [red]'{final_tld}'",
                     choices=["y", "n"],
                     default="y"
                 ).lower() == "y":
+                    
                     config_manager.config['SITE'][site_name]['domain'] = final_tld
                     config_manager.write_config()
                     return final_tld, f"{base_url}.{final_tld}"
