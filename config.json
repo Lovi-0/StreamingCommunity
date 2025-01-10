@@ -20,7 +20,7 @@
         "not_close": false
     },
     "REQUESTS": {
-        "timeout": 35,
+        "timeout": 30,
         "max_retry": 8,
         "proxy_start_min": 0.1,
         "proxy_start_max": 0.5
@@ -81,7 +81,7 @@
             "domain": "so"
         },
         "cb01new": {
-            "domain": "quest"
+            "domain": "sbs"
         },
         "1337xx": {
             "domain": "to"

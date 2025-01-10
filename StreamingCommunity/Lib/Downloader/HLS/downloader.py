@@ -11,7 +11,7 @@ import httpx
 
 # Internal utilities
 from StreamingCommunity.Util._jsonConfig import config_manager
-from StreamingCommunity.Util.console import console, Panel, Table
+from StreamingCommunity.Util.console import console, Panel
 from StreamingCommunity.Util.color import Colors
 from StreamingCommunity.Util.os import (
     compute_sha1_hash,
@@ -283,6 +283,7 @@ class ContentExtractor:
                 raise ValueError("Invalid m3u8 index URL")
     
         print("")
+
 
 class DownloadTracker:
     def __init__(self, path_manager: PathManager):
@@ -815,6 +816,9 @@ class HLS_Downloader:
             else:
                 console.log("[red]Error: m3u8_index is None")
 
+        # Reset
+        self._reset()
+
     def _clean(self, out_path: str) -> None:
         """
         Cleans up temporary files and folders after downloading and processing.
@@ -953,3 +957,9 @@ class HLS_Downloader:
 
         # Clean up temporary files and directories
         self._clean(self.content_joiner.converted_out_path)
+
+    def _reset(self):
+        global list_MissingTs, m3u8_url_fixer
+
+        m3u8_url_fixer.reset_playlist()
+        list_MissingTs = []

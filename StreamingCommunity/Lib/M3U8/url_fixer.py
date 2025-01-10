@@ -50,3 +50,9 @@ class M3U8_UrlFix:
 
         return full_url
     
+    def reset_playlist(self) -> None:
+        """
+        Reset the M3U8 playlist URL to its default state (None).
+        """
+        self.url_playlist = None
+    
