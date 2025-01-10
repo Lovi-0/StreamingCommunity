@@ -23,7 +23,7 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSourceAnime
 
 
 # Variable
-from .costant import SITE_NAME, SERIES_FOLDER, MOVIE_FOLDER
+from .costant import SITE_NAME, ANIME_FOLDER, MOVIE_FOLDER
 
 
 
@@ -54,7 +54,7 @@ def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_so
 
         if scrape_serie.is_series:
             mp4_path = os_manager.get_sanitize_path(
-                os.path.join(SERIES_FOLDER, scrape_serie.series_name)
+                os.path.join(ANIME_FOLDER, scrape_serie.series_name)
             )
         else:
             mp4_path = os_manager.get_sanitize_path(

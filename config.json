@@ -8,6 +8,7 @@
         "root_path": "Video",
         "movie_folder_name": "Movie",
         "serie_folder_name": "TV",
+        "anime_folder_name": "Anime",
         "map_episode_name": "E%(episode)_%(episode_name)",
         "config_qbit_tor": {
             "host": "192.168.1.99",
