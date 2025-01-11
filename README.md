@@ -408,7 +408,7 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | [DDLStreamItaly](https://ddlstreamitaly.co/) |   ✅   |
 | [GuardaSerie](https://guardaserie.academy/) |   ✅   |
 | [MostraGuarda](https://mostraguarda.stream/) |   ✅   |
-| [StreamingCommunity](https://streamingcommunity.prof/) |   ✅   |
+| [StreamingCommunity](https://streamingcommunity.ooo/) |   ✅   |
 
 
 # Tutorials 

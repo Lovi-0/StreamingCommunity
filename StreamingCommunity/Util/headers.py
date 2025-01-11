@@ -3,7 +3,7 @@
 import re
 import sys
 import random
-import pkg_resources
+from importlib.metadata import version, PackageNotFoundError
 
 
 # External library
@@ -11,7 +11,11 @@ from fake_useragent import UserAgent
 
 
 # Variable
-ua_version = pkg_resources.get_distribution('fake-useragent').version
+try:
+    ua_version = version('fake-useragent')
+except PackageNotFoundError:
+    ua_version = None
+
 if not getattr(sys, 'frozen', False):
     if ua_version == '1.1.3':
         ua = UserAgent(use_external_data=True)
