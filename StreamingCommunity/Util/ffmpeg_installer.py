@@ -336,6 +336,8 @@ def check_ffmpeg() -> Tuple[Optional[str], Optional[str], Optional[str]]:
                     ['where', 'ffplay'], stderr=subprocess.DEVNULL, text=True
                 ).strip().split('\n')[0]
 
+                return ffmpeg_path, ffprobe_path, ffplay_path
+            
             except subprocess.CalledProcessError:
                 logging.warning("One or more FFmpeg binaries were not found with command where")
 
