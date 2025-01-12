@@ -324,14 +324,20 @@ def check_ffmpeg() -> Tuple[Optional[str], Optional[str], Optional[str]]:
         # Windows detection
         elif system_platform == 'windows':
             try:
-                ffmpeg_path = subprocess.check_output(['where', 'ffmpeg'], text=True).strip().split('\n')[0]
-                ffprobe_path = subprocess.check_output(['where', 'ffprobe'], text=True).strip().split('\n')[0]
-                ffplay_path = subprocess.check_output(['where', 'ffplay'], text=True).strip().split('\n')[0]
+                ffmpeg_path = subprocess.check_output(
+                    ['where', 'ffmpeg'], stderr=subprocess.DEVNULL, text=True
+                ).strip().split('\n')[0]
                 
-                if ffmpeg_path and ffprobe_path:
-                    return ffmpeg_path, ffprobe_path, ffplay_path
+                ffprobe_path = subprocess.check_output(
+                    ['where', 'ffprobe'], stderr=subprocess.DEVNULL, text=True
+                ).strip().split('\n')[0]
+                
+                ffplay_path = subprocess.check_output(
+                    ['where', 'ffplay'], stderr=subprocess.DEVNULL, text=True
+                ).strip().split('\n')[0]
+
             except subprocess.CalledProcessError:
-                pass
+                logging.warning("One or more FFmpeg binaries were not found with command where")
 
         # Linux detection
         else:
