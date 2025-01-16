@@ -41,6 +41,7 @@
 - 🛠️ [Installation](#installation)
     - 📦 [PyPI Installation](#1-pypi-installation)
     - 🔄 [Automatic Installation](#2-automatic-installation)
+    - 🔧 [Binary Location](#binary-location)
     - 📝 [Manual Installation](#3-manual-installation)
         - 💻 [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
         - 📱 [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux)
@@ -99,7 +100,7 @@ Run the script:
 python run_streaming.py
 ```
 
-## Updating via PyPI
+### Updating via PyPI
 
 ```bash
 pip install --upgrade StreamingCommunity
@@ -153,6 +154,69 @@ source .venv/bin/activate && python test_run.py && deactivate
 ```bash
 ./test_run.py
 ```
+
+## Binary Location
+
+### Default Locations
+- **Windows**: `C:\binary`
+- **MacOS**: `~/Applications/binary`
+- **Linux**: `~/.local/bin/binary`
+
+You can customize these locations by following these steps for your operating system:
+
+#### Windows
+1. Move the binary folder from `C:\binary` to your desired location
+2. Add the new path to Windows environment variables:
+   - Open Start menu and search for "Environment Variables"
+   - Click "Edit the system environment variables"
+   - Click "Environment Variables" button
+   - Under "System Variables", find and select "Path"
+   - Click "Edit"
+   - Add the new binary folder path
+   - Click "OK" to save changes
+
+For detailed Windows PATH instructions, see the [Windows PATH guide](https://www.eukhost.com/kb/how-to-add-to-the-path-on-windows-10-and-windows-11/).
+
+#### MacOS
+1. Move the binary folder from `~/Applications/binary` to your desired location
+2. Add the new path to your shell's configuration file:
+   ```bash
+   # For bash (edit ~/.bash_profile)
+   export PATH="/your/custom/path:$PATH"
+   
+   # For zsh (edit ~/.zshrc)
+   export PATH="/your/custom/path:$PATH"
+   ```
+3. Reload your shell configuration:
+   ```bash
+   # For bash
+   source ~/.bash_profile
+   
+   # For zsh
+   source ~/.zshrc
+   ```
+
+#### Linux
+1. Move the binary folder from `~/.local/bin/binary` to your desired location
+2. Add the new path to your shell's configuration file:
+   ```bash
+   # For bash (edit ~/.bashrc)
+   export PATH="/your/custom/path:$PATH"
+   
+   # For zsh (edit ~/.zshrc)
+   export PATH="/your/custom/path:$PATH"
+   ```
+3. Apply the changes:
+   ```bash
+   source ~/.bashrc   # for bash
+   # or
+   source ~/.zshrc    # for zsh
+   ```
+
+> [!IMPORTANT]
+> After moving the binary folder, ensure that all executables (ffmpeg, ffprobe, ffplay) are present in the new location and have the correct permissions:
+> - Windows: `.exe` extensions required
+> - MacOS/Linux: Ensure files have execute permissions (`chmod +x filename`)
 
 ## 3. Manual Installation
 
@@ -318,6 +382,10 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
                    ind - Indonesian                      vie - Vietnamese
 ```
 
+> [!NOTE]
+> When using subtitles on Windows, please note that the default Windows Media Player may not display them correctly. We recommend using VLC Media Player for proper subtitle display and optimal playback experience.
+
+
 > [!IMPORTANT]
 > Language code availability may vary by site. Some platforms might:
 >
@@ -334,6 +402,14 @@ forced-ita         hin - Hindi        pol - Polish      tur - Turkish
 > "specific_list_audio": ["ita", "eng", "spa"],
 > "specific_list_subtitles": ["ita", "eng", "spa"]
 > ```
+
+For the best viewing experience, we recommend using VLC Media Player:
+- Supports all video formats and codecs
+- Properly displays embedded subtitles
+- Available for all major operating systems
+- Free and open-source
+
+You can download VLC Media Player from the [official website](https://www.videolan.org/vlc/).
 
 ## M3U8_PARSER Settings
 
@@ -404,7 +480,7 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | [Altadefinizione](https://altadefinizione.prof/) |   ✅   |
 | [AnimeUnity](https://animeunity.so/) |   ✅   |
 | [Ilcorsaronero](https://ilcorsaronero.link/) |   ✅   |
-| [CB01New](https://cb01new.sbs/) |   ✅   |
+| [CB01New](https://cb01new.lol/) |   ✅   |
 | [DDLStreamItaly](https://ddlstreamitaly.co/) |   ✅   |
 | [GuardaSerie](https://guardaserie.academy/) |   ✅   |
 | [MostraGuarda](https://mostraguarda.stream/) |   ✅   |
