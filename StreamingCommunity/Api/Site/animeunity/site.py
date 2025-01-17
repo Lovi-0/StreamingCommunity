@@ -129,21 +129,13 @@ def title_search(title: str) -> int:
 
     # Prepare JSON data to be sent in the request
     json_data =  {
-        'title': title,
-        'type': False,
-        'year': False,
-        'order': False,
-        'status': False,
-        'genres': False,
-        'offset': 0,
-        'dubbed': False,
-        'season': False,
+        'title': title
     }
 
     # Send a POST request to the API endpoint for live search
     try:
         response = httpx.post(
-            url=f'https://www.{SITE_NAME}.{domain_to_use}/archivio/get-animes', 
+            url=f'https://www.{SITE_NAME}.{domain_to_use}/livesearch', 
             cookies=cookies, 
             headers=headers, 
             json=json_data,

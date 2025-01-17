@@ -27,7 +27,7 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
         string_to_search = msg.ask(f"\n[purple]Insert word to search in [green]{SITE_NAME}").strip()
 
     # Search on database
-    len_database = title_search(quote_plus(string_to_search))
+    len_database = title_search(string_to_search)
 
     # Return list of elements
     if get_onylDatabase:
