@@ -2,7 +2,6 @@
 
 import ssl
 import time
-import certifi
 from urllib.parse import urlparse, unquote
 
 
@@ -20,14 +19,14 @@ from StreamingCommunity.Util._jsonConfig import config_manager
 base_headers = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-    'cache-control': 'max-age=0',
     'dnt': '1',
     'priority': 'u=0, i',
+    'referer': '',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"Windows"',
     'sec-fetch-dest': 'document',
     'sec-fetch-mode': 'navigate',
-    'sec-fetch-site': 'none',
+    'sec-fetch-site': 'same-origin',
     'sec-fetch-user': '?1',
     'upgrade-insecure-requests': '1',
     'user-agent': ''
@@ -84,6 +83,8 @@ def validate_url(url, base_url, max_timeout, max_retries=3, sleep=3):
     # Verify URL structure matches base_url structure
     base_domain = get_base_domain(base_url)
     url_domain = get_base_domain(url)
+
+    base_headers['referer'] = url
     base_headers['user-agent'] = get_headers()
     
     if base_domain != url_domain:
@@ -98,7 +99,7 @@ def validate_url(url, base_url, max_timeout, max_retries=3, sleep=3):
         return False, None
 
     client = httpx.Client(
-        verify=certifi.where(),
+        verify=False,
         headers=base_headers,
         timeout=max_timeout
     )

@@ -19,6 +19,8 @@ from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeRe
 
 # Variable
 console = Console()
+
+# https://github.com/eugeneware/ffmpeg-static/releases
 FFMPEG_CONFIGURATION = {
     'windows': {
         'base_dir': lambda home: os.path.join(os.path.splitdrive(home)[0] + os.path.sep, 'binary'),
@@ -28,13 +30,13 @@ FFMPEG_CONFIGURATION = {
     },
     'darwin': {
         'base_dir': lambda home: os.path.join(home, 'Applications', 'binary'),
-        'download_url': 'https://evermeet.cx/ffmpeg/ffmpeg-{version}.zip',
+        'download_url': 'https://github.com/eugeneware/ffmpeg-static/releases/download/b{version}/ffmpeg-macOS-{arch}.zip',
         'file_extension': '.zip',
         'executables': ['ffmpeg', 'ffprobe', 'ffplay']
     },
     'linux': {
         'base_dir': lambda home: os.path.join(home, '.local', 'bin', 'binary'),
-        'download_url': 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-{arch}-static.tar.xz',
+        'download_url': 'https://github.com/eugeneware/ffmpeg-static/releases/download/b{version}/ffmpeg-linux-{arch}.tar.xz',
         'file_extension': '.tar.xz',
         'executables': ['ffmpeg', 'ffprobe', 'ffplay']
     }
@@ -150,19 +152,26 @@ class FFMPEGDownloader:
 
     def _get_latest_version(self) -> Optional[str]:
         """
-        Get the latest FFmpeg version from the official website.
+        Get the latest FFmpeg version from the GitHub releases page.
 
         Returns:
-            Optional[str]: The latest version string, or None if retrieval fails
+            Optional[str]: The latest version string, or None if retrieval fails.
 
         Raises:
-            requests.exceptions.RequestException: If there are network-related errors
+            requests.exceptions.RequestException: If there are network-related errors.
         """
         try:
-            version_url = 'https://www.gyan.dev/ffmpeg/builds/release-version'
-            return requests.get(version_url).text.strip()
+            # Use GitHub API to fetch the latest release
+            response = requests.get(
+                'https://api.github.com/repos/eugeneware/ffmpeg-static/releases/latest'
+            )
+            response.raise_for_status()
+            latest_release = response.json()
+
+            # Extract the tag name or version from the release
+            return latest_release.get('tag_name')
         except Exception as e:
-            logging.error(f"Unable to get version: {e}")
+            logging.error(f"Unable to get version from GitHub: {e}")
             return None
 
     def _download_file(self, url: str, destination: str) -> bool:

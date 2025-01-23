@@ -122,5 +122,5 @@ if __name__ == "__main__":
                 domain_to_use, _ = search_domain(site_name=site_name, base_url=f"https://{site_name}.{original_domain}", get_first=True)
                 
             update_readme(alias, domain_to_use)
-            print("------------------------------------")
-            time.sleep(2)
+            print("\n------------------------------------")
+            time.sleep(1)

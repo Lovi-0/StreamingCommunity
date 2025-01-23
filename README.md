@@ -9,9 +9,6 @@
   <a href="https://www.paypal.com/donate/?hosted_button_id=UXTWMT8P6HE2C">
     <img src="https://img.shields.io/badge/_-Donate-red.svg?logo=githubsponsors&labelColor=555555&style=for-the-badge" alt="Donate"/>
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/License-GPL_3.0-blue.svg?style=for-the-badge" alt="License"/>
-  </a>
   <a href="https://github.com/Lovi-0/StreamingCommunity/commits">
     <img src="https://img.shields.io/github/commit-activity/m/Lovi-0/StreamingCommunity?label=commits&style=for-the-badge" alt="Commits"/>
   </a>
@@ -21,17 +18,11 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/Lovi-0/StreamingCommunity/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-GPL_3.0-blue.svg?style=for-the-badge" alt="License"/>
+  </a>
   <a href="https://pypi.org/project/streamingcommunity">
-    <img src="https://img.shields.io/pypi/dm/streamingcommunity?style=for-the-badge" alt="PyPI Downloads"/>
-  </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity/network/members">
-    <img src="https://img.shields.io/github/forks/Lovi-0/StreamingCommunity?style=for-the-badge" alt="Forks"/>
-  </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity">
-    <img src="https://img.shields.io/github/languages/code-size/Lovi-0/StreamingCommunity?style=for-the-badge" alt="Code Size"/>
-  </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity">
-    <img src="https://img.shields.io/github/repo-size/Lovi-0/StreamingCommunity?style=for-the-badge" alt="Repo Size"/>
+    <img src="https://img.shields.io/pypi/dw/streamingcommunity?style=for-the-badge" alt="PyPI Downloads"/>
   </a>
 </p>
 
@@ -477,10 +468,10 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | Website            | Status |
 |:-------------------|:------:|
 | [1337xx](https://1337xx.to/) |   ✅   |
-| [Altadefinizione](https://altadefinizione.florist/) |   ✅   |
+| [AltadefinizioneGratis](https://altadefinizionegratis.info/) |   ✅   |
 | [AnimeUnity](https://animeunity.so/) |   ✅   |
 | [Ilcorsaronero](https://ilcorsaronero.link/) |   ✅   |
-| [CB01New](https://cb01new.lol/) |   ✅   |
+| [CB01New](https://cb01new.video/) |   ✅   |
 | [DDLStreamItaly](https://ddlstreamitaly.co/) |   ✅   |
 | [GuardaSerie](https://guardaserie.academy/) |   ✅   |
 | [MostraGuarda](https://mostraguarda.stream/) |   ✅   |

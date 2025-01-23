@@ -1,6 +1,5 @@
 # 10.12.23
 
-import sys
 import json
 import logging
 import secrets
@@ -83,8 +82,12 @@ def get_version_and_domain():
     if not disable_searchDomain:
         domain_to_use, base_url = search_domain(SITE_NAME, f"https://{SITE_NAME}.{DOMAIN_NOW}")
 
-    version = get_version(domain_to_use)
-        
+    try:
+        version = get_version(domain_to_use)
+    except:
+        console.print("[green]Auto generate version ...")
+        version = secrets.token_hex(32 // 2)
+            
     return version, domain_to_use
 
 

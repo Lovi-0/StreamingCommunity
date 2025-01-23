@@ -199,7 +199,7 @@ def display_episodes_list(scrape_serie) -> str:
     # Run the table and handle user input
     last_command = table_show_manager.run()
 
-    if last_command == "q":
+    if last_command == "q" or last_command == "quit":
         console.print("\n[red]Quit [white]...")
         sys.exit(0)
 

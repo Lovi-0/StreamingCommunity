@@ -1,5 +1,6 @@
 # 26.03.24
 
+import os
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -26,6 +27,7 @@ class Logger:
 
             # Configure file logging if debug mode and logging to file are both enabled
             if self.log_to_file:
+                self.remove_existing_log_file()
                 self.configure_file_logging()
         else:
 
@@ -51,3 +53,10 @@ class Logger:
         formatter = logging.Formatter('[%(filename)s:%(lineno)s - %(funcName)20s() ] %(asctime)s - %(levelname)s - %(message)s')
         file_handler.setFormatter(formatter)
         logging.getLogger('').addHandler(file_handler)
+
+    def remove_existing_log_file(self):
+        """
+        Remove the log file if it already exists.
+        """
+        if os.path.exists(self.log_file):
+            os.remove(self.log_file)

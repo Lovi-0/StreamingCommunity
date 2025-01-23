@@ -174,12 +174,12 @@ class TVShowManager:
                     
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
-                    choices.extend(["q", "", "back"])
+                    choices.extend(["q", "quit", "b", "back"])
 
                     key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
                 last_command = key
 
-                if key.lower() == "q":
+                if key.lower() == "q" or key.lower() == "quit":
                     break
 
                 elif key == "":
@@ -188,7 +188,7 @@ class TVShowManager:
                     if self.slice_end > total_items:
                         self.slice_end = total_items
 
-                elif key.lower() == "back" and research_func:
+                elif (key.lower() == "b" or key.lower() == "back") and research_func:
                     self.run_back_command(research_func)
 
                 else:
@@ -205,19 +205,19 @@ class TVShowManager:
 
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
-                    choices.extend(["q", "", "back"])
+                    choices.extend(["q", "quit", "b", "back"])
 
                     key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
                 last_command = key
 
-                if key.lower() == "q":
+                if key.lower() == "q" or key.lower() == "quit":
                     break
 
                 elif key == "":
                     self.slice_start = 0
                     self.slice_end = self.step
 
-                elif key.lower() == "back" and research_func:
+                elif (key.lower() == "b" or key.lower() == "back") and research_func:
                     self.run_back_command(research_func)
 
                 else:

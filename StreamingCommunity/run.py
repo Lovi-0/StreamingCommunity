@@ -125,7 +125,6 @@ def initialize():
 
 
 def main():
-
     start = time.time()
 
     # Create logger
@@ -136,9 +135,39 @@ def main():
     search_functions = load_search_functions()
     logging.info(f"Load module in: {time.time() - start} s")
 
-    # Create dynamic argument parser
-    parser = argparse.ArgumentParser(description='Script to download film and series from the internet.')
+    # Create argument parser
+    parser = argparse.ArgumentParser(
+        description='Script to download movies and series from the internet. Use these commands to configure the script and control its behavior.'
+    )
 
+    # Add arguments for the main configuration parameters
+    parser.add_argument(
+        '--add_siteName', type=bool, help='Enable or disable adding the site name to the file name (e.g., true/false).'
+    )
+    parser.add_argument(
+        '--disable_searchDomain', type=bool, help='Enable or disable searching in configured domains (e.g., true/false).'
+    )
+    parser.add_argument(
+        '--not_close', type=bool, help='If set to true, the script will not close the console after execution (e.g., true/false).'
+    )
+
+    # Add arguments for M3U8 configuration
+    parser.add_argument(
+        '--default_video_worker', type=int, help='Number of workers for video during M3U8 download (default: 12).'
+    )
+    parser.add_argument(
+        '--default_audio_worker', type=int, help='Number of workers for audio during M3U8 download (default: 12).'
+    )
+
+    # Add options for audio and subtitles
+    parser.add_argument(
+        '--specific_list_audio', type=str, help='Comma-separated list of specific audio languages to download (e.g., ita,eng).'
+    )
+    parser.add_argument(
+        '--specific_list_subtitles', type=str, help='Comma-separated list of specific subtitle languages to download (e.g., eng,spa).'
+    )
+
+    # Add arguments for search functions
     color_map = {
         "anime": "red",
         "film_serie": "yellow",
@@ -153,10 +182,35 @@ def main():
         long_option = alias
         parser.add_argument(f'-{short_option}', f'--{long_option}', action='store_true', help=f'Search for {alias.split("_")[0]} on streaming platforms.')
 
-    # Parse command line arguments
+    # Parse command-line arguments
     args = parser.parse_args()
 
-    # Mapping command-line arguments to functions
+    # Map command-line arguments to the config values
+    config_updates = {}
+
+    if args.add_siteName is not None:
+        config_updates['DEFAULT.add_siteName'] = args.add_siteName
+    if args.disable_searchDomain is not None:
+        config_updates['DEFAULT.disable_searchDomain'] = args.disable_searchDomain
+    if args.not_close is not None:
+        config_updates['DEFAULT.not_close'] = args.not_close
+    if args.default_video_worker is not None:
+        config_updates['M3U8_DOWNLOAD.default_video_worker'] = args.default_video_worker
+    if args.default_audio_worker is not None:
+        config_updates['M3U8_DOWNLOAD.default_audio_worker'] = args.default_audio_worker
+    if args.specific_list_audio is not None:
+        config_updates['M3U8_DOWNLOAD.specific_list_audio'] = args.specific_list_audio.split(',')
+    if args.specific_list_subtitles is not None:
+        config_updates['M3U8_DOWNLOAD.specific_list_subtitles'] = args.specific_list_subtitles.split(',')
+
+    # Apply the updates to the config file
+    for key, value in config_updates.items():
+        section, option = key.split('.')
+        config_manager.set_key(section, option, value)
+
+    config_manager.write_config()
+
+    # Map command-line arguments to functions
     arg_to_function = {alias: func for alias, (func, _) in search_functions.items()}
 
     # Check which argument is provided and run the corresponding function

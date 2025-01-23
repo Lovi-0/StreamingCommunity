@@ -74,7 +74,7 @@ def get_select_title(table_show_manager, media_search_manager):
     table_show_manager.clear()
 
     # Handle user's quit command
-    if last_command == "q":
+    if last_command == "q" or last_command == "quit":
         console.print("\n[red]Quit [white]...")
         sys.exit(0)
 

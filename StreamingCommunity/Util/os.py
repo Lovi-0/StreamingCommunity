@@ -8,16 +8,16 @@ import shutil
 import hashlib
 import logging
 import platform
-import unidecode
 import subprocess
 import contextlib
-import pathvalidate
 import urllib.request
 import importlib.metadata
 
 
 # External library
 import httpx
+from unidecode import unidecode
+from pathvalidate import sanitize_filename, sanitize_filepath
 
 
 # Internal utilities
@@ -25,172 +25,133 @@ from .ffmpeg_installer import check_ffmpeg
 from StreamingCommunity.Util.console import console, msg
 
 
-# Variable
-OS_CONFIGURATIONS = {
-    'windows': {
-        'max_length': 255,
-        'invalid_chars': '<>:"/\\|?*',
-        'reserved_names': [
-            "CON", "PRN", "AUX", "NUL",
-            "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-            "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
-        ],
-        'max_path': 255
-    },
-    'darwin': {
-        'max_length': 4096,
-        'invalid_chars': '/:',
-        'reserved_names': [],
-        'hidden_file_restriction': True
-    },
-    'linux': {
-        'max_length': 4096,
-        'invalid_chars': '/\0',
-        'reserved_names': []
-    }
-}
-
-
 
 class OsManager:
     def __init__(self):
         self.system = self._detect_system()
-        self.config = OS_CONFIGURATIONS.get(self.system, {})
+        self.max_length = self._get_max_length()
 
     def _detect_system(self) -> str:
         """Detect and normalize operating system name."""
         system = platform.system().lower()
+        if system not in ['windows', 'darwin', 'linux']:
+            raise ValueError(f"Unsupported operating system: {system}")
+        return system
 
-        if system in OS_CONFIGURATIONS:
-            return system
-        
-        raise ValueError(f"Unsupported operating system: {system}")
+    def _get_max_length(self) -> int:
+        """Get max filename length based on OS."""
+        return 255 if self.system == 'windows' else 4096
 
     def _normalize_windows_path(self, path: str) -> str:
-        """
-        Normalize Windows paths to handle drive letters correctly.
-        
-        Args:
-            path (str): Original path that might contain a drive letter.
-            
-        Returns:
-            str: Properly normalized absolute path.
-        """
-        if self.system != 'windows':
+        """Normalize Windows paths."""
+        if not path or self.system != 'windows':
             return path
-            
-        # Check if path starts with a drive letter
+
+        # Preserve network paths (UNC and IP-based)
+        if path.startswith('\\\\') or path.startswith('//'):
+            return path.replace('/', '\\')
+
+        # Handle drive letters
         if len(path) >= 2 and path[1] == ':':
             drive = path[0:2]
-            rest = path[2:].lstrip(os.sep)
-            # Ensure proper absolute path format
-            return os.path.join(drive + os.sep, rest)
-        return path
-    
-    def _process_filename(self, filename: str) -> str:
-        """
-        Comprehensively process filename with cross-platform considerations.
-        
-        Args:
-            filename (str): Original filename.
-        
-        Returns:
-            str: Processed filename.
-        """
-        name, ext = os.path.splitext(filename)
-        
-        # Handle length restrictions
-        if len(name) > self.config['max_length']:
-            name = self._truncate_filename(name)
-        
-        # Reconstruct filename
-        processed_filename = name + ext
-        
-        return processed_filename
+            rest = path[2:].replace('/', '\\').lstrip('\\')
+            return f"{drive}\\{rest}"
 
-    def _truncate_filename(self, name: str) -> str:
-        """
-        Truncate filename based on OS-specific rules.
-        
-        Args:
-            name (str): Original filename.
-        
-        Returns:
-            str: Truncated filename.
-        """
-        logging.info("_truncate_filename: ", name)
+        return path.replace('/', '\\')
 
-        if self.system == 'windows':
-            return name[:self.config['max_length'] - 3] + '___'
-        elif self.system == 'darwin':
-            return name[:self.config['max_length']]
-        elif self.system == 'linux':
-            return name[:self.config['max_length'] - 2] + '___'
+    def _normalize_mac_path(self, path: str) -> str:
+        """Normalize macOS paths."""
+        if not path or self.system != 'darwin':
+            return path
+
+        # Convert Windows separators to Unix
+        normalized = path.replace('\\', '/')
+        
+        # Ensure absolute paths start with /
+        if normalized.startswith('/'):
+            return os.path.normpath(normalized)
+
+        return normalized
 
     def get_sanitize_file(self, filename: str) -> str:
-        """
-        Sanitize filename using pathvalidate with unidecode.
-        
-        Args:
-            filename (str): Original filename.
-        
-        Returns:
-            str: Sanitized filename.
-        """
+        """Sanitize filename."""
+        if not filename:
+            return filename
 
-        # Decode unicode characters and sanitize
-        decoded_filename = unidecode.unidecode(filename)
-        sanitized_filename = pathvalidate.sanitize_filename(decoded_filename)
+        # Decode and sanitize
+        decoded = unidecode(filename)
+        sanitized = sanitize_filename(decoded)
         
-        # Truncate if necessary based on OS configuration
-        name, ext = os.path.splitext(sanitized_filename)
-        if len(name) > self.config['max_length']:
-            name = self._truncate_filename(name)
+        # Split name and extension
+        name, ext = os.path.splitext(sanitized)
         
-        result = name + ext
-        return result
+        # Calculate available length for name considering the '...' and extension
+        max_name_length = self.max_length - len('...') - len(ext)
+        
+        # Truncate name if it exceeds the max name length
+        if len(name) > max_name_length:
+            name = name[:max_name_length] + '...'
+        
+        # Ensure the final file name includes the extension
+        return name + ext
 
     def get_sanitize_path(self, path: str) -> str:
-        """
-        Sanitize folder path using pathvalidate with unidecode.
-        
-        Args:
-            path (str): Original folder path.
-        
-        Returns:
-            str: Sanitized folder path.
-        """
+        """Sanitize complete path."""
+        if not path:
+            return path
 
-        # Normalize path for Windows drive letters first
-        path = self._normalize_windows_path(path)
-
-        # Decode unicode characters and sanitize
-        decoded_path = unidecode.unidecode(path)
-        sanitized_path = pathvalidate.sanitize_filepath(decoded_path)
+        # Decode unicode characters
+        decoded = unidecode(path)
         
-        # Split path and process each component
-        path_components = os.path.normpath(sanitized_path).split(os.sep)
-        
-        # Handle Windows drive letter specially
-        if self.system == 'windows' and len(path_components[0]) == 2 and path_components[0][1] == ':':
-            drive = path_components.pop(0)
-            processed_components = [drive + os.sep]
+        # Basic path sanitization
+        sanitized = sanitize_filepath(decoded)
 
+        if self.system == 'windows':
+            # Handle network paths (UNC or IP-based)
+            if path.startswith('\\\\') or path.startswith('//'):
+                parts = path.replace('/', '\\').split('\\')
+                # Keep server/IP and share name as is
+                sanitized_parts = parts[:4]
+                # Sanitize remaining parts
+                if len(parts) > 4:
+                    sanitized_parts.extend([
+                        self.get_sanitize_file(part)
+                        for part in parts[4:]
+                        if part
+                    ])
+                return '\\'.join(sanitized_parts)
+            
+            # Handle drive letters
+            elif len(path) >= 2 and path[1] == ':':
+                drive = path[:2]
+                rest = path[2:].lstrip('\\').lstrip('/')
+                path_parts = [drive] + [
+                    self.get_sanitize_file(part)
+                    for part in rest.replace('/', '\\').split('\\')
+                    if part
+                ]
+                return '\\'.join(path_parts)
+                
+            # Regular path
+            else:
+                parts = path.replace('/', '\\').split('\\')
+                return '\\'.join(p for p in parts if p)
         else:
-            processed_components = []
+            # Handle Unix-like paths (Linux and macOS)
+            is_absolute = path.startswith('/')
+            parts = path.replace('\\', '/').split('/')
+            sanitized_parts = [
+                self.get_sanitize_file(part)
+                for part in parts
+                if part
+            ]
+            
+            result = '/'.join(sanitized_parts)
+            if is_absolute:
+                result = '/' + result
+                
+            return result
         
-        # Process remaining components
-        for component in path_components:
-            if component:  # Skip empty components
-                if len(component) > self.config['max_length']:
-                    component = self._truncate_filename(component)
-                    
-                processed_components.append(component)
-
-        # Join with proper separator and normalize
-        result = os.path.normpath(os.path.join(*processed_components))
-        return result
-
     def create_path(self, path: str, mode: int = 0o755) -> bool:
         """
         Create directory path with specified permissions.
@@ -271,6 +232,7 @@ class OsManager:
         except Exception as e:
             logging.error(f"An error occurred while checking file existence: {e}")
             return False
+
 
 class InternManager():
 
