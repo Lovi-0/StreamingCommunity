@@ -85,8 +85,9 @@ def get_version_and_domain():
     try:
         version = get_version(domain_to_use)
     except:
-        console.print("[green]Auto generate version ...")
-        version = secrets.token_hex(32 // 2)
+        #console.print("[green]Auto generate version ...")
+        #version = secrets.token_hex(32 // 2)
+        version = None
             
     return version, domain_to_use
 

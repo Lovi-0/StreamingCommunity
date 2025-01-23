@@ -69,6 +69,7 @@ class ScrapeSerie:
             # Extract seasons from JSON response
             soup = BeautifulSoup(response.text, "html.parser")
             json_response = json.loads(soup.find("div", {"id": "app"}).get("data-page"))
+            self.version = json_response['version']
                   
             """
             response = httpx.post(
