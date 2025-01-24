@@ -21,6 +21,7 @@ from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeRe
 console = Console()
 
 # https://github.com/eugeneware/ffmpeg-static/releases
+# https://github.com/GyanD/codexffmpeg/releases/
 FFMPEG_CONFIGURATION = {
     'windows': {
         'base_dir': lambda home: os.path.join(os.path.splitdrive(home)[0] + os.path.sep, 'binary'),
@@ -150,7 +151,7 @@ class FFMPEGDownloader:
 
         return tuple(found_executables) if len(found_executables) == 3 else (None, None, None)
 
-    def _get_latest_version(self) -> Optional[str]:
+    def _get_latest_version(self, repo: str) -> Optional[str]:
         """
         Get the latest FFmpeg version from the GitHub releases page.
 
@@ -162,14 +163,13 @@ class FFMPEGDownloader:
         """
         try:
             # Use GitHub API to fetch the latest release
-            response = requests.get(
-                'https://api.github.com/repos/eugeneware/ffmpeg-static/releases/latest'
-            )
+            response = requests.get(f'https://api.github.com/repos/{repo}/releases/latest')
             response.raise_for_status()
             latest_release = response.json()
 
             # Extract the tag name or version from the release
             return latest_release.get('tag_name')
+        
         except Exception as e:
             logging.error(f"Unable to get version from GitHub: {e}")
             return None
@@ -273,7 +273,10 @@ class FFMPEGDownloader:
         if all([existing_ffmpeg, existing_ffprobe, existing_ffplay]):
             return existing_ffmpeg, existing_ffprobe, existing_ffplay
 
-        version = self._get_latest_version()
+        repo = 'GyanD/codexffmpeg' if self._detect_system() == 'windows' else 'eugeneware/ffmpeg-static'
+        console.print(f"[red]Use {repo} repo for downloading ffmpeg.")
+        version = self._get_latest_version(repo)
+
         if not version:
             logging.error("Cannot proceed: version not found")
             return None, None, None
