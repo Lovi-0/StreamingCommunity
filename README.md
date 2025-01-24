@@ -22,7 +22,7 @@
     <img src="https://img.shields.io/badge/License-GPL_3.0-blue.svg?style=for-the-badge" alt="License"/>
   </a>
   <a href="https://pypi.org/project/streamingcommunity">
-    <img src="https://img.shields.io/pypi/dw/streamingcommunity?style=for-the-badge" alt="PyPI Downloads"/>
+    <img src="https://img.shields.io/pypi/dm/streamingcommunity?style=for-the-badge" alt="PyPI Downloads"/>
   </a>
 </p>
 
@@ -475,7 +475,7 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | [DDLStreamItaly](https://ddlstreamitaly.co/) |   ✅   |
 | [GuardaSerie](https://guardaserie.academy/) |   ✅   |
 | [MostraGuarda](https://mostraguarda.stream/) |   ✅   |
-| [StreamingCommunity](https://streamingcommunity.ooo/) |   ✅   |
+| [StreamingCommunity](https://streamingcommunity.paris/) |   ✅   |
 
 
 # Tutorials 

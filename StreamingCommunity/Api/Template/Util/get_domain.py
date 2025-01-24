@@ -7,7 +7,7 @@ from urllib.parse import urlparse, unquote
 
 # External libraries
 import httpx
-from googlesearch import search
+from serpapi import search
 
 
 # Internal utilities
@@ -15,7 +15,7 @@ from StreamingCommunity.Util.headers import get_headers
 from StreamingCommunity.Util.console import console, msg
 from StreamingCommunity.Util._jsonConfig import config_manager
 
-
+api_key = "ebfaafb043613442e0010e3795c9ead4cab196e5448a6e3728d64edbbccdf731"
 base_headers = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
@@ -164,13 +164,20 @@ def search_domain(site_name: str, base_url: str, get_first: bool = False):
     console.print(f"\n[cyan]Searching for alternate domains for[white]: [yellow]{base_domain}")
     
     try:
-        search_results = list(search(base_domain, num_results=20, lang="it"))
+        params = {
+            "q": base_domain,
+            "hl": "it",
+            "gl": "it",
+            "num": 20,
+            "api_key": api_key 
+        }
+        search_results = [element['link'] for element in search(params)['organic_results']]
         base_urls = set()
 
         for url in search_results:
-            base_url = get_base_url(url)
-            if base_url:
-                base_urls.add(base_url)
+            element_url = get_base_url(url)
+            if element_url:
+                base_urls.add(element_url)
         
         # Filter URLs based on domain matching and subdomain count
         filtered_results = [

@@ -11,4 +11,4 @@ pycryptodomex
 fake-useragent
 qbittorrent-api
 python-qbittorrent 
-googlesearch-python
+serpapi
