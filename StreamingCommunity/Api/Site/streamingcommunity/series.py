@@ -15,7 +15,7 @@ from StreamingCommunity.Lib.Downloader import HLS_Downloader
 
 # Logic class
 from .util.ScrapeSerie import ScrapeSerie
-from StreamingCommunity.Api.Template.Util import manage_selection, map_episode_title, validate_selection, validate_episode_selection, execute_search
+from StreamingCommunity.Api.Template.Util import manage_selection, map_episode_title, dynamic_format_number, validate_selection, validate_episode_selection, execute_search
 from StreamingCommunity.Api.Template.Class.SearchType import MediaItem
 
 
@@ -40,6 +40,7 @@ def download_video(index_season_selected: int, index_episode_selected: int, scra
         - str: output path
     """
     start_message()
+    index_season_selected = dynamic_format_number(index_season_selected)
 
     # Get info about episode
     obj_episode = scrape_serie.episode_manager.get(index_episode_selected - 1)

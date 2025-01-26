@@ -58,7 +58,7 @@ def get_version(domain: str):
 
         # Extract version
         version = json.loads(soup.find("div", {"id": "app"}).get("data-page"))['version']
-        console.print(f"[cyan]Get version [white]=> [red]{version} \n")
+        #console.print(f"[cyan]Get version [white]=> [red]{version} \n")
 
         return version
     

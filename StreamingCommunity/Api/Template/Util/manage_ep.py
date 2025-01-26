@@ -89,7 +89,7 @@ def map_episode_title(tv_name: str, number_season: int, episode_number: int, epi
         map_episode_temp = map_episode_temp.replace("%(tv_name)", os_manager.get_sanitize_file(tv_name))
 
     if number_season != None:
-        map_episode_temp = map_episode_temp.replace("%(season)", dynamic_format_number(number_season))
+        map_episode_temp = map_episode_temp.replace("%(season)", number_season)
     else:
         map_episode_temp = map_episode_temp.replace("%(season)", dynamic_format_number(0))
 

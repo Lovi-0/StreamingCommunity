@@ -39,7 +39,6 @@ def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, 
     Return:
         - str: output path
     """
-
     start_message()
 
     # Get info about episode

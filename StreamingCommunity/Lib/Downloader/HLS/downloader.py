@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 import logging
 
 
@@ -11,6 +12,7 @@ import httpx
 
 # Internal utilities
 from StreamingCommunity.Util._jsonConfig import config_manager
+from StreamingCommunity.Util.headers import get_headers
 from StreamingCommunity.Util.console import console, Panel
 from StreamingCommunity.Util.color import Colors
 from StreamingCommunity.Util.os import (
@@ -45,6 +47,7 @@ MERGE_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_subs')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_DOWNLOAD', 'cleanup_tmp_folder')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
 GET_ONLY_LINK = config_manager.get_bool('M3U8_PARSER', 'get_only_link')
+RETRY_LIMIT = config_manager.get_int('REQUESTS', 'max_retry')
 
 
 # Variable
@@ -470,17 +473,57 @@ class ContentDownloader:
 
             # Parse the M3U8 file to get the subtitle URI
             m3u8_sub_parser = M3U8_Parser()
-            m3u8_sub_parser.parse_data(
-                uri=obj_subtitle.get('uri'),
-                raw_content=httpx.get(obj_subtitle.get('url')).text  # Fetch subtitle content
-            )
+            url = obj_subtitle.get('url')
+            success = False
+
+            for attempt in range(RETRY_LIMIT):
+                try:
+                    response = httpx.get(url, headers={'user-agent': get_headers()}, timeout=20)
+                    response.raise_for_status()
+                    m3u8_sub_parser.parse_data(
+                        uri=obj_subtitle.get('uri'),
+                        raw_content=response.text
+                    )
+                    success = True
+                    break
+
+                except httpx.RequestError as e:
+                    logging.warning(f"Attempt {attempt + 1} failed for URL {url}: {e}")
+                    time.sleep(2)
+
+            if not success:
+                console.log(f"[red]Failed to download subtitle data for: {sub_language}")
+                continue
 
             # Print the status of the subtitle download
-            #console.print(f"[cyan]Downloading subtitle: [red]{sub_language.lower()}")
+            console.print(f"[cyan] - Downloading subtitle: [red]{sub_language.lower()}")
+
+            # Download the subtitle content with retry
+            subtitle_content = None
+            for attempt in range(RETRY_LIMIT):
+                try:
+                    response = httpx.get(m3u8_sub_parser.subtitle[-1], headers={'user-agent': get_headers()}, timeout=20)
+                    response.raise_for_status()
+                    subtitle_content = response.content
+                    break
+
+                except httpx.RequestError as e:
+                    logging.warning(f"Attempt {attempt + 1} failed for subtitle content URL: {e}")
+                    time.sleep(2)
+
+            if subtitle_content is None:
+                console.log(f"[red]Failed to download subtitle content for: {sub_language}")
+                continue
 
             # Write the content to the specified file
-            with open(obj_subtitle.get("path"), "wb") as f:
-                f.write(HttpClient().get_content(m3u8_sub_parser.subtitle[-1]))
+            try:
+                with open(obj_subtitle.get("path"), "wb") as f:
+                    f.write(subtitle_content)
+                #console.log(f"[green]Subtitle downloaded successfully: {sub_language}")
+
+            except Exception as e:
+                logging.error(f"Failed to write subtitle file for {sub_language}: {e}")
+                #console.log(f"[red]Error writing subtitle file: {sub_language}")
 
 
 class ContentJoiner:
