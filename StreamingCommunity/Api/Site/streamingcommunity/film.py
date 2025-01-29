@@ -52,7 +52,7 @@ def download_film(select_title: MediaItem) -> str:
 
     # Define the filename and path for the downloaded film
     title_name = os_manager.get_sanitize_file(select_title.name) + ".mp4"
-    mp4_path = os.path.join(MOVIE_FOLDER, select_title.name)
+    mp4_path = os.path.join(MOVIE_FOLDER, title_name.replace(".mp4", ""))
 
     # Download the film using the m3u8 playlist, and output filename
     r_proc = HLS_Downloader(
