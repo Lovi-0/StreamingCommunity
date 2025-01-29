@@ -24,6 +24,9 @@
   <a href="https://pypi.org/project/streamingcommunity">
     <img src="https://img.shields.io/pypi/dm/streamingcommunity?style=for-the-badge" alt="PyPI Downloads"/>
   </a>
+  <a href="https://github.com/Lovi-0/StreamingCommunity">
+    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/main/loc-badge.json&style=for-the-badge" alt="Lines of Code"/>
+  </a>
 </p>
 
 # 📋 Table of Contents
