@@ -8,7 +8,7 @@ unidecode
 jsbeautifier
 pathvalidate
 pycryptodomex
+googlesearch-python
 fake-useragent
 qbittorrent-api
 python-qbittorrent 
-serpapi
