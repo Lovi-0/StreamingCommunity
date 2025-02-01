@@ -24,10 +24,10 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSourceAnime
 
 # Variable
 from .costant import SITE_NAME, ANIME_FOLDER, MOVIE_FOLDER
-KILL_HANDLER = bool(False)
 
 
-def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_source: VideoSourceAnime) -> tuple[str,bool]:
+
+def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_source: VideoSourceAnime) -> str:
     """
     Downloads the selected episode.
 
@@ -36,7 +36,6 @@ def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_so
 
     Return:
         - str: output path
-        - bool: kill handler status
     """
 
     # Get information about the selected episode
@@ -46,8 +45,7 @@ def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_so
 
         start_message()
         console.print(f"[yellow]Download:  [red]EP_{obj_episode.number} \n")
-        console.print("[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
-        
+
         # Collect mp4 url
         video_source.get_embed(obj_episode.id)
 
@@ -67,18 +65,11 @@ def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_so
         os_manager.create_path(mp4_path)                                                            
 
         # Start downloading
-        
         r_proc = MP4_downloader(
             url=str(video_source.src_mp4).strip(),
             path=os.path.join(mp4_path, title_name)
         )
-        
-        # If download fails do not create the file
-        if r_proc == None:
-            if os.path.exists(os.path.join(mp4_path, title_name)):
-                os.remove(os.path.join(mp4_path, title_name))
-            return "",True
-            
+
         if r_proc != None:
             console.print("[green]Result: ")
             console.print(r_proc)
@@ -115,15 +106,12 @@ def download_series(select_title: MediaItem):
 
     # Download selected episodes
     if len(list_episode_select) == 1 and last_command != "*":
-        download_episode(list_episode_select[0]-1, scrape_serie, video_source)[0]
+        download_episode(list_episode_select[0]-1, scrape_serie, video_source)
 
     # Download all other episodes selecter
     else:
-        kill_handler=bool(False)
         for i_episode in list_episode_select:
-            if kill_handler:
-                break
-            kill_handler= download_episode(i_episode-1, scrape_serie, video_source)[1]
+            download_episode(i_episode-1, scrape_serie, video_source)
 
 
 def download_film(select_title: MediaItem):

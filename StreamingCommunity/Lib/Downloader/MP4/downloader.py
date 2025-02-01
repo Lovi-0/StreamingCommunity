@@ -1,12 +1,11 @@
 # 09.06.24
 
 import os
-import signal
 import sys
 import ssl
 import certifi
 import logging
-import atexit
+
 
 # External libraries
 import httpx
@@ -35,9 +34,7 @@ GET_ONLY_LINK = config_manager.get_bool('M3U8_PARSER', 'get_only_link')
 TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 
-#Ending constant
-KILL_HANDLER = bool(False)
-   
+
 
 def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = None):
     """
@@ -49,7 +46,6 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
         - referer (str, optional): The referer header value.
         - headers_ (dict, optional): Custom headers for the request.
     """
-
     # Early return for link-only mode
     if GET_ONLY_LINK:
         return {'path': path, 'url': url}
@@ -115,34 +111,15 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
                 # Ensure directory exists
                 os.makedirs(os.path.dirname(path), exist_ok=True)
 
-
-                def signal_handler(*args):
-                    """
-                    Signal handler for SIGINT
-                    
-                    Parameters:
-                        - args (tuple): The signal arguments (to prevent errors).
-                    """
-                    
-                    if(downloaded<total/2):   
-                        raise KeyboardInterrupt
-                    else:
-                        console.print("[bold green]Download almost completed, will exit next[/bold green]")
-                        print("KILL_HANDLER: ", KILL_HANDLER)
-
-
                 # Download file
                 with open(path, 'wb') as file, progress_bar as bar:
                     downloaded = 0
-                    #Test check stop download
-                    #atexit.register(quit_gracefully)
-
                     for chunk in response.iter_bytes(chunk_size=1024):
-                        signal.signal(signal.SIGINT,signal_handler)
                         if chunk:
-                                size = file.write(chunk)
-                                downloaded += size
-                                bar.update(size)
+                            size = file.write(chunk)
+                            downloaded += size
+                            bar.update(size)
+
                             # Optional: Add a check to stop download if needed
                             # if downloaded > MAX_DOWNLOAD_SIZE:
                             #     break
@@ -156,7 +133,7 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
                 title=f"{os.path.basename(path.replace('.mp4', ''))}", 
                 border_style="green"
             ))
-            return path,KILL_HANDLER
+            return path
         
         else:
             console.print("[bold red]Download failed or file is empty.[/bold red]")
@@ -175,8 +152,4 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
     except Exception as e:
         logging.error(f"Unexpected error during download: {e}")
         console.print(f"[bold red]Unexpected Error: {e}[/bold red]")
-        return None
-    
-    except KeyboardInterrupt:   
-        console.print("[bold red]Download stopped by user.[/bold red]")
         return None
