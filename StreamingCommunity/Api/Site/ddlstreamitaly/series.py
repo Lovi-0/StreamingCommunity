@@ -28,7 +28,7 @@ from .costant import SERIES_FOLDER
 
 
 
-def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, video_source: VideoSource) -> str:
+def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, video_source: VideoSource) -> tuple[str,bool]:
     """
     Download a single episode video.
 
@@ -38,13 +38,14 @@ def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, 
 
     Return:
         - str: output path
+        - bool: kill handler status
     """
     start_message()
 
     # Get info about episode
     obj_episode = scape_info_serie.list_episodes[index_episode_selected - 1]
-    console.print(f"[yellow]Download: [red]{obj_episode.get('name')}")
-    print()
+    console.print(f"[yellow]Download: [red]{obj_episode.get('name')}\n")
+    console.print(f"[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
 
     # Define filename and path for the downloaded video
     title_name = os_manager.get_sanitize_file(
@@ -70,6 +71,11 @@ def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, 
         path=os.path.join(mp4_path, title_name),
         referer=f"{parsed_url.scheme}://{parsed_url.netloc}/",
     )
+    
+    if r_proc == None:
+        if os.path.exists(os.path.join(mp4_path, title_name)):
+            os.remove(os.path.join(mp4_path, title_name))
+    return "",True
 
     if r_proc != None:
         console.print("[green]Result: ")
@@ -105,8 +111,11 @@ def download_thread(dict_serie: MediaItem):
         return
 
     # Download selected episodes
+    kill_handler = bool(False)
     for i_episode in list_episode_select:
-        download_video(i_episode, scape_info_serie, video_source)
+        if kill_handler:
+            break
+        kill_handler = download_video(i_episode, scape_info_serie, video_source)[1]
 
 
 def display_episodes_list(obj_episode_manager) -> str:

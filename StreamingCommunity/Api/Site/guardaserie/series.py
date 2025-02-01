@@ -44,9 +44,8 @@ def download_video(index_season_selected: int, index_episode_selected: int, scap
 
     # Get info about episode
     obj_episode = scape_info_serie.list_episodes[index_episode_selected - 1]
-    console.print(f"[yellow]Download: [red]{index_season_selected}:{index_episode_selected} {obj_episode.get('name')}")
-    print()
-
+    console.print(f"[yellow]Download: [red]{index_season_selected}:{index_episode_selected} {obj_episode.get('name')}\n")
+    console.print(f"[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
     # Define filename and path for the downloaded video
     mp4_name = f"{map_episode_title(scape_info_serie.tv_name, index_season_selected, index_episode_selected, obj_episode.get('name'))}.mp4"
     mp4_path = os.path.join(SERIES_FOLDER, scape_info_serie.tv_name, f"S{index_season_selected}")
@@ -70,6 +69,13 @@ def download_video(index_season_selected: int, index_episode_selected: int, scap
         if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
             frames = get_call_stack()
             execute_search(frames[-4])"""
+            
+    # Removes file not completed and stops other downloads
+    if r_proc == None:
+        if os.path.exists(os.path.join(mp4_path, mp4_name)):
+            os.remove(os.path.join(mp4_path, mp4_name))
+        return "",True
+
 
     if r_proc != None:
         console.print("[green]Result: ")
@@ -113,7 +119,10 @@ def download_episode(scape_info_serie: GetSerieInfo, index_season_selected: int,
             return
 
         # Download selected episodes
+        stopped = bool(False)
         for i_episode in list_episode_select:
+            if stopped:
+                break
             download_video(index_season_selected, i_episode, scape_info_serie)
 
 
