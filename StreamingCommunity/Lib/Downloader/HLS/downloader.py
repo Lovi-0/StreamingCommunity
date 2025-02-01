@@ -416,7 +416,7 @@ class ContentDownloader:
             # Download the video streams and print status
             info_dw = video_m3u8.download_streams(f"{Colors.MAGENTA}video", "video")
             list_MissingTs.append(info_dw)
-
+            self.stopped=list_MissingTs.pop()
             # Print duration information of the downloaded video
             #print_duration_table(downloaded_video[0].get('path'))
 
@@ -447,7 +447,7 @@ class ContentDownloader:
                 # Download the audio segments and print status
                 info_dw = audio_m3u8.download_streams(f"{Colors.MAGENTA}audio {Colors.RED}{obj_audio.get('language')}", f"audio_{obj_audio.get('language')}")
                 list_MissingTs.append(info_dw)
-
+                self.stopped=list_MissingTs.pop()
                 # Print duration information of the downloaded audio
                 #print_duration_table(obj_audio.get('path'))
 
@@ -710,6 +710,8 @@ class ContentJoiner:
 
 
 class HLS_Downloader:
+    stopped = bool(False)
+    
     def __init__(self, output_filename: str=None, m3u8_playlist: str=None, m3u8_index: str=None, is_playlist_url: bool=True, is_index_url: bool=True):
         """
         Initializes the HLS_Downloader class.
@@ -820,9 +822,11 @@ class HLS_Downloader:
                                 return None    
                         
                         else:
+                            if self.stopped:
+                                return self.stopped
                             return {
                                 'path': self.output_filename,
-                                'url': self.m3u8_playlist
+                                'url': self.m3u8_playlist,
                             }
                     
                     else:
@@ -847,9 +851,11 @@ class HLS_Downloader:
                             return None
 
                         else:
+                            if self.stopped:
+                                return None
                             return {
                                 'path': self.output_filename,
-                                'url': self.m3u8_index
+                                'url': self.m3u8_index,
                             }
                     
                     else:
