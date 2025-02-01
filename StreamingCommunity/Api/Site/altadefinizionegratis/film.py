@@ -64,6 +64,9 @@ def download_film(select_title: MediaItem) -> str:
         if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
             frames = get_call_stack()
             execute_search(frames[-4])"""
+    if r_proc == None:
+        if os.path.exists(os.path.join(mp4_path, title_name)):
+            os.remove(os.path.join(mp4_path, title_name))
 
     if r_proc != None:
         console.print("[green]Result: ")

@@ -70,6 +70,13 @@ def download_video(index_season_selected: int, index_episode_selected: int, scap
         if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
             frames = get_call_stack()
             execute_search(frames[-4])"""
+            
+    # Removes file not completed and stops other downloads
+    if r_proc == None:
+        if os.path.exists(os.path.join(mp4_path, mp4_name)):
+            os.remove(os.path.join(mp4_path, mp4_name))
+        return "",True
+
 
     if r_proc != None:
         console.print("[green]Result: ")
@@ -113,7 +120,10 @@ def download_episode(scape_info_serie: GetSerieInfo, index_season_selected: int,
             return
 
         # Download selected episodes
+        stopped = bool(False)
         for i_episode in list_episode_select:
+            if stopped:
+                break
             download_video(index_season_selected, i_episode, scape_info_serie)
 
 

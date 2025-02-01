@@ -570,4 +570,6 @@ class M3U8_Segments:
                 console.print("[yellow]⚠ Warning:[/yellow] Too many retries detected! Consider reducing the number of [cyan]workers[/cyan] in the [magenta]config.json[/magenta] file. This will impact [bold]performance[/bold]. \n")
 
         # Info to return
-        return {'type': type, 'nFailed': self.info_nFailed}
+        if self.download_interrupted:
+            return {'type': type, 'nFailed': self.info_nFailed, 'stopped': bool(True)}
+        return {'type': type, 'nFailed': self.info_nFailed, 'stopped': bool(False)}

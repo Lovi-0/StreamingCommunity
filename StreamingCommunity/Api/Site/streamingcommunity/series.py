@@ -28,7 +28,7 @@ from .costant import SITE_NAME, SERIES_FOLDER
 
 
 
-def download_video(index_season_selected: int, index_episode_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource) -> str:
+def download_video(index_season_selected: int, index_episode_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource) -> tuple[str,bool]:
     """
     Download a single episode video.
 
@@ -38,6 +38,7 @@ def download_video(index_season_selected: int, index_episode_selected: int, scra
 
     Return:
         - str: output path
+        - bool: kill handler status
     """
     start_message()
     index_season_selected = dynamic_format_number(index_season_selected)
@@ -69,6 +70,12 @@ def download_video(index_season_selected: int, index_episode_selected: int, scra
         if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
             frames = get_call_stack()
             execute_search(frames[-4])"""
+
+    if r_proc == None:
+        if os.path.exists(os.path.join(mp4_path, mp4_name)):
+            os.remove(os.path.join(mp4_path, mp4_name))
+            return "",True
+
 
     if r_proc != None:
         console.print("[green]Result: ")
@@ -112,9 +119,12 @@ def download_episode(index_season_selected: int, scrape_serie: ScrapeSerie, vide
             console.print(f"[red]{str(e)}")
             return
 
-        # Download selected episodes
+        # Download selected episodes if not stopped
+        stopped = bool(False)
         for i_episode in list_episode_select:
-            download_video(index_season_selected, i_episode, scrape_serie, video_source)
+            if stopped:
+                break
+            stopped=download_video(index_season_selected, i_episode, scrape_serie, video_source)[1]
 
 def download_series(select_season: MediaItem, version: str) -> None:
     """
