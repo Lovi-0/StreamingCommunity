@@ -50,7 +50,7 @@ def download_film(movie_details: Json_film) -> str:
     # Start message and display film information
     start_message()
     console.print(f"[yellow]Download:  [red]{movie_details.title} \n")
-
+    console.print(f"[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
     # Make request to main site
     try:
         url = f"https://{SITE_NAME}.{DOMAIN_NOW}/set-movie-a/{movie_details.imdb_id}"

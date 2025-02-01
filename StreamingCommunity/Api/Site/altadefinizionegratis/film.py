@@ -40,7 +40,8 @@ def download_film(select_title: MediaItem) -> str:
     # Start message and display film information
     start_message()
     console.print(f"[yellow]Download:  [red]{select_title.name} \n")
-
+    console.print(f"[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
+    
     # Set domain and media ID for the video source
     video_source = VideoSource(select_title.url)
 

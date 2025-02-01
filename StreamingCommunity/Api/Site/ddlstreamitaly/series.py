@@ -44,8 +44,8 @@ def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, 
 
     # Get info about episode
     obj_episode = scape_info_serie.list_episodes[index_episode_selected - 1]
-    console.print(f"[yellow]Download: [red]{obj_episode.get('name')}")
-    print()
+    console.print(f"[yellow]Download: [red]{obj_episode.get('name')}\n")
+    console.print(f"[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
 
     # Define filename and path for the downloaded video
     title_name = os_manager.get_sanitize_file(
