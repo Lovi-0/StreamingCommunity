@@ -39,10 +39,7 @@ from .segments import M3U8_Segments
 # Config
 DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_DOWNLOAD', 'specific_list_audio')            
 DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_DOWNLOAD', 'specific_list_subtitles')
-DOWNLOAD_VIDEO = config_manager.get_bool('M3U8_DOWNLOAD', 'download_video')
-DOWNLOAD_AUDIO = config_manager.get_bool('M3U8_DOWNLOAD', 'download_audio')
 MERGE_AUDIO = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_audio')
-DOWNLOAD_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'download_sub')
 MERGE_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_subs')
 REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_DOWNLOAD', 'cleanup_tmp_folder')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
@@ -55,6 +52,29 @@ max_timeout = config_manager.get_int("REQUESTS", "timeout")
 m3u8_url_fixer = M3U8_UrlFix()
 list_MissingTs = []
 
+
+
+class HttpClient:
+    def __init__(self, headers: dict = None):
+        self.headers = headers or {'User-Agent': get_headers()}
+        self.client = httpx.Client(headers=self.headers, timeout=max_timeout, follow_redirects=True)
+
+    def _make_request(self, url: str, return_content: bool = False):
+        for attempt in range(RETRY_LIMIT):
+            try:
+                response = self.client.get(url)
+                response.raise_for_status()
+                return response.content if return_content else response.text
+            except Exception as e:
+                logging.error(f"Attempt {attempt+1} failed for {url}: {str(e)}")
+                time.sleep(1.5 ** attempt)
+        return None
+
+    def get(self, url: str) -> str:
+        return self._make_request(url)
+
+    def get_content(self, url: str) -> bytes:
+        return self._make_request(url, return_content=True)
 
 
 class PathManager:
@@ -88,66 +108,7 @@ class PathManager:
         os.makedirs(self.subtitle_segments_path, exist_ok=True)
 
 
-class HttpClient:
-    def __init__(self, headers: str = None):
-        """
-        Initializes the HttpClient with specified headers.
-        """
-        self.headers = headers
-
-    def get(self, url: str):
-        """
-        Sends a GET request to the specified URL and returns the response as text.
-
-        Returns:
-            str: The response body as text if the request is successful, None otherwise.
-        """
-        logging.info(f"class 'HttpClient'; make request: {url}")
-        try:
-            response = httpx.get(
-                url=url, 
-                headers=self.headers, 
-                timeout=max_timeout,
-                follow_redirects=True
-            )
-
-            response.raise_for_status()
-            return response.text
-
-        except Exception as e:
-            console.print(f"Request to {url} failed with error: {e}")
-            return 404
-
-    def get_content(self, url):
-        """
-        Sends a GET request to the specified URL and returns the raw response content.
-
-        Returns:
-            bytes: The response content as bytes if the request is successful, None otherwise.
-        """
-        logging.info(f"class 'HttpClient'; make request: {url}")
-        try:
-            response = httpx.get(
-                url=url, 
-                headers=self.headers, 
-                timeout=max_timeout
-            )
-
-            response.raise_for_status()
-            return response.content  # Return the raw response content
-
-        except Exception as e:
-            logging.error(f"Request to {url} failed: {response.status_code} when get content.")
-            return None
-
-
 class ContentExtractor:
-    def __init__(self):
-        """
-        This class is responsible for extracting audio, subtitle, and video information from an M3U8 playlist.
-        """
-        pass
-
     def start(self, obj_parse: M3U8_Parser):
         """
         Starts the extraction process by parsing the M3U8 playlist and collecting audio, subtitle, and video data.
@@ -155,10 +116,7 @@ class ContentExtractor:
         Args:
             obj_parse (str): The M3U8_Parser obj of the M3U8 playlist.
         """
-
         self.obj_parse = obj_parse
-
-        # Collect audio, subtitle, and video information
         self._collect_audio()
         self._collect_subtitle()
         self._collect_video()
@@ -417,8 +375,6 @@ class ContentDownloader:
             info_dw = video_m3u8.download_streams(f"{Colors.MAGENTA}video", "video")
             list_MissingTs.append(info_dw)
             self.stopped=list_MissingTs.pop()
-            # Print duration information of the downloaded video
-            #print_duration_table(downloaded_video[0].get('path'))
 
         else:
             console.log("[cyan]Video [red]already exists.")
@@ -448,8 +404,6 @@ class ContentDownloader:
                 info_dw = audio_m3u8.download_streams(f"{Colors.MAGENTA}audio {Colors.RED}{obj_audio.get('language')}", f"audio_{obj_audio.get('language')}")
                 list_MissingTs.append(info_dw)
                 self.stopped=list_MissingTs.pop()
-                # Print duration information of the downloaded audio
-                #print_duration_table(obj_audio.get('path'))
 
             else:
                 console.log(f"[cyan]Audio [white]([green]{obj_audio.get('language')}[white]) [red]already exists.")
@@ -822,8 +776,6 @@ class HLS_Downloader:
                                 return None    
                         
                         else:
-                            if self.stopped:
-                                return self.stopped
                             return {
                                 'path': self.output_filename,
                                 'url': self.m3u8_playlist,
@@ -851,8 +803,6 @@ class HLS_Downloader:
                             return None
 
                         else:
-                            if self.stopped:
-                                return None
                             return {
                                 'path': self.output_filename,
                                 'url': self.m3u8_index,
@@ -978,11 +928,11 @@ class HLS_Downloader:
         self.download_tracker.add_subtitle(self.content_extractor.list_available_subtitles)
 
         # Download each type of content
-        if DOWNLOAD_VIDEO and len(self.download_tracker.downloaded_video) > 0:
+        if len(self.download_tracker.downloaded_video) > 0:
             self.content_downloader.download_video(self.download_tracker.downloaded_video)
-        if DOWNLOAD_AUDIO and len(self.download_tracker.downloaded_audio) > 0:
+        if len(self.download_tracker.downloaded_audio) > 0:
             self.content_downloader.download_audio(self.download_tracker.downloaded_audio)
-        if DOWNLOAD_SUBTITLE and len(self.download_tracker.downloaded_subtitle) > 0:
+        if len(self.download_tracker.downloaded_subtitle) > 0:
             self.content_downloader.download_subtitle(self.download_tracker.downloaded_subtitle)
 
         # Join downloaded content

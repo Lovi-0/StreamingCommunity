@@ -72,11 +72,6 @@ def download_video(index_episode_selected: int, scape_info_serie: GetSerieInfo, 
         referer=f"{parsed_url.scheme}://{parsed_url.netloc}/",
     )
     
-    if r_proc == None:
-        if os.path.exists(os.path.join(mp4_path, title_name)):
-            os.remove(os.path.join(mp4_path, title_name))
-    return "",True
-
     if r_proc != None:
         console.print("[green]Result: ")
         console.print(r_proc)

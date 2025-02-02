@@ -71,12 +71,6 @@ def download_video(index_season_selected: int, index_episode_selected: int, scra
             frames = get_call_stack()
             execute_search(frames[-4])"""
 
-    if r_proc == None:
-        if os.path.exists(os.path.join(mp4_path, mp4_name)):
-            os.remove(os.path.join(mp4_path, mp4_name))
-            return "",True
-
-
     if r_proc != None:
         console.print("[green]Result: ")
         console.print(r_proc)

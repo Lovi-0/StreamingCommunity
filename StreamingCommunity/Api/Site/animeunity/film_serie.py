@@ -73,12 +73,6 @@ def download_episode(index_select: int, scrape_serie: ScrapeSerieAnime, video_so
             path=os.path.join(mp4_path, title_name)
         )
         
-        # If download fails do not create the file
-        if r_proc == None:
-            if os.path.exists(os.path.join(mp4_path, title_name)):
-                os.remove(os.path.join(mp4_path, title_name))
-            return "",True
-            
         if r_proc != None:
             console.print("[green]Result: ")
             console.print(r_proc)
