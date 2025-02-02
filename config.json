@@ -2,9 +2,9 @@
     "DEFAULT": {
         "debug": false,
         "log_file": "app.log",
-        "log_to_file": false,
-        "show_message": false,
-        "clean_console": false,
+        "log_to_file": true,
+        "show_message": true,
+        "clean_console": true,
         "root_path": "Video",
         "movie_folder_name": "Movie",
         "serie_folder_name": "TV",
@@ -17,17 +17,17 @@
             "pass": "adminadmin"
         },
         "add_siteName": false,
-        "disable_searchDomain": true,
+        "disable_searchDomain": false,
         "not_close": false
     },
     "REQUESTS": {
-        "timeout": 25,
+        "timeout": 30,
         "max_retry": 8,
         "proxy_start_min": 0.1,
         "proxy_start_max": 0.5
     },
     "M3U8_DOWNLOAD": {
-        "tqdm_delay": 0.1,
+        "tqdm_delay": 0.12,
         "default_video_workser": 12,
         "default_audio_workser": 12,
         "merge_audio": true,
