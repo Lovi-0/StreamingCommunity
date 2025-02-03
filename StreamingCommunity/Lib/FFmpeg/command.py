@@ -31,7 +31,7 @@ FFMPEG_DEFAULT_PRESET = config_manager.get("M3U8_CONVERSION", "default_preset")
 
 
 # Variable
-TQDM_USE_LARGE_BAR = not ("android" in sys.platform or "ios" in sys.platform)
+TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 FFMPEG_PATH = os_summary.ffmpeg_path
 
 

@@ -24,9 +24,6 @@
   <a href="https://pypi.org/project/streamingcommunity">
     <img src="https://img.shields.io/pypi/dm/streamingcommunity?style=for-the-badge" alt="PyPI Downloads"/>
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity">
-    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/main/Test/Util/loc-badge.json&style=for-the-badge" alt="Lines of Code"/>
-  </a>
 </p>
 
 # 📋 Table of Contents
@@ -39,6 +36,7 @@
     - 📝 [Manual Installation](#3-manual-installation)
         - 💻 [Win 7](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Installation#win-7)
         - 📱 [Termux](https://github.com/Ghost6446/StreamingCommunity_api/wiki/Termux)
+    - 📝 [Telegram Usage](#4-telegram-usage)
 - ⚙️ [Configuration](#configuration)
     - 🔧 [Default](#default-settings)
     - 📩 [Request](#requests-settings)
@@ -258,6 +256,34 @@ python3 update.py
 
 <br>
 
+## 4. Telegram Usage
+
+### Configuration
+
+You need to create an .env file and enter your Telegram token 
+
+and user ID to authorize only one user to use it
+
+### .env Example:
+
+```
+TOKEN_TELEGRAM=IlTuo2131TOKEN$12D3Telegram
+AUTHORIZED_USER_ID=12345678 
+DEBUG=False
+```
+
+### Install Python Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### On Linux/MacOS:
+
+```bash
+python3 telegram_bot.py
+```
+
 # Configuration
 
 You can change some behaviors by tweaking the configuration file.
@@ -471,12 +497,12 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | Website            | Status |
 |:-------------------|:------:|
 | [1337xx](https://1337xx.to/) |   ✅   |
-| [AltadefinizioneGratis](https://altadefinizionegratis.site/) |   ✅   |
+| [AltadefinizioneGratis](https://altadefinizionegratis.info/) |   ✅   |
 | [AnimeUnity](https://animeunity.so/) |   ✅   |
 | [Ilcorsaronero](https://ilcorsaronero.link/) |   ✅   |
 | [CB01New](https://cb01new.video/) |   ✅   |
 | [DDLStreamItaly](https://ddlstreamitaly.co/) |   ✅   |
-| [GuardaSerie](https://guardaserie.meme/) |   ✅   |
+| [GuardaSerie](https://guardaserie.academy/) |   ✅   |
 | [MostraGuarda](https://mostraguarda.stream/) |   ✅   |
 | [StreamingCommunity](https://streamingcommunity.paris/) |   ✅   |
 

@@ -1,0 +1,138 @@
+[os.py:424 -   get_system_summary() ] 2025-01-30 17:14:34,489 - INFO - Python: 3.13.1 (CPython x86_64) - Linux-6.12.9-200.fc41.x86_64-x86_64-with-glibc2.40 (glibc 2...4.0)
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,079 - INFO - Library: httpx-0.28.1
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,080 - INFO - Library: bs4-0.0.2
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,082 - INFO - Library: rich-13.9.4
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,084 - INFO - Library: tqdm-4.66.6
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,085 - INFO - Library: m3u8-6.0.0
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,086 - INFO - Library: psutil-5.9.8
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,088 - INFO - Library: unidecode-1.3.8
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,088 - INFO - Library: jsbeautifier-1.15.1
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,089 - INFO - Library: pathvalidate-3.2.3
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,090 - INFO - Library: pycryptodomex-3.21.0
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,091 - INFO - Library: fake-useragent-2.0.3
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,092 - INFO - Library: qbittorrent-api-2024.12.71
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,092 - INFO - Library: python-qbittorrent-0.4.3
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,093 - INFO - Library: serpapi-0.1.5
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,094 - INFO - Library: flask-3.1.0
+[os.py:476 -   get_system_summary() ] 2025-01-30 17:14:35,094 - INFO - Library: flask-socketio-5.5.1
+[os.py:479 -   get_system_summary() ] 2025-01-30 17:14:35,122 - INFO - Libraries: httpx-0.28.1, bs4-0.0.2, rich-13.9.4, tqdm-4.66.6, m3u8-6.0.0, psutil-5.9.8, unidecode-1.3.8, jsbeautifier-1.15.1, pathvalidate-3.2.3, pycryptodomex-3.21.0, fake-useragent-2.0.3, qbittorrent-api-2024.12.71, python-qbittorrent-0.4.3, serpapi-0.1.5, flask-3.1.0, flask-socketio-5.5.1
+[run.py:77 - load_search_functions() ] 2025-01-30 17:14:38,841 - INFO - Load module name: 1337xx
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,057 - INFO - Read key: DEFAULT.map_episode_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,058 - INFO - Read key: DEFAULT.root_path
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,058 - INFO - Read key: SITE.1337xx
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,058 - INFO - Read key: DEFAULT.serie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,058 - INFO - Read key: DEFAULT.movie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,059 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,059 - INFO - Read key: DEFAULT.disable_searchDomain
+[decryptor.py:20 -             <module>() ] 2025-01-30 17:14:39,062 - INFO - [cyan]Decrypy use: Cryptodomex
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,203 - INFO - Read key: M3U8_DOWNLOAD.tqdm_use_large_bar
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,211 - INFO - Read key: DEFAULT.debug
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,211 - INFO - Read key: M3U8_CONVERSION.use_codec
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,211 - INFO - Read key: M3U8_CONVERSION.use_vcodec
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,211 - INFO - Read key: M3U8_CONVERSION.use_acodec
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,211 - INFO - Read key: M3U8_CONVERSION.use_bitrate
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,211 - INFO - Read key: M3U8_CONVERSION.use_gpu
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,211 - INFO - Read key: M3U8_CONVERSION.default_preset
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,212 - INFO - Read key: M3U8_DOWNLOAD.tqdm_use_large_bar
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,213 - INFO - Read key: M3U8_DOWNLOAD.tqdm_delay
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,213 - INFO - Read key: M3U8_DOWNLOAD.tqdm_use_large_bar
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,213 - INFO - Read key: REQUESTS.max_retry
+[os.py:229 -           check_file() ] 2025-01-30 17:14:39,214 - INFO - Check if file exists: list_proxy.txt
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,214 - INFO - Read key: REQUESTS.proxy_start_min
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,214 - INFO - Read key: REQUESTS.proxy_start_max
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,214 - INFO - Read key: M3U8_DOWNLOAD.default_video_workser
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,214 - INFO - Read key: M3U8_DOWNLOAD.default_audio_workser
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,214 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,215 - INFO - Read key: M3U8_DOWNLOAD.specific_list_audio
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,215 - INFO - Read key: M3U8_DOWNLOAD.specific_list_subtitles
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,215 - INFO - Read key: M3U8_DOWNLOAD.download_video
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,215 - INFO - Read key: M3U8_DOWNLOAD.download_audio
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,215 - INFO - Read key: M3U8_DOWNLOAD.merge_audio
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,215 - INFO - Read key: M3U8_DOWNLOAD.download_sub
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,215 - INFO - Read key: M3U8_DOWNLOAD.merge_subs
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,216 - INFO - Read key: M3U8_DOWNLOAD.cleanup_tmp_folder
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,216 - INFO - Read key: M3U8_PARSER.force_resolution
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,216 - INFO - Read key: M3U8_PARSER.get_only_link
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,216 - INFO - Read key: REQUESTS.max_retry
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,216 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,217 - INFO - Read key: M3U8_PARSER.get_only_link
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,218 - INFO - Read key: M3U8_DOWNLOAD.tqdm_use_large_bar
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,218 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,220 - INFO - Read key: DEFAULT.config_qbit_tor
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,220 - INFO - Read key: DEFAULT.config_qbit_tor
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,220 - INFO - Read key: DEFAULT.config_qbit_tor
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,221 - INFO - Read key: DEFAULT.config_qbit_tor
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,221 - INFO - Read key: M3U8_DOWNLOAD.tqdm_use_large_bar
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,221 - INFO - Read key: REQUESTS.timeout
+[run.py:77 - load_search_functions() ] 2025-01-30 17:14:39,221 - INFO - Load module name: altadefinizionegratis
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,222 - INFO - Read key: DEFAULT.root_path
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,222 - INFO - Read key: SITE.altadefinizionegratis
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,223 - INFO - Read key: DEFAULT.serie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,223 - INFO - Read key: DEFAULT.movie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,223 - INFO - Read key: DEFAULT.add_siteName
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,223 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,223 - INFO - Read key: DEFAULT.disable_searchDomain
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,237 - INFO - Read key: REQUESTS.timeout
+[run.py:77 - load_search_functions() ] 2025-01-30 17:14:39,238 - INFO - Load module name: animeunity
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,239 - INFO - Read key: DEFAULT.root_path
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,240 - INFO - Read key: SITE.animeunity
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,240 - INFO - Read key: DEFAULT.movie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,240 - INFO - Read key: DEFAULT.anime_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,240 - INFO - Read key: DEFAULT.add_siteName
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,240 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,240 - INFO - Read key: DEFAULT.disable_searchDomain
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,243 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,244 - INFO - Read key: REQUESTS.timeout
+[run.py:77 - load_search_functions() ] 2025-01-30 17:14:39,244 - INFO - Load module name: cb01new
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,245 - INFO - Read key: DEFAULT.root_path
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,245 - INFO - Read key: SITE.cb01new
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,246 - INFO - Read key: DEFAULT.serie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,246 - INFO - Read key: DEFAULT.movie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,246 - INFO - Read key: DEFAULT.add_siteName
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,246 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,247 - INFO - Read key: DEFAULT.disable_searchDomain
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,248 - INFO - Read key: REQUESTS.timeout
+[run.py:77 - load_search_functions() ] 2025-01-30 17:14:39,249 - INFO - Load module name: ddlstreamitaly
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,251 - INFO - Read key: DEFAULT.root_path
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,251 - INFO - Read key: SITE.ddlstreamitaly
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,252 - INFO - Read key: SITE.ddlstreamitaly
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,252 - INFO - Read key: DEFAULT.serie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,252 - INFO - Read key: DEFAULT.movie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,253 - INFO - Read key: DEFAULT.add_siteName
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,253 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,254 - INFO - Read key: DEFAULT.disable_searchDomain
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,255 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,256 - INFO - Read key: REQUESTS.timeout
+[run.py:77 - load_search_functions() ] 2025-01-30 17:14:39,256 - INFO - Load module name: guardaserie
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,258 - INFO - Read key: DEFAULT.root_path
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,258 - INFO - Read key: SITE.guardaserie
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,258 - INFO - Read key: DEFAULT.serie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,258 - INFO - Read key: DEFAULT.movie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,258 - INFO - Read key: DEFAULT.add_siteName
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,258 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,258 - INFO - Read key: DEFAULT.disable_searchDomain
+[run.py:77 - load_search_functions() ] 2025-01-30 17:14:39,260 - INFO - Load module name: ilcorsaronero
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,261 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,262 - INFO - Read key: DEFAULT.root_path
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,262 - INFO - Read key: SITE.ilcorsaronero
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,262 - INFO - Read key: DEFAULT.serie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,262 - INFO - Read key: DEFAULT.movie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,262 - INFO - Read key: DEFAULT.add_siteName
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,263 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,263 - INFO - Read key: DEFAULT.disable_searchDomain
+[run.py:77 - load_search_functions() ] 2025-01-30 17:14:39,263 - INFO - Load module name: mostraguarda
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,266 - INFO - Read key: DEFAULT.root_path
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,267 - INFO - Read key: SITE.mostraguarda
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,267 - INFO - Read key: DEFAULT.serie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,267 - INFO - Read key: DEFAULT.movie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,267 - INFO - Read key: DEFAULT.add_siteName
+[run.py:77 - load_search_functions() ] 2025-01-30 17:14:39,267 - INFO - Load module name: streamingcommunity
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,269 - INFO - Read key: DEFAULT.root_path
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,269 - INFO - Read key: SITE.streamingcommunity
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,269 - INFO - Read key: DEFAULT.serie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,269 - INFO - Read key: DEFAULT.movie_folder_name
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,270 - INFO - Read key: DEFAULT.add_siteName
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,270 - INFO - Read key: REQUESTS.timeout
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,270 - INFO - Read key: DEFAULT.disable_searchDomain
+[_jsonConfig.py:89 -             read_key() ] 2025-01-30 17:14:39,271 - INFO - Read key: REQUESTS.timeout
+[run.py:157 -                 main() ] 2025-01-30 17:14:39,272 - INFO - Load module in: 5.0520179271698 s

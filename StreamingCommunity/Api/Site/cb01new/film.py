@@ -38,7 +38,6 @@ def download_film(select_title: MediaItem) -> str:
     # Start message and display film information
     start_message()
     console.print(f"[yellow]Download:  [red]{select_title.name} \n")
-    console.print(f"[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
 
     # Setup api manger
     print(select_title.url)
@@ -46,7 +45,9 @@ def download_film(select_title: MediaItem) -> str:
 
     # Define output path
     title_name = os_manager.get_sanitize_file(select_title.name) +".mp4"
-    mp4_path = os.path.join(MOVIE_FOLDER, title_name.replace(".mp4", ""))
+    mp4_path = os_manager.get_sanitize_path(
+        os.path.join(MOVIE_FOLDER, title_name.replace(".mp4", ""))
+    )
 
     # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()

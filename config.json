@@ -2,23 +2,24 @@
     "DEFAULT": {
         "debug": false,
         "log_file": "app.log",
-        "log_to_file": true,
-        "show_message": true,
+        "log_to_file": false,
+        "show_message": false,
         "clean_console": true,
-        "root_path": "Video",
+        "root_path": "/home/giuseppepiccolo/Develop/docker/jellyfin/media/",
         "movie_folder_name": "Movie",
-        "serie_folder_name": "TV",
+        "serie_folder_name": "Serie",
         "anime_folder_name": "Anime",
-        "map_episode_name": "E%(episode)_%(episode_name)",
+        "map_episode_name": "%(tv_name)_S%(season)E%(episode)_%(episode_name)",
         "config_qbit_tor": {
-            "host": "192.168.1.99",
-            "port": "7060",
+            "host": "192.168.5.172",
+            "port": "8080",
             "user": "admin",
             "pass": "adminadmin"
         },
         "add_siteName": false,
         "disable_searchDomain": false,
-        "not_close": false
+        "not_close": false,
+        "telegram_bot": true
     },
     "REQUESTS": {
         "timeout": 30,
@@ -28,13 +29,17 @@
     },
     "M3U8_DOWNLOAD": {
         "tqdm_delay": 0.12,
+        "tqdm_use_large_bar": false,
         "default_video_workser": 12,
         "default_audio_workser": 12,
+        "download_video": true,
+        "download_audio": true,
         "merge_audio": true,
         "specific_list_audio": [
             "ita"
         ],
-        "merge_subs": true,
+        "download_sub": false,
+        "merge_subs": false,
         "specific_list_subtitles": [
             "eng",
             "spa"
@@ -58,10 +63,10 @@
             "domain": "paris"
         },
         "altadefinizionegratis": {
-            "domain": "site"
+            "domain": "info"
         },
         "guardaserie": {
-            "domain": "meme"
+            "domain": "academy"
         },
         "mostraguarda": {
             "domain": "stream"
@@ -78,7 +83,7 @@
             "domain": "so"
         },
         "cb01new": {
-            "domain": "mobi"
+            "domain": "video"
         },
         "1337xx": {
             "domain": "to"

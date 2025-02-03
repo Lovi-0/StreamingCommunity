@@ -28,7 +28,7 @@ USERNAME = str(config_manager.get_dict('DEFAULT', 'config_qbit_tor')['user'])
 PASSWORD = str(config_manager.get_dict('DEFAULT', 'config_qbit_tor')['pass'])
 
 # Config
-TQDM_USE_LARGE_BAR = not ("android" in sys.platform or "ios" in sys.platform)
+TQDM_USE_LARGE_BAR = config_manager.get_int('M3U8_DOWNLOAD', 'tqdm_use_large_bar')
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
 
 

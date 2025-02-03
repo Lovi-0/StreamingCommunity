@@ -24,6 +24,12 @@ from StreamingCommunity.Api.Player.supervideo import VideoSource
 # Config
 from .costant import MOVIE_FOLDER
 
+# Telegram bot instance
+from telegram_bot import get_bot_instance
+from session import get_session, updateScriptId, deleteScriptId
+from StreamingCommunity.Util._jsonConfig import config_manager
+TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
+
 
 def download_film(select_title: MediaItem) -> str:
     """
@@ -37,17 +43,29 @@ def download_film(select_title: MediaItem) -> str:
         - str: output path
     """
 
+    if TELEGRAM_BOT:
+      bot = get_bot_instance()
+    
+      # Invio a telegram
+      bot.send_message(f"Download in corso:\n{select_title.name}", None)
+    
+      # Get script_id
+      script_id = get_session()
+      if script_id != "unknown":
+          updateScriptId(script_id, select_title.name)
+
     # Start message and display film information
     start_message()
     console.print(f"[yellow]Download:  [red]{select_title.name} \n")
-    console.print(f"[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
-    
+
     # Set domain and media ID for the video source
     video_source = VideoSource(select_title.url)
 
     # Define output path
     title_name = os_manager.get_sanitize_file(select_title.name) + ".mp4"
-    mp4_path = os.path.join(MOVIE_FOLDER, title_name.replace(".mp4", ""))
+    mp4_path = os_manager.get_sanitize_path(
+        os.path.join(MOVIE_FOLDER, title_name.replace(".mp4", ""))
+    )
 
     # Get m3u8 master playlist
     master_playlist = video_source.get_playlist()
@@ -65,7 +83,13 @@ def download_film(select_title: MediaItem) -> str:
         if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
             frames = get_call_stack()
             execute_search(frames[-4])"""
-    
+
+    if TELEGRAM_BOT:
+      # Delete script_id
+      script_id = get_session()
+      if script_id != "unknown":
+          deleteScriptId(script_id)
+          
     if r_proc != None:
         console.print("[green]Result: ")
         console.print(r_proc)
