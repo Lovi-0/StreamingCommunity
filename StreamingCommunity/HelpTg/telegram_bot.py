@@ -62,24 +62,33 @@ class TelegramBot:
 
                 current_time = time.time()
 
-                # Crea una nuova lista senza gli script che sono scaduti
+                # Crea una nuova lista senza gli script che sono scaduti o le screen che non esistono
                 scripts_data_to_save = []
 
                 for script in scripts_data:
-                    if "titolo" not in script and script["status"] == "running" and (current_time - script["start_time"]) > 600:
-                        # Prova a terminare la sessione screen
-                        try:
-                            subprocess.check_output(["screen", "-S", script["screen_id"], "-X", "quit"])
-                            print(f"✅ La sessione screen con ID {script['screen_id']} è stata fermata automaticamente.")
-                        except subprocess.CalledProcessError:
-                            print(f"⚠️ Impossibile fermare la sessione screen con ID {script['screen_id']}.")
+                    screen_exists = False
+                    try:
+                        existing_screens = subprocess.check_output(["screen", "-list"]).decode('utf-8')
+                        if script["screen_id"] in existing_screens:
+                            screen_exists = True
+                    except subprocess.CalledProcessError:
+                        pass  # Se il comando fallisce, significa che non ci sono screen attivi.
 
-                        # Aggiungi solo gli script che non sono scaduti
-                        print(f"⚠️ Lo script con ID {script['screen_id']} ha superato i 10 minuti e verrà rimosso.")
+                    if screen_exists:
+                        if "titolo" not in script and script["status"] == "running" and (current_time - script["start_time"]) > 600:
+                            # Prova a terminare la sessione screen
+                            try:
+                                subprocess.check_output(["screen", "-S", script["screen_id"], "-X", "quit"])
+                                print(f"✅ La sessione screen con ID {script['screen_id']} è stata fermata automaticamente.")
+                            except subprocess.CalledProcessError:
+                                print(f"⚠️ Impossibile fermare la sessione screen con ID {script['screen_id']}.")
+                            print(f"⚠️ Lo script con ID {script['screen_id']} ha superato i 10 minuti e verrà rimosso.")
+                        else:
+                            scripts_data_to_save.append(script)
                     else:
-                        scripts_data_to_save.append(script)
+                        print(f"⚠️ La sessione screen con ID {script['screen_id']} non esiste più e verrà rimossa.")
 
-                # Salva la lista aggiornata, senza gli script scaduti
+                # Salva la lista aggiornata, senza gli script scaduti o le screen non esistenti
                 with open("../../scripts.json", "w") as f:
                     json.dump(scripts_data_to_save, f, indent=4)
 
@@ -191,7 +200,7 @@ class TelegramBot:
         #screen_id = '0000'
 
         # Impostare a True per avviare il test_run.py in modalità verbose per il debug
-        
+
         debug_mode = os.getenv("DEBUG")
         verbose = debug_mode
 
@@ -523,7 +532,7 @@ if __name__ == "__main__":
     # Usa le variabili
     token = os.getenv("TOKEN_TELEGRAM")
     authorized_user_id = os.getenv("AUTHORIZED_USER_ID")
-    
+
     TOKEN = token  # Inserisci il token del tuo bot Telegram sul file .env
     AUTHORIZED_USER_ID = int(authorized_user_id)  # Inserisci il tuo ID utente Telegram sul file .env
 
