@@ -2,6 +2,7 @@
 
 import io
 import os
+import glob
 import sys
 import time
 import shutil
@@ -294,6 +295,18 @@ class OsSummary:
         self.ffprobe_path = None
         self.ffplay_path = None
 
+    def get_binary_directory(self):
+        """Get the binary directory based on OS."""
+        system = platform.system().lower()
+        home = os.path.expanduser('~')
+        
+        if system == 'windows':
+            return os.path.join(os.path.splitdrive(home)[0] + os.path.sep, 'binary')
+        elif system == 'darwin':
+            return os.path.join(home, 'Applications', 'binary')
+        else:  # linux
+            return os.path.join(home, '.local', 'bin', 'binary')
+
     def get_executable_version(self, command: list):
         """
         Get the version of a given command-line executable.
@@ -396,24 +409,11 @@ class OsSummary:
             sys.exit(0)
 
     def get_system_summary(self):
-        """
-        Generate a summary of the system environment.
-
-        Includes:
-            - Python version and implementation details.
-            - Operating system and architecture.
-            - Versions of `ffmpeg` and `ffprobe` executables.
-            - Installed Python libraries as listed in `requirements.txt`.
-        """
-        
-        # Check if Python is the official CPython
         self.check_python_version()
-
-        # Check internet connectivity
         InternManager().check_internet()
         console.print("[bold blue]System Summary[/bold blue][white]:")
 
-        # Python version and platform
+        # Python info
         python_version = sys.version.split()[0]
         python_implementation = platform.python_implementation()
         arch = platform.machine()
@@ -422,34 +422,56 @@ class OsSummary:
         
         console.print(f"[cyan]Python[white]: [bold red]{python_version} ({python_implementation} {arch}) - {os_info} ({glibc_version})[/bold red]")
         logging.info(f"Python: {python_version} ({python_implementation} {arch}) - {os_info} ({glibc_version})")
+
+        # FFmpeg detection
+        binary_dir = self.get_binary_directory()
+        system = platform.system().lower()
+        arch = platform.machine().lower()
         
-        # Use the 'where' command on Windows and 'which' command on Unix-like systems
-        system_platform = platform.system().lower()
-        command = 'where' if system_platform == 'windows' else 'which'
+        # Map architecture names
+        arch_map = {
+            'amd64': 'x64', 
+            'x86_64': 'x64',
+            'x64': 'x64',
+            'arm64': 'arm64',
+            'aarch64': 'arm64',
+            'armv7l': 'arm',
+            'i386': 'ia32',
+            'i686': 'ia32'
+        }
+        arch = arch_map.get(arch, arch)
 
-        # Locate ffmpeg and ffprobe from the PATH environment
-        if self.ffmpeg_path is not None and "binary" not in self.ffmpeg_path:
-            self.ffmpeg_path = self.check_ffmpeg_location([command, 'ffmpeg'])
-
-        if self.ffprobe_path is not None and "binary" not in self.ffprobe_path:
-            self.ffprobe_path = self.check_ffmpeg_location([command, 'ffprobe'])
-
-        # If ffmpeg or ffprobe is not located, fall back to using the check_ffmpeg function
-        if self.ffmpeg_path is None or self.ffprobe_path is None:
+        # Check binary directory
+        if os.path.exists(binary_dir):
+            
+            # Search for any file containing 'ffmpeg' and the architecture
+            ffmpeg_files = glob.glob(os.path.join(binary_dir, f'*ffmpeg*{arch}*'))
+            ffprobe_files = glob.glob(os.path.join(binary_dir, f'*ffprobe*{arch}*'))
+            
+            if ffmpeg_files and ffprobe_files:
+                self.ffmpeg_path = ffmpeg_files[0]
+                self.ffprobe_path = ffprobe_files[0]
+                
+                # Set executable permissions if needed
+                if system != 'windows':
+                    os.chmod(self.ffmpeg_path, 0o755)
+                    os.chmod(self.ffprobe_path, 0o755)
+            else:
+                self.ffmpeg_path, self.ffprobe_path, self.ffplay_path = check_ffmpeg()
+        else:
             self.ffmpeg_path, self.ffprobe_path, self.ffplay_path = check_ffmpeg()
 
-        # If still not found, print error and exit
-        if self.ffmpeg_path is None or self.ffprobe_path is None:
+        if not self.ffmpeg_path or not self.ffprobe_path:
             console.log("[red]Can't locate ffmpeg or ffprobe")
             sys.exit(0)
 
-        ffmpeg_version = self.get_executable_version([self.ffprobe_path, '-version'])
+        ffmpeg_version = self.get_executable_version([self.ffmpeg_path, '-version'])
         ffprobe_version = self.get_executable_version([self.ffprobe_path, '-version'])
 
         console.print(f"[cyan]Path[white]: [red]ffmpeg [bold yellow]'{self.ffmpeg_path}'[/bold yellow][white], [red]ffprobe '[bold yellow]{self.ffprobe_path}'[/bold yellow]")
         console.print(f"[cyan]Exe versions[white]: [bold red]ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}[/bold red]")
 
-        # Check if requirements.txt exists, if not on pyinstaller
+        # Handle requirements.txt
         if not getattr(sys, 'frozen', False):
             requirements_file = 'requirements.txt'
             
@@ -459,19 +481,14 @@ class OsSummary:
                     requirements_file
                 )
             
-            # Read the optional libraries from the requirements file, get only name without version if "library==1.0.0"
             optional_libraries = [line.strip().split("=")[0] for line in open(requirements_file, 'r', encoding='utf-8-sig')]
             
-            # Check if libraries are installed and prompt to install missing ones
             for lib in optional_libraries:
                 installed_version = self.get_library_version(lib)
-
                 if 'not installed' in installed_version:
                     user_response = msg.ask(f"{lib} is not installed. Do you want to install it? (yes/no)", default="y")
-                    
                     if user_response.lower().strip() in ["yes", "y"]:
                         self.install_library(lib)
-                
                 else:
                     logging.info(f"Library: {installed_version}")
             
@@ -479,7 +496,6 @@ class OsSummary:
             logging.info(f"Libraries: {', '.join([self.get_library_version(lib) for lib in optional_libraries])}")
 
 
-# OTHER
 os_manager = OsManager()
 internet_manager = InternManager()
 os_summary = OsSummary()
