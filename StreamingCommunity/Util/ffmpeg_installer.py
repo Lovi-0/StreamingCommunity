@@ -1,18 +1,19 @@
 # 24.01.2024
 
 import os
+import glob
+import gzip
+import shutil
+import tarfile
+import zipfile
+import logging
 import platform
 import subprocess
-import zipfile
-import tarfile
-import logging
-import requests
-import shutil
-import glob
 from typing import Optional, Tuple
 
 
 # External library
+import requests
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeRemainingColumn
 
@@ -20,44 +21,30 @@ from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeRe
 # Variable
 console = Console()
 
-# https://github.com/eugeneware/ffmpeg-static/releases
-# https://github.com/GyanD/codexffmpeg/releases/
+
 FFMPEG_CONFIGURATION = {
     'windows': {
         'base_dir': lambda home: os.path.join(os.path.splitdrive(home)[0] + os.path.sep, 'binary'),
-        'download_url': 'https://github.com/GyanD/codexffmpeg/releases/download/{version}/ffmpeg-{version}-full_build.zip',
-        'file_extension': '.zip',
-        'executables': ['ffmpeg.exe', 'ffprobe.exe', 'ffplay.exe']
+        'download_url': 'https://github.com/eugeneware/ffmpeg-static/releases/latest/download/ffmpeg-win32-{arch}.gz',
+        'file_extension': '.gz',
+        'executables': ['ffmpeg-win32-{arch}', 'ffprobe-win32-{arch}']
     },
     'darwin': {
         'base_dir': lambda home: os.path.join(home, 'Applications', 'binary'),
-        'download_url': 'https://github.com/eugeneware/ffmpeg-static/releases/download/b{version}/ffmpeg-macOS-{arch}.zip',
-        'file_extension': '.zip',
-        'executables': ['ffmpeg', 'ffprobe', 'ffplay']
+        'download_url': 'https://github.com/eugeneware/ffmpeg-static/releases/latest/download/ffmpeg-darwin-{arch}.gz',
+        'file_extension': '.gz',
+        'executables': ['ffmpeg-darwin-{arch}', 'ffprobe-darwin-{arch}']
     },
     'linux': {
         'base_dir': lambda home: os.path.join(home, '.local', 'bin', 'binary'),
-        'download_url': 'https://github.com/eugeneware/ffmpeg-static/releases/download/b{version}/ffmpeg-linux-{arch}.tar.xz',
-        'file_extension': '.tar.xz',
-        'executables': ['ffmpeg', 'ffprobe', 'ffplay']
+        'download_url': 'https://github.com/eugeneware/ffmpeg-static/releases/latest/download/ffmpeg-linux-{arch}.gz',
+        'file_extension': '.gz',
+        'executables': ['ffmpeg-linux-{arch}', 'ffprobe-linux-{arch}']
     }
 }
 
 
 class FFMPEGDownloader:
-    """
-    A class for downloading and managing FFmpeg executables.
-    
-    This class handles the detection of the operating system, downloading of FFmpeg binaries,
-    and management of the FFmpeg executables (ffmpeg, ffprobe, and ffplay).
-
-    Attributes:
-        os_name (str): The detected operating system name
-        arch (str): The system architecture (e.g., x86_64, arm64)
-        home_dir (str): User's home directory path
-        base_dir (str): Base directory for storing FFmpeg binaries
-    """
-
     def __init__(self):
         self.os_name = self._detect_system()
         self.arch = self._detect_arch()
@@ -70,9 +57,6 @@ class FFMPEGDownloader:
 
         Returns:
             str: Normalized operating system name ('windows', 'darwin', or 'linux')
-
-        Raises:
-            ValueError: If the operating system is not supported
         """
         system = platform.system().lower()
         if system in FFMPEG_CONFIGURATION:
@@ -85,18 +69,17 @@ class FFMPEGDownloader:
 
         Returns:
             str: Normalized architecture name (e.g., 'x86_64', 'arm64')
-            
-        The method normalizes various architecture names to consistent values:
-            - amd64/x86_64/x64 -> x86_64
-            - arm64/aarch64 -> arm64
         """
         machine = platform.machine().lower()
         arch_map = {
-            'amd64': 'x86_64', 
-            'x86_64': 'x86_64', 
-            'x64': 'x86_64',
-            'arm64': 'arm64', 
-            'aarch64': 'arm64'
+            'amd64': 'x64', 
+            'x86_64': 'x64',
+            'x64': 'x64',
+            'arm64': 'arm64',
+            'aarch64': 'arm64',
+            'armv7l': 'arm',
+            'i386': 'ia32',
+            'i686': 'ia32'
         }
         return arch_map.get(machine, machine)
 
@@ -106,11 +89,6 @@ class FFMPEGDownloader:
 
         Returns:
             str: Path to the base directory
-            
-        The directory location varies by operating system:
-            - Windows: C:\\binary
-            - macOS: ~/Applications/binary
-            - Linux: ~/.local/bin/binary
         """
         base_dir = FFMPEG_CONFIGURATION[self.os_name]['base_dir'](self.home_dir)
         os.makedirs(base_dir, exist_ok=True)
@@ -157,9 +135,6 @@ class FFMPEGDownloader:
 
         Returns:
             Optional[str]: The latest version string, or None if retrieval fails.
-
-        Raises:
-            requests.exceptions.RequestException: If there are network-related errors.
         """
         try:
             # Use GitHub API to fetch the latest release
@@ -184,10 +159,6 @@ class FFMPEGDownloader:
 
         Returns:
             bool: True if download was successful, False otherwise.
-
-        Raises:
-            requests.exceptions.RequestException: If there are network-related errors
-            IOError: If there are issues writing to the destination file
         """
         try:
             response = requests.get(url, stream=True)
@@ -233,6 +204,13 @@ class FFMPEGDownloader:
             elif archive_path.endswith('.tar.xz'):
                 with tarfile.open(archive_path) as tar_ref:
                     tar_ref.extractall(extraction_path)
+            elif archive_path.endswith('.gz'):
+                file_name = os.path.basename(archive_path)[:-3]  # Remove extension .gz
+                output_path = os.path.join(extraction_path, file_name)
+                with gzip.open(archive_path, 'rb') as f_in, open(output_path, 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+            else:
+                raise ValueError("Unsupported archive format")
 
             config = FFMPEG_CONFIGURATION[self.os_name]
             executables = config['executables']
@@ -240,7 +218,6 @@ class FFMPEGDownloader:
 
             for executable in executables:
                 exe_paths = glob.glob(os.path.join(extraction_path, '**', executable), recursive=True)
-                
                 if exe_paths:
                     dest_path = os.path.join(self.base_dir, executable)
                     shutil.copy2(exe_paths[0], dest_path)
@@ -269,34 +246,29 @@ class FFMPEGDownloader:
             Tuple[Optional[str], Optional[str], Optional[str]]: Paths to ffmpeg, ffprobe, and ffplay executables.
             Returns None for each executable that couldn't be downloaded or set up.
         """
-        existing_ffmpeg, existing_ffprobe, existing_ffplay = self._check_existing_binaries()
-        if all([existing_ffmpeg, existing_ffprobe, existing_ffplay]):
-            return existing_ffmpeg, existing_ffprobe, existing_ffplay
-
-        repo = 'GyanD/codexffmpeg' if self._detect_system() == 'windows' else 'eugeneware/ffmpeg-static'
-        console.print(f"[red]Use {repo} repo for downloading ffmpeg.")
-        version = self._get_latest_version(repo)
-
-        if not version:
-            logging.error("Cannot proceed: version not found")
-            return None, None, None
-
         config = FFMPEG_CONFIGURATION[self.os_name]
-        download_url = config['download_url'].format(
-            version=version, 
-            arch=self.arch
+        executables = [exe.format(arch=self.arch) for exe in config['executables']]
+        
+        for executable in executables:
+            download_url = f"https://github.com/eugeneware/ffmpeg-static/releases/latest/download/{executable}.gz"
+            download_path = os.path.join(self.base_dir, f"{executable}.gz")
+            final_path = os.path.join(self.base_dir, executable)
+            
+            console.print(f"[bold blue]Downloading {executable} from GitHub[/]")
+            if not self._download_file(download_url, download_path):
+                return None, None, None
+            
+            with gzip.open(download_path, 'rb') as f_in, open(final_path, 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
+            
+            os.chmod(final_path, 0o755)
+            os.remove(download_path)
+        
+        return (
+            os.path.join(self.base_dir, executables[0]),
+            os.path.join(self.base_dir, executables[1]),
+            None
         )
-        
-        download_path = os.path.join(
-            self.base_dir, 
-            f'ffmpeg-{version}{config["file_extension"]}'
-        )
-        
-        console.print(f"[bold blue]Downloading FFmpeg from:[/] {download_url}")
-        if not self._download_file(download_url, download_path):
-            return None, None, None
-        
-        return self._extract_and_copy_binaries(download_path)
 
 def check_ffmpeg() -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
