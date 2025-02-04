@@ -1,7 +1,6 @@
 # 31.01.24
 
 import sys
-import time
 import logging
 import subprocess
 from typing import List, Dict
@@ -36,24 +35,14 @@ FFMPEG_PATH = os_summary.ffmpeg_path
 
 
 def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
-    
     """
     Joins single ts video file to mp4
     
     Parameters:
         - video_path (str): The path to the video file.
         - out_path (str): The path to save the output file.
-        - vcodec (str): The video codec to use. Defaults to 'copy'.
-        - acodec (str): The audio codec to use. Defaults to 'aac'.
-        - bitrate (str): The bitrate for the audio stream. Defaults to '192k'.
-        - force_ts (bool): Force video path to be mpegts as input.
+        - codec (M3U8_Codec): The video codec to use. Defaults to 'copy'.
     """
-
-    if not os_manager.check_file(video_path):
-        logging.error("Missing input video for ffmpeg conversion.")
-        sys.exit(0)
-
-    # Start command with locate ffmpeg
     ffmpeg_cmd = [FFMPEG_PATH]
 
     # Enabled the use of gpu
@@ -121,11 +110,6 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join video")
                 print()
 
-    time.sleep(0.5)
-    if not os_manager.check_file(out_path):
-        logging.error("Missing output video for ffmpeg conversion video.")
-        sys.exit(0)
-
 
 def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: str, codec: M3U8_Codec = None):
     """
@@ -137,11 +121,6 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
             Each dictionary should contain the 'path' key with the path to the audio file.
         - out_path (str): The path to save the output file.
     """
-
-    if not os_manager.check_file(video_path):
-        logging.error("Missing input video for ffmpeg conversion.")
-        sys.exit(0)
-
     video_audio_same_duration = check_duration_v_a(video_path, audio_tracks[0].get('path'))
 
     # Start command with locate ffmpeg
@@ -225,11 +204,6 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join audio")
                 print()
 
-    time.sleep(0.5)
-    if not os_manager.check_file(out_path):
-        logging.error("Missing output video for ffmpeg conversion audio.")
-        sys.exit(0)
-
 
 def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_path: str):
     """
@@ -241,12 +215,6 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
             Each dictionary should contain the 'path' key with the path to the subtitle file and the 'name' key with the name of the subtitle.
         - out_path (str): The path to save the output file.
     """
-
-    if not os_manager.check_file(video_path):
-        logging.error("Missing input video for ffmpeg conversion.")
-        sys.exit(0)
-
-    # Start command with locate ffmpeg
     ffmpeg_cmd = [FFMPEG_PATH, "-i", video_path]
 
     # Add subtitle input files first
@@ -274,7 +242,6 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
     ffmpeg_cmd += [out_path, "-y"]
     logging.info(f"FFmpeg command: {ffmpeg_cmd}")
 
-
     # Run join
     if DEBUG_MODE:
         subprocess.run(ffmpeg_cmd, check=True)
@@ -289,8 +256,3 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
             with suppress_output():
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join subtitle")
                 print()
-
-    time.sleep(0.5)
-    if not os_manager.check_file(out_path):
-        logging.error("Missing output video for ffmpeg conversion subtitle.")
-        sys.exit(0)
