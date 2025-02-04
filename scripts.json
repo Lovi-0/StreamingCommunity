@@ -1,1 +1,16 @@
-[]
+[
+    {
+        "screen_id": "0e830205",
+        "start_time": 1738674260.611711,
+        "status": "running",
+        "user_id": 676749122,
+        "titolo": "Doctor Strange"
+    },
+    {
+        "screen_id": "29057a57",
+        "start_time": 1738674321.6443458,
+        "status": "running",
+        "user_id": 676749122,
+        "titolo": "Guardiani della Galassia Vol. 2"
+    }
+]

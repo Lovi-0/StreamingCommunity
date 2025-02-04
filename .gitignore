@@ -50,3 +50,4 @@ list_proxy.txt
 cmd.txt
 bot_config.json
 script.json
+active_requests.json

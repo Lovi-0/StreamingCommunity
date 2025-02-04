@@ -38,7 +38,7 @@ from ...M3U8 import (
 from .segments import M3U8_Segments
 
 # Telegram bot instance
-from telegram_bot import get_bot_instance
+StreamingCommunity.HelpTg. import get_bot_instance
 TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 
 # Config

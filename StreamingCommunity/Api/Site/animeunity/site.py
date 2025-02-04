@@ -20,7 +20,7 @@ from StreamingCommunity.Api.Template.Util import search_domain
 from StreamingCommunity.Api.Template.Class.SearchType import MediaManager
 
 # Telegram bot instance
-from telegram_bot import get_bot_instance
+StreamingCommunity.HelpTg. import get_bot_instance
 from StreamingCommunity.Util._jsonConfig import config_manager
 TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 

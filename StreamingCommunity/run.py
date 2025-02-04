@@ -21,7 +21,7 @@ from StreamingCommunity.Util.os import os_summary
 from StreamingCommunity.Util.logger import Logger
 
 # Telegram bot instance
-from telegram_bot import get_bot_instance
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
 
 # Config
 CLOSE_CONSOLE = config_manager.get_bool('DEFAULT', 'not_close')

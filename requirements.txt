@@ -12,3 +12,5 @@ googlesearch-python
 fake-useragent
 qbittorrent-api
 python-qbittorrent 
+pyTelegramBotAPI
+Pillow
