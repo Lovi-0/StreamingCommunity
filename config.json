@@ -18,7 +18,8 @@
         },
         "add_siteName": false,
         "disable_searchDomain": false,
-        "not_close": false
+        "not_close": false,
+        "telegram_bot": true
     },
     "REQUESTS": {
         "timeout": 30,
@@ -58,7 +59,7 @@
             "domain": "paris"
         },
         "altadefinizionegratis": {
-            "domain": "site"
+            "domain": "pro"
         },
         "guardaserie": {
             "domain": "meme"

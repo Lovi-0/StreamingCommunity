@@ -23,7 +23,13 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSource
 
 # Variable
 from .costant import SITE_NAME, MOVIE_FOLDER
-        
+
+# Telegram bot instance
+from telegram_bot import get_bot_instance
+from session import get_session, updateScriptId, deleteScriptId
+from StreamingCommunity.Util._jsonConfig import config_manager
+TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
+
 
 def download_film(select_title: MediaItem) -> str:
     """
@@ -36,11 +42,23 @@ def download_film(select_title: MediaItem) -> str:
     Return:
         - str: output path
     """
+    if TELEGRAM_BOT:
+      bot = get_bot_instance()
+    
+      # Invio a telegram
+      bot.send_message(f"Download in corso:\n{select_title.name}", None)
+
+      # Viene usato per lo screen 
+      console.print(f"## Download: [red]{select_title.name} ##")
+    
+      # Get script_id
+      script_id = get_session()
+      if script_id != "unknown":
+          updateScriptId(script_id, select_title.name)
 
     # Start message and display film information
     start_message()
     console.print(f"[yellow]Download: [red]{select_title.name} \n")
-    console.print(f"[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
 
     # Init class
     video_source = VideoSource(SITE_NAME, False)
@@ -60,6 +78,12 @@ def download_film(select_title: MediaItem) -> str:
         m3u8_playlist=master_playlist, 
         output_filename=os.path.join(mp4_path, title_name)
     ).start()
+
+    if TELEGRAM_BOT:
+      # Delete script_id
+      script_id = get_session()
+      if script_id != "unknown":
+          deleteScriptId(script_id)
 
     """if r_proc == 404:
         time.sleep(2)

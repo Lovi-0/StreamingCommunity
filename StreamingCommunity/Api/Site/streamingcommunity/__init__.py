@@ -1,7 +1,8 @@
 # 21.05.24
 
 from urllib.parse import quote_plus
-
+import subprocess
+import sys
 
 # Internal utilities
 from StreamingCommunity.Util.console import console, msg
@@ -12,6 +13,10 @@ from .site import get_version_and_domain, title_search, run_get_select_title, me
 from .film import download_film
 from .series import download_series
 
+# Telegram bot instance
+from StreamingCommunity.Util._jsonConfig import config_manager
+from telegram_bot import get_bot_instance
+TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 
 # Variable
 indice = 0
@@ -27,8 +32,25 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
     Main function of the application for film and series.
     """
 
-    if string_to_search is None:
-        string_to_search = msg.ask(f"\n[purple]Insert word to search in [green]{SITE_NAME}").strip()
+    if TELEGRAM_BOT:
+      bot = get_bot_instance()
+
+      if string_to_search is None:
+        # Chiedi la scelta all'utente con il bot Telegram
+        string_to_search = bot.ask(
+            "key_search",
+            f"Inserisci la parola da cercare\noppure 🔙 back per tornare alla scelta: ",
+            None
+        )
+
+        if string_to_search == 'back':
+            # Riavvia lo script
+            # Chiude il processo attuale e avvia una nuova istanza dello script
+            subprocess.Popen([sys.executable] + sys.argv)
+            sys.exit()
+    else:
+        if string_to_search is None:
+            string_to_search = msg.ask(f"\n[purple]Insert word to search in [green]{SITE_NAME}").strip()
 
     # Get site domain and version and get result of the search
     site_version, domain = get_version_and_domain()
@@ -51,6 +73,9 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
     
     else:
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")
+
+        if TELEGRAM_BOT:
+          bot.send_message(f"Nessun risultato trovato riprova", None)
 
         # Retry
         search()

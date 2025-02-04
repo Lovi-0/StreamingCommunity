@@ -27,6 +27,9 @@ from StreamingCommunity.Api.Template.Class.SearchType import MediaManager
 # Config
 from .costant import SITE_NAME, DOMAIN_NOW
 
+# Telegram bot instance
+from telegram_bot import get_bot_instance
+TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 
 # Variable
 media_search_manager = MediaManager()
@@ -95,7 +98,7 @@ def get_version_and_domain():
 def title_search(title_search: str, domain: str) -> int:
     """
     Search for titles based on a search query.
-
+      
     Parameters:
         - title_search (str): The title to search for.
         - domain (str): The domain to search on.
@@ -103,6 +106,9 @@ def title_search(title_search: str, domain: str) -> int:
     Returns:
         int: The number of titles found.
     """
+    if TELEGRAM_BOT:
+        bot = get_bot_instance()
+
     media_search_manager.clear()
     table_show_manager.clear()
     
@@ -117,7 +123,11 @@ def title_search(title_search: str, domain: str) -> int:
     except Exception as e:
         console.print(f"Site: {SITE_NAME}, request search error: {e}")
 
-    for dict_title in response.json()['data']:
+    if TELEGRAM_BOT:
+      # Prepara le scelte per l'utente
+      choices = []
+          
+    for i, dict_title in enumerate(response.json()['data']):
         try:
 
             media_search_manager.add_media({
@@ -128,10 +138,19 @@ def title_search(title_search: str, domain: str) -> int:
                 'date': dict_title.get('last_air_date'),
                 'score': dict_title.get('score')
             })
-
+            if TELEGRAM_BOT:
+              # Crea una stringa formattata per ogni scelta con numero
+              choice_text = f"{i} - {dict_title.get('name')} ({dict_title.get('type')}) - {dict_title.get('last_air_date')}"
+              choices.append(choice_text)
+            
         except Exception as e:
             print(f"Error parsing a film entry: {e}")
-
+	
+    if TELEGRAM_BOT:
+      if choices:
+        # Invio a telegram la lista
+        bot.send_message(f"Lista dei risultati:", choices)
+          
     # Return the number of titles found
     return media_search_manager.get_length()
 

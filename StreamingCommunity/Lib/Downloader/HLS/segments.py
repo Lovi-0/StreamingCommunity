@@ -47,6 +47,7 @@ PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
 DEFAULT_VIDEO_WORKERS = config_manager.get_int('M3U8_DOWNLOAD', 'default_video_workser')
 DEFAULT_AUDIO_WORKERS = config_manager.get_int('M3U8_DOWNLOAD', 'default_audio_workser')
 MAX_TIMEOOUT = config_manager.get_int("REQUESTS", "timeout")
+TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 
 
 
@@ -295,6 +296,11 @@ class M3U8_Segments:
             - description: Description to insert on tqdm bar
             - type (str): Type of download: 'video' or 'audio'
         """
+
+        if TELEGRAM_BOT:
+          # Viene usato per lo screen 
+          console.log("####")
+
         self.setup_interrupt_handler()
 
         progress_bar = tqdm(
