@@ -12,7 +12,7 @@ from .site import title_search, run_get_select_title, media_search_manager
 from .title import download_title
 
 # Telegram bot instance
-StreamingCommunity.HelpTg. import get_bot_instance
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
 from StreamingCommunity.Util._jsonConfig import config_manager
 TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 import sys

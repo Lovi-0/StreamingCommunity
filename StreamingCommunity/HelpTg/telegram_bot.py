@@ -5,11 +5,12 @@ import uuid
 import subprocess
 import os, re, sys
 import json
-from request_manager import RequestManager
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+from StreamingCommunity.HelpTg.request_manager import RequestManager
 import threading
 
 # Funzione per caricare variabili da un file .env
-def load_env(file_path=".env"):
+def load_env(file_path="../../.env"):
     if os.path.exists(file_path):
         with open(file_path) as f:
             for line in f:
@@ -22,7 +23,7 @@ load_env()
 
 class TelegramBot:
     _instance = None
-    _config_file = "bot_config.json"
+    _config_file = "../../bot_config.json"
 
     @classmethod
     def get_instance(cls):
@@ -54,7 +55,7 @@ class TelegramBot:
         def monitor_scripts():
             while True:
                 try:
-                    with open("scripts.json", "r") as f:
+                    with open("../../scripts.json", "r") as f:
                         scripts_data = json.load(f)
                 except (FileNotFoundError, json.JSONDecodeError):
                     scripts_data = []
@@ -79,7 +80,7 @@ class TelegramBot:
                         scripts_data_to_save.append(script)
 
                 # Salva la lista aggiornata, senza gli script scaduti
-                with open("scripts.json", "w") as f:
+                with open("../../scripts.json", "w") as f:
                     json.dump(scripts_data_to_save, f, indent=4)
 
                 time.sleep(60)  # Controlla ogni minuto
@@ -195,7 +196,7 @@ class TelegramBot:
         verbose = debug_mode
 
         if debug_mode == "True":
-            subprocess.Popen(["python3", "test_run.py", screen_id])
+            subprocess.Popen(["python3", "../../test_run.py", screen_id])
         else:
             # Verifica se lo screen con il nome esiste già
             try:
@@ -209,7 +210,7 @@ class TelegramBot:
                 pass  # Se il comando fallisce, significa che non ci sono screen attivi.
 
             # Crea la sessione screen e avvia lo script al suo interno
-            command = ["screen", "-dmS", screen_id, "python3", "test_run.py", screen_id]
+            command = ["screen", "-dmS", screen_id, "python3", "../../test_run.py", screen_id]
 
             # Avvia il comando tramite subprocess
             subprocess.Popen(command)
@@ -223,7 +224,7 @@ class TelegramBot:
         }
 
         # Salvataggio nel file JSON
-        json_file = "scripts.json"
+        json_file = "../../scripts.json"
 
         # Carica i dati esistenti o crea una nuova lista
         try:
@@ -246,7 +247,7 @@ class TelegramBot:
           return
 
       try:
-          with open("scripts.json", "r") as f:
+          with open("../../scripts.json", "r") as f:
               scripts_data = json.load(f)
       except (FileNotFoundError, json.JSONDecodeError):
           scripts_data = []
@@ -305,7 +306,7 @@ class TelegramBot:
         parts = message.text.split()
         if len(parts) < 2:
             try:
-                with open("scripts.json", "r") as f:
+                with open("../../scripts.json", "r") as f:
                     scripts_data = json.load(f)
             except (FileNotFoundError, json.JSONDecodeError):
                 scripts_data = []
@@ -328,7 +329,7 @@ class TelegramBot:
             screen_id = parts[1]
 
             try:
-                with open("scripts.json", "r") as f:
+                with open("../../scripts.json", "r") as f:
                     scripts_data = json.load(f)
             except (FileNotFoundError, json.JSONDecodeError):
                 scripts_data = []
@@ -352,7 +353,7 @@ class TelegramBot:
                 return
 
             # Salva la lista aggiornata senza lo script eliminato
-            with open("scripts.json", "w") as f:
+            with open("../../scripts.json", "w") as f:
                 json.dump(new_scripts_data, f, indent=4)
 
             print(f"✅ Script `{screen_id}` terminato con successo!")
@@ -508,8 +509,8 @@ class TelegramBot:
 
     def run(self):
         print("🚀 Avvio del bot...")
-        # svuoto il file scripts.json
-        with open("scripts.json", "w") as f:
+        # svuoto il file ../../scripts.json
+        with open("../../scripts.json", "w") as f:
             json.dump([], f)
         self.bot.infinity_polling()
 

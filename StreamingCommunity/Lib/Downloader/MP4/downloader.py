@@ -30,7 +30,7 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Telegram bot instance
-StreamingCommunity.HelpTg. import get_bot_instance
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
 TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 
 

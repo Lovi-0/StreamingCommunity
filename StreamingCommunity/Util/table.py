@@ -19,7 +19,7 @@ from .message import start_message
 from .call_stack import get_call_stack
 
 # Telegram bot instance
-StreamingCommunity.HelpTg. import get_bot_instance
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
 from StreamingCommunity.Util._jsonConfig import config_manager
 TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 

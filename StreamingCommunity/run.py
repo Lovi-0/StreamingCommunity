@@ -26,7 +26,7 @@ from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
 # Config
 CLOSE_CONSOLE = config_manager.get_bool('DEFAULT', 'not_close')
 TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
-from session import get_session, deleteScriptId
+from StreamingCommunity.HelpTg.session import get_session, deleteScriptId
 
 
 def run_function(func: Callable[..., None], close_console: bool = False) -> None:

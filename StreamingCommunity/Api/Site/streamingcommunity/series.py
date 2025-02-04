@@ -27,8 +27,8 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSource
 from .costant import SITE_NAME, SERIES_FOLDER
 
 # Telegram bot instance
-StreamingCommunity.HelpTg. import get_bot_instance
-from session import get_session, updateScriptId, deleteScriptId
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+from StreamingCommunity.HelpTg.session import get_session, updateScriptId, deleteScriptId
 from StreamingCommunity.Util._jsonConfig import config_manager
 TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 
