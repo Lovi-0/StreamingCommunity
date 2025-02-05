@@ -47,6 +47,7 @@
 - 📝 [Command](#command)
 - 💻 [Examples of terminal](#examples-of-terminal-usage)
 - 🐳 [Docker](#docker)
+- 📝 [Telegram Usage](#telegram-usage)
 - 🎓 [Tutorial](#tutorials)
 - 📝 [To do](#to-do)
 - 💬 [Support](#support)
@@ -500,6 +501,34 @@ make LOCAL_DIR=/path/to/download run-container
 ```
 
 The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
+
+# Telegram Usage
+
+## Configuration
+
+You need to create an .env file and enter your Telegram token 
+
+and user ID to authorize only one user to use it
+
+## .env Example:
+
+```
+TOKEN_TELEGRAM=IlTuo2131TOKEN$12D3Telegram
+AUTHORIZED_USER_ID=12345678 
+DEBUG=False
+```
+
+## Install Python Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+## On Linux/MacOS:
+
+```bash
+python3 telegram_bot.py
+```
 
 # Website Status 
 
