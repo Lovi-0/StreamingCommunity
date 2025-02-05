@@ -1,7 +1,7 @@
 # 09.06.24
 
 import os
-import signal
+import signal, re
 import sys
 import ssl
 import certifi
@@ -29,6 +29,10 @@ from ...FFmpeg import print_duration_table
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# Telegram bot instance
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
+
 
 # Config
 GET_ONLY_LINK = config_manager.get_bool('M3U8_PARSER', 'get_only_link')
@@ -49,6 +53,16 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
         - referer (str, optional): The referer header value.
         - headers_ (dict, optional): Custom headers for the request.
     """
+    if TELEGRAM_BOT:
+      bot = get_bot_instance()
+      # Viene usato per lo screen 
+      console.log("####")
+
+    if os.path.exists(path):
+        console.log("[red]Output file already exists.")
+        if TELEGRAM_BOT:
+          bot.send_message(f"Contenuto già scaricato!", None)
+        return 400
 
     # Early return for link-only mode
     if GET_ONLY_LINK:
@@ -100,7 +114,7 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
                 # Create progress bar
                 progress_bar = tqdm(
                     total=total,
-                    ascii='░▒█',
+                    ascii='âââ',
                     bar_format=f"{Colors.YELLOW}[MP4] {Colors.WHITE}({Colors.CYAN}video{Colors.WHITE}): "
                                f"{Colors.RED}{{percentage:.2f}}% {Colors.MAGENTA}{{bar}} {Colors.WHITE}[ "
                                f"{Colors.YELLOW}{{n_fmt}}{Colors.WHITE} / {Colors.RED}{{total_fmt}} {Colors.WHITE}] "
@@ -156,8 +170,16 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
                 title=f"{os.path.basename(path.replace('.mp4', ''))}", 
                 border_style="green"
             ))
-            return path,KILL_HANDLER
-        
+
+            if TELEGRAM_BOT:
+              message = f"Download completato\nDimensione: {internet_manager.format_file_size(os.path.getsize(path))}\nDurata: {print_duration_table(path, description=False, return_string=True)}\nTitolo: {os.path.basename(path.replace('.mp4', ''))}"
+              # Rimuovere i tag di colore usando una regex
+              clean_message = re.sub(r'\[[a-zA-Z]+\]', '', message)
+              # Invio a telegram
+              bot.send_message(clean_message, None)
+              
+            return path
+
         else:
             console.print("[bold red]Download failed or file is empty.[/bold red]")
             return None

@@ -18,6 +18,11 @@ from typing import Dict, List, Any
 from .message import start_message
 from .call_stack import get_call_stack
 
+# Telegram bot instance
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+from StreamingCommunity.Util._jsonConfig import config_manager
+TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
+
 
 class TVShowManager:
     def __init__(self):
@@ -149,6 +154,9 @@ class TVShowManager:
         total_items = len(self.tv_shows)
         last_command = ""  # Variable to store the last command executed
 
+        if TELEGRAM_BOT:
+          bot = get_bot_instance()
+          
         while True:
             start_message()
 
@@ -167,7 +175,16 @@ class TVShowManager:
                 self.console.print(f"\n[green]Press [red]Enter [green]for next page, [red]'q' [green]to quit, or [red]'back' [green]to search.")
 
                 if not force_int_input:
-                    key = Prompt.ask(
+                    if TELEGRAM_BOT:
+                      self.console.print(f"\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
+                          "[yellow](e.g., 1-2) [cyan]for a range of media, or [yellow](e.g., 3-*) [cyan]to download from a specific index to the end")
+                      key = bot.ask(
+                          "select_title_episode",
+                          f"Inserisci l'indice dei media (ad esempio, 1), * per scaricare tutti i media, (ad esempio, 1-2) per un intervallo di media, o (ad esempio, 3-*) per scaricare dal un indice specifico fino alla fine.",
+                          None
+                      )
+                    else:
+                      key = Prompt.ask(
                         "\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
                         "[yellow](e.g., 1-2) [cyan]for a range of media, or [yellow](e.g., 3-*) [cyan]to download from a specific index to the end"
                     )
@@ -175,8 +192,16 @@ class TVShowManager:
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
                     choices.extend(["q", "quit", "b", "back"])
-
-                    key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
+                    if TELEGRAM_BOT:
+                      self.console.print(f"[cyan]Insert media [red]index")
+                      key = bot.ask(
+                        "select_title",
+                        f"Scegli il contenuto da scaricare:\n📺 Serie TV - 🎞️ Film - 🌀 Anime\noppure `back` per tornare indietro",
+                        None
+                      )
+                    else:
+                      key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
+                        
                 last_command = key
 
                 if key.lower() == "q" or key.lower() == "quit":
@@ -198,16 +223,34 @@ class TVShowManager:
                 # Last slice, ensure all remaining items are shown
                 self.console.print(f"\n [green]You've reached the end. [red]Enter [green]for first page, [red]'q' [green]to quit, or [red]'back' [green]to search.")
                 if not force_int_input:
-                    key = Prompt.ask(
-                        "\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
-                        "[yellow](e.g., 1-2) [cyan]for a range of media, or [yellow](e.g., 3-*) [cyan]to download from a specific index to the end"
-                    )
+                    if TELEGRAM_BOT:
+                      self.console.print(f"\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
+                          "[yellow](e.g., 1-2) [cyan]for a range of media, or [yellow](e.g., 3-*) [cyan]to download from a specific index to the end")
+                      key = bot.ask(
+                          "select_title_episode",
+                          f"Inserisci l'indice dei media (ad esempio, 1), * per scaricare tutti i media, (ad esempio, 1-2) per un intervallo di media, o (ad esempio, 3-*) per scaricare dal un indice specifico fino alla fine.",
+                          None
+                      )
+                    else:
+                      key = Prompt.ask(
+                          "\n[cyan]Insert media index [yellow](e.g., 1), [red]* [cyan]to download all media, "
+                          "[yellow](e.g., 1-2) [cyan]for a range of media, or [yellow](e.g., 3-*) [cyan]to download from a specific index to the end"
+                      )
 
                 else:
                     choices = [str(i) for i in range(0, max_int_input)]
                     choices.extend(["q", "quit", "b", "back"])
 
-                    key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
+                    if TELEGRAM_BOT:
+                      self.console.print(f"[cyan]Insert media [red]index")
+                      key = bot.ask(
+                        "select_title",
+                        f"Scegli il contenuto da scaricare:\n📺 Serie TV - 🎞️ Film - 🌀 Anime\n oppure `back` per tornare indietro",
+                        None
+                      )
+                    else:
+                      key = Prompt.ask("[cyan]Insert media [red]index", choices=choices, show_choices=False)
+                        
                 last_command = key
 
                 if key.lower() == "q" or key.lower() == "quit":

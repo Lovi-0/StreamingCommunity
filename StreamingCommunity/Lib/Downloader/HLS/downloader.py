@@ -1,9 +1,11 @@
 # 17.10.24
 
 import os
+import re
 import sys
 import time
 import logging
+import subprocess
 
 
 # External libraries
@@ -35,6 +37,9 @@ from ...M3U8 import (
 )
 from .segments import M3U8_Segments
 
+# Telegram bot instance
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 
 # Config
 DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_DOWNLOAD', 'specific_list_audio')            
@@ -749,9 +754,14 @@ class HLS_Downloader:
     def start(self):
         """
         Initiates the downloading process. Checks if the output file already exists and proceeds with processing the playlist or index.
-        """            
+        """
+        if TELEGRAM_BOT:
+          bot = get_bot_instance()
+
         if os.path.exists(self.output_filename):
             console.log("[red]Output file already exists.")
+            if TELEGRAM_BOT:
+              bot.send_message(f"Contenuto già scaricato!", None)
             return 400
         
         self.path_manager.create_directories()
@@ -825,6 +835,8 @@ class HLS_Downloader:
         Args:
             out_path (str): The path of the output file to be cleaned up.
         """
+        if TELEGRAM_BOT:
+          bot = get_bot_instance()
 
         # Check if the final output file exists
         logging.info(f"Check if end file converted exists: {out_path}")
@@ -868,6 +880,13 @@ class HLS_Downloader:
                 title=f"{os.path.basename(self.output_filename.replace('.mp4', ''))}",
                 border_style="green"
             ))
+
+            if TELEGRAM_BOT:
+              message = f"Download completato\nDimensione: {formatted_size}\nDurata: {formatted_duration}\nPercorso: {os.path.abspath(self.output_filename)}"
+              # Rimuovere i tag di colore usando una regex
+              clean_message = re.sub(r'\[[a-zA-Z]+\]', '', message)
+              # Invio a telegram
+              bot.send_message(clean_message, None)
 
             # Handle missing segments
             if missing_ts:
