@@ -411,7 +411,6 @@ class OsSummary:
     def get_system_summary(self):
         self.check_python_version()
         InternManager().check_internet()
-        console.print("[bold blue]System Summary[/bold blue][white]:")
 
         # Python info
         python_version = sys.version.split()[0]
@@ -477,7 +476,7 @@ class OsSummary:
             
             if not os.path.exists(requirements_file):
                 self.download_requirements(
-                    'https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/refs/heads/main/requirements.txt',
+                    'https://raw.githubusercontent.com/Abc-dc/StreamingCommunity/refs/heads/main/requirements.txt',
                     requirements_file
                 )
             

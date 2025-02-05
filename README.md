@@ -9,23 +9,23 @@
   <a href="https://www.paypal.com/donate/?hosted_button_id=UXTWMT8P6HE2C">
     <img src="https://img.shields.io/badge/_-Donate-red.svg?logo=githubsponsors&labelColor=555555&style=for-the-badge" alt="Donate"/>
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity/commits">
-    <img src="https://img.shields.io/github/commit-activity/m/Lovi-0/StreamingCommunity?label=commits&style=for-the-badge" alt="Commits"/>
+  <a href="https://github.com/Abc-dc/StreamingCommunity/commits">
+    <img src="https://img.shields.io/github/commit-activity/m/Abc-dc/StreamingCommunity?label=commits&style=for-the-badge" alt="Commits"/>
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity/commits">
-    <img src="https://img.shields.io/github/last-commit/Lovi-0/StreamingCommunity/main?label=&style=for-the-badge&display_timestamp=committer" alt="Last Commit"/>
+  <a href="https://github.com/Abc-dc/StreamingCommunity/commits">
+    <img src="https://img.shields.io/github/last-commit/Abc-dc/StreamingCommunity/main?label=&style=for-the-badge&display_timestamp=committer" alt="Last Commit"/>
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Lovi-0/StreamingCommunity/blob/main/LICENSE">
+  <a href="https://github.com/Abc-dc/StreamingCommunity/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-GPL_3.0-blue.svg?style=for-the-badge" alt="License"/>
   </a>
   <a href="https://pypi.org/project/streamingcommunity">
     <img src="https://img.shields.io/pypi/dm/streamingcommunity?style=for-the-badge" alt="PyPI Downloads"/>
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity">
-    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/main/Test/Util/loc-badge.json&style=for-the-badge" alt="Lines of Code"/>
+  <a href="https://github.com/Abc-dc/StreamingCommunity">
+    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Abc-dc/StreamingCommunity/main/Test/Util/loc-badge.json&style=for-the-badge" alt="Lines of Code"/>
   </a>
 </p>
 
@@ -58,13 +58,13 @@
 # Installation
 
 <p align="center">
-  <a href="https://github.com/Lovi-0/StreamingCommunity/releases/latest/download/StreamingCommunity.exe">
+  <a href="https://github.com/Abc-dc/StreamingCommunity/releases/latest/download/StreamingCommunity.exe">
     <img src="https://img.shields.io/badge/-Windows_x64-blue.svg?style=for-the-badge&logo=windows" alt="Windows">
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity/releases/latest/download/StreamingCommunity.zip">
+  <a href="https://github.com/Abc-dc/StreamingCommunity/releases/latest/download/StreamingCommunity.zip">
     <img src="https://img.shields.io/badge/-Source_tar-green.svg?style=for-the-badge" alt="Source Tarball">
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity/releases">
+  <a href="https://github.com/Abc-dc/StreamingCommunity/releases">
     <img src="https://img.shields.io/badge/-All_Versions-lightgrey.svg?style=for-the-badge" alt="All Versions">
   </a>
 </p>
@@ -554,7 +554,7 @@ python3 telegram_bot.py
 
 # To Do 
 
-- Finish [website API](https://github.com/Lovi-0/StreamingCommunity/tree/test_gui_1)
+- Finish [website API](https://github.com/Abc-dc/StreamingCommunity/tree/test_gui_1)
 
 # Contributing
 
@@ -572,6 +572,6 @@ This software is provided "as is", without warranty of any kind, express or impl
 
 ## Contributors
 
-<a href="https://github.com/Lovi-0/StreamingCommunity/graphs/contributors" alt="View Contributors">
-  <img src="https://contrib.rocks/image?repo=Lovi-0/StreamingCommunity&max=1000&columns=10" alt="Contributors" />
+<a href="https://github.com/Abc-dc/StreamingCommunity/graphs/contributors" alt="View Contributors">
+  <img src="https://contrib.rocks/image?repo=Abc-dc/StreamingCommunity&max=1000&columns=10" alt="Contributors" />
 </a>

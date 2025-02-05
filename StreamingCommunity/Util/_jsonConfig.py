@@ -34,7 +34,7 @@ class ConfigManager:
             else:
                 logging.info("Configuration file does not exist. Downloading...")
                 self.download_requirements(
-                    'https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/refs/heads/main/config.json',
+                    'https://raw.githubusercontent.com/Abc-dc/StreamingCommunity/refs/heads/main/config.json',
                     self.file_path
                 )
 
