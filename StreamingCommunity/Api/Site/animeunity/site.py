@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from StreamingCommunity.Util.console import console
 from StreamingCommunity.Util._jsonConfig import config_manager
 from StreamingCommunity.Util.table import TVShowManager
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
 
 
 # Logic class
@@ -19,14 +20,9 @@ from StreamingCommunity.Api.Template import get_select_title
 from StreamingCommunity.Api.Template.Util import search_domain
 from StreamingCommunity.Api.Template.Class.SearchType import MediaManager
 
-# Telegram bot instance
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
-from StreamingCommunity.Util._jsonConfig import config_manager
-TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
-
 
 # Variable
-from .costant import SITE_NAME, DOMAIN_NOW
+from .costant import SITE_NAME, DOMAIN_NOW, TELEGRAM_BOT
 media_search_manager = MediaManager()
 table_show_manager = TVShowManager()
 max_timeout = config_manager.get_int("REQUESTS", "timeout")
@@ -109,7 +105,7 @@ def title_search(title: str) -> int:
         - int: A number containing the length of media search manager.
     """
     if TELEGRAM_BOT:  
-      bot = get_bot_instance()
+        bot = get_bot_instance()
     
     media_search_manager.clear()
     table_show_manager.clear()
@@ -154,9 +150,9 @@ def title_search(title: str) -> int:
     except Exception as e:
         console.print(f"Site: {SITE_NAME}, request search error: {e}")
 
+    # Inizializza la lista delle scelte
     if TELEGRAM_BOT:
-      # Inizializza la lista delle scelte
-      choices = []
+        choices = []
 
     for dict_title in response.json()['records']:
         try:
@@ -180,11 +176,10 @@ def title_search(title: str) -> int:
 
         except Exception as e:
             print(f"Error parsing a film entry: {e}")
+
     if TELEGRAM_BOT:
-      # Se ci sono scelte, inviale a Telegram
-      if choices:
-          # Invio a telegram la lista
-          bot.send_message(f"Lista dei risultati:", choices)
+        if choices:
+            bot.send_message(f"Lista dei risultati:", choices)
 
     # Return the length of media search manager
     return media_search_manager.get_length()

@@ -1,19 +1,18 @@
 # 3.12.23
 
 import os
-import time
 
 
 # Internal utilities
-from StreamingCommunity.Util.console import console, msg
+from StreamingCommunity.Util.console import console
 from StreamingCommunity.Util.os import os_manager
 from StreamingCommunity.Util.message import start_message
-from StreamingCommunity.Util.call_stack import get_call_stack
 from StreamingCommunity.Lib.Downloader import HLS_Downloader
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+from StreamingCommunity.HelpTg.session import get_session, updateScriptId, deleteScriptId
 
 
 # Logic class
-from StreamingCommunity.Api.Template.Util import execute_search
 from StreamingCommunity.Api.Template.Class.SearchType import MediaItem
 
 
@@ -22,13 +21,7 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSource
 
 
 # Variable
-from .costant import SITE_NAME, MOVIE_FOLDER
-
-# Telegram bot instance
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
-from StreamingCommunity.HelpTg.session import get_session, updateScriptId, deleteScriptId
-from StreamingCommunity.Util._jsonConfig import config_manager
-TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
+from .costant import SITE_NAME, MOVIE_FOLDER, TELEGRAM_BOT
 
 
 def download_film(select_title: MediaItem) -> str:
@@ -43,18 +36,16 @@ def download_film(select_title: MediaItem) -> str:
         - str: output path
     """
     if TELEGRAM_BOT:
-      bot = get_bot_instance()
-    
-      # Invio a telegram
-      bot.send_message(f"Download in corso:\n{select_title.name}", None)
+        bot = get_bot_instance()
+        bot.send_message(f"Download in corso:\n{select_title.name}", None)
 
-      # Viene usato per lo screen 
-      console.print(f"## Download: [red]{select_title.name} ##")
+        # Viene usato per lo screen 
+        console.print(f"## Download: [red]{select_title.name} ##")
     
-      # Get script_id
-      script_id = get_session()
-      if script_id != "unknown":
-          updateScriptId(script_id, select_title.name)
+        # Get script_id
+        script_id = get_session()
+        if script_id != "unknown":
+            updateScriptId(script_id, select_title.name)
 
     # Start message and display film information
     start_message()
@@ -80,21 +71,16 @@ def download_film(select_title: MediaItem) -> str:
     ).start()
 
     if TELEGRAM_BOT:
-      # Delete script_id
-      script_id = get_session()
-      if script_id != "unknown":
-          deleteScriptId(script_id)
+        
+        # Delete script_id
+        script_id = get_session()
+        if script_id != "unknown":
+            deleteScriptId(script_id)
 
-    """if r_proc == 404:
-        time.sleep(2)
+    if "error" in r_proc.keys():
+        try:
+            os.remove(r_proc['path'])
+        except:
+            pass
 
-        # Re call search function
-        if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
-            frames = get_call_stack()
-            execute_search(frames[-4])"""
-
-    if r_proc != None:
-        console.print("[green]Result: ")
-        console.print(r_proc)
-
-    return os.path.join(mp4_path, title_name)
+    return r_proc['path']

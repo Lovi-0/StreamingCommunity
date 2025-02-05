@@ -2,20 +2,20 @@
 
 import os
 import sys
-import time
 
 
 # Internal utilities
 from StreamingCommunity.Util.console import console, msg
 from StreamingCommunity.Util.message import start_message
-from StreamingCommunity.Util.call_stack import get_call_stack
 from StreamingCommunity.Util.table import TVShowManager
 from StreamingCommunity.Lib.Downloader import HLS_Downloader
+from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+from StreamingCommunity.HelpTg.session import get_session, updateScriptId, deleteScriptId
 
 
 # Logic class
 from .util.ScrapeSerie import ScrapeSerie
-from StreamingCommunity.Api.Template.Util import manage_selection, map_episode_title, dynamic_format_number, validate_selection, validate_episode_selection, execute_search
+from StreamingCommunity.Api.Template.Util import manage_selection, map_episode_title, dynamic_format_number, validate_selection, validate_episode_selection
 from StreamingCommunity.Api.Template.Class.SearchType import MediaItem
 
 
@@ -24,13 +24,7 @@ from StreamingCommunity.Api.Player.vixcloud import VideoSource
 
 
 # Variable
-from .costant import SITE_NAME, SERIES_FOLDER
-
-# Telegram bot instance
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
-from StreamingCommunity.HelpTg.session import get_session, updateScriptId, deleteScriptId
-from StreamingCommunity.Util._jsonConfig import config_manager
-TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
+from .costant import SITE_NAME, SERIES_FOLDER, TELEGRAM_BOT
 
 
 def download_video(index_season_selected: int, index_episode_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource) -> tuple[str,bool]:
@@ -54,18 +48,17 @@ def download_video(index_season_selected: int, index_episode_selected: int, scra
     print()
 
     if TELEGRAM_BOT:
-      bot = get_bot_instance()
+        bot = get_bot_instance()
       
-      # Invio a telegram
-      bot.send_message(
-        f"Download in corso\nSerie: {scrape_serie.series_name}\nStagione: {index_season_selected}\nEpisodio: {index_episode_selected}\nTitolo: {obj_episode.name}",
-        None
-      )
+        # Invio a telegram
+        bot.send_message(
+            f"Download in corso\nSerie: {scrape_serie.series_name}\nStagione: {index_season_selected}\nEpisodio: {index_episode_selected}\nTitolo: {obj_episode.name}",
+            None
+        )
 
-    # Get script_id
+    # Get script_id and update it
     script_id = get_session()
     if script_id != "unknown":
-        # Update script_id
         updateScriptId(script_id, f"{scrape_serie.series_name} - S{index_season_selected} - E{index_episode_selected} - {obj_episode.name}")
 
     # Define filename and path for the downloaded video
@@ -83,22 +76,13 @@ def download_video(index_season_selected: int, index_episode_selected: int, scra
         output_filename=os.path.join(mp4_path, mp4_name)
     ).start()
 	
-    #bot.send_message(f"Serie scaricata tutta", None)
+    if "error" in r_proc.keys():
+        try:
+            os.remove(r_proc['path'])
+        except:
+            pass
 
-    """if r_proc == 404:
-        time.sleep(2)
-
-        # Re call search function
-        if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
-            frames = get_call_stack()
-            execute_search(frames[-4])"""
-
-    if r_proc != None:
-        console.print("[green]Result: ")
-        console.print(r_proc)
-        #bot.send_message(f"Episodio scaricato", None)
-
-    return os.path.join(mp4_path, mp4_name)
+    return r_proc['path']
 
 def download_episode(index_season_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource, download_all: bool = False) -> None:
     """
@@ -108,8 +92,6 @@ def download_episode(index_season_selected: int, scrape_serie: ScrapeSerie, vide
         - index_season_selected (int): Index of the selected season.
         - download_all (bool): Download all episodes in the season.
     """
-
-    #bot = get_bot_instance()
 
     # Clean memory of all episodes and get the number of the season
     scrape_serie.episode_manager.clear()
@@ -126,8 +108,6 @@ def download_episode(index_season_selected: int, scrape_serie: ScrapeSerie, vide
             download_video(index_season_selected, i_episode, scrape_serie, video_source)
         console.print(f"\n[red]End downloaded [yellow]season: [red]{index_season_selected}.")
 
-        #bot.send_message(f"Finito di scaricare la stagione: {index_season_selected}", None)
-
     else:
 
         # Display episodes list and manage user selection
@@ -138,15 +118,11 @@ def download_episode(index_season_selected: int, scrape_serie: ScrapeSerie, vide
             list_episode_select = validate_episode_selection(list_episode_select, episodes_count)
         except ValueError as e:
             console.print(f"[red]{str(e)}")
-            #bot.send_message(f"{str(e)}", None)
             return
 
         # Download selected episodes if not stopped
-        stopped = bool(False)
         for i_episode in list_episode_select:
-            if stopped:
-                break
-            stopped=download_video(index_season_selected, i_episode, scrape_serie, video_source)[1]
+            download_video(index_season_selected, i_episode, scrape_serie, video_source)[1]
 
 def download_series(select_season: MediaItem, version: str) -> None:
     """
@@ -158,7 +134,7 @@ def download_series(select_season: MediaItem, version: str) -> None:
         - version (str): Version of the site.
     """
     if TELEGRAM_BOT:
-      bot = get_bot_instance()
+        bot = get_bot_instance()
 
     # Start message and set up video source
     start_message()
@@ -179,21 +155,22 @@ def download_series(select_season: MediaItem, version: str) -> None:
     console.print(f"\n[green]Seasons found: [red]{seasons_count}")
 
     if TELEGRAM_BOT:
-      console.print("\n[cyan]Insert season number [yellow](e.g., 1), [red]* [cyan]to download all seasons, "
+        console.print("\n[cyan]Insert season number [yellow](e.g., 1), [red]* [cyan]to download all seasons, "
           "[yellow](e.g., 1-2) [cyan]for a range of seasons, or [yellow](e.g., 3-*) [cyan]to download from a specific season to the end")
 
-      bot.send_message(f"Stagioni trovate: {seasons_count}", None)
+        bot.send_message(f"Stagioni trovate: {seasons_count}", None)
 
-      index_season_selected = bot.ask(
-        "select_title_episode",
-        "Inserisci il numero della stagione (es. 1), * per scaricare tutte le stagioni, (es. 1-2) per un intervallo di stagioni, o (es. 3-*) per scaricare dalla stagione specificata fino alla fine",
-        None
-      )
+        index_season_selected = bot.ask(
+            "select_title_episode",
+            "Inserisci il numero della stagione (es. 1), * per scaricare tutte le stagioni, (es. 1-2) per un intervallo di stagioni, o (es. 3-*) per scaricare dalla stagione specificata fino alla fine",
+            None
+        )
+
     else:
-      index_season_selected = msg.ask(
-          "\n[cyan]Insert season number [yellow](e.g., 1), [red]* [cyan]to download all seasons, "
-          "[yellow](e.g., 1-2) [cyan]for a range of seasons, or [yellow](e.g., 3-*) [cyan]to download from a specific season to the end"
-      )
+        index_season_selected = msg.ask(
+            "\n[cyan]Insert season number [yellow](e.g., 1), [red]* [cyan]to download all seasons, "
+            "[yellow](e.g., 1-2) [cyan]for a range of seasons, or [yellow](e.g., 3-*) [cyan]to download from a specific season to the end"
+        )
 
     # Manage and validate the selection
     list_season_select = manage_selection(index_season_selected, seasons_count)
@@ -216,11 +193,12 @@ def download_series(select_season: MediaItem, version: str) -> None:
             download_episode(i_season, scrape_serie, video_source, download_all=False)
 
     if TELEGRAM_BOT:
-      bot.send_message(f"Finito di scaricare tutte le serie e episodi", None)
-      # Get script_id
-      script_id = get_session()
-      if script_id != "unknown":
-          deleteScriptId(script_id)
+        bot.send_message(f"Finito di scaricare tutte le serie e episodi", None)
+
+        # Get script_id
+        script_id = get_session()
+        if script_id != "unknown":
+            deleteScriptId(script_id)
 
 
 def display_episodes_list(scrape_serie) -> str:
@@ -231,7 +209,7 @@ def display_episodes_list(scrape_serie) -> str:
         last_command (str): Last command entered by the user.
     """
     if TELEGRAM_BOT:
-      bot = get_bot_instance()
+        bot = get_bot_instance()
 
     # Set up table for displaying episodes
     table_show_manager = TVShowManager()
@@ -247,7 +225,8 @@ def display_episodes_list(scrape_serie) -> str:
 
     # Populate the table with episodes information
     if TELEGRAM_BOT:
-      choices = []
+        choices = []
+
     for i, media in enumerate(scrape_serie.episode_manager.episodes):
         table_show_manager.add_tv_show({
             'Index': str(media.number),
@@ -256,20 +235,12 @@ def display_episodes_list(scrape_serie) -> str:
         })
 
         if TELEGRAM_BOT:
-          # Creazione della stringa per il messaggio Telegram
-          choice_text = f"{media.number} - {media.name} ({media.duration} min)"
-          choices.append(choice_text)
+            choice_text = f"{media.number} - {media.name} ({media.duration} min)"
+            choices.append(choice_text)
 
     if TELEGRAM_BOT:
-      # creo episoded_count
-      #episoded_count = len(scrape_serie.episode_manager.episodes)
-
-      # Invio a telegram
-      #bot.send_message(f"Episodi trovati: {episoded_count}", None)
-
-      # Invia la lista degli episodi al bot Telegram
-      if choices:
-          bot.send_message(f"Lista episodi:", choices)
+        if choices:
+            bot.send_message(f"Lista episodi:", choices)
 
     # Run the table and handle user input
     last_command = table_show_manager.run()

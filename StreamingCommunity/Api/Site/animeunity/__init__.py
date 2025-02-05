@@ -30,6 +30,7 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
         bot = get_bot_instance()
 
         if string_to_search is None:
+
             # Chiedi la scelta all'utente con il bot Telegram
             string_to_search = bot.ask(
                 "key_search",
@@ -66,9 +67,8 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
             download_series(select_title)
             
     else:
-        
         if TELEGRAM_BOT:
-          bot.send_message(f"Nessun risultato trovato riprova", None)
+            bot.send_message(f"Nessun risultato trovato riprova", None)
           
         console.print(f"\n[red]Nothing matching was found for[white]: [purple]{string_to_search}")
 

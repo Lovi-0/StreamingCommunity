@@ -33,6 +33,7 @@ def search(string_to_search: str = None, get_onylDatabase: bool = False):
         bot = get_bot_instance()
 
         if string_to_search is None:
+            
             # Chiedi la scelta all'utente con il bot Telegram
             string_to_search = bot.ask(
                 "key_search",

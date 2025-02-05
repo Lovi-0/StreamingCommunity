@@ -42,7 +42,7 @@ def title_search(title_search: str) -> int:
         int: The number of titles found.
     """
     if TELEGRAM_BOT:  
-      bot = get_bot_instance()
+        bot = get_bot_instance()
 
     media_search_manager.clear()
     table_show_manager.clear()
@@ -71,9 +71,9 @@ def title_search(title_search: str) -> int:
     # Create soup and find table
     soup = BeautifulSoup(response.text, "html.parser")
 
+    # Inizializza la lista delle scelte
     if TELEGRAM_BOT:
-      # Inizializza la lista delle scelte
-      choices = []
+        choices = []
 
     for row in soup.find_all('div', class_='col-lg-3 col-md-3 col-xs-4'):
         try:
@@ -94,19 +94,17 @@ def title_search(title_search: str) -> int:
             media_search_manager.add_media(film_info)
 
             if TELEGRAM_BOT:
-              # Crea una stringa formattata per ogni scelta con numero
-              choice_text = f"{len(choices)} - {film_info.get('name')} ({film_info.get('url')}) {film_info.get('score')}"
-              choices.append(choice_text)
+                # Crea una stringa formattata per ogni scelta con numero
+                choice_text = f"{len(choices)} - {film_info.get('name')} ({film_info.get('url')}) {film_info.get('score')}"
+                choices.append(choice_text)
 
         except AttributeError as e:
             print(f"Error parsing a film entry: {e}")
     
     
     if TELEGRAM_BOT:
-      # Se ci sono scelte, inviale a Telegram
-      if choices:
-          # Invio a telegram la lista
-          bot.send_message(f"Lista dei risultati:", choices)
+        if choices:
+            bot.send_message(f"Lista dei risultati:", choices)
 
     # Return the number of titles found
     return media_search_manager.get_length()
