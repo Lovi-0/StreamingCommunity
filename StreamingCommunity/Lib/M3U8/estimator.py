@@ -22,7 +22,7 @@ TQDM_USE_LARGE_BAR = not ("android" in sys.platform or "ios" in sys.platform)
 
 
 class M3U8_Ts_Estimator:
-    def __init__(self, total_segments: int):
+    def __init__(self, total_segments: int, segments_instance=None):
         """
         Initialize the M3U8_Ts_Estimator object.
         
@@ -32,6 +32,7 @@ class M3U8_Ts_Estimator:
         self.ts_file_sizes = []
         self.now_downloaded_size = 0
         self.total_segments = total_segments
+        self.segments_instance = segments_instance
         self.lock = threading.Lock()
         self.speed = {"upload": "N/A", "download": "N/A"}
 
@@ -102,7 +103,6 @@ class M3U8_Ts_Estimator:
             return "Error"
     
     def update_progress_bar(self, total_downloaded: int, duration: float, progress_counter: tqdm) -> None:
-        """Updates the progress bar with download information."""
         try:
             self.add_ts_file(total_downloaded * self.total_segments, total_downloaded, duration)
             
@@ -120,21 +120,25 @@ class M3U8_Ts_Estimator:
                 if len(speed_data) >= 2:
                     average_internet_speed = speed_data[0]
                     average_internet_unit = speed_data[1]
-
                 else:
                     average_internet_speed = "N/A"
                     average_internet_unit = ""
                 
+                # Retrieve retry count from segments_instance
+                retry_count = self.segments_instance.active_retries if self.segments_instance else 0
                 progress_str = (
                     f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded} {Colors.WHITE}< "
                     f"{Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
-                    f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed} {Colors.RED}{average_internet_unit}"
+                    f"{Colors.WHITE}| {Colors.CYAN}{average_internet_speed} {Colors.RED}{average_internet_unit} "
+                    f"{Colors.WHITE}| {Colors.GREEN}CRR {Colors.RED}{retry_count}"
                 )
-                
             else:
+                # Retrieve retry count from segments_instance
+                retry_count = self.segments_instance.active_retries if self.segments_instance else 0
                 progress_str = (
                     f"{Colors.WHITE}[ {Colors.GREEN}{number_file_downloaded} {Colors.WHITE}< "
-                    f"{Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size}"
+                    f"{Colors.GREEN}{number_file_total_size} {Colors.RED}{units_file_total_size} "
+                    f"{Colors.WHITE}| {Colors.GREEN}CRR {Colors.RED}{retry_count}"
                 )
             
             progress_counter.set_postfix_str(progress_str)

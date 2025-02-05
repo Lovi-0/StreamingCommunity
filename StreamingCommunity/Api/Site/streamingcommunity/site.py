@@ -15,7 +15,7 @@ from StreamingCommunity.Util.console import console
 from StreamingCommunity.Util._jsonConfig import config_manager
 from StreamingCommunity.Util.headers import get_headers
 from StreamingCommunity.Util.table import TVShowManager
-
+from StreamingCommunity.TelegramHelp.telegram_bot import get_bot_instance
 
 
 # Logic class
@@ -25,11 +25,8 @@ from StreamingCommunity.Api.Template.Class.SearchType import MediaManager
 
 
 # Config
-from .costant import SITE_NAME, DOMAIN_NOW
+from .costant import SITE_NAME, DOMAIN_NOW, TELEGRAM_BOT
 
-# Telegram bot instance
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
-TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 
 # Variable
 media_search_manager = MediaManager()
@@ -123,13 +120,12 @@ def title_search(title_search: str, domain: str) -> int:
     except Exception as e:
         console.print(f"Site: {SITE_NAME}, request search error: {e}")
 
+    # Prepara le scelte per l'utente
     if TELEGRAM_BOT:
-      # Prepara le scelte per l'utente
-      choices = []
+        choices = []
           
     for i, dict_title in enumerate(response.json()['data']):
         try:
-
             media_search_manager.add_media({
                 'id': dict_title.get('id'),
                 'slug': dict_title.get('slug'),
@@ -138,18 +134,17 @@ def title_search(title_search: str, domain: str) -> int:
                 'date': dict_title.get('last_air_date'),
                 'score': dict_title.get('score')
             })
+
             if TELEGRAM_BOT:
-              # Crea una stringa formattata per ogni scelta con numero
-              choice_text = f"{i} - {dict_title.get('name')} ({dict_title.get('type')}) - {dict_title.get('last_air_date')}"
-              choices.append(choice_text)
+                choice_text = f"{i} - {dict_title.get('name')} ({dict_title.get('type')}) - {dict_title.get('last_air_date')}"
+                choices.append(choice_text)
             
         except Exception as e:
             print(f"Error parsing a film entry: {e}")
 	
     if TELEGRAM_BOT:
-      if choices:
-        # Invio a telegram la lista
-        bot.send_message(f"Lista dei risultati:", choices)
+        if choices:
+            bot.send_message(f"Lista dei risultati:", choices)
           
     # Return the number of titles found
     return media_search_manager.get_length()

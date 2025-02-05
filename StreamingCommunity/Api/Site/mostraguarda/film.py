@@ -2,7 +2,6 @@
 
 import os
 import sys
-import time
 import logging
 
 
@@ -12,16 +11,11 @@ from bs4 import BeautifulSoup
 
 
 # Internal utilities
-from StreamingCommunity.Util.console import console, msg
+from StreamingCommunity.Util.console import console
 from StreamingCommunity.Util.os import os_manager
 from StreamingCommunity.Util.message import start_message
-from StreamingCommunity.Util.call_stack import get_call_stack
 from StreamingCommunity.Util.headers import get_headers
 from StreamingCommunity.Lib.Downloader import HLS_Downloader
-
-
-# Logic class
-from StreamingCommunity.Api.Template.Util import execute_search
 
 
 # Player
@@ -51,6 +45,7 @@ def download_film(movie_details: Json_film) -> str:
     start_message()
     console.print(f"[yellow]Download:  [red]{movie_details.title} \n")
     console.print(f"[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
+    
     # Make request to main site
     try:
         url = f"https://{SITE_NAME}.{DOMAIN_NOW}/set-movie-a/{movie_details.imdb_id}"
@@ -82,20 +77,14 @@ def download_film(movie_details: Json_film) -> str:
 
     # Download the film using the m3u8 playlist, and output filename
     r_proc = HLS_Downloader(
-        m3u8_playlist=master_playlist, 
-        output_filename=os.path.join(mp4_path, title_name)
+        m3u8_url=master_playlist, 
+        output_path=os.path.join(mp4_path, title_name)
     ).start()
 
-    """if r_proc == 404:
-        time.sleep(2)
+    if "error" in r_proc.keys():
+        try:
+            os.remove(r_proc['path'])
+        except:
+            pass
 
-        # Re call search function
-        if msg.ask("[green]Do you want to continue [white]([red]y[white])[green] or return at home[white]([red]n[white]) ", choices=['y', 'n'], default='y', show_choices=True) == "n":
-            frames = get_call_stack()
-            execute_search(frames[-4])"""
-
-    if r_proc != None:
-        console.print("[green]Result: ")
-        console.print(r_proc)
-
-    return os.path.join(mp4_path, title_name)
+    return r_proc['path']

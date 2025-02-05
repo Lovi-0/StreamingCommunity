@@ -1,12 +1,11 @@
 # 09.06.24
 
 import os
-import signal, re
+import re
 import sys
-import ssl
-import certifi
+import signal
 import logging
-import atexit
+
 
 # External libraries
 import httpx
@@ -19,6 +18,7 @@ from StreamingCommunity.Util.color import Colors
 from StreamingCommunity.Util.console import console, Panel
 from StreamingCommunity.Util._jsonConfig import config_manager
 from StreamingCommunity.Util.os import internet_manager
+from StreamingCommunity.TelegramHelp.telegram_bot import get_bot_instance
 
 
 # Logic class
@@ -29,15 +29,14 @@ from ...FFmpeg import print_duration_table
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Telegram bot instance
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
-TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
-
 
 # Config
 GET_ONLY_LINK = config_manager.get_bool('M3U8_PARSER', 'get_only_link')
 TQDM_USE_LARGE_BAR = not ("android" in sys.platform or "ios" in sys.platform)
 REQUEST_TIMEOUT = config_manager.get_float('REQUESTS', 'timeout')
+
+TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
+
 
 #Ending constant
 KILL_HANDLER = bool(False)
@@ -54,14 +53,13 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
         - headers_ (dict, optional): Custom headers for the request.
     """
     if TELEGRAM_BOT:
-      bot = get_bot_instance()
-      # Viene usato per lo screen 
-      console.log("####")
+        bot = get_bot_instance()
+        console.log("####")
 
     if os.path.exists(path):
         console.log("[red]Output file already exists.")
         if TELEGRAM_BOT:
-          bot.send_message(f"Contenuto già scaricato!", None)
+            bot.send_message(f"Contenuto già scaricato!", None)
         return 400
 
     # Early return for link-only mode
@@ -94,8 +92,8 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
     try:
         # Create a custom transport that bypasses SSL verification
         transport = httpx.HTTPTransport(
-            verify=False,  # Disable SSL certificate verification
-            http2=True     # Optional: enable HTTP/2 support
+            verify=False,
+            http2=True
         )
         
         # Download with streaming and progress tracking
@@ -137,7 +135,6 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
                     Parameters:
                         - args (tuple): The signal arguments (to prevent errors).
                     """
-                    
                     if(downloaded<total/2):   
                         raise KeyboardInterrupt
                     else:
@@ -154,9 +151,9 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
                     for chunk in response.iter_bytes(chunk_size=1024):
                         signal.signal(signal.SIGINT,signal_handler)
                         if chunk:
-                                size = file.write(chunk)
-                                downloaded += size
-                                bar.update(size)
+                            size = file.write(chunk)
+                            downloaded += size
+                            bar.update(size)
                             # Optional: Add a check to stop download if needed
                             # if downloaded > MAX_DOWNLOAD_SIZE:
                             #     break
@@ -172,11 +169,9 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
             ))
 
             if TELEGRAM_BOT:
-              message = f"Download completato\nDimensione: {internet_manager.format_file_size(os.path.getsize(path))}\nDurata: {print_duration_table(path, description=False, return_string=True)}\nTitolo: {os.path.basename(path.replace('.mp4', ''))}"
-              # Rimuovere i tag di colore usando una regex
-              clean_message = re.sub(r'\[[a-zA-Z]+\]', '', message)
-              # Invio a telegram
-              bot.send_message(clean_message, None)
+                message = f"Download completato\nDimensione: {internet_manager.format_file_size(os.path.getsize(path))}\nDurata: {print_duration_table(path, description=False, return_string=True)}\nTitolo: {os.path.basename(path.replace('.mp4', ''))}"
+                clean_message = re.sub(r'\[[a-zA-Z]+\]', '', message)
+                bot.send_message(clean_message, None)
               
             return path
 
@@ -184,16 +179,6 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
             console.print("[bold red]Download failed or file is empty.[/bold red]")
             return None
 
-    except httpx.HTTPStatusError as http_err:
-        logging.error(f"HTTP error occurred: {http_err}")
-        console.print(f"[bold red]HTTP Error: {http_err}[/bold red]")
-        return None
-    
-    except httpx.RequestError as req_err:
-        logging.error(f"Request error: {req_err}")
-        console.print(f"[bold red]Request Error: {req_err}[/bold red]")
-        return None
-    
     except Exception as e:
         logging.error(f"Unexpected error during download: {e}")
         console.print(f"[bold red]Unexpected Error: {e}[/bold red]")

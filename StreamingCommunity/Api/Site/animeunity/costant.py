@@ -17,3 +17,5 @@ ANIME_FOLDER = os.path.join(ROOT_PATH, config_manager.get('DEFAULT', 'anime_fold
 if config_manager.get_bool("DEFAULT", "add_siteName"):
     MOVIE_FOLDER = os.path.join(ROOT_PATH, SITE_NAME, config_manager.get('DEFAULT', 'movie_folder_name'))   
     ANIME_FOLDER = os.path.join(ROOT_PATH, config_manager.get('DEFAULT', 'anime_folder_name'))
+
+TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')

@@ -110,6 +110,8 @@ def join_video(video_path: str, out_path: str, codec: M3U8_Codec = None):
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join video")
                 print()
 
+    return out_path
+
 
 def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: str, codec: M3U8_Codec = None):
     """
@@ -204,6 +206,8 @@ def join_audios(video_path: str, audio_tracks: List[Dict[str, str]], out_path: s
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join audio")
                 print()
 
+    return out_path
+
 
 def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_path: str):
     """
@@ -256,3 +260,5 @@ def join_subtitle(video_path: str, subtitles_list: List[Dict[str, str]], out_pat
             with suppress_output():
                 capture_ffmpeg_real_time(ffmpeg_cmd, "[cyan]Join subtitle")
                 print()
+
+    return out_path

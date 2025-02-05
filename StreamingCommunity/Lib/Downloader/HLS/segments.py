@@ -47,7 +47,6 @@ PROXY_START_MAX = config_manager.get_float('REQUESTS', 'proxy_start_max')
 DEFAULT_VIDEO_WORKERS = config_manager.get_int('M3U8_DOWNLOAD', 'default_video_workser')
 DEFAULT_AUDIO_WORKERS = config_manager.get_int('M3U8_DOWNLOAD', 'default_audio_workser')
 MAX_TIMEOOUT = config_manager.get_int("REQUESTS", "timeout")
-TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 
 
 
@@ -70,7 +69,7 @@ class M3U8_Segments:
 
         # Util class
         self.decryption: M3U8_Decryption = None 
-        self.class_ts_estimator = M3U8_Ts_Estimator(0) 
+        self.class_ts_estimator = M3U8_Ts_Estimator(0, self) 
         self.class_url_fixer = M3U8_UrlFix(url)
 
         # Sync
@@ -88,6 +87,8 @@ class M3U8_Segments:
         self.info_maxRetry = 0
         self.info_nRetry = 0
         self.info_nFailed = 0
+        self.active_retries = 0 
+        self.active_retries_lock = threading.Lock()
 
     def __get_key__(self, m3u8_parser: M3U8_Parser) -> bytes:
         key_uri = urljoin(self.url, m3u8_parser.keys.get('uri'))
@@ -232,10 +233,17 @@ class M3U8_Segments:
                     self.queue.put((index, None))  # Marker for failed segment
                     progress_bar.update(1)
                     self.info_nFailed += 1
+                    return
+                
+                with self.active_retries_lock:
+                    self.active_retries += 1
                 
                 sleep_time = backoff_factor * (2 ** attempt)
                 logging.info(f"Retrying segment {index} in {sleep_time} seconds...")
                 time.sleep(sleep_time)
+                
+                with self.active_retries_lock:
+                    self.active_retries -= 1
 
     def write_segments_to_file(self):
         """
@@ -296,11 +304,7 @@ class M3U8_Segments:
             - description: Description to insert on tqdm bar
             - type (str): Type of download: 'video' or 'audio'
         """
-
-        if TELEGRAM_BOT:
-          # Viene usato per lo screen 
-          console.log("####")
-
+        self.get_info()
         self.setup_interrupt_handler()
 
         progress_bar = tqdm(

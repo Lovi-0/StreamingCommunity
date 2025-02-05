@@ -9,23 +9,23 @@
   <a href="https://www.paypal.com/donate/?hosted_button_id=UXTWMT8P6HE2C">
     <img src="https://img.shields.io/badge/_-Donate-red.svg?logo=githubsponsors&labelColor=555555&style=for-the-badge" alt="Donate"/>
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity/commits">
-    <img src="https://img.shields.io/github/commit-activity/m/Lovi-0/StreamingCommunity?label=commits&style=for-the-badge" alt="Commits"/>
+  <a href="https://github.com/Abc-dc/StreamingCommunity/commits">
+    <img src="https://img.shields.io/github/commit-activity/m/Abc-dc/StreamingCommunity?label=commits&style=for-the-badge" alt="Commits"/>
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity/commits">
-    <img src="https://img.shields.io/github/last-commit/Lovi-0/StreamingCommunity/main?label=&style=for-the-badge&display_timestamp=committer" alt="Last Commit"/>
+  <a href="https://github.com/Abc-dc/StreamingCommunity/commits">
+    <img src="https://img.shields.io/github/last-commit/Abc-dc/StreamingCommunity/main?label=&style=for-the-badge&display_timestamp=committer" alt="Last Commit"/>
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Lovi-0/StreamingCommunity/blob/main/LICENSE">
+  <a href="https://github.com/Abc-dc/StreamingCommunity/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-GPL_3.0-blue.svg?style=for-the-badge" alt="License"/>
   </a>
   <a href="https://pypi.org/project/streamingcommunity">
     <img src="https://img.shields.io/pypi/dm/streamingcommunity?style=for-the-badge" alt="PyPI Downloads"/>
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity">
-    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Lovi-0/StreamingCommunity/main/Test/Util/loc-badge.json&style=for-the-badge" alt="Lines of Code"/>
+  <a href="https://github.com/Abc-dc/StreamingCommunity">
+    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Abc-dc/StreamingCommunity/main/Test/Util/loc-badge.json&style=for-the-badge" alt="Lines of Code"/>
   </a>
 </p>
 
@@ -44,7 +44,10 @@
     - 📩 [Request](#requests-settings)
     - 📥 [Download](#m3u8_download-settings)
     - 🔍 [Parser](#m3u8_parser-settings)
+- 📝 [Command](#command)
+- 💻 [Examples of terminal](#examples-of-terminal-usage)
 - 🐳 [Docker](#docker)
+- 📝 [Telegram Usage](#telegram-usage)
 - 🎓 [Tutorial](#tutorials)
 - 📝 [To do](#to-do)
 - 💬 [Support](#support)
@@ -55,16 +58,13 @@
 # Installation
 
 <p align="center">
-  <a href="https://github.com/Lovi-0/StreamingCommunity/releases/latest/download/StreamingCommunity.exe">
+  <a href="https://github.com/Abc-dc/StreamingCommunity/releases/latest/download/StreamingCommunity.exe">
     <img src="https://img.shields.io/badge/-Windows_x64-blue.svg?style=for-the-badge&logo=windows" alt="Windows">
   </a>
-  <a href="https://pypi.org/project/StreamingCommunity">
-    <img src="https://img.shields.io/badge/-PyPI-blue.svg?logo=pypi&labelColor=555555&style=for-the-badge" alt="PyPI">
-  </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity/releases/latest/download/StreamingCommunity.zip">
+  <a href="https://github.com/Abc-dc/StreamingCommunity/releases/latest/download/StreamingCommunity.zip">
     <img src="https://img.shields.io/badge/-Source_tar-green.svg?style=for-the-badge" alt="Source Tarball">
   </a>
-  <a href="https://github.com/Lovi-0/StreamingCommunity/releases">
+  <a href="https://github.com/Abc-dc/StreamingCommunity/releases">
     <img src="https://img.shields.io/badge/-All_Versions-lightgrey.svg?style=for-the-badge" alt="All Versions">
   </a>
 </p>
@@ -286,25 +286,37 @@ The configuration file is divided into several main sections:
     `<br/><br/>`
 
 - `movie_folder_name`: The name of the subdirectory where movies will be stored.
+  * Can be changed from terminal with `--movie_folder_name`
+    <br/><br/>
+
 - `serie_folder_name`: The name of the subdirectory where TV series will be stored.
+  * Can be changed from terminal with `--serie_folder_name`
+    <br/><br/>
 
 - `map_episode_name`: Template for TV series episode filenames
 
   ### Episode name usage:
 
   You can choose different vars:
-
-
   * `%(tv_name)` : Is the name of TV Show
   * `%(season)` : Is the number of the season
   * `%(episode)` : Is the number of the episode
   * `%(episode_name)` : Is the name of the episode
     `<br/><br/>`
+  * Can be changed from terminal with `--map_episode_name`
+    <br/><br/>
     
 - `add_siteName`: If set to true, appends the site_name to the root path before the movie and serie folders.
-- `disable_searchDomain`: If set to true, disables the search for a new domain for all sites.
-- `not_close`: If set to true, keeps the program running after the download is complete.
+  * Can be changed from terminal with `--add_siteName true/false`
+    <br/><br/>
 
+- `disable_searchDomain`: If set to true, disables the search for a new domain for all sites.
+  * Can be changed from terminal with `--disable_searchDomain true/false`
+    <br/><br/>
+
+- `not_close`: If set to true, keeps the program running after the download is complete.
+  * Can be changed from terminal with `--not_close true/false`
+    <br/><br/>
 
     ### qBittorrent Configuration
 
@@ -350,7 +362,13 @@ The configuration file is divided into several main sections:
 - `tqdm_delay`: Delay between progress bar updates
 - `tqdm_use_large_bar`: Use detailed progress bar (recommended for desktop) set to false for mobile
 - `default_video_workser`: Number of threads for video download
+  * Can be changed from terminal with `--default_video_worker <number>`
+    <br/><br/>
+
 - `default_audio_workser`: Number of threads for audio download
+  * Can be changed from terminal with `--default_audio_worker <number>`
+    <br/><br/>
+
 - `cleanup_tmp_folder`: Remove temporary .ts files after download
 
 > [!IMPORTANT]
@@ -361,6 +379,9 @@ The configuration file is divided into several main sections:
 ### Language Settings
 
 The following codes can be used for `specific_list_audio` and `specific_list_subtitles`:
+* Can be changed from terminal with `--specific_list_audio ita,eng` for audio
+* Can be changed from terminal with `--specific_list_subtitles eng,spa` for subtitles
+
 
 ```
 ara - Arabic       eng - English      ita - Italian     por - Portuguese
@@ -432,6 +453,21 @@ You can download VLC Media Player from the [official website](https://www.videol
 - Enter a season number followed by `-*` to download from that season to the end.
   * **Example:** `3-*` will download from *Season 3* to the final season.
 
+# Examples of terminal usage
+
+```bash
+# Change video and audio workers
+python test_run.py --default_video_worker 8 --default_audio_worker 8
+
+# Set specific languages
+python test_run.py --specific_list_audio ita,eng --specific_list_subtitles eng,spa
+
+# Keep console open after download
+python test_run.py --not_close true
+
+# Disable domain search and add site name
+python test_run.py --disable_searchDomain true --add_siteName true
+```
 
 # Docker
 
@@ -466,15 +502,43 @@ make LOCAL_DIR=/path/to/download run-container
 
 The `run-container` command mounts also the `config.json` file, so any change to the configuration file is reflected immediately without having to rebuild the image.
 
+# Telegram Usage
+
+## Configuration
+
+You need to create an .env file and enter your Telegram token 
+
+and user ID to authorize only one user to use it
+
+## .env Example:
+
+```
+TOKEN_TELEGRAM=IlTuo2131TOKEN$12D3Telegram
+AUTHORIZED_USER_ID=12345678 
+DEBUG=False
+```
+
+## Install Python Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+## On Linux/MacOS:
+
+```bash
+python3 telegram_bot.py
+```
+
 # Website Status 
 
 | Website            | Status |
 |:-------------------|:------:|
 | [1337xx](https://1337xx.to/) |   ✅   |
-| [AltadefinizioneGratis](https://altadefinizionegratis.site/) |   ✅   |
+| [AltadefinizioneGratis](https://altadefinizionegratis.pro/) |   ✅   |
 | [AnimeUnity](https://animeunity.so/) |   ✅   |
 | [Ilcorsaronero](https://ilcorsaronero.link/) |   ✅   |
-| [CB01New](https://cb01new.video/) |   ✅   |
+| [CB01New](https://cb01new.media/) |   ✅   |
 | [DDLStreamItaly](https://ddlstreamitaly.co/) |   ✅   |
 | [GuardaSerie](https://guardaserie.meme/) |   ✅   |
 | [MostraGuarda](https://mostraguarda.stream/) |   ✅   |
@@ -490,7 +554,7 @@ The `run-container` command mounts also the `config.json` file, so any change to
 
 # To Do 
 
-- Finish [website API](https://github.com/Lovi-0/StreamingCommunity/tree/test_gui_1)
+- Finish [website API](https://github.com/Abc-dc/StreamingCommunity/tree/test_gui_1)
 
 # Contributing
 
@@ -508,6 +572,6 @@ This software is provided "as is", without warranty of any kind, express or impl
 
 ## Contributors
 
-<a href="https://github.com/Lovi-0/StreamingCommunity/graphs/contributors" alt="View Contributors">
-  <img src="https://contrib.rocks/image?repo=Lovi-0/StreamingCommunity&max=1000&columns=10" alt="Contributors" />
+<a href="https://github.com/Abc-dc/StreamingCommunity/graphs/contributors" alt="View Contributors">
+  <img src="https://contrib.rocks/image?repo=Abc-dc/StreamingCommunity&max=1000&columns=10" alt="Contributors" />
 </a>

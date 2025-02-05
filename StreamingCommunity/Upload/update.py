@@ -25,8 +25,7 @@ def update():
     """
     Check for updates on GitHub and display relevant information.
     """
-
-    console.print("[green]Checking GitHub version [white]...")
+    console.print("\n[cyan]→ [green]Checking GitHub version ...")
 
     # Make the GitHub API requests and handle potential errors
     try:
@@ -59,7 +58,7 @@ def update():
     if str(__version__).replace('v', '') != str(last_version).replace('v', '') :
         console.print(f"[red]New version available: [yellow]{last_version} \n")
     else:
-        console.print(f" [yellow]Everything is up to date \n")
+        console.print(f" [red]Everything is up to date \n")
 
     console.print(f"[red]{__title__} has been downloaded [yellow]{total_download_count} [red]times, but only [yellow]{percentual_stars}% [red]of users have starred it.\n\
         [cyan]Help the repository grow today by leaving a [yellow]star [cyan]and [yellow]sharing [cyan]it with others online!")
