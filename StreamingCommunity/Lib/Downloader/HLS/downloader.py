@@ -36,11 +36,13 @@ from .segments import M3U8_Segments
 
 
 # Config
+ENABLE_AUDIO = config_manager.get_bool('M3U8_DOWNLOAD', 'download_audio')
+ENABLE_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'download_subtitle')
 DOWNLOAD_SPECIFIC_AUDIO = config_manager.get_list('M3U8_DOWNLOAD', 'specific_list_audio')
 DOWNLOAD_SPECIFIC_SUBTITLE = config_manager.get_list('M3U8_DOWNLOAD', 'specific_list_subtitles')
 MERGE_AUDIO = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_audio')
 MERGE_SUBTITLE = config_manager.get_bool('M3U8_DOWNLOAD', 'merge_subs')
-REMOVE_SEGMENTS_FOLDER = config_manager.get_bool('M3U8_DOWNLOAD', 'cleanup_tmp_folder')
+CLEANUP_TMP = config_manager.get_bool('M3U8_DOWNLOAD', 'cleanup_tmp_folder')
 FILTER_CUSTOM_REOLUTION = config_manager.get_int('M3U8_PARSER', 'force_resolution')
 GET_ONLY_LINK = config_manager.get_bool('M3U8_PARSER', 'get_only_link')
 RETRY_LIMIT = config_manager.get_int('REQUESTS', 'max_retry')
@@ -121,7 +123,7 @@ class PathManager:
 
     def cleanup(self):
         """Removes temporary directories if configured to do so."""
-        if REMOVE_SEGMENTS_FOLDER:
+        if CLEANUP_TMP:
             os_manager.remove_folder(self.temp_dir)
 
 
@@ -157,32 +159,33 @@ class M3U8Manager:
         If it's a master playlist, only selects video stream.
         """
         if not self.is_master:
-            # For master playlist, only get the video stream
             if FILTER_CUSTOM_REOLUTION != -1:
                 self.video_url, self.video_res = self.parser._video.get_custom_uri(y_resolution=FILTER_CUSTOM_REOLUTION)
             else:
                 self.video_url, self.video_res = self.parser._video.get_best_uri()
 
-            # Don't process audio or subtitles for master playlist
             self.audio_streams = []
             self.sub_streams = []
             
         else:
-            # For media playlist, process all streams as before
             if FILTER_CUSTOM_REOLUTION != -1:
                 self.video_url, self.video_res = self.parser._video.get_custom_uri(y_resolution=FILTER_CUSTOM_REOLUTION)
             else:
                 self.video_url, self.video_res = self.parser._video.get_best_uri()
 
-            self.audio_streams = [
-                s for s in (self.parser._audio.get_all_uris_and_names() or [])
-                if s.get('language') in DOWNLOAD_SPECIFIC_AUDIO
-            ]
+            self.audio_streams = []
+            if ENABLE_AUDIO:
+                self.audio_streams = [
+                    s for s in (self.parser._audio.get_all_uris_and_names() or [])
+                    if s.get('language') in DOWNLOAD_SPECIFIC_AUDIO
+                ]
 
-            self.sub_streams = [
-                s for s in (self.parser._subtitle.get_all_uris_and_names() or [])
-                if s.get('language') in DOWNLOAD_SPECIFIC_SUBTITLE
-            ]
+            self.sub_streams = []
+            if ENABLE_SUBTITLE:
+                self.sub_streams = [
+                    s for s in (self.parser._subtitle.get_all_uris_and_names() or [])
+                    if s.get('language') in DOWNLOAD_SPECIFIC_SUBTITLE
+                ]
 
     def log_selection(self):
         if FILTER_CUSTOM_REOLUTION == -1:

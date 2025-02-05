@@ -476,7 +476,7 @@ class OsSummary:
             
             if not os.path.exists(requirements_file):
                 self.download_requirements(
-                    'https://raw.githubusercontent.com/Abc-dc/StreamingCommunity/refs/heads/main/requirements.txt',
+                    'https://raw.githubusercontent.com/Arrowar/StreamingCommunity/refs/heads/main/requirements.txt',
                     requirements_file
                 )
             
