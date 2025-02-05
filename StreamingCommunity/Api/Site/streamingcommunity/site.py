@@ -15,7 +15,7 @@ from StreamingCommunity.Util.console import console
 from StreamingCommunity.Util._jsonConfig import config_manager
 from StreamingCommunity.Util.headers import get_headers
 from StreamingCommunity.Util.table import TVShowManager
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+from StreamingCommunity.TelegramHelp.telegram_bot import get_bot_instance
 
 
 # Logic class

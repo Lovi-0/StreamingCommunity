@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 from StreamingCommunity.Util.console import console
 from StreamingCommunity.Util._jsonConfig import config_manager
 from StreamingCommunity.Util.table import TVShowManager
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+from StreamingCommunity.TelegramHelp.telegram_bot import get_bot_instance
 
 
 # Logic class

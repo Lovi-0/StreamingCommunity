@@ -7,7 +7,7 @@ from urllib.parse import quote_plus
 
 # Internal utilities
 from StreamingCommunity.Util.console import console, msg
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+from StreamingCommunity.TelegramHelp.telegram_bot import get_bot_instance
 
 
 # Logic class

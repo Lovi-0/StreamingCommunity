@@ -21,7 +21,7 @@ from StreamingCommunity.Util.os import (
     os_manager,
     internet_manager
 )
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+from StreamingCommunity.TelegramHelp.telegram_bot import get_bot_instance
 
 
 # Logic class

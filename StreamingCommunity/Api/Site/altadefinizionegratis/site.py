@@ -26,7 +26,7 @@ max_timeout = config_manager.get_int("REQUESTS", "timeout")
 disable_searchDomain = config_manager.get_bool("DEFAULT", "disable_searchDomain")
 
 # Telegram bot instance
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+from StreamingCommunity.TelegramHelp.telegram_bot import get_bot_instance
 from StreamingCommunity.Util._jsonConfig import config_manager
 TELEGRAM_BOT = config_manager.get_bool('DEFAULT', 'telegram_bot')
 

@@ -2,8 +2,8 @@
 
 import sys
 from StreamingCommunity.run import main
-from StreamingCommunity.HelpTg.request_manager import RequestManager
-from StreamingCommunity.HelpTg.session import set_session
+from StreamingCommunity.TelegramHelp.request_manager import RequestManager
+from StreamingCommunity.TelegramHelp.session import set_session
 
 # Svuoto il file
 request_manager = RequestManager()

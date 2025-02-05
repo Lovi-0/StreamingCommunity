@@ -18,7 +18,7 @@ from StreamingCommunity.Util.color import Colors
 from StreamingCommunity.Util.console import console, Panel
 from StreamingCommunity.Util._jsonConfig import config_manager
 from StreamingCommunity.Util.os import internet_manager
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
+from StreamingCommunity.TelegramHelp.telegram_bot import get_bot_instance
 
 
 # Logic class
@@ -54,7 +54,6 @@ def MP4_downloader(url: str, path: str, referer: str = None, headers_: dict = No
     """
     if TELEGRAM_BOT:
         bot = get_bot_instance()
-        # Viene usato per lo screen 
         console.log("####")
 
     if os.path.exists(path):

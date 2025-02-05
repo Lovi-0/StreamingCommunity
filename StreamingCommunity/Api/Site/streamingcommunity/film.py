@@ -8,8 +8,8 @@ from StreamingCommunity.Util.console import console
 from StreamingCommunity.Util.os import os_manager
 from StreamingCommunity.Util.message import start_message
 from StreamingCommunity.Lib.Downloader import HLS_Downloader
-from StreamingCommunity.HelpTg.telegram_bot import get_bot_instance
-from StreamingCommunity.HelpTg.session import get_session, updateScriptId, deleteScriptId
+from StreamingCommunity.TelegramHelp.telegram_bot import get_bot_instance
+from StreamingCommunity.TelegramHelp.session import get_session, updateScriptId, deleteScriptId
 
 
 # Logic class
