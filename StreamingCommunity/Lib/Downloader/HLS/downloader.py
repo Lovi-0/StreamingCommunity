@@ -72,6 +72,7 @@ class HLSClient:
                 response = client.get(url)
                 response.raise_for_status()
                 return response.content if return_content else response.text
+            
             except Exception as e:
                 logging.error(f"Attempt {attempt+1} failed: {str(e)}")
                 time.sleep(1.5 ** attempt)
@@ -100,8 +101,10 @@ class PathManager:
             root = config_manager.get('DEFAULT', 'root_path')
             hash_name = compute_sha1_hash(self.m3u8_url) + ".mp4"
             return os.path.join(root, "undefined", hash_name)
+        
         if not path.endswith(".mp4"):
             path += ".mp4"
+
         return os_manager.get_sanitize_path(path)
 
     def setup_directories(self):
@@ -112,7 +115,6 @@ class PathManager:
 
     def move_final_file(self, final_file: str):
         """Moves the final merged file to the desired output location."""
-        os.makedirs(os.path.dirname(self.output_path), exist_ok=True)
         if os.path.exists(self.output_path):
             os.remove(self.output_path)
         shutil.move(final_file, self.output_path)
@@ -144,6 +146,7 @@ class M3U8Manager:
         content = self.client.request(self.m3u8_url)
         if not content:
             raise ValueError("Failed to fetch M3U8 content")
+        
         self.parser.parse_data(uri=self.m3u8_url, raw_content=content)
         self.url_fixer.set_playlist(self.m3u8_url)
         self.is_master = self.parser.is_master_playlist
@@ -245,49 +248,78 @@ class DownloadManager:
         self.client = client
         self.url_fixer = url_fixer
         self.missing_segments = []
+        self.stopped = False
 
     def download_video(self, video_url: str):
         """Downloads video segments from the M3U8 playlist."""
         video_full_url = self.url_fixer.generate_full_url(video_url)
         video_tmp_dir = os.path.join(self.temp_dir, 'video')
+
         downloader = M3U8_Segments(url=video_full_url, tmp_folder=video_tmp_dir)
         result = downloader.download_streams("Video", "video")
         self.missing_segments.append(result)
 
+        if result.get('stopped', False):
+            self.stopped = True
+        return self.stopped
+
     def download_audio(self, audio: Dict):
         """Downloads audio segments for a specific language track."""
+        if self.stopped:
+            return True
+        
         audio_full_url = self.url_fixer.generate_full_url(audio['uri'])
         audio_tmp_dir = os.path.join(self.temp_dir, 'audio', audio['language'])
+
         downloader = M3U8_Segments(url=audio_full_url, tmp_folder=audio_tmp_dir)
         result = downloader.download_streams(f"Audio {audio['language']}", "audio")
         self.missing_segments.append(result)
 
+        if result.get('stopped', False):
+            self.stopped = True
+        return self.stopped
+
     def download_subtitle(self, sub: Dict):
         """Downloads and saves subtitle file for a specific language."""
+        if self.stopped:
+            return True
+        
         content = self.client.request(sub['uri'])
         if content:
             sub_path = os.path.join(self.temp_dir, 'subs', f"{sub['language']}.vtt")
             with open(sub_path, 'w', encoding='utf-8') as f:
                 f.write(content)
 
+        return self.stopped
+
     def download_all(self, video_url: str, audio_streams: List[Dict], sub_streams: List[Dict]):
         """
         Downloads all selected streams (video, audio, subtitles).
-        Skips already downloaded content to support resume functionality.
         """
         video_file = os.path.join(self.temp_dir, 'video', '0.ts')
         if not os.path.exists(video_file):
-            self.download_video(video_url)
+            if self.download_video(video_url):
+                return True
         
         for audio in audio_streams:
+            if self.stopped:
+                break
+
             audio_file = os.path.join(self.temp_dir, 'audio', audio['language'], '0.ts')
             if not os.path.exists(audio_file):
-                self.download_audio(audio)
+                if self.download_audio(audio):
+                    return True
 
         for sub in sub_streams:
+            if self.stopped:
+                break
+
             sub_file = os.path.join(self.temp_dir, 'subs', f"{sub['language']}.vtt")
             if not os.path.exists(sub_file):
-                self.download_subtitle(sub)
+                if self.download_subtitle(sub):
+                    return True
+        
+        return self.stopped
 
 
 class MergeManager:
@@ -324,12 +356,14 @@ class MergeManager:
                 out_path=os.path.join(self.temp_dir, 'video.mp4'),
                 codec=self.parser.codec
             )
+
         else:
             if MERGE_AUDIO and self.audio_streams:
                 audio_tracks = [{
                     'path': os.path.join(self.temp_dir, 'audio', a['language'], '0.ts'),
                     'name': a['language']
                 } for a in self.audio_streams]
+
                 merged_audio_path = os.path.join(self.temp_dir, 'merged_audio.mp4')
                 merged_file = join_audios(
                     video_path=video_file,
@@ -337,17 +371,20 @@ class MergeManager:
                     out_path=merged_audio_path,
                     codec=self.parser.codec
                 )
+
             if MERGE_SUBTITLE and self.sub_streams:
                 sub_tracks = [{
                     'path': os.path.join(self.temp_dir, 'subs', f"{s['language']}.vtt"),
                     'language': s['language']
                 } for s in self.sub_streams]
+
                 merged_subs_path = os.path.join(self.temp_dir, 'final.mp4')
                 merged_file = join_subtitle(
                     video_path=merged_file,
                     subtitles_list=sub_tracks,
                     out_path=merged_subs_path
                 )
+                
         return merged_file
 
 
@@ -382,7 +419,8 @@ class HLS_Downloader:
                     'path': self.path_manager.output_path,
                     'url': self.m3u8_url,
                     'is_master': False, 
-                    'error': 'File already exists'
+                    'error': 'File already exists',
+                    'stopped': False
                 }
                 if TELEGRAM_BOT:
                     bot.send_message(response)
@@ -400,11 +438,22 @@ class HLS_Downloader:
                 client=self.client,
                 url_fixer=self.m3u8_manager.url_fixer
             )
-            self.download_manager.download_all(
+            
+            # Check if download was stopped
+            download_stopped = self.download_manager.download_all(
                 video_url=self.m3u8_manager.video_url,
                 audio_streams=self.m3u8_manager.audio_streams,
                 sub_streams=self.m3u8_manager.sub_streams
             )
+
+            if download_stopped:
+                return {
+                    'path': None,
+                    'url': self.m3u8_url,
+                    'is_master': self.m3u8_manager.is_master,
+                    'error': 'Download stopped by user',
+                    'stopped': True
+                }
 
             self.merge_manager = MergeManager(
                 temp_dir=self.path_manager.temp_dir,
@@ -422,20 +471,23 @@ class HLS_Downloader:
             return {
                 'path': self.path_manager.output_path,
                 'url': self.m3u8_url,
-                'is_master': self.m3u8_manager.is_master
+                'is_master': self.m3u8_manager.is_master,
+                'stopped': False
             }
 
         except Exception as e:
             error_msg = str(e)
             console.print(f"[red]Download failed: {error_msg}[/red]")
             logging.error("Download error", exc_info=True)
+            
             return {
                 'path': None,
                 'url': self.m3u8_url,
                 'is_master': getattr(self.m3u8_manager, 'is_master', None),
-                'error': error_msg
+                'error': error_msg,
+                'stopped': False
             }
-
+        
     def _print_summary(self):
         """Prints download summary including file size, duration, and any missing segments."""
         if TELEGRAM_BOT:
@@ -466,6 +518,7 @@ class HLS_Downloader:
         if missing_ts:
             panel_content += f"\n{missing_info}"
             os.rename(self.path_manager.output_path, self.path_manager.output_path.replace(".mp4", "_failed.mp4"))
+
         console.print(Panel(
             panel_content,
             title=f"{os.path.basename(self.path_manager.output_path.replace('.mp4', ''))}",

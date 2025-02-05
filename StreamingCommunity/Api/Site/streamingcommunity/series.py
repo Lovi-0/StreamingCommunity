@@ -72,8 +72,8 @@ def download_video(index_season_selected: int, index_episode_selected: int, scra
     
     # Download the episode
     r_proc = HLS_Downloader(
-        m3u8_playlist=master_playlist,
-        output_filename=os.path.join(mp4_path, mp4_name)
+        m3u8_url=master_playlist,
+        output_path=os.path.join(mp4_path, mp4_name)
     ).start()
 	
     if "error" in r_proc.keys():
@@ -82,7 +82,7 @@ def download_video(index_season_selected: int, index_episode_selected: int, scra
         except:
             pass
 
-    return r_proc['path']
+    return r_proc['path'], r_proc['stopped']
 
 def download_episode(index_season_selected: int, scrape_serie: ScrapeSerie, video_source: VideoSource, download_all: bool = False) -> None:
     """
@@ -105,7 +105,11 @@ def download_episode(index_season_selected: int, scrape_serie: ScrapeSerie, vide
 
         # Download all episodes without asking
         for i_episode in range(1, episodes_count + 1):
-            download_video(index_season_selected, i_episode, scrape_serie, video_source)
+            path, stopped = download_video(index_season_selected, i_episode, scrape_serie, video_source)
+
+            if stopped:
+                break
+
         console.print(f"\n[red]End downloaded [yellow]season: [red]{index_season_selected}.")
 
     else:
@@ -122,7 +126,10 @@ def download_episode(index_season_selected: int, scrape_serie: ScrapeSerie, vide
 
         # Download selected episodes if not stopped
         for i_episode in list_episode_select:
-            download_video(index_season_selected, i_episode, scrape_serie, video_source)[1]
+            path, stopped = download_video(index_season_selected, i_episode, scrape_serie, video_source)
+
+            if stopped:
+                break
 
 def download_series(select_season: MediaItem, version: str) -> None:
     """

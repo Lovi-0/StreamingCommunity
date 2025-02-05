@@ -17,7 +17,7 @@ class RequestManager:
         if not hasattr(self, 'initialized'):
             self.json_file = json_file
             self.initialized = True
-            self.on_response_callback = None  # Aggiungi un campo per il callback
+            self.on_response_callback = None
 
     def create_request(self, type: str) -> str:
         request_data = {

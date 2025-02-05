@@ -3,7 +3,7 @@
         "debug": false,
         "log_file": "app.log",
         "log_to_file": false,
-        "show_message": false,
+        "show_message": true,
         "clean_console": true,
         "root_path": "Video",
         "movie_folder_name": "Movie",
@@ -28,7 +28,7 @@
         "proxy_start_max": 0.5
     },
     "M3U8_DOWNLOAD": {
-        "tqdm_delay": 0.15,
+        "tqdm_delay": 0.12,
         "default_video_workser": 12,
         "default_audio_workser": 12,
         "merge_audio": true,

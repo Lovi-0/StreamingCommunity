@@ -559,18 +559,3 @@ class TelegramBot:
 
 def get_bot_instance():
     return TelegramBot.get_instance()
-
-
-# Esempio di utilizzo
-if __name__ == "__main__":
-
-    # Usa le variabili
-    token = os.getenv("TOKEN_TELEGRAM")
-    authorized_user_id = os.getenv("AUTHORIZED_USER_ID")
-
-    TOKEN = token
-    AUTHORIZED_USER_ID = int(authorized_user_id)
-
-    # Inizializza il bot
-    bot = TelegramBot.init_bot(TOKEN, AUTHORIZED_USER_ID)
-    bot.run()
