@@ -44,6 +44,8 @@
     - 📩 [Request](#requests-settings)
     - 📥 [Download](#m3u8_download-settings)
     - 🔍 [Parser](#m3u8_parser-settings)
+- 📝 [Command](#command)
+- 💻 [Examples of terminal](#examples-of-terminal-usage)
 - 🐳 [Docker](#docker)
 - 🎓 [Tutorial](#tutorials)
 - 📝 [To do](#to-do)
@@ -283,25 +285,37 @@ The configuration file is divided into several main sections:
     `<br/><br/>`
 
 - `movie_folder_name`: The name of the subdirectory where movies will be stored.
+  * Can be changed from terminal with `--movie_folder_name`
+    <br/><br/>
+
 - `serie_folder_name`: The name of the subdirectory where TV series will be stored.
+  * Can be changed from terminal with `--serie_folder_name`
+    <br/><br/>
 
 - `map_episode_name`: Template for TV series episode filenames
 
   ### Episode name usage:
 
   You can choose different vars:
-
-
   * `%(tv_name)` : Is the name of TV Show
   * `%(season)` : Is the number of the season
   * `%(episode)` : Is the number of the episode
   * `%(episode_name)` : Is the name of the episode
     `<br/><br/>`
+  * Can be changed from terminal with `--map_episode_name`
+    <br/><br/>
     
 - `add_siteName`: If set to true, appends the site_name to the root path before the movie and serie folders.
-- `disable_searchDomain`: If set to true, disables the search for a new domain for all sites.
-- `not_close`: If set to true, keeps the program running after the download is complete.
+  * Can be changed from terminal with `--add_siteName true/false`
+    <br/><br/>
 
+- `disable_searchDomain`: If set to true, disables the search for a new domain for all sites.
+  * Can be changed from terminal with `--disable_searchDomain true/false`
+    <br/><br/>
+
+- `not_close`: If set to true, keeps the program running after the download is complete.
+  * Can be changed from terminal with `--not_close true/false`
+    <br/><br/>
 
     ### qBittorrent Configuration
 
@@ -347,7 +361,13 @@ The configuration file is divided into several main sections:
 - `tqdm_delay`: Delay between progress bar updates
 - `tqdm_use_large_bar`: Use detailed progress bar (recommended for desktop) set to false for mobile
 - `default_video_workser`: Number of threads for video download
+  * Can be changed from terminal with `--default_video_worker <number>`
+    <br/><br/>
+
 - `default_audio_workser`: Number of threads for audio download
+  * Can be changed from terminal with `--default_audio_worker <number>`
+    <br/><br/>
+
 - `cleanup_tmp_folder`: Remove temporary .ts files after download
 
 > [!IMPORTANT]
@@ -358,6 +378,9 @@ The configuration file is divided into several main sections:
 ### Language Settings
 
 The following codes can be used for `specific_list_audio` and `specific_list_subtitles`:
+* Can be changed from terminal with `--specific_list_audio ita,eng` for audio
+* Can be changed from terminal with `--specific_list_subtitles eng,spa` for subtitles
+
 
 ```
 ara - Arabic       eng - English      ita - Italian     por - Portuguese
@@ -429,6 +452,21 @@ You can download VLC Media Player from the [official website](https://www.videol
 - Enter a season number followed by `-*` to download from that season to the end.
   * **Example:** `3-*` will download from *Season 3* to the final season.
 
+# Examples of terminal usage
+
+```bash
+# Change video and audio workers
+python test_run.py --default_video_worker 8 --default_audio_worker 8
+
+# Set specific languages
+python test_run.py --specific_list_audio ita,eng --specific_list_subtitles eng,spa
+
+# Keep console open after download
+python test_run.py --not_close true
+
+# Disable domain search and add site name
+python test_run.py --disable_searchDomain true --add_siteName true
+```
 
 # Docker
 
