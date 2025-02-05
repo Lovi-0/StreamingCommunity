@@ -11,6 +11,6 @@ pycryptodomex
 googlesearch-python
 fake-useragent
 qbittorrent-api
-python-qbittorrent 
-pyTelegramBotAPI
+python-qbittorrent
 Pillow
+pyTelegramBotAPI

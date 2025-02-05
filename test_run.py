@@ -11,5 +11,4 @@ request_manager.clear_file()
 script_id = sys.argv[1] if len(sys.argv) > 1 else "unknown"
 
 set_session(script_id)
-
 main(script_id)

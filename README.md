@@ -58,9 +58,6 @@
   <a href="https://github.com/Lovi-0/StreamingCommunity/releases/latest/download/StreamingCommunity.exe">
     <img src="https://img.shields.io/badge/-Windows_x64-blue.svg?style=for-the-badge&logo=windows" alt="Windows">
   </a>
-  <a href="https://pypi.org/project/StreamingCommunity">
-    <img src="https://img.shields.io/badge/-PyPI-blue.svg?logo=pypi&labelColor=555555&style=for-the-badge" alt="PyPI">
-  </a>
   <a href="https://github.com/Lovi-0/StreamingCommunity/releases/latest/download/StreamingCommunity.zip">
     <img src="https://img.shields.io/badge/-Source_tar-green.svg?style=for-the-badge" alt="Source Tarball">
   </a>
@@ -471,10 +468,10 @@ The `run-container` command mounts also the `config.json` file, so any change to
 | Website            | Status |
 |:-------------------|:------:|
 | [1337xx](https://1337xx.to/) |   ✅   |
-| [AltadefinizioneGratis](https://altadefinizionegratis.site/) |   ✅   |
+| [AltadefinizioneGratis](https://altadefinizionegratis.pro/) |   ✅   |
 | [AnimeUnity](https://animeunity.so/) |   ✅   |
 | [Ilcorsaronero](https://ilcorsaronero.link/) |   ✅   |
-| [CB01New](https://cb01new.video/) |   ✅   |
+| [CB01New](https://cb01new.media/) |   ✅   |
 | [DDLStreamItaly](https://ddlstreamitaly.co/) |   ✅   |
 | [GuardaSerie](https://guardaserie.meme/) |   ✅   |
 | [MostraGuarda](https://mostraguarda.stream/) |   ✅   |
