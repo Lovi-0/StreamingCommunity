@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="https://i.ibb.co/PFnjvBc/immagine-2024-12-26-180318047.png" alt="Project Logo" width="700"/>
-</p>
 
 <p align="center">
   <a href="https://pypi.org/project/streamingcommunity">
