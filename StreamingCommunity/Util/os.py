@@ -307,24 +307,6 @@ class OsSummary:
         else:  # linux
             return os.path.join(home, '.local', 'bin', 'binary')
 
-    def get_executable_version(self, command: list):
-        """
-        Get the version of a given command-line executable.
-
-        Args:
-            command (list): The command to run, e.g., `['ffmpeg', '-version']`.
-
-        Returns:
-            str: The version string of the executable.
-        """
-        try:
-            version_output = subprocess.check_output(command, stderr=subprocess.STDOUT).decode().split('\n')[0]
-            return version_output.split(" ")[2]
-        
-        except (FileNotFoundError, subprocess.CalledProcessError):
-            console.print(f"{command[0]} not found", style="bold red")
-            sys.exit(0)
-
     def check_ffmpeg_location(self, command: list) -> str:
         """
         Check if a specific executable (ffmpeg or ffprobe) is located using the given command.
@@ -464,11 +446,7 @@ class OsSummary:
             console.log("[red]Can't locate ffmpeg or ffprobe")
             sys.exit(0)
 
-        ffmpeg_version = self.get_executable_version([self.ffmpeg_path, '-version'])
-        ffprobe_version = self.get_executable_version([self.ffprobe_path, '-version'])
-
         console.print(f"[cyan]Path[white]: [red]ffmpeg [bold yellow]'{self.ffmpeg_path}'[/bold yellow][white], [red]ffprobe '[bold yellow]{self.ffprobe_path}'[/bold yellow]")
-        console.print(f"[cyan]Exe versions[white]: [bold red]ffmpeg {ffmpeg_version}, ffprobe {ffprobe_version}[/bold red]")
 
         # Handle requirements.txt
         if not getattr(sys, 'frozen', False):

@@ -28,7 +28,7 @@
         "proxy_start_max": 0.5
     },
     "M3U8_DOWNLOAD": {
-        "tqdm_delay": 0.05,
+        "tqdm_delay": 0.01,
         "default_video_workser": 12,
         "default_audio_workser": 12,
         "download_audio": true,

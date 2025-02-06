@@ -87,6 +87,7 @@ class M3U8_Segments:
         self.info_maxRetry = 0
         self.info_nRetry = 0
         self.info_nFailed = 0
+
         self.active_retries = 0 
         self.active_retries_lock = threading.Lock()
 
@@ -170,7 +171,8 @@ class M3U8_Segments:
         client_params = {
             'headers': random_headers(self.key_base_url) if hasattr(self, 'key_base_url') else {'User-Agent': get_headers()},
             'timeout': MAX_TIMEOOUT,
-            'follow_redirects': True
+            'follow_redirects': True,
+            'http2': False
         }
         
         if THERE_IS_PROXY_LIST and index is not None and hasattr(self, 'valid_proxy'):
@@ -178,7 +180,7 @@ class M3U8_Segments:
         
         return httpx.Client(**client_params)
                             
-    def download_segment(self, ts_url: str, index: int, progress_bar: tqdm, backoff_factor: float = 1.3) -> None:
+    def download_segment(self, ts_url: str, index: int, progress_bar: tqdm, backoff_factor: float = 1.1) -> None:
         """
         Downloads a TS segment and adds it to the segment queue with retry logic.
 
@@ -186,7 +188,6 @@ class M3U8_Segments:
             - ts_url (str): The URL of the TS segment.
             - index (int): The index of the segment.
             - progress_bar (tqdm): Progress counter for tracking download progress.
-            - retries (int): The number of times to retry on failure (default is 3).
             - backoff_factor (float): The backoff factor for exponential backoff (default is 1.5 seconds).
         """       
         for attempt in range(REQUEST_MAX_RETRY):
@@ -289,7 +290,7 @@ class M3U8_Segments:
                         buffer[index] = segment_content
 
                 except queue.Empty:
-                    self.current_timeout = min(MAX_TIMEOOUT, self.current_timeout * 1.25)
+                    self.current_timeout = min(MAX_TIMEOOUT, self.current_timeout * 1.1)
                     if self.stop_event.is_set():
                         break
 
@@ -323,7 +324,7 @@ class M3U8_Segments:
             # Configure workers and delay
             max_workers = self._get_worker_count(type)
             delay = max(PROXY_START_MIN, min(PROXY_START_MAX, 1 / (len(self.valid_proxy) + 1))) if THERE_IS_PROXY_LIST else TQDM_DELAY_WORKER
-
+            
             # Download segments with completion verification
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = []
@@ -373,7 +374,6 @@ class M3U8_Segments:
 
         return self._generate_results(type)
     
-
     def _get_bar_format(self, description: str) -> str:
         """
         Generate platform-appropriate progress bar format.

@@ -5,13 +5,16 @@ import sys
 import time
 
 
+# External library
+import httpx
+
+
 # Internal utilities
 from .version import __version__, __author__, __title__
 from StreamingCommunity.Util.console import console
+from StreamingCommunity.Util._jsonConfig import config_manager
+from StreamingCommunity.Util.headers import get_headers
 
-
-# External library
-import httpx
 
 
 # Variable
@@ -26,8 +29,19 @@ def update():
     Check for updates on GitHub and display relevant information.
     """
     try:
-        response_reposity = httpx.get(f"https://api.github.com/repos/{__author__}/{__title__}").json()
-        response_releases = httpx.get(f"https://api.github.com/repos/{__author__}/{__title__}/releases").json()
+        response_reposity = httpx.get(
+            url=f"https://api.github.com/repos/{__author__}/{__title__}", 
+            headers={'user-agent': get_headers()}, 
+            timeout=config_manager.get_int("REQUESTS", "timeout"), 
+            follow_redirects=True
+        ).json()
+
+        response_releases = httpx.get(
+            url=f"https://api.github.com/repos/{__author__}/{__title__}/releases",
+            headers={'user-agent': get_headers()}, 
+            timeout=config_manager.get_int("REQUESTS", "timeout"), 
+            follow_redirects=True
+        ).json()
         
     except Exception as e:
         console.print(f"[red]Error accessing GitHub API: {e}")

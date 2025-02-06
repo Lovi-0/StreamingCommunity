@@ -37,7 +37,6 @@ def download_film(select_title: MediaItem) -> str:
     console.print(f"[cyan]You can safely stop the download with [bold]Ctrl+c[bold] [cyan] \n")
 
     # Setup api manger
-    print(select_title.url)
     video_source = VideoSource(select_title.url)
 
     # Define output path

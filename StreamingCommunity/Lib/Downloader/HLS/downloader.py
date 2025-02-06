@@ -506,8 +506,8 @@ class HLS_Downloader:
         file_size = internet_manager.format_file_size(os.path.getsize(self.path_manager.output_path))
         duration = print_duration_table(self.path_manager.output_path, description=False, return_string=True)
 
+        print()
         panel_content = (
-            f"[bold green]Download completed![/bold green]\n"
             f"[cyan]File size: [bold red]{file_size}[/bold red]\n"
             f"[cyan]Duration: [bold]{duration}[/bold]\n"
             f"[cyan]Output: [bold]{os.path.abspath(self.path_manager.output_path)}[/bold]"

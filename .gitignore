@@ -23,8 +23,6 @@ share/python-wheels/
 # PyInstaller
 *.manifest
 *.spec
-setup.py
-MANIFEST.in
 
 # Installer logs
 pip-log.txt

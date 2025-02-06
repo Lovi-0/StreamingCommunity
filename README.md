@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://i.ibb.co/xtkv1JQk/ss1.png" alt="Project Logo" width="700"/>
+  <img src="https://i.ibb.co/v6RnT0wY/s2.jpg" alt="Project Logo" width="700"/>
 </p>
 
 <p align="center">
@@ -25,7 +25,7 @@
     <img src="https://img.shields.io/pypi/dm/streamingcommunity?style=for-the-badge" alt="PyPI Downloads"/>
   </a>
   <a href="https://github.com/Arrowar/StreamingCommunity">
-    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Arrowar/StreamingCommunity/main/Test/Util/loc-badge.json&style=for-the-badge" alt="Lines of Code"/>
+    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Arrowar/StreamingCommunity/main/Test/Media/loc-badge.json&style=for-the-badge" alt="Lines of Code"/>
   </a>
 </p>
 
